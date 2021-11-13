@@ -1,14 +1,7 @@
 # Created by PyCharm
-# Author: nmoltta
+# Author: nmoltta, gsvidaurre
 # Project: ParentalCareTracking
-# Date: 11/7/21
-
-# G. Smith-Vidaurre
-# Updated 01 Nov 2021
-# Modified from https://pimylifeup.com/raspberry-pi-temperature-sensor/
-# Note that sensor must be connected to 3.3V for power and pin #4 for 1-wire data transfer
-# A single sub-folder per device should appear inside /sys/bus/w1/devices that starts with 28 after initial setup (see link)
-# Otherwise something is not connected correctly (e.g. multiple folders that start with 00-)
+# Date: 11/13/21
 
 import os
 import glob
@@ -23,9 +16,6 @@ os.system('modprobe w1-therm')
 base_dir = '/sys/bus/w1/devices/'
 device_folder = glob.glob(base_dir + '28*')[0]
 device_file = device_folder + '/w1_slave'
-
-# To run this script execute with python3, otherwise the file = f statement in print calls will fail
-# Also had to rerun setup of /w1 folder as in https://pimylifeup.com/raspberry-pi-temperature-sensor/
 
 # Open file that contains temperature output
 def read_temp_raw():
@@ -68,13 +58,13 @@ csvfile = Path(pathfile)
 if not csvfile.is_file():
     header = [
         ['recording_chamber', 'year', 'month', 'day', 'time', 'degrees_Celsius', 'degrees_Farenheit']
-    ]  
+    ]
     f = open(pathfile, "a", newline = "")
     writer = csv.writer(f, delimiter = ",")
     writer.writerows(header)
 
 while True:
-    
+
     dt = datetime.now()
     temp = read_temp()
 
@@ -88,4 +78,3 @@ while True:
     writer.writerows(tmp_row)
 
     time.sleep(60)
-

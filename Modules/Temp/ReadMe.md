@@ -1,1 +1,8 @@
-<p>Placeholder to describe functions in this directory</p>
+**Authors**: nmoltta, gsvidaurre
+**Date**: 13 November 2021
+
+**Description**: This directory contains code to run and collect data from a waterproof 1-wire DS18B20 temperature sensor on a Raspberry Pi computer. The original code to control the temperature sensor was obtained from https://pimylifeup.com/raspberry-pi-temperature-sensor/. The  sensor will provide temperature data from inside the nest chamber, but will not provide incubation temperature unless strategically placed to do so (which may be complicated by the fact that some birds continue to add nesting material and can bury the sensor). Temperature data inside the nest chamber complements parental visits captured by the RFID antenna and infrared beam breakers.
+
+**Notes on usage**: The sensor must be connected to 3.3V for power and GPIO pin 4 for 1-wire data transfer. A single sub-folder per device should appear inside /sys/bus/w1/devices that starts with 28 after initial setup (see link above), ptherwise something is not connected correctly (e.g. when multiple folders appear that start with 00-). The script Temp.py must be executed with python3, otherwise some code will fail (e.g. the file = f statement in the print calls). May need to rerun setup of /w1 folder as in https://pimylifeup.com/raspberry-pi-temperature-sensor/ every time the Raspberry Pi computer restarts.
+
+**Data structure**: The function in Temp.py should return the recording chamber number, the temperature value in degrees Celsius and degrees Farenheit, year, month, day, and timestamp (HH:MM:SS). Each of these fields will be written out as a new line of a .csv file generated per day by a separate function.
