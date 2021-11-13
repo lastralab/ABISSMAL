@@ -1,7 +1,7 @@
 # Created by PyCharm
-# Author: nmoltta
+# Author: nmoltta, gsvidaurre
 # Project: ParentalCareTracking
-# Date: 11/7/21
+# Date: 11/13/21
 
 #!/usr/bin/env python3
 
@@ -87,5 +87,3 @@ comms = RFIDSetup()
 SetReaderMode(comms)
 SetPollingDelay(comms)
 ReadTagPageZero(comms)
-
-
