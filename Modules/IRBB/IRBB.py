@@ -1,7 +1,7 @@
 # Created by PyCharm
 # Author: nmoltta, gsvidaurre
 # Project: ParentalCareTracking
-# Date: 13 November 2021
+# Date: 11/13/2021
 
 import RPi.GPIO as GPIO
 
