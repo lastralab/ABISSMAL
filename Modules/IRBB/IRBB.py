@@ -3,19 +3,19 @@
 # Project: ParentalCareTracking
 # Date: 11/16/2021
 
-# Import calls can stay in the script per device
+# Previous code
+# Import calls need to be here and in master script otherwise code fails
 import RPi.GPIO as GPIO
+import time
+from datetime import datetime
 
-def detect_beam_breaks(BEAM_PIN):
-    # beam not broken
-    if GPIO.input(BEAM_PIN):
-        return False
-    # beam broken
-    else:
-        return True
-
-# I think this belongs in the master script
-#GPIO.setmode(GPIO.BCM)
-#GPIO.setup(BEAM_PIN, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-#GPIO.add_event_detect(BEAM_PIN, GPIO.BOTH, callback=detect_beam_breaks)
-#GPIO.cleanup()
+def detect_beam_breaks_callback(BEAM_PIN):
+    # Return date and timestamp when the beam is broken
+    if not GPIO.input(BEAM_PIN):
+        dt = datetime.now()
+        print(dt)
+        
+# Handler function for manual Ctrl + C cancellation
+def signal_handler(sig, frame):
+    GPIO.cleanup()
+    sys.exit(0)
