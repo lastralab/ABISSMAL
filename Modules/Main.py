@@ -23,21 +23,21 @@ format = "%(asctime)s: %(message)s"
 
 logging.basicConfig(
     format=format,
-    filename='/home/py/log/info.log',
+    filename='/home/pi/log/info.log',
     level=logging.INFO,
     datefmt="%H:%M:%S"
 )
 
 logging.basicConfig(
     format=format,
-    filename='/home/py/log/error.log',
+    filename='/home/pi/log/error.log',
     level=logging.ERROR,
     datefmt="%H:%M:%S"
 )
 
 logging.basicConfig(
     format=format,
-    filename='/home/py/log/warning.log',
+    filename='/home/pi/log/warning.log',
     level=logging.WARNING,
     datefmt="%H:%M:%S"
 )
