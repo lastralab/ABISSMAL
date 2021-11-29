@@ -1,22 +1,21 @@
 # Created by PyCharm
 # Author: nmoltta, gsvidaurre
 # Project: ParentalCareTracking
-# Date: 13 November 2021
+# Date: 11/16/2021
 
+# Previous code
+# Import calls need to be here and in master script otherwise code fails
 import RPi.GPIO as GPIO
+import time
+from datetime import datetime
 
-# GPIO pin ID through which IR receiver transmits data
-BEAM_PIN = 16
-
-def break_beam_callback(channel):
-    if GPIO.input(BEAM_PIN):
-        print("beam unbroken")
-    else:
-        print("beam broken")
-
-GPIO.setmode(GPIO.BCM)
-GPIO.setup(BEAM_PIN, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-GPIO.add_event_detect(BEAM_PIN, GPIO.BOTH, callback=break_beam_callback)
-
-message = input("Press enter to quit\n\n")
-GPIO.cleanup()
+def detect_beam_breaks_callback(BEAM_PIN):
+    # Return date and timestamp when the beam is broken
+    if not GPIO.input(BEAM_PIN):
+        dt = datetime.now()
+        print(dt)
+        
+# Handler function for manual Ctrl + C cancellation
+def signal_handler(sig, frame):
+    GPIO.cleanup()
+    sys.exit(0)
