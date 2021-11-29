@@ -65,3 +65,7 @@ if __name__ == "__main__":
     logging.info("Main: before running thread")
     irbb.start()
     logging.info("Main: all done")
+    # irbb.run() ?
+
+    if not irbb.is_alive():
+        logging.error('IRBB is not running')
