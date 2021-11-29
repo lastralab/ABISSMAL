@@ -16,13 +16,31 @@ from IRBB import signal_handler
 from os.path import exists
 from EmailService import error_alert
 
-# Constants
+# Constants and logging setup
 box_id = 101
 modules = ['init_irbb', 'init_rfid', 'init_temp', 'init_video', 'init_backup']
-logfile = 'path'  # todo implement
 format = "%(asctime)s: %(message)s"
-logging.basicConfig(format=format, level=logging.INFO,
-                    datefmt="%H:%M:%S")
+
+logging.basicConfig(
+    format=format,
+    filename='log/info.log',
+    level=logging.INFO,
+    datefmt="%H:%M:%S"
+)
+
+logging.basicConfig(
+    format=format,
+    filename='log/error.log',
+    level=logging.ERROR,
+    datefmt="%H:%M:%S"
+)
+
+logging.basicConfig(
+    format=format,
+    filename='log/warning.log',
+    level=logging.WARNING,
+    datefmt="%H:%M:%S"
+)
 
 
 # CSV main handler function
@@ -41,6 +59,7 @@ def csv_writer(box, module, date, value):
 # IRBB - IR Beam Breaker function
 def init_irbb(box):
     BEAM_PIN = 16
+    warnings = 0
     module = 'IRBB'
     GPIO.setmode(GPIO.BCM)
     GPIO.setup(BEAM_PIN, GPIO.IN, pull_up_down=GPIO.PUD_UP)
@@ -54,12 +73,14 @@ def init_irbb(box):
         if isinstance(timestamp, datetime.datetime):
             csv_writer(box, module, date.today(), timestamp)
         else:
+            warnings = warnings + 1
             msg = 'IRBB is not returning a timestamp: ' + timestamp
-            logging.error(msg)
+            logging.error(msg) if warnings > 3 else logging.warning(msg)
             # error_alert.email_alert('gsvidaurre@gmail.com', box + '_' + module, msg)
 
 
 if __name__ == "__main__":
+    warnings = 0
     logging.info("Main: before creating thread")
     irbb = threading.Thread(target=init_irbb, args=(box_id,))
     logging.info("Main: before running thread")
@@ -68,4 +89,6 @@ if __name__ == "__main__":
     # irbb.run() ?
 
     if not irbb.is_alive():
-        logging.error('IRBB is not running')
+        warnings = warnings + 1
+        msg = 'IRBB thread is not running'
+        logging.error(msg) if warnings > 3 else logging.warning(msg)
