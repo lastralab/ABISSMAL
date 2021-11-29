@@ -1,5 +1,4 @@
-<p>Placeholder to describe functions in this directory</p>
-
+<h1>Infra Red Beam Breaker - IRBB</h1>
 **Authors**: nmoltta, gsvidaurre
 **Date**: 22 November 2021
 
