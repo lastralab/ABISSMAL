@@ -16,8 +16,10 @@ from IRBB import signal_handler
 from os.path import exists
 from EmailService import error_alert
 
-# Box identification
+# Constants
 box_id = 101
+modules = ['init_irbb', 'init_rfid', 'init_temp', 'init_video', 'init_backup']
+logfile = 'path'  # todo implement
 
 
 # CSV main handler function
@@ -34,7 +36,7 @@ def csv_writer(box, module, date, value):
 
 
 # IRBB - IR Beam Breaker function
-def init_irbb(box, run):
+def init_irbb(box):
     while run:
         BEAM_PIN = 16
         module = 'IRBB'
@@ -54,14 +56,14 @@ def init_irbb(box, run):
                 logging.error(msg)
                 # error_alert.email_alert('gsvidaurre@gmail.com', box + '_' + module, msg)
 
-        # return true ?
 
+if __name__ == "__main__":
+    format = "%(asctime)s: %(message)s"
+    logging.basicConfig(format=format, level=logging.INFO,
+                        datefmt="%H:%M:%S")
 
-# IRBB example that should be possible with threading without needing the "run" parameter
-# init_irbb(box_id, run = true)
-
-init_irbb(box_id, true)
-
-# todo try init_irbb(box_id, false)
-
-threading.Thread()
+    logging.info("Main    : before creating thread")
+    x = threading.Thread(target=init_irbb, args=(box_id,))
+    logging.info("Main    : before running thread")
+    x.start()
+    logging.info("Main    : all done " + date.now())
