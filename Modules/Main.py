@@ -23,21 +23,21 @@ format = "%(asctime)s: %(message)s"
 
 logging.basicConfig(
     format=format,
-    filename='log/info.log',
+    filename='/home/py/log/info.log',
     level=logging.INFO,
     datefmt="%H:%M:%S"
 )
 
 logging.basicConfig(
     format=format,
-    filename='log/error.log',
+    filename='/home/py/log/error.log',
     level=logging.ERROR,
     datefmt="%H:%M:%S"
 )
 
 logging.basicConfig(
     format=format,
-    filename='log/warning.log',
+    filename='/home/py/log/warning.log',
     level=logging.WARNING,
     datefmt="%H:%M:%S"
 )
@@ -59,7 +59,7 @@ def csv_writer(box, module, date, value):
 # IRBB - IR Beam Breaker function
 def init_irbb(box):
     BEAM_PIN = 16
-    warnings = 0
+    warn = 0
     module = 'IRBB'
     GPIO.setmode(GPIO.BCM)
     GPIO.setup(BEAM_PIN, GPIO.IN, pull_up_down=GPIO.PUD_UP)
@@ -73,9 +73,9 @@ def init_irbb(box):
         if isinstance(timestamp, datetime.datetime):
             csv_writer(box, module, date.today(), timestamp)
         else:
-            warnings = warnings + 1
+            warn = warn + 1
             msg = 'IRBB is not returning a timestamp: ' + timestamp
-            logging.error(msg) if warnings > 3 else logging.warning(msg)
+            logging.error(msg) if warn > 3 else logging.warn(msg)
             # error_alert.email_alert('gsvidaurre@gmail.com', box + '_' + module, msg)
 
 
