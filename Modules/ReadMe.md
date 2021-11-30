@@ -20,3 +20,5 @@
   - searches for filename, appends row if exists
   - creates new file and writes first csv row
   - saves file in Data folder
+
+# GSV notes

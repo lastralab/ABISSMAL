@@ -13,7 +13,7 @@ def detect_beam_breaks_callback(BEAM_PIN):
     # Return date and timestamp when the beam is broken
     if not GPIO.input(BEAM_PIN):
         dt = datetime.now()
-        print(dt)
+        print(f'{dt:%Y-%m-%d %H:%M:%S.%f}')
         
 # Handler function for manual Ctrl + C cancellation
 def signal_handler(sig, frame):
