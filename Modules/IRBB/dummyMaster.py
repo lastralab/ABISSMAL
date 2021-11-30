@@ -17,7 +17,8 @@ from IRBB import signal_handler
 # GPIO pin ID through which IR receiver transmits data
 BEAM_PIN = 16
 
-# Add a script guard for running modules....not sure if this should be included in master script
+# Add a script
+guard for running modules....not sure if this should be included in master script
 #if __name__ == '__main__':
 
 # Run the code to set up the GPIO pin for IR event detection
