@@ -8,6 +8,8 @@
 
 The master script sets up a pull up resistor to detect a falling edge that represents a beam break. Edges are detected by adding events rather than polling to avoid missing edges, and a bouncetime parameter ensures that only a single edge will be detected even when multiple callbacks occur in a rapid fashion.
 
+Video is setup to start recording for 1 minute after the beam breaker gets activated. Date is logged and written in a csv file.
+
 **Software**: To use the infrared beam breakers I ran the following code in a terminal window to install libraries:
 
 sudo pip3 install signal
