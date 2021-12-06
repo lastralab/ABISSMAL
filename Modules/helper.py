@@ -13,31 +13,57 @@ from os.path import exists
 import smtplib
 from email.message import EmailMessage
 
+# Create the log folder unless it already exists
+if not os.path.exists('/home/pi/log'):
+    os.makedirs('/home/pi/log')
+
+# Create the main folder where data will be saved unless this already exists
+main_data = '/home/pi/Data_ParentalCareTracking'
+if not os.path.exists(main_data):
+    os.makedirs(main_data)
+
+# Set path variables for module data, then create these sub-directories if they don't already exist
+irbb_data = main_data + "/IRBB"
+rfid_data = main_data + "/RFID"
+temp_data = main_data + "/Temp"
+video_data = main_data + "/RFID/Data/Video"
+
+if not os.path.exists(irbb_data):
+    os.makedirs(irbb_data)
+
+if not os.path.exists(rfid_data):
+    os.makedirs(rfid_data)
+
+if not os.path.exists(temp_data):
+    os.makedirs(temp_data)
+
+if not os.path.exists(video_data):
+    os.makedirs(video_data)
+
 # Constants and logging setup
 box_id = 101
 modules = ['IRBB', 'RFID', 'Temp']
-format = "%(asctime)s: %(message)s"
-
+FORMAT = "%(asctime)s: %(message)s"
 
 logging.basicConfig(
-    format=format,
+    format=FORMAT,
     filename='/home/pi/log/info.log',
     level=logging.INFO,
-    datefmt="%H:%M:%S"
+    datefmt="%Y-%m-%d %H:%M:%S"
 )
 
 logging.basicConfig(
     format=format,
     filename='/home/pi/log/error.log',
     level=logging.ERROR,
-    datefmt="%H:%M:%S"
+    datefmt="%Y-%m-%d %H:%M:%S"
 )
 
 logging.basicConfig(
     format=format,
     filename='/home/pi/log/warning.log',
     level=logging.WARNING,
-    datefmt="%H:%M:%S"
+    datefmt="%Y-%m-%d %H:%M:%S"
 )
 
 
@@ -68,3 +94,5 @@ def email_alert(toemail, module, text):
     s = smtplib.SMTP('localhost')
     s.send_message(msg)
     s.quit()
+
+# TODO add backup function
