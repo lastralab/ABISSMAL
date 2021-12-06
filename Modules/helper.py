@@ -62,7 +62,7 @@ def email_alert(toemail, module, text):
     msg = EmailMessage()
     msg.set_content(text)
     msg['Subject'] = f'Pi Alert: {subject}'
-    msg['From'] = ''  # smtp setup email from
+    msg['From'] = ''  # smtp localhost setup email
     msg['To'] = toemail
 
     s = smtplib.SMTP('localhost')
