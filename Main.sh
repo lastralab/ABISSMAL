@@ -14,8 +14,8 @@ Cyan='\033[0;96m'
 
 user_name=$(whoami)
 location=$(pwd)
-#python_v=$(which 'python')
-irbb_file="/Modules/IRBB.py; exit"
+python_v=$(which python)
+irbb_file="/Modules/IRBB.py"
 irbb_command="${python_v} ${location}${irbb_file}"
 
 echo ""
@@ -33,7 +33,7 @@ screen -ls | grep Detached | cut -d. -f1 | awk '{print $1}' | xargs kill
 echo ""
 echo -e "Starting screen name: ${Cyan}irbb${NC}..."
 sleep 1s
-screen -S irbb bash -c irbb_command
+screen -S irbb bash -c "${irbb_command}"
 echo -e "Started ${Cyan}irbb${NC}."
 #screen -r irbb
 
