@@ -1,5 +1,5 @@
 # terminal run:
-# .../pathto/ParentalCareTracking/Main.sh
+# .../pathtodirectory/ParentalCareTracking/Main.sh
 
 # TODO: incorporate all modules to run on separate screens
 # more info: https://raspi.tv/2012/using-screen-with-raspberry-pi-to-avoid-leaving-ssh-sessions-open

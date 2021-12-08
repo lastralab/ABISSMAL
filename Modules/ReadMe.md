@@ -12,7 +12,7 @@
 
 - CSV writer
 - Email Service
-- Logging directory/files setup
+- Logging setup
 
 <h1>Infrared beam breaker - IRBB</h1>
 
