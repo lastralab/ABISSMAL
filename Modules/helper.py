@@ -7,6 +7,8 @@ import logging
 import time
 import signal
 import sys
+import os
+import csv
 import RPi.GPIO as GPIO
 from datetime import date
 from os.path import exists
@@ -41,44 +43,55 @@ if not os.path.exists(video_data):
     os.makedirs(video_data)
 
 # Constants and logging setup
-box_id = 101
+box_id = "101"
 modules = ['IRBB', 'RFID', 'Temp']
-FORMAT = "%(asctime)s: %(message)s"
 
-logging.basicConfig(
-    format=FORMAT,
-    filename='/home/pi/log/info.log',
-    level=logging.INFO,
-    datefmt="%Y-%m-%d %H:%M:%S"
-)
 
-logging.basicConfig(
-    format=format,
-    filename='/home/pi/log/error.log',
-    level=logging.ERROR,
-    datefmt="%Y-%m-%d %H:%M:%S"
-)
+def logger_setup():
+    FORMAT = "%(asctime)s: %(message)s"
+    logging.basicConfig(
+        format=FORMAT,
+        filename='/home/pi/log/info.log',
+        level=logging.INFO,
+        datefmt="%Y-%m-%d %H:%M:%S"
+    )
 
-logging.basicConfig(
-    format=format,
-    filename='/home/pi/log/warning.log',
-    level=logging.WARNING,
-    datefmt="%Y-%m-%d %H:%M:%S"
-)
+    logging.basicConfig(
+        format=format,
+        filename='/home/pi/log/error.log',
+        level=logging.ERROR,
+        datefmt="%Y-%m-%d %H:%M:%S"
+    )
+
+    logging.basicConfig(
+        format=format,
+        filename='/home/pi/log/warning.log',
+        level=logging.WARNING,
+        datefmt="%Y-%m-%d %H:%M:%S"
+    )
 
 
 # CSV helper function
+
 # TODO: add timeout to track pin malfunction
-def csv_writer(box, data_path, date, value):
+def csv_writer(box_id, module, data_path, date, header, value):
     if data_path:
-        filename = box + '_' + date + '.csv'
-        full_path = data_path + filename
+        filename = module + '_' + box_id + '_' + date + '.csv'
+        full_path = data_path + '/' + filename
         if exists(full_path):
             file = open(full_path, 'a+')
-            file.write(value)
+            #file.write(value)
+            tmp_writer = csv.writer(file)
+            tmp_writer.writerow(value)
+            file.close()
         else:
             file = open(full_path, 'w+')
-            file.write(value)
+            #file.write(header)
+            #file.write(value)
+            tmp_writer = csv.writer(file)
+            tmp_writer.writerow(header)
+            tmp_writer.writerow(value)
+            file.close()
 
 
 # Email Service helper function
