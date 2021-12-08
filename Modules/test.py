@@ -39,13 +39,13 @@ if exists(full_path):
     tmp_writer.writerow(header)
     tmp_writer.writerow(value)
     file.close()
-    else:
-        file = open(full_path, 'w+')
-        #file.write(header)
-        #file.write(value)
-        tmp_writer = csv.writer(file)
-        tmp_writer.writerow(header)
-        tmp_writer.writerow(value)
-        file.close()
+else:
+    file = open(full_path, 'w+')
+    #file.write(header)
+    #file.write(value)
+    tmp_writer = csv.writer(file)
+    tmp_writer.writerow(header)
+    tmp_writer.writerow(value)
+    file.close()
 
 

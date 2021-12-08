@@ -25,17 +25,23 @@ logger_setup()
 header = ['chamber_id', 'sensor_id', 'year', 'month', 'day', 'timestamp']
 sensor_id = "lead"
 
+GPIO.setmode(GPIO.BCM)
+GPIO.setup(BEAM_PIN, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+
 def detect_beam_breaks_callback(BEAM_PIN):
-    # Return date and timestamp when the beam is broken
+    # Return date and timestamp when the beam is broken (previous)
+    # GPIO.add_event_detect(BEAM_PIN, GPIO.FALLING, callback=detect_beam_breaks_callback,
+    #                                   bouncetime=100)
+
     if not GPIO.input(BEAM_PIN):
-        return()
-        #logging.info('No IRBB activity on pin ' + str(BEAM_PIN) + '.')
+        loggin.info('nothing')
+        # logging.info('No IRBB activity on pin ' + str(BEAM_PIN) + '.')
     else:
         dt = datetime.now()
-        
+        loggin.info('something: ' + str(dt))
         # Logging is not working at all, nothing is written
-        #logging.info('IRBB activity detected')
-        #logging.INFO('IRBB activity detected at: ' + f"{dt:%H:%M:%S.%f}")
+        # logging.info('IRBB activity detected')
+        # logging.INFO('IRBB activity detected at: ' + f"{dt:%H:%M:%S.%f}")
         # This finally prints a .csv but the callback isn't working
         csv_writer(str(box_id), 'IRBB', irbb_data, f"{dt.year}_{dt.month}_{dt.day}",
                    header, [box_id, sensor_id, f"{dt.year}", f"{dt.month}", f"{dt.day}", f"{dt:%H:%M:%S.%f}"])
@@ -46,13 +52,5 @@ def detect_beam_breaks_callback(BEAM_PIN):
 def signal_handler(sig, frame):
     GPIO.cleanup()
     sys.exit(0)
-    
-GPIO.setmode(GPIO.BCM)
-GPIO.setup(BEAM_PIN, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-    
-# Add event detection for beam breaker with the callback function
-# Not working, even when I add a print to the callback function
-GPIO.add_event_detect(BEAM_PIN, GPIO.FALLING, callback=detect_beam_breaks_callback,
-                                      bouncetime=100)
 
 # TODO test: helper.email_alert('gsvidaurre@gmail.com', box + '_' + module, msg)
