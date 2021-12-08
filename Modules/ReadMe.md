@@ -1,12 +1,6 @@
-<h1>Main Script</h1>
-<p>Running all modules asynchronously and perform activities based on the values returned.</p>
-<h3>Pre-requisites</h3>
-
-**Authors**: nmoltta, gsvidaurre
-**Date**: 22 November 2021
-
-- Screen: ```sudo apt-get install screen```
-- SMTP setup to send email alerts from localhost
+<h1>Modules</h1>
+<b>Authors</b>: nmoltta, gsvidaurre<br>
+<b>Date</b>: 22 November 2021
 
 <h3>Helper functions</h3>
 
