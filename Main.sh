@@ -3,6 +3,7 @@
 # $ sudo apt-get install screen
 # $ cd <<path to git directory>>/ParentalCareTracking/
 # $ chmod +x Main.sh
+
 RED='\033[0;31m'
 NC='\033[0m'
 BIGreen='\033[1;92m'
@@ -40,7 +41,3 @@ echo -e "Started ${Cyan}irbb${NC}."
 echo ""
 
 # TODO: incorporate all modules to run on separate screens
-# more info: https://raspi.tv/2012/using-screen-with-raspberry-pi-to-avoid-leaving-ssh-sessions-open
-# screen bash -d -m -S irbb python Modules/IRBB.py
-
-# TODO: include top command to track system performance
