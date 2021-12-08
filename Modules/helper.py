@@ -69,10 +69,10 @@ logging.basicConfig(
 
 # CSV helper function
 # TODO: add timeout to track pin malfunction
-def csv_writer(box, module, date, value):
-    if module in modules:
+def csv_writer(box, data_path, date, value):
+    if data_path:
         filename = box + '_' + date + '.csv'
-        full_path = module + '/Data/' + filename
+        full_path = data_path + filename
         if exists(full_path):
             file = open(full_path, 'a+')
             file.write(value)
