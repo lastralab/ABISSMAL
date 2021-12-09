@@ -13,6 +13,7 @@ from datetime import date
 from os.path import exists
 import smtplib
 # from email.message import EmailMessage
+from os import walk
 
 
 def logger_setup(default_dir):
@@ -99,4 +100,21 @@ def csv_writer(box, data_path, date, value):
 #     s.quit()
 
 
-# TODO add backup function
+# TODO implement email service and try catch
+def backup(module, dir_from, dir_to):
+    if not (os.path.exists(dir_from) and os.path.exists(dir_to)):
+        logging.error('Backup directories not found.')
+    else:
+        files = []
+        for (dirpath, dirnames, filenames) in walk(dir_from):
+            files.extend(filenames)
+            break
+
+        i = len(files)
+
+        for f in files:
+            os.replace(dir_from + f, dir_to + f)
+            break
+
+        loggin.info(module + ' backup complete: ' + i + 'files moved.')
+
