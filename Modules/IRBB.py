@@ -23,11 +23,11 @@ module = 'IRBB'
 
 # CSV header
 header = ['chamber_id', 'sensor_id', 'year', 'month', 'day', 'timestamp']
-sensor_id = "lead"
+sensor_id = "rear"
 irbb_data = "/home/pi/Data_ParentalCareTracking/IRBB"
 
 
-def detect_beam_breaks_callback(BEAM_PIN):
+def detect_beam_breaks_callback(BEAM_PIN, sensor_id):
      if GPIO.input(BEAM_PIN):
          logging.info('No IRBB activity on pin ' + str(BEAM_PIN) + '.')
      else:
@@ -44,8 +44,10 @@ def signal_handler(sig, frame):
      GPIO.cleanup()
      sys.exit(0)
 
+
 GPIO.setmode(GPIO.BCM)
 GPIO.setup(BEAM_PIN, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 
-GPIO.add_event_detect(BEAM_PIN, GPIO.FALLING, callback=detect_beam_breaks_callback,
+
+GPIO.add_event_detect(BEAM_PIN, GPIO.FALLING, callback=lambda x: detect_beam_breaks_callback(BEAM_PIN, sensor_id),
                                       bouncetime=100)
