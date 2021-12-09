@@ -17,7 +17,7 @@ user_name=$(whoami)
 location=$(pwd)
 python_v=$(which python)
 irbb_file="/Modules/IRBB.py"
-irbb_command="${python_v} -c ${location}${irbb_file}"
+irbb_command="${python_v} ${location}${irbb_file}"
 
 echo ""
 echo -e "${Blue}Project:${NC}     ${Green}PARENTAL CARE TRACKING ${NC}"
