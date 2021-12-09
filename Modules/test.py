@@ -49,3 +49,23 @@ else:
     file.close()
 
 
+######### To test that IRBB device is working:
+    
+    # Created by PyCharm
+# Author: nmoltta, gsvidaurre
+# Project: ParentalCareTracking
+# Date: 11/16/2021
+
+import RPi.GPIO as GPIO
+
+
+# GPIO pin ID through which IR receiver transmits data
+BEAM_PIN = 16
+
+
+def break_beam_callback(BEAM_PIN):
+    if not GPIO.input(BEAM_PIN):
+        print("beam unbroken")
+    else:
+        print("beam broken")
+
