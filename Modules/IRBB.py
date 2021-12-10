@@ -32,18 +32,14 @@ irbb_data = "/home/pi/Data_ParentalCareTracking/IRBB"
 logging.info('started irbb script')
 
 def detect_beam_breaks_callback(BEAM_PIN, sensor_id):
-    while True:
-         if GPIO.input(BEAM_PIN):
-             #logging.info('No IRBB activity on pin ' + str(BEAM_PIN) + '.')
-             continue
-         else:
-             dt = datetime.now()
-             logging.info('IRBB activity detected at: ' + f"{dt:%H:%M:%S.%f}")
-             # This finally prints a .csv but the callback isn't working
-             csv_writer(str(box_id), 'IRBB', irbb_data, f"{dt.year}_{dt.month}_{dt.day}",
-                        header, [box_id, sensor_id, f"{dt.year}", f"{dt.month}", f"{dt.day}", f"{dt:%H:%M:%S.%f}"])
-             # TODO implement video function
-             sleep(1)
+    if not GPIO.input(BEAM_PIN):
+        dt = datetime.now()
+        logging.info('IRBB activity detected at: ' + f"{dt:%H:%M:%S.%f}")
+        # This finally prints a .csv but the callback isn't working
+        csv_writer(str(box_id), 'IRBB', irbb_data, f"{dt.year}_{dt.month}_{dt.day}",
+                   header, [box_id, sensor_id, f"{dt.year}", f"{dt.month}", f"{dt.day}", f"{dt:%H:%M:%S.%f}"])
+        # TODO implement video function
+        sleep(1)
 
 
  # Handler function for manual Ctrl + C cancellation
@@ -57,5 +53,14 @@ GPIO.setup(BEAM_PIN, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 
 GPIO.add_event_detect(BEAM_PIN, GPIO.FALLING, callback=lambda x: detect_beam_breaks_callback(BEAM_PIN, sensor_id),
                                       bouncetime=100)
+try:
+    while True:
+        pass
+    
+except KeyboardInterrupt:
+    GPIO.cleanup()
+    
+finally:
+    GPIO.cleanup()
 
-detect_beam_breaks_callback(BEAM_PIN, sensor_id)
+#detect_beam_breaks_callback(BEAM_PIN, sensor_id)

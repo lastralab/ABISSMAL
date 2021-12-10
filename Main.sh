@@ -16,7 +16,7 @@ Cyan='\033[0;96m'
 user_name=$(whoami)
 location=$(pwd)
 python_v=$(which python)
-irbb_file="/Modules/IRBB.py"
+irbb_file="/Modules/IRBB.py; exit"
 irbb_command="${python_v} ${location}${irbb_file}"
 
 echo ""
@@ -34,7 +34,7 @@ echo -e "${Yellow}Cleaning up detached screens...${NC}"
 echo ""
 echo -e "Starting screen name: ${Cyan}irbb${NC}..."
 sleep 1s
-
+# fix to run in background and continue opening screens
 screen -S irbb bash -c "${irbb_command}"
 
 echo -e "Started ${Cyan}irbb${NC}."
