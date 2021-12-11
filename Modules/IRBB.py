@@ -19,14 +19,17 @@ from time import sleep
 
 logger_setup('/home/pi/')
 
-# GPIO pin ID through which IR receiver transmits data
-BEAM_PIN = 16
+# GPIO pin IDs through which IR receivers transmit data
+#BEAM_PIN = 16
+BEAM_PIN_lead = 16
+BEAM_PIN_rear = 19
+
 warn = 0
 module = 'IRBB'
 
 # CSV header
 header = ['chamber_id', 'sensor_id', 'year', 'month', 'day', 'timestamp']
-sensor_id = "rear"
+#sensor_id = "rear"
 irbb_data = "/home/pi/Data_ParentalCareTracking/IRBB"
 
 logging.info('started irbb script')
@@ -49,18 +52,20 @@ def signal_handler(sig, frame):
 
 
 GPIO.setmode(GPIO.BCM)
-GPIO.setup(BEAM_PIN, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+GPIO.setup(BEAM_PIN_lead, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+GPIO.setup(BEAM_PIN_rear, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 
-GPIO.add_event_detect(BEAM_PIN, GPIO.FALLING, callback=lambda x: detect_beam_breaks_callback(BEAM_PIN, sensor_id),
-                                      bouncetime=100)
+GPIO.add_event_detect(BEAM_PIN_lead, GPIO.FALLING, callback=lambda x: detect_beam_breaks_callback(BEAM_PIN_lead, "lead"), bouncetime=100)
+GPIO.add_event_detect(BEAM_PIN_rear, GPIO.FALLING, callback=lambda x: detect_beam_breaks_callback(BEAM_PIN_rear, "rear"), bouncetime=100)
+
 try:
     while True:
         pass
     
 except KeyboardInterrupt:
+    logging.info('exiting IRBB')
     GPIO.cleanup()
     
 finally:
     GPIO.cleanup()
 
-#detect_beam_breaks_callback(BEAM_PIN, sensor_id)
