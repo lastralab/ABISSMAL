@@ -10,12 +10,31 @@ from datetime import datetime
 import csv
 from pathlib import Path
 
+# For logging and writing to a .csv file
+from helper import logger_setup
+from helper import csv_writer
+from helper import box_id
+from time import sleep
+
+logger_setp('/home/pi')
+
+warn = 0
+module = 'Temp'
+
+# CSV header
+header = ['chamber_id', 'year', 'month', 'day', 'time', 'degrees_Celsius', 'degrees_Farenheit']
+temp_data = '/home/pi/Data_ParentalCareTracking/Temp'
+
+logging.info('started temperature script')
+
+# Set up temperature probe 1-wire data transfer
 os.system('modprobe w1-gpio')
 os.system('modprobe w1-therm')
 
 base_dir = '/sys/bus/w1/devices/'
 device_folder = glob.glob(base_dir + '28*')[0]
 device_file = device_folder + '/w1_slave'
+
 
 # Open file that contains temperature output
 def read_temp_raw():
@@ -41,40 +60,14 @@ def read_temp():
         temp_c = float(temp_string) / 1000.0
         temp_f = (temp_c * (9.0 / 5.0)) + 32.0
         return temp_c, temp_f
-        #return "{} (degrees Celsius); {} degrees Farenheit".format(temp_c, temp_f)
-
-# The while loop is always TRUE and therefore will run forever, unless there's an erorr or the user interrupts the run
-# The script is put to sleep every 60 seconds, so the temperature will print every minute
-# Print to a file instead of the screen. With date and time
-file_name = "RC_01_temperature"
-out_path = "/home/pi"
-pathfile = os.path.join(out_path, f"{file_name}.csv")
-
-# If the file does not already exist, then write column headers to the .csv
-csvfile = Path(pathfile)
-#f = open(pathfile, "a", newline = "")
-#writer = csv.writer(f, delimiter = ",")
-
-if not csvfile.is_file():
-    header = [
-        ['recording_chamber', 'year', 'month', 'day', 'time', 'degrees_Celsius', 'degrees_Farenheit']
-    ]
-    f = open(pathfile, "a", newline = "")
-    writer = csv.writer(f, delimiter = ",")
-    writer.writerows(header)
 
 while True:
 
     dt = datetime.now()
     temp = read_temp()
 
-    # Print output to a csv
-    tmp_row = [
-            ['RC_01', "{}".format(dt.year), "{}".format(dt.month), "{}".format(dt.day), "{}:{}:{}".format(dt.hour, dt.minute, dt.second), temp[0], temp[1]]
-    ]
+    logging.info('Temperature sensor reading at:' + f"{dt:%H:%M:%S.%f}")
 
-    f = open(pathfile, "a", newline = "")
-    writer = csv.writer(f, delimiter = ",")
-    writer.writerows(tmp_row)
+    csv_writer(str(box_id), module, temp_data, f"{dt.year}_{dt.month}_{dt.day}", header, [box_id, f"{dt.year}", f"{dt.month}", f"{dt.day}", f"{dt:%H:%M:%S.%f}", temp[0], temp[1]])
 
     time.sleep(60)
