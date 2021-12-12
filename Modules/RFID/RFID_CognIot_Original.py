@@ -11,23 +11,6 @@ import time
 import sys
 from datetime import datetime
 
-# Added for logging and writing data to .csv
-import csv
-import logging
-from helper import logger_setup
-from helper import csv_writer
-from helper import box_id
-from time import sleep
-
-warn = 0
-module = 'RFID'
-
-# CSV header
-header = ['chamber_id', 'year', 'month', 'day', 'timestamp', 'PIT_tag_ID']
-rfid_data = "/home/pi/Data_ParentalCareTracking/RFID"
-
-logging.info('started RFID script')
-
 #set GPIO pin
 GPIO_PIN = 1 # GPIO18
 # GPIO_PIN = 0 # GPIO17
@@ -97,10 +80,7 @@ def ReadTagPageZero(fd):
         if ans == int("0xD6", 16):
             notag = False
             ans = ReadText(fd)
-            dt = datetime.now()
-            logging.info('RFID activity detected at:' + f"{dt:%H:%M:%S.%f}")
-            csv_writer(str(box_id), module, rfid_data, f"{dt.year}_{dt.month}_{dt.day}", header, [box_id, f"{dt.year}", f"{dt.month}", f"{dt.day}", f"{dt:%H:%M:%S.%f}", ans])
-            #print("%s %s %s" % (ans, datetime.now().date().strftime("%m/%d/%y"), datetime.now().time().strftime("%H:%M:%S")))
+            print("%s %s %s" % (ans, datetime.now().date().strftime("%m/%d/%y"), datetime.now().time().strftime("%H:%M:%S")))
             notag = True
 
 comms = RFIDSetup()
