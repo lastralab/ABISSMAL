@@ -8,6 +8,7 @@ import glob
 import time
 from datetime import datetime
 import csv
+import logging
 from pathlib import Path
 
 # For logging and writing to a .csv file
@@ -16,7 +17,7 @@ from helper import csv_writer
 from helper import box_id
 from time import sleep
 
-logger_setp('/home/pi')
+logger_setup('/home/pi/')
 
 warn = 0
 module = 'Temp'
@@ -61,13 +62,18 @@ def read_temp():
         temp_f = (temp_c * (9.0 / 5.0)) + 32.0
         return temp_c, temp_f
 
-while True:
+try:
+    while True:
 
-    dt = datetime.now()
-    temp = read_temp()
+        dt = datetime.now()
+        temp = read_temp()
 
-    logging.info('Temperature sensor reading at:' + f"{dt:%H:%M:%S.%f}")
+        logging.info('Temperature sensor reading at:' + f"{dt:%H:%M:%S.%f}")
 
-    csv_writer(str(box_id), module, temp_data, f"{dt.year}_{dt.month}_{dt.day}", header, [box_id, f"{dt.year}", f"{dt.month}", f"{dt.day}", f"{dt:%H:%M:%S.%f}", temp[0], temp[1]])
+        csv_writer(str(box_id), module, temp_data, f"{dt.year}_{dt.month}_{dt.day}", header, [box_id, f"{dt.year}", f"{dt.month}", f"{dt.day}", f"{dt:%H:%M:%S.%f}", temp[0], temp[1]])
 
-    time.sleep(60)
+        time.sleep(60)
+
+except KeyboardInterrupt:
+    logging.info('exiting Temp')
+    
