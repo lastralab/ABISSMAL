@@ -19,6 +19,8 @@ from helper import csv_writer
 from helper import box_id
 from time import sleep
 
+logger_setup("/home/pi/")
+
 warn = 0
 module = 'RFID'
 
@@ -88,20 +90,23 @@ def ReadInt(fd):
 #read RFID tag
 def ReadTagPageZero(fd):
     notag = True
-    while notag:
-        WaitForCTS()
-        wiringpi2.serialPutchar(fd, 0x52)
-        wiringpi2.serialPutchar(fd, 0x00)
-        time.sleep(0.1)
-        ans = ReadInt(fd)
-        if ans == int("0xD6", 16):
-            notag = False
-            ans = ReadText(fd)
-            dt = datetime.now()
-            logging.info('RFID activity detected at:' + f"{dt:%H:%M:%S.%f}")
-            csv_writer(str(box_id), module, rfid_data, f"{dt.year}_{dt.month}_{dt.day}", header, [box_id, f"{dt.year}", f"{dt.month}", f"{dt.day}", f"{dt:%H:%M:%S.%f}", ans])
-            #print("%s %s %s" % (ans, datetime.now().date().strftime("%m/%d/%y"), datetime.now().time().strftime("%H:%M:%S")))
-            notag = True
+    try:
+        while notag:
+            WaitForCTS()
+            wiringpi2.serialPutchar(fd, 0x52)
+            wiringpi2.serialPutchar(fd, 0x00)
+            time.sleep(0.1)
+            ans = ReadInt(fd)
+            if ans == int("0xD6", 16):
+                notag = False
+                ans = ReadText(fd)
+                dt = datetime.now()
+                logging.info('RFID activity detected at:' + f"{dt:%H:%M:%S.%f}")
+                csv_writer(str(box_id), module, rfid_data, f"{dt.year}_{dt.month}_{dt.day}", header, [box_id, f"{dt.year}", f"{dt.month}", f"{dt.day}", f"{dt:%H:%M:%S.%f}", ans])
+                notag = True
+
+    except KeyboardInterrupt:
+        logging.info('exiting RFID')
 
 comms = RFIDSetup()
 SetReaderMode(comms)
