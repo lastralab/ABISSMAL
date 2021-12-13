@@ -1,7 +1,7 @@
 # Created by PyCharm
-# Author: nmoltta, gsvidaurre
+# Author: nmoltta
 # Project: ParentalCareTracking
-# Date: 11/13/21
+# Date: 11/7/21
 
 #!/usr/bin/env python3
 
@@ -10,25 +10,6 @@ import numpy as np
 import time
 import sys
 from datetime import datetime
-
-# Added for logging and writing data to .csv
-import csv
-import logging
-from helper import logger_setup
-from helper import csv_writer
-from helper import box_id
-from time import sleep
-
-logger_setup("/home/pi/")
-
-warn = 0
-module = 'RFID'
-
-# CSV header
-header = ['chamber_id', 'year', 'month', 'day', 'timestamp', 'PIT_tag_ID']
-rfid_data = "/home/pi/Data_ParentalCareTracking/RFID"
-
-logging.info('started RFID script')
 
 #set GPIO pin
 GPIO_PIN = 1 # GPIO18
@@ -90,25 +71,21 @@ def ReadInt(fd):
 #read RFID tag
 def ReadTagPageZero(fd):
     notag = True
-    try:
-        while notag:
-            WaitForCTS()
-            wiringpi2.serialPutchar(fd, 0x52)
-            wiringpi2.serialPutchar(fd, 0x00)
-            time.sleep(0.1)
-            ans = ReadInt(fd)
-            if ans == int("0xD6", 16):
-                notag = False
-                ans = ReadText(fd)
-                dt = datetime.now()
-                logging.info('RFID activity detected at:' + f"{dt:%H:%M:%S.%f}")
-                csv_writer(str(box_id), module, rfid_data, f"{dt.year}_{dt.month}_{dt.day}", header, [box_id, f"{dt.year}", f"{dt.month}", f"{dt.day}", f"{dt:%H:%M:%S.%f}", ans])
-                notag = True
-
-    except KeyboardInterrupt:
-        logging.info('exiting RFID')
+    while notag:
+        WaitForCTS()
+        wiringpi2.serialPutchar(fd, 0x52)
+        wiringpi2.serialPutchar(fd, 0x00)
+        time.sleep(0.1)
+        ans = ReadInt(fd)
+        if ans == int("0xD6", 16):
+            notag = False
+            ans = ReadText(fd)
+            print("%s %s %s" % (ans, datetime.now().date().strftime("%m/%d/%y"), datetime.now().time().strftime("%H:%M:%S")))
+            notag = True
 
 comms = RFIDSetup()
 SetReaderMode(comms)
 SetPollingDelay(comms)
 ReadTagPageZero(comms)
+
+
