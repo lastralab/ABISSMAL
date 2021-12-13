@@ -1,1 +1,0 @@
-<p>Placeholder to describe external libraries in this directory</p>
