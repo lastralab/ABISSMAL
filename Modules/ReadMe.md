@@ -53,3 +53,11 @@ The RPi.GPIO, time, and datetime libraries were already installed.
 **Notes on usage**: Since video data is computationally intensive to record, and expensive both to store and score, videos will be recorded around parental visits to the nest chamber. Either RFID or the infrared beam breakers should trigger video recording. Ideally, video recording will capture several seconds before the given parent enters (perhaps 10 seconds), and will record for a set amount of time after the trigger (e.g. 30 or 60 seconds). This code still needs to be optimized for resolution and size given the height of the nest container. A set of manually scored videos can possibly be used for automated tracking of behavior, but since these videos will be short it may be possible to score behaviors manually with an animal behavior app.
 
 **Data structure**: The function in Video.py should return videos that contain the recording chamber number, and the year, month, day, and timestamp (HH:MM:SS) in the file name of each video.
+
+**Commands to use camera and do MP4 conversion:
+
+sudo raspi-config > Interface Options > P1 Camera > Enable > Finish > Reboot
+
+To access MP4Box: sudo apt install -y gpac
+gpac 0.5.2-426
+Installs gpac gpac-modules-base libfreenect0.5 libglu1-mesa libgpac4
