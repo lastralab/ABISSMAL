@@ -1,8 +1,10 @@
 #!/bin/bash
-# Terminal run:
-# $ sudo apt-get install screen
-# $ cd <<path to git directory>>/ParentalCareTracking/
-# $ chmod +x Main.sh
+##
+ # Created by PyCharm
+ # Author: nmoltta
+ # Project: ParentalCareTracking
+ # Date: 12/08/2021
+##
 
 RED='\033[0;31m'
 NC='\033[0m'
@@ -58,4 +60,3 @@ echo -e "Started ${Cyan}temp${NC}."
 echo ""
 
 # TODO: fix to run in background and continue opening screens for later modules
-

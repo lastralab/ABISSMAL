@@ -8,12 +8,16 @@ import time
 import signal
 import sys
 import os
+import csv
 # import RPi.GPIO as GPIO
 from datetime import date
 from os.path import exists
 import smtplib
+
 # from email.message import EmailMessage
-from os import walk
+
+box_id = 101
+modules = ['IRBB', 'RFID', 'Temp']
 
 
 def logger_setup(default_dir):
@@ -44,9 +48,6 @@ def logger_setup(default_dir):
     if not os.path.exists(video_data):
         os.makedirs(video_data)
 
-    # Constants and logging setup
-    box_id = 101
-    modules = ['IRBB', 'RFID', 'Temp']
     FORMAT = "%(asctime)s: %(message)s"
 
     logging.basicConfig(
@@ -73,48 +74,37 @@ def logger_setup(default_dir):
 
 # CSV helper function
 # TODO: add timeout to track pin malfunction
-def csv_writer(box, data_path, date, value):
+def csv_writer(box_id, module, data_path, date, header, value):
     if data_path:
-        filename = box + '_' + date + '.csv'
-        full_path = data_path + filename
+        filename = module + '_' + box_id + '_' + date + '.csv'
+        full_path = data_path + "/" + filename
         if exists(full_path):
             file = open(full_path, 'a+')
-            file.write(value)
+            # file.write(value)
+            tmp_writer = csv.writer(file)
+            tmp_writer.writerow(value)
+            file.close()
         else:
             file = open(full_path, 'w+')
-            file.write(value)
-
+            # file.write(header)
+            # file.write(value)
+            tmp_writer = csv.writer(file)
+            tmp_writer.writerow(header)
+            tmp_writer.writerow(value)
+            file.close()
 
 # Email Service helper function
 # TODO: test
 # def email_alert(toemail, module, text):
-#     subject = 'Module[' + module + ']'
-#     msg = EmailMessage()
-#     msg.set_content(text)
-#     msg['Subject'] = f'Pi Alert: {subject}'
-#     msg['From'] = ''  # smtp localhost setup email
-#     msg['To'] = toemail
-#
-#     s = smtplib.SMTP('localhost')
-#     s.send_message(msg)
-#     s.quit()
+#    subject = 'Module[' + module + ']'
+#    msg = EmailMessage()
+#    msg.set_content(text)
+#    msg['Subject'] = f'Pi Alert: {subject}'
+#    msg['From'] = ''  # smtp localhost setup email
+#    msg['To'] = toemail
 
+#    s = smtplib.SMTP('localhost')
+#    s.send_message(msg)
+#    s.quit()
 
-# TODO implement email service and try catch
-def backup(module, dir_from, dir_to):
-    if not (os.path.exists(dir_from) and os.path.exists(dir_to)):
-        logging.error('Backup directories not found.')
-    else:
-        files = []
-        for (dirpath, dirnames, filenames) in walk(dir_from):
-            files.extend(filenames)
-            break
-
-        i = len(files)
-
-        for f in files:
-            os.replace(dir_from + f, dir_to + f)
-            break
-
-        loggin.info(module + ' backup complete: ' + i + 'files moved.')
-
+# TODO add backup function

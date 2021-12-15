@@ -1,49 +1,72 @@
 # Created by PyCharm
-# Author: nmoltta
+# Author: nmoltta, gsvidaurre
 # Project: ParentalCareTracking
-# Date: 12/8/21
+# Date: 11/16/2021
 
+# !/usr/bin/env python3
+
+import time
 import signal
+from datetime import datetime
 import sys
+import csv
+import RPi.GPIO as GPIO
 import logging
-import os
-from datetime import date
-from os.path import exists
 from helper import logger_setup
-from picamera import PiCamera
+from helper import csv_writer
+from helper import box_id
 from time import sleep
-from subprocess import call
-
 
 logger_setup('/home/pi/')
 
+# GPIO pin IDs through which IR receivers transmit data
+# BEAM_PIN = 16
+BEAM_PIN_lead = 16
+BEAM_PIN_rear = 19
 
-def convert(file_h264):
+warn = 0
+module = 'IRBB'
 
-    command = "MP4Box -add " + file_h264 + " " + file_mp4
-    call([command], shell=True)
-    logging.info('Converted video h264 to mp4.')
+header = ['chamber_id', 'sensor_id', 'year', 'month', 'day', 'timestamp']
+
+irbb_data = "/home/pi/Data_ParentalCareTracking/IRBB"
+
+logging.info('started irbb script')
 
 
-# TODO test adding function to beam breaker function, passing time param
-# TODO try catch, log errors
-def record(time_now):
-    path = home_pi + 'RFID/Data/Video/'
-    filename = 'IRBB_' + time_now
-    file_h264 = path + filename + '.h264'
-    camera = PiCamera()
-    camera.resolution = (640, 480)
-    camera.framerate = 15
-    camera.start_preview()
-    camera.start_recording(file_h264)
-    sleep(60)
-    camera.stop_recording()
-    camera.stop_preview()
-    file_mp4 = path + filename + '.mp4'
-    command = "MP4Box -add " + file_h264 + " " + file_mp4
-    call([command], shell=True)
-    logging.info('Converted video ' + filename + ' to mp4.')
+def detect_beam_breaks_callback(BEAM_PIN, sensor_id):
+    if not GPIO.input(BEAM_PIN):
+        dt = datetime.now()
+        logging.info('IRBB activity detected at: ' + f"{dt:%H:%M:%S.%f}")
+        # This finally prints a .csv but the callback isn't working
+        csv_writer(str(box_id), 'IRBB', irbb_data, f"{dt.year}_{dt.month}_{dt.day}",
+                   header, [box_id, sensor_id, f"{dt.year}", f"{dt.month}", f"{dt.day}", f"{dt:%H:%M:%S.%f}"])
+        # TODO implement video function
+        sleep(1)
 
-# test
-# print('IRBB ran...')
-# logging.info('IRBB running')
+
+# Handler function for manual Ctrl + C cancellation
+def signal_handler(sig, frame):
+    GPIO.cleanup()
+    sys.exit(0)
+
+
+GPIO.setmode(GPIO.BCM)
+GPIO.setup(BEAM_PIN_lead, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+GPIO.setup(BEAM_PIN_rear, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+
+GPIO.add_event_detect(BEAM_PIN_lead, GPIO.FALLING,
+                      callback=lambda x: detect_beam_breaks_callback(BEAM_PIN_lead, "lead"), bouncetime=100)
+GPIO.add_event_detect(BEAM_PIN_rear, GPIO.FALLING,
+                      callback=lambda x: detect_beam_breaks_callback(BEAM_PIN_rear, "rear"), bouncetime=100)
+
+try:
+    while True:
+        pass
+
+except KeyboardInterrupt:
+    logging.info('exiting IRBB')
+    GPIO.cleanup()
+
+finally:
+    GPIO.cleanup()

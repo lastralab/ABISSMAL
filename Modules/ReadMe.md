@@ -1,12 +1,18 @@
-<h1>Modules</h1>
-<b>Authors</b>: nmoltta, gsvidaurre<br>
+<h1>Parental Care Tracking</h1>
+<b>Authors</b>: nmoltta, gsvidaurre <br>
 <b>Date</b>: 22 November 2021
+
+- Screen: ```$ sudo apt-get install screen```
+- Permissions: 
+  - `````$ cd <<path to git directory>>/ParentalCareTracking/`````
+  - ```$ chmod +x Main.sh```
+- SMTP install/setup to send email alerts
 
 <h3>Helper functions</h3>
 
 - CSV writer
 - Email Service
-- Logging setup
+- Logging directory/files setup
 
 <h1>Infrared beam breaker - IRBB</h1>
 
