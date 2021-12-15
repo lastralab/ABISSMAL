@@ -59,4 +59,4 @@ echo -e "Started ${Cyan}temp${NC}."
 
 echo ""
 
-# TODO: fix to run in background and continue opening screens for later modules
+# TODO: test -dmS / fix to run in background and continue opening screens for later modules
