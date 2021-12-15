@@ -1,12 +1,12 @@
-<h1>Main Script</h1>
-<p>Running all modules asynchronously and perform activities based on the values returned.</p>
-<h3>Pre-requisites</h3>
 
-**Authors**: nmoltta, gsvidaurre
+**Authors**: nmoltta, gsvidaurre <br>
 **Date**: 22 November 2021
 
-- Screen: ```sudo apt-get install screen```
-- SMTP setup to send email alerts from localhost
+- Screen: ```$ sudo apt-get install screen```
+- Permissions: 
+  - `````$ cd <<path to git directory>>/ParentalCareTracking/`````
+  - ```$ chmod +x Main.sh```
+- SMTP install/setup to send email alerts
 
 <h3>Helper functions</h3>
 

@@ -1,8 +1,5 @@
 #!/bin/bash
-# Terminal run:
-# $ sudo apt-get install screen
-# $ cd <<path to git directory>>/ParentalCareTracking/
-# $ chmod +x Main.sh
+#
 
 RED='\033[0;31m'
 NC='\033[0m'
@@ -41,6 +38,3 @@ echo -e "Started ${Cyan}irbb${NC}."
 #screen -r irbb
 
 echo ""
-
-# TODO: incorporate all modules to run on separate screens
-
