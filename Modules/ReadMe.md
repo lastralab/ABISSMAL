@@ -1,10 +1,10 @@
-
-**Authors**: nmoltta, gsvidaurre <br>
-**Date**: 22 November 2021
+<h1>Parental Care Tracking</h1>
+<b>Authors</b>: nmoltta, gsvidaurre <br>
+<b>Date</b>: 22 November 2021
 
 - Screen: ```$ sudo apt-get install screen```
-- Permissions: 
-  - `````$ cd <<path to git directory>>/ParentalCareTracking/`````
+- Fix Permissions: 
+  - `````$ cd <path>/ParentalCareTracking/`````
   - ```$ chmod +x Main.sh```
 - SMTP install/setup to send email alerts
 
