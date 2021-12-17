@@ -13,10 +13,12 @@ import csv
 from datetime import date
 from os.path import exists
 import smtplib
+
 # from email.message import EmailMessage
 
 box_id = 101
 modules = ['IRBB', 'RFID', 'Temp']
+
 
 def logger_setup(default_dir):
     # Create the log folder unless it already exists
@@ -69,8 +71,8 @@ def logger_setup(default_dir):
         datefmt="%Y-%m-%d %H:%M:%S"
     )
 
-# CSV helper function
 
+# CSV helper function
 # TODO: add timeout to track pin malfunction
 def csv_writer(box_id, module, data_path, date, header, value):
     if data_path:
@@ -78,19 +80,18 @@ def csv_writer(box_id, module, data_path, date, header, value):
         full_path = data_path + "/" + filename
         if exists(full_path):
             file = open(full_path, 'a+')
-            #file.write(value)
+            # file.write(value)
             tmp_writer = csv.writer(file)
             tmp_writer.writerow(value)
             file.close()
         else:
             file = open(full_path, 'w+')
-            #file.write(header)
-            #file.write(value)
+            # file.write(header)
+            # file.write(value)
             tmp_writer = csv.writer(file)
             tmp_writer.writerow(header)
             tmp_writer.writerow(value)
             file.close()
-
 
 # Email Service helper function
 # TODO: test
