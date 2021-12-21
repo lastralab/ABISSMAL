@@ -42,9 +42,10 @@ def detect_beam_breaks_callback(BEAM_PIN, sensor_id):
                    header, [box_id, sensor_id, f"{dt.year}", f"{dt.month}", f"{dt.day}", f"{dt:%H:%M:%S.%f}"])
         if sensor_id == "rear":
             GPIO.output(REC_LED, GPIO.HIGH)
-            sleep(3)
+            sleep(1)
 
-        # GPIO.output(REC_LED, GPIO.LOW)
+    else:
+        GPIO.output(REC_LED, GPIO.LOW)
 
 
 # Handler function for manual Ctrl + C cancellation
@@ -58,7 +59,6 @@ GPIO.setup(BEAM_PIN_lead, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 GPIO.setup(BEAM_PIN_rear, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 GPIO.setwarnings(False)
 GPIO.setup(REC_LED, GPIO.OUT)
-GPIO.output(REC_LED, GPIO.LOW)
 
 GPIO.add_event_detect(BEAM_PIN_lead, GPIO.FALLING,
                       callback=lambda x: detect_beam_breaks_callback(BEAM_PIN_lead, "lead"), bouncetime=100)
