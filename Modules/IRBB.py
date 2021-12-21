@@ -42,9 +42,9 @@ def detect_beam_breaks_callback(BEAM_PIN, sensor_id):
         csv_writer(str(box_id), 'IRBB', irbb_data, f"{dt.year}_{dt.month}_{dt.day}",
                    header, [box_id, sensor_id, f"{dt.year}", f"{dt.month}", f"{dt.day}", f"{dt:%H:%M:%S.%f}"])
         if sensor_id == "rear":
-            GPIO.output(REC_LED, HIGH)  # or low to turn on?
+            GPIO.output(REC_LED, GPIO.HIGH)  # or low to turn on?
         else:
-            GPIO.output(REC_LED, LOW)
+            GPIO.output(REC_LED, GPIO.LOW)
         # sleep(1)  # no longer needed?
 
 
