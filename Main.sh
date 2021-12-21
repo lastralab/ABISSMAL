@@ -41,8 +41,8 @@ echo -e "${Yellow}Setting permissions for user:${NC} ${user_name}${NC}"
 echo ""
 find Modules/ -type f -exec chmod 644 {} \;
 chown -R "${user_name}" .
-echo -e "${Green}To access a screen run:${NC} screen -r ${Purple}{name}${NC}"
-echo -e "${RED}To detach a screen press Ctrl + D${NC}"
+echo -e "To access a screen run:${Green} screen -r ${NC}${Purple}{name}${NC}"
+echo -e "To detach a screen press${RED} Ctrl + D${NC}"
 #screen -ls | grep Detached | cut -d. -f1 | awk '{print $1}' | xargs kill
 echo ""
 
