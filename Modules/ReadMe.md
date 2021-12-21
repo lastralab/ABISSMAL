@@ -7,6 +7,9 @@
   - `````$ cd <path>/ParentalCareTracking/`````
   - ```$ chmod +x Main.sh```
 - SMTP install/setup to send email alerts
+- Git store credentials:
+  - >git config --global credential.helper store
+  - >git pull 
 
 <h3>Helper functions</h3>
 
