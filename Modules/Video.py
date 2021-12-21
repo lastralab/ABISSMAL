@@ -25,6 +25,7 @@ warn = 0
 module = 'Video'
 video_data = "/home/pi/Data_ParentalCareTracking/Video/"
 GPIO.setmode(GPIO.BCM)
+GPIO.setwarnings(False)
 GPIO.setup(REC_LED, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
 
 
@@ -47,9 +48,11 @@ def record_video(path, box_id):
     camera.iso = 400
     camera.resolution = (640, 640)
     camera.framerate = 60
+    logging.info("Starting video recording...")
     camera.start_recording(file_h264)
     camera.wait_recording(60)
     camera.stop_recording()
+    logging.info("Video recorded")
     camera.close()
     file_mp4 = path + str(box_id) + dt_str + '.mp4'
     # MP4Box prints a lot of messages, could these be saved to the log via Main.sh?
@@ -60,7 +63,6 @@ def record_video(path, box_id):
 
 while GPIO.input(int(REC_LED)):
     record_video(video_data, box_id)
-    pass
 
 
 try:
