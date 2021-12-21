@@ -1,7 +1,7 @@
 #!/bin/bash
 ##
  # Created by PyCharm
- # Author: nmoltta
+ # Author: Tania M. Molina
  # Project: ParentalCareTracking
  # Date: 12/08/2021
 ##
@@ -31,10 +31,10 @@ rfid_file="/Modules/RFID.py"
 rfid_command="${python_v} ${location}${rfid_file}"
 
 echo ""
-echo -e "${Blue}Project:${NC}     ${Green}PARENTAL CARE TRACKING ${NC}"
+echo -e "${Blue}Project:${NC}     ${Green}P A R E N T A L   C A R E   T R A C K I N G${NC}"
 echo -e "${Blue}Repository:${NC}  https://github.com/lastralab/parentalcaretracking"
 echo -e "${Blue}Date:${NC}        ${Blue}November 2021${NC}"
-echo -e "${Blue}Authors:${NC}     ${Cyan}Tania M. Molina & Grace Smith-Vidaurre${NC}"
+echo -e "${Blue}Authors:${NC}     ${Cyan}Tania M. Molina${NC} & ${Cyan}Grace Smith-Vidaurre${NC}"
 echo ""
 
 echo -e "${Yellow}Setting permissions for user:${NC} ${user_name}${NC}"
