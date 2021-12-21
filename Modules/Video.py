@@ -60,9 +60,9 @@ def record_video(path, box_id):
 
 try:
     while True:
-        if GPIO.INPUT(REC_LED):
+        if GPIO.input(int(REC_LED)):
             record_video(video_data, box_id)
-        pass
+            pass
 
 except KeyboardInterrupt:
     logging.info('exiting Video')
