@@ -24,7 +24,7 @@ warn = 0
 module = 'Video'
 video_data = "/home/pi/Data_ParentalCareTracking/Video/"
 GPIO.setmode(GPIO.BCM)
-GPIO.setup(REC_LED, GPIO.IN)
+GPIO.setup(REC_LED, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
 
 
 def convert(file_h264):
@@ -68,12 +68,15 @@ def record_video(path, box_id):
         logging.info('Converted video ' + file_h264 + ' to mp4.')
 
 
-GPIO.add_event_detect(REC_LED, GPIO.FALLING,
-                      callback=lambda x: record_video(video_data, box_id), bouncetime=100)
+# if GPIO.INPUT(REC_LED):
+#     record_video(video_data, box_id)
+# GPIO.add_event_detect(REC_LED, GPIO.FALLING, callback=lambda x: record_video(video_data, box_id), bouncetime=100)
 
 try:
     while True:
-        pass
+        if GPIO.INPUT(REC_LED):
+            record_video(video_data, box_id)
+        # pass
 
 except KeyboardInterrupt:
     logging.info('exiting Video')
