@@ -18,7 +18,7 @@ from helper import box_id
 from time import sleep
 from os import walk
 
-REC_LED = 14  # change accordingly but same as IRBB
+REC_LED = 12  # change accordingly but same as IRBB
 
 warn = 0
 module = 'Video'

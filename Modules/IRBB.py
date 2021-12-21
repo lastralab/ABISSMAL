@@ -24,7 +24,7 @@ logger_setup('/home/pi/')
 
 BEAM_PIN_lead = 16
 BEAM_PIN_rear = 19
-REC_LED = 14  # change accordingly
+REC_LED = 12  # change accordingly
 warn = 0
 module = 'IRBB'
 header = ['chamber_id', 'sensor_id', 'year', 'month', 'day', 'timestamp']
