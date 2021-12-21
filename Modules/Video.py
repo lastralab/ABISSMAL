@@ -18,6 +18,9 @@ from helper import box_id
 from time import sleep
 from os import walk
 from picamera import PiCamera
+from subprocess import call
+
+logger_setup('/home/pi/')
 
 REC_LED = 12  # change accordingly but same as IRBB
 
@@ -26,7 +29,7 @@ module = 'Video'
 video_data = "/home/pi/Data_ParentalCareTracking/Video/"
 GPIO.setmode(GPIO.BCM)
 GPIO.setwarnings(False)
-GPIO.setup(REC_LED, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+GPIO.setup(REC_LED, GPIO.IN)
 
 
 def convert(file_h264):
@@ -62,6 +65,7 @@ def record_video(path, box_id):
 
 
 while GPIO.input(int(REC_LED)):
+    logging.info('Activating video function')
     record_video(video_data, box_id)
 
 
@@ -70,8 +74,7 @@ try:
         pass
 
 except KeyboardInterrupt:
-    logging.info('exiting Video')
-    GPIO.cleanup()
+    logging.info('exiting Video.py')
 
 finally:
     GPIO.cleanup()
