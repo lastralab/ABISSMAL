@@ -16,7 +16,6 @@ from helper import logger_setup
 from helper import csv_writer
 from helper import box_id
 from time import sleep
-from picamera import PiCamera
 from subprocess import call
 from os import walk
 
@@ -43,9 +42,9 @@ def detect_beam_breaks_callback(BEAM_PIN, sensor_id):
                    header, [box_id, sensor_id, f"{dt.year}", f"{dt.month}", f"{dt.day}", f"{dt:%H:%M:%S.%f}"])
         if sensor_id == "rear":
             GPIO.output(REC_LED, GPIO.HIGH)
-            sleep(1)
+            sleep(3)
 
-        GPIO.output(REC_LED, GPIO.LOW)
+        # GPIO.output(REC_LED, GPIO.LOW)
 
 
 # Handler function for manual Ctrl + C cancellation
