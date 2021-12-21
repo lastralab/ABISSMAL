@@ -58,11 +58,14 @@ def record_video(path, box_id):
     logging.info('Converted video ' + file_h264 + ' to mp4.')
 
 
+while GPIO.input(int(REC_LED)):
+    record_video(video_data, box_id)
+    pass
+
+
 try:
     while True:
-        if GPIO.input(int(REC_LED)):
-            record_video(video_data, box_id)
-            pass
+        pass
 
 except KeyboardInterrupt:
     logging.info('exiting Video')
