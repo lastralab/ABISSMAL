@@ -16,7 +16,7 @@ from helper import logger_setup
 from helper import csv_writer
 from helper import box_id
 from time import sleep
-from Video import record_video
+#from Video import record_video
 from subprocess import call
 from os import walk
 
@@ -77,14 +77,15 @@ GPIO.add_event_detect(BEAM_PIN_rear, GPIO.FALLING,
 
 try:
     while True:
-        if GPIO.input(VIDEO_PIN):
-            record_video(video_data, box_id, video_duration)
+        pass
+        #if GPIO.input(VIDEO_PIN):
+        #    record_video(video_data, box_id, video_duration)
 
 except KeyboardInterrupt:
     logging.info('exiting IRBB')
-    GPIO.output(REC_LED, GPIO.LOW)
+    #GPIO.output(REC_LED, GPIO.LOW)
     GPIO.cleanup()
 
 finally:
-    GPIO.output(REC_LED, GPIO.LOW)
+    #GPIO.output(REC_LED, GPIO.LOW)
     GPIO.cleanup()
