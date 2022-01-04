@@ -5,8 +5,8 @@ Grace Smith-Vidaurre
 
 Project board: https://github.com/lastralab/ParentalCareTracking/projects/1 <br>
 <h2>Git-flow</h2>
-- All branches get created from **main**
-- All pull requests get created to **staging**
+- All branches get created from <b>main</b>
+- All pull requests get created to <b>staging</b>
 - Only tested and validated code from staging gets merged to main
 
 <h2>Overview</h2>
