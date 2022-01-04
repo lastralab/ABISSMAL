@@ -61,6 +61,6 @@ echo -e "Started ${Cyan}temp${NC}."
 
 echo ""
 echo -e "To kill all screens, run:"
-echo -e "${BIGreen}screen -ls | grep Detached | cut -d. -f1 | awk '{print $1}' | xargs kill${NC}"
+echo -e "${BIGreen}screen -ls | grep Detached | cut -d. -f1 | awk '{print \$1}' | xargs kill${NC}"
 
 echo ""
