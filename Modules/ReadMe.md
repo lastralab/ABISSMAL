@@ -2,11 +2,16 @@
 <b>Authors</b>: nmoltta, gsvidaurre <br>
 <b>Date</b>: 22 November 2021
 
-- Screen: ```$ sudo apt-get install screen```
+<h2>Pre-requisites</h2>
+- Screen: 
+  - >$ sudo apt-get install screen
 - Fix Permissions: 
-  - `````$ cd <path>/ParentalCareTracking/`````
-  - ```$ chmod +x Main.sh```
+  - >$ cd <path>/ParentalCareTracking/
+  - >$ chmod +x Main.sh
 - SMTP install/setup to send email alerts
+- Git store credentials:
+  - >git config --global credential.helper store
+  - >git pull 
 
 <h3>Helper functions</h3>
 
