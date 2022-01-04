@@ -1,8 +1,10 @@
 #!/bin/bash
-# Terminal run:
-# $ sudo apt-get install screen
-# $ cd <<path to git directory>>/ParentalCareTracking/
-# $ chmod +x Main.sh
+##
+ # Created by PyCharm
+ # Author: nmoltta
+ # Project: ParentalCareTracking
+ # Date: 12/08/2021
+##
 
 RED='\033[0;31m'
 NC='\033[0m'
@@ -52,13 +54,20 @@ screen -dmS irbb bash -c "${irbb_command}"
 #echo -e "Starting screen name: ${Cyan}video${NC}..."
 #sleep 1s
 #screen -dmS video bash -c "${video_command}"
+echo -e "Started ${Cyan}irbb${NC}."
 
 echo -e "Starting screen name: ${Cyan}rfid${NC}..."
 sleep 1s
 screen -dmS rfid bash -c "${rfid_command}"
+echo -e "Started ${Cyan}rfid${NC}."
 
 echo -e "Starting screen name: ${Cyan}temp${NC}..."
 sleep 1s
 screen -dmS temp bash -c "${temp_command}"
 
 echo ""
+echo -e "Started ${Cyan}temp${NC}."
+
+echo ""
+
+# TODO: test -dmS / fix to run in background and continue opening screens for later modules
