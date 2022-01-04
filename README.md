@@ -20,8 +20,15 @@ This parental care tracking system was developed and implemented for captive zeb
 <h2>Main Script</h2>
 <p>Runs all modules asynchronously and provides monitoring access via SSH.</p>
 
-<h2>Hardware To Do</h2>
+<h2>Remote Access Setup - SSH</h2>
+- Change Raspberry Pi default password to avoid unwanted users
+- Write all passwords in a safe place
+- Follow steps from <a href="https://www.raspberrypi.com/documentation/computers/remote-access.html">Raspberry Pi Documentation - Remote Access</a>:
+  - Find IP address
+  - Enable SSH
+  - Forwarding
 
+<h2>Hardware To Do</h2>
 - Make RFID antenna to fit container entrance
 - Solder proto-PCB after code testing
 - Set up RPi, proto-PCB, and external hard drive in tupperwares
