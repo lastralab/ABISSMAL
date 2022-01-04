@@ -23,39 +23,24 @@ from os import walk
 
 logger_setup('/home/pi/')
 
-<<<<<<< HEAD
-=======
-# GPIO pin IDs through which IR receivers transmit data
-# BEAM_PIN = 16
->>>>>>> 952fc981b1f7dac97792713eee6f53ab3a58dbfa
 BEAM_PIN_lead = 16
 BEAM_PIN_rear = 19
 #REC_LED = 12  # change accordingly
 VIDEO_PIN = 13
 warn = 0
 module = 'IRBB'
-<<<<<<< HEAD
 header = ['chamber_id', 'sensor_id', 'year', 'month', 'day', 'timestamp']
 irbb_data = "/home/pi/Data_ParentalCareTracking/IRBB/"
 video_duration = 90
 video_data = "/home/pi/Data_ParentalCareTracking/Video/"
-camera_state = 0 # global variable, camera turned off
-             
-=======
 
 header = ['chamber_id', 'sensor_id', 'year', 'month', 'day', 'timestamp']
 
 irbb_data = "/home/pi/Data_ParentalCareTracking/IRBB"
->>>>>>> 952fc981b1f7dac97792713eee6f53ab3a58dbfa
 
 logging.info('started irbb + video script')
 
 
-<<<<<<< HEAD
-# Need to update recording function to record only if the previous video
-# was recorded 90 seconds or some threshold ago
-=======
->>>>>>> 952fc981b1f7dac97792713eee6f53ab3a58dbfa
 def detect_beam_breaks_callback(BEAM_PIN, sensor_id):
     
     if not GPIO.input(BEAM_PIN):
@@ -89,6 +74,7 @@ def signal_handler(sig, frame):
 GPIO.setmode(GPIO.BCM)
 GPIO.setup(BEAM_PIN_lead, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 GPIO.setup(BEAM_PIN_rear, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+
 GPIO.setwarnings(False)
 #GPIO.setup(REC_LED, GPIO.OUT)
 
@@ -102,7 +88,6 @@ GPIO.output(VIDEO_PIN, GPIO.LOW)
 GPIO.add_event_detect(BEAM_PIN_lead, GPIO.FALLING,
                       callback=lambda x: detect_beam_breaks_callback(BEAM_PIN_lead, "lead"), bouncetime=100)
 
-<<<<<<< HEAD
 GPIO.add_event_detect(BEAM_PIN_rear, GPIO.FALLING,
                       callback=lambda x: detect_beam_breaks_callback(BEAM_PIN_rear, "rear"), bouncetime=100)
 
@@ -114,21 +99,12 @@ GPIO.add_event_detect(BEAM_PIN_rear, GPIO.FALLING,
 # RuntimeError: Conflicting edge detection already enabled for this GPIO channel
 #GPIO.add_event_detect(BEAM_PIN_rear, GPIO.FALLING,
 #                      callback=lambda x:detect_trigger_callback(BEAM_PIN_rear), bouncetime=100)
-=======
-GPIO.add_event_detect(BEAM_PIN_lead, GPIO.FALLING,
-                      callback=lambda x: detect_beam_breaks_callback(BEAM_PIN_lead, "lead"), bouncetime=100)
-GPIO.add_event_detect(BEAM_PIN_rear, GPIO.FALLING,
-                      callback=lambda x: detect_beam_breaks_callback(BEAM_PIN_rear, "rear"), bouncetime=100)
->>>>>>> 952fc981b1f7dac97792713eee6f53ab3a58dbfa
 
 try:
     while True:
         pass
-<<<<<<< HEAD
         if GPIO.input(VIDEO_PIN):
             record_video(video_data, box_id, video_duration)
-=======
->>>>>>> 952fc981b1f7dac97792713eee6f53ab3a58dbfa
 
 except KeyboardInterrupt:
     logging.info('exiting IRBB')
