@@ -1,7 +1,7 @@
 # Created by PyCharm
 # Author: nmoltta, gsvidaurre
 # Project: ParentalCareTracking
-# Date: 01/04/2022
+# Date: 11/16/2021
 
 # !/usr/bin/env python3
 
@@ -16,7 +16,6 @@ from helper import logger_setup
 from helper import csv_writer
 from helper import box_id
 from time import sleep
-#from Video import convert
 from Video import record_video
 from subprocess import call
 from os import walk
@@ -62,14 +61,12 @@ def detect_beam_breaks_callback(BEAM_PIN, sensor_id):
         GPIO.output(VIDEO_PIN, GPIO.LOW)
 
 
-# Handler function for manual Ctrl + C cancellation
-def signal_handler(sig, frame):
+# Manual Ctrl + C
+def signal_handler():
     GPIO.cleanup()
     sys.exit(0)
     
 
-# Cannot have multple edge detection functions running for the same pin
-# Also, cannot change pin values once set up as an input, and pins have to be inputs for edge detection
 GPIO.add_event_detect(BEAM_PIN_lead, GPIO.FALLING,
                       callback=lambda x: detect_beam_breaks_callback(BEAM_PIN_lead, "lead"), bouncetime=100)
 
