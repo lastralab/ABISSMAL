@@ -25,6 +25,7 @@ logger_setup('/home/pi/')
 
 BEAM_PIN_lead = 16
 BEAM_PIN_rear = 19
+REC_LED = 12
 VIDEO_PIN = 13
 
 warn = 0
@@ -84,7 +85,9 @@ try:
 
 except KeyboardInterrupt:
     logging.info('exiting IRBB')
+    GPIO.output(REC_LED, GPIO.LOW)
     GPIO.cleanup()
 
 finally:
+    GPIO.output(REC_LED, GPIO.LOW)
     GPIO.cleanup()
