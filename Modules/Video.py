@@ -23,20 +23,13 @@ from subprocess import call
 logger_setup('/home/pi/')
 
 REC_LED = 12
+VIDEO_PIN = 13
 GPIO.setmode(GPIO.BCM)
 GPIO.setwarnings(False)
-GPIO.setup(REC_LED, GPIO.OUT) 
-
-def convert(file_h264):
-    command = "MP4Box -add " + file_h264 + " " + file_mp4
-    call([command], shell=True)
-    logging.info('Converted video h264 to mp4.')
+GPIO.setup(REC_LED, GPIO.OUT)
+GPIO.output(REC_LED, GPIO.LOW)
     
-
-# TODO try recording with ring buffer:
-# See https://gist.github.com/waveform80/8496879
-# Also see picamera docs section 3.12 Recording to circular stream in
-# https://picamerax.readthedocs.io/en/latest/recipes1.html
+    
 def record_video(path, box_id, duration):
     GPIO.output(REC_LED, GPIO.HIGH)
     dt = datetime.now()
@@ -59,4 +52,3 @@ def record_video(path, box_id, duration):
     command = "MP4Box -add " + file_h264 + " " + file_mp4
     call([command], shell=True)
     logging.info('Converted video ' + file_h264 + ' to mp4.')
-        

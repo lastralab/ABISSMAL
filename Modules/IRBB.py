@@ -16,7 +16,7 @@ from helper import logger_setup
 from helper import csv_writer
 from helper import box_id
 from time import sleep
-from Video import convert
+#from Video import convert
 from Video import record_video
 from subprocess import call
 from os import walk
@@ -36,6 +36,15 @@ video_duration = 10
 video_data = "/home/pi/Data_ParentalCareTracking/Video/"
 
 logging.info('started irbb + video script')
+
+GPIO.setmode(GPIO.BCM)
+GPIO.setup(BEAM_PIN_lead, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+GPIO.setup(BEAM_PIN_rear, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+
+GPIO.setup(VIDEO_PIN, GPIO.OUT)
+GPIO.output(VIDEO_PIN, GPIO.LOW)
+
+GPIO.setwarnings(False)
 
 
 def detect_beam_breaks_callback(BEAM_PIN, sensor_id):
@@ -57,17 +66,7 @@ def detect_beam_breaks_callback(BEAM_PIN, sensor_id):
 def signal_handler(sig, frame):
     GPIO.cleanup()
     sys.exit(0)
-
-
-GPIO.setmode(GPIO.BCM)
-GPIO.setup(BEAM_PIN_lead, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-GPIO.setup(BEAM_PIN_rear, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-
-GPIO.setup(VIDEO_PIN, GPIO.OUT)
-GPIO.output(VIDEO_PIN, GPIO.LOW)
-
-GPIO.setwarnings(False)
-
+    
 
 # Cannot have multple edge detection functions running for the same pin
 # Also, cannot change pin values once set up as an input, and pins have to be inputs for edge detection
@@ -76,6 +75,7 @@ GPIO.add_event_detect(BEAM_PIN_lead, GPIO.FALLING,
 
 GPIO.add_event_detect(BEAM_PIN_rear, GPIO.FALLING,
                       callback=lambda x: detect_beam_breaks_callback(BEAM_PIN_rear, "rear"), bouncetime=100)
+
 
 try:
     while True:
