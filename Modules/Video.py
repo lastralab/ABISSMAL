@@ -47,7 +47,6 @@ def convert(file_h264):
 # See https://gist.github.com/waveform80/8496879
 # Also see picamera docs section 3.12 Recording to circular stream in
 # https://picamerax.readthedocs.io/en/latest/recipes1.html
-<<<<<<< HEAD
 def record_video(path, box_id, duration):
     #if GPIO.input(REC_LED):
         # Doesn't print, so this is failing

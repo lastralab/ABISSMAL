@@ -1,7 +1,7 @@
 # Created by PyCharm
 # Author: nmoltta, gsvidaurre
 # Project: ParentalCareTracking
-# Date: 11/16/2021
+# Date: 01/04/2022
 
 # !/usr/bin/env python3
 
@@ -15,9 +15,9 @@ import logging
 from helper import logger_setup
 from helper import csv_writer
 from helper import box_id
+from time import sleep
 from Video import convert
 from Video import record_video
-from time import sleep
 from subprocess import call
 from os import walk
 
@@ -31,18 +31,13 @@ warn = 0
 module = 'IRBB'
 header = ['chamber_id', 'sensor_id', 'year', 'month', 'day', 'timestamp']
 irbb_data = "/home/pi/Data_ParentalCareTracking/IRBB/"
-video_duration = 90
+video_duration = 10
 video_data = "/home/pi/Data_ParentalCareTracking/Video/"
-
-header = ['chamber_id', 'sensor_id', 'year', 'month', 'day', 'timestamp']
-
-irbb_data = "/home/pi/Data_ParentalCareTracking/IRBB"
 
 logging.info('started irbb + video script')
 
 
 def detect_beam_breaks_callback(BEAM_PIN, sensor_id):
-    
     if not GPIO.input(BEAM_PIN):
         dt = datetime.now()
         logging.info('IRBB activity detected in sensor: ' + sensor_id)
@@ -58,11 +53,6 @@ def detect_beam_breaks_callback(BEAM_PIN, sensor_id):
     else:
         #GPIO.output(REC_LED, GPIO.LOW)
         GPIO.output(VIDEO_PIN, GPIO.LOW)
-        
-# Another callback function to monitor the LED and record video
-#def detect_trigger_callback(BEAM_PIN):
-#    if GPIO.input(BEAM_PIN):
-#        record_video(video_data, box_id, video_duration)
 
 
 # Handler function for manual Ctrl + C cancellation
@@ -82,27 +72,23 @@ GPIO.setwarnings(False)
 # Pins used for GPIO.add_event_detect need to be set up as inputs, but cannot change the
 # value of a pin using GPIO.input, only GPIO.output (which requires pin to be set up as an output)
 # GPIO.setup(VIDEO_PIN, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+
+
 GPIO.setup(VIDEO_PIN, GPIO.OUT)
 GPIO.output(VIDEO_PIN, GPIO.LOW)
 
+
+# Cannot have multple edge detection functions running for the same pin
+# Also, cannot change pin values once set up as an input, and pins have to be inputs for edge detection
 GPIO.add_event_detect(BEAM_PIN_lead, GPIO.FALLING,
                       callback=lambda x: detect_beam_breaks_callback(BEAM_PIN_lead, "lead"), bouncetime=100)
 
 GPIO.add_event_detect(BEAM_PIN_rear, GPIO.FALLING,
                       callback=lambda x: detect_beam_breaks_callback(BEAM_PIN_rear, "rear"), bouncetime=100)
 
-# Does not work since pin needs to be an input (see above)
-#GPIO.add_event_detect(VIDEO_PIN, GPIO.FALLING,
-#                      callback=lambda x:detect_trigger_callback(VIDEO_PIN), bouncetime=100)
-
-# Cannot have multple edge detection functions running for the same pin
-# RuntimeError: Conflicting edge detection already enabled for this GPIO channel
-#GPIO.add_event_detect(BEAM_PIN_rear, GPIO.FALLING,
-#                      callback=lambda x:detect_trigger_callback(BEAM_PIN_rear), bouncetime=100)
-
 try:
     while True:
-        pass
+        #pass
         if GPIO.input(VIDEO_PIN):
             record_video(video_data, box_id, video_duration)
 
