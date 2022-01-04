@@ -1,0 +1,11 @@
+Modules/IRBB.py: 6: Modules/IRBB.py: import: not found
+Modules/IRBB.py: 7: Modules/IRBB.py: import: not found
+from: can't read /var/mail/datetime
+Modules/IRBB.py: 9: Modules/IRBB.py: import: not found
+Modules/IRBB.py: 10: Modules/IRBB.py: import: not found
+Modules/IRBB.py: 11: Modules/IRBB.py: import: not found
+Modules/IRBB.py: 12: Modules/IRBB.py: import: not found
+from: can't read /var/mail/helper
+from: can't read /var/mail/helper
+from: can't read /var/mail/helper
+Modules/IRBB.py: 17: Modules/IRBB.py: Syntax error: word unexpected (expecting ")")

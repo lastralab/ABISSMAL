@@ -1,7 +1,7 @@
 # Created by PyCharm
 # Author: nmoltta, gsvidaurre
 # Project: ParentalCareTracking
-# Date: 11/16/2021
+# Date: 01/04/2022
 
 # !/usr/bin/env python3
 
@@ -16,53 +16,71 @@ from helper import logger_setup
 from helper import csv_writer
 from helper import box_id
 from time import sleep
+#from Video import convert
+from Video import record_video
+from subprocess import call
+from os import walk
 
 logger_setup('/home/pi/')
 
-# GPIO pin IDs through which IR receivers transmit data
-# BEAM_PIN = 16
 BEAM_PIN_lead = 16
 BEAM_PIN_rear = 19
+VIDEO_PIN = 13
 
 warn = 0
 module = 'IRBB'
-
 header = ['chamber_id', 'sensor_id', 'year', 'month', 'day', 'timestamp']
+irbb_data = "/home/pi/Data_ParentalCareTracking/IRBB/"
 
-irbb_data = "/home/pi/Data_ParentalCareTracking/IRBB"
+video_duration = 10
+video_data = "/home/pi/Data_ParentalCareTracking/Video/"
 
-logging.info('started irbb script')
+logging.info('started irbb + video script')
+
+GPIO.setmode(GPIO.BCM)
+GPIO.setup(BEAM_PIN_lead, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+GPIO.setup(BEAM_PIN_rear, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+
+GPIO.setup(VIDEO_PIN, GPIO.OUT)
+GPIO.output(VIDEO_PIN, GPIO.LOW)
+
+GPIO.setwarnings(False)
 
 
 def detect_beam_breaks_callback(BEAM_PIN, sensor_id):
     if not GPIO.input(BEAM_PIN):
         dt = datetime.now()
-        logging.info('IRBB activity detected at: ' + f"{dt:%H:%M:%S.%f}")
-        # This finally prints a .csv but the callback isn't working
+        logging.info('IRBB activity detected in sensor: ' + sensor_id)
         csv_writer(str(box_id), 'IRBB', irbb_data, f"{dt.year}_{dt.month}_{dt.day}",
                    header, [box_id, sensor_id, f"{dt.year}", f"{dt.month}", f"{dt.day}", f"{dt:%H:%M:%S.%f}"])
-        # TODO implement video function
-        sleep(1)
+        if sensor_id == "rear":
+            GPIO.output(VIDEO_PIN, GPIO.HIGH)
+            sleep(1)
+            GPIO.output(VIDEO_PIN, GPIO.LOW)
+            
+    else:
+        GPIO.output(VIDEO_PIN, GPIO.LOW)
 
 
 # Handler function for manual Ctrl + C cancellation
 def signal_handler(sig, frame):
     GPIO.cleanup()
     sys.exit(0)
+    
 
-
-GPIO.setmode(GPIO.BCM)
-GPIO.setup(BEAM_PIN_lead, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-GPIO.setup(BEAM_PIN_rear, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-
+# Cannot have multple edge detection functions running for the same pin
+# Also, cannot change pin values once set up as an input, and pins have to be inputs for edge detection
 GPIO.add_event_detect(BEAM_PIN_lead, GPIO.FALLING,
                       callback=lambda x: detect_beam_breaks_callback(BEAM_PIN_lead, "lead"), bouncetime=100)
+
 GPIO.add_event_detect(BEAM_PIN_rear, GPIO.FALLING,
                       callback=lambda x: detect_beam_breaks_callback(BEAM_PIN_rear, "rear"), bouncetime=100)
 
+
 try:
     while True:
-        pass
+        if GPIO.input(VIDEO_PIN):
+            record_video(video_data, box_id, video_duration)
 
 except KeyboardInterrupt:
     logging.info('exiting IRBB')
