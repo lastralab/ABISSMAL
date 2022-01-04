@@ -29,16 +29,18 @@ rfid_file="/Modules/RFID.py"
 rfid_command="${python_v} ${location}${rfid_file}"
 
 echo ""
-echo -e "${Blue}Project:${NC}     ${Green}PARENTAL CARE TRACKING ${NC}"
+echo -e "${Blue}Project:${NC}     ${Green}P A R E N T A L   C A R E   T R A C K I N G${NC}"
 echo -e "${Blue}Repository:${NC}  https://github.com/lastralab/parentalcaretracking"
 echo -e "${Blue}Date:${NC}        ${Blue}November 2021${NC}"
-echo -e "${Blue}Authors:${NC}     ${Cyan}Tania Molina & Grace Smith Vidaurre${NC}"
+echo -e "${Blue}Authors:${NC}     ${Cyan}Tania M. Molina${NC} & ${Cyan}Grace Smith-Vidaurre${NC}"
 echo ""
 
-echo -e "${Yellow}Setting permissions...${NC}"
+echo -e "${Yellow}Setting permissions for user:${NC} ${user_name}${NC}"
+echo ""
 find Modules/ -type f -exec chmod 644 {} \;
-chown -R ${user_name} .
-echo -e "${Yellow}Cleaning up detached screens...${NC}"
+chown -R "${user_name}" .
+echo -e "To access a screen run:${Green} screen -r ${NC}${Purple}{name}${NC}"
+echo -e "To detach a screen press${RED} Ctrl + D${NC}"
 #screen -ls | grep Detached | cut -d. -f1 | awk '{print $1}' | xargs kill
 echo ""
 
@@ -58,5 +60,7 @@ screen -dmS temp bash -c "${temp_command}"
 echo -e "Started ${Cyan}temp${NC}."
 
 echo ""
+echo -e "To kill all screens, run:"
+echo -e "${BIGreen}screen -ls | grep Detached | cut -d. -f1 | awk '{print $1}' | xargs kill${NC}"
 
-# TODO: test -dmS / fix to run in background and continue opening screens for later modules
+echo ""

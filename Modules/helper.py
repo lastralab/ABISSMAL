@@ -34,7 +34,7 @@ def logger_setup(default_dir):
     irbb_data = main_data + "/IRBB"
     rfid_data = main_data + "/RFID"
     temp_data = main_data + "/Temp"
-    video_data = main_data + "/RFID/Data/Video"
+    video_data = main_data + "/Video"
 
     if not os.path.exists(irbb_data):
         os.makedirs(irbb_data)
