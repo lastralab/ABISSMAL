@@ -25,12 +25,13 @@ logger_setup('/home/pi/')
 
 BEAM_PIN_lead = 16
 BEAM_PIN_rear = 19
-#REC_LED = 12  # change accordingly
 VIDEO_PIN = 13
+
 warn = 0
 module = 'IRBB'
 header = ['chamber_id', 'sensor_id', 'year', 'month', 'day', 'timestamp']
 irbb_data = "/home/pi/Data_ParentalCareTracking/IRBB/"
+
 video_duration = 10
 video_data = "/home/pi/Data_ParentalCareTracking/Video/"
 
@@ -44,14 +45,11 @@ def detect_beam_breaks_callback(BEAM_PIN, sensor_id):
         csv_writer(str(box_id), 'IRBB', irbb_data, f"{dt.year}_{dt.month}_{dt.day}",
                    header, [box_id, sensor_id, f"{dt.year}", f"{dt.month}", f"{dt.day}", f"{dt:%H:%M:%S.%f}"])
         if sensor_id == "rear":
-            #GPIO.output(REC_LED, GPIO.HIGH)
-            # sleep(1)
             GPIO.output(VIDEO_PIN, GPIO.HIGH)
             sleep(1)
             GPIO.output(VIDEO_PIN, GPIO.LOW)
             
     else:
-        #GPIO.output(REC_LED, GPIO.LOW)
         GPIO.output(VIDEO_PIN, GPIO.LOW)
 
 
@@ -65,17 +63,10 @@ GPIO.setmode(GPIO.BCM)
 GPIO.setup(BEAM_PIN_lead, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 GPIO.setup(BEAM_PIN_rear, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 
-GPIO.setwarnings(False)
-#GPIO.setup(REC_LED, GPIO.OUT)
-
-# pull_up_down parameter not valid for outputs
-# Pins used for GPIO.add_event_detect need to be set up as inputs, but cannot change the
-# value of a pin using GPIO.input, only GPIO.output (which requires pin to be set up as an output)
-# GPIO.setup(VIDEO_PIN, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-
-
 GPIO.setup(VIDEO_PIN, GPIO.OUT)
 GPIO.output(VIDEO_PIN, GPIO.LOW)
+
+GPIO.setwarnings(False)
 
 
 # Cannot have multple edge detection functions running for the same pin
@@ -88,7 +79,6 @@ GPIO.add_event_detect(BEAM_PIN_rear, GPIO.FALLING,
 
 try:
     while True:
-        #pass
         if GPIO.input(VIDEO_PIN):
             record_video(video_data, box_id, video_duration)
 
