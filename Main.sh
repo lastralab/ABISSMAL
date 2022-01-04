@@ -1,13 +1,14 @@
 #!/bin/bash
 ##
  # Created by PyCharm
- # Author: Tania M. Molina
+ # Author: nmoltta
  # Project: ParentalCareTracking
  # Date: 12/08/2021
 ##
 
 RED='\033[0;31m'
 NC='\033[0m'
+BIGreen='\033[1;92m'
 Green='\033[0;92m'
 Yellow='\033[0;93m'
 Blue='\033[0;94m'
@@ -20,9 +21,6 @@ python_v=$(which python)
 
 irbb_file="/Modules/IRBB.py"
 irbb_command="${python_v} ${location}${irbb_file}"
-
-video_file="/Modules/Video.py"
-video_command="${python_v} ${location}${video_file}"
 
 temp_file="/Modules/Temp.py"
 temp_command="${python_v} ${location}${temp_file}"
@@ -49,17 +47,20 @@ echo ""
 echo -e "Starting screen name: ${Cyan}irbb${NC}..."
 sleep 1s
 screen -dmS irbb bash -c "${irbb_command}"
-
-echo -e "Starting screen name: ${Cyan}video${NC}..."
-sleep 1s
-screen -dmS video bash -c "${video_command}"
+echo -e "Started ${Cyan}irbb${NC}."
 
 echo -e "Starting screen name: ${Cyan}rfid${NC}..."
 sleep 1s
 screen -dmS rfid bash -c "${rfid_command}"
+echo -e "Started ${Cyan}rfid${NC}."
 
 echo -e "Starting screen name: ${Cyan}temp${NC}..."
 sleep 1s
 screen -dmS temp bash -c "${temp_command}"
+echo -e "Started ${Cyan}temp${NC}."
+
+echo ""
+echo -e "To kill all screens, run:"
+echo -e "${BIGreen}screen -ls | grep Detached | cut -d. -f1 | awk '{print \$1}' | xargs kill${NC}"
 
 echo ""
