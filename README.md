@@ -25,3 +25,10 @@ This parental care tracking system was developed and implemented for captive zeb
 - Make RFID antenna to fit container entrance
 - Solder proto-PCB after code testing
 - Set up RPi, proto-PCB, and external hard drive in tupperwares
+
+
+<h2>Troubleshooting</h2>
+<h3>LED still ON after detaching all screens</h3>
+- Open terminal in root folder, run:
+  - > screen -r irbb
+  - Ctrl + C
