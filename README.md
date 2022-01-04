@@ -26,7 +26,14 @@ This parental care tracking system was developed and implemented for captive zeb
 - Follow steps from <a href="https://www.raspberrypi.com/documentation/computers/remote-access.html">Raspberry Pi Documentation - Remote Access</a>:
   - Find IP address
   - Enable SSH
-  - Forwarding
+- > sudo apt-get update
+- > sudo apt install nmap
+- > hostname -I
+- > nmap -sn {hostname}/24
+  - > Nmap scan report for {machine} (hostname)
+- > ping {machine}
+- From remote computer
+  - > ssh pi@{hostname}
 
 <h2>Hardware To Do</h2>
 - Make RFID antenna to fit container entrance
