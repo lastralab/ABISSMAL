@@ -77,12 +77,24 @@ def detect_motion(camera):
         # Count changed pixels
         changedPixels = 0
         # xrange no longer exists in Python 3
+        
+        # TKTK need to update since the stream isn't 100 x 75 pixels
+        #for x in range(0, video_width):
+        #    for y in range(0, video_height):
+                #pixdiff1 = abs(buffer1[x,y][0] - buffer2[x,y][0])
+                # Green channel
+                # Originally noted to be the "highest quality" channel, and was the only channel monitored
+        #        pixdiff = abs(buffer1[x,y][1] - buffer2[x,y][1])
+                #pixdiff3 = abs(buffer1[x,y][2] - buffer2[x,y][2])
+        #        if pixdiff > threshold:
+        #            changedPixels += 1
+                    
         for x in range(0, 100):
             for y in range(0, 75):
                 # Check green channel only (originally noted to be the "highest quality" channel)
                 pixdiff = abs(buffer1[x,y][1] - buffer2[x,y][1])
                 if pixdiff > threshold:
-                    changedPixels += 1
+                    changedPixels += 1            
                     
         # Trigger if sufficient pixels changed
         if changedPixels > sensitivity:
@@ -105,20 +117,15 @@ def convert_video(filename):
 
 # TKTK need to update filenames so date time is distinct and a separate pair of videos is made per trigger
 with picamera.PiCamera() as camera:
-    dt = datetime.now()
-    hour_int = int(f"{dt:%H}")
+    general_time = datetime.now()
+    hour_int = int(f"{general_time:%H}")
     
     if hour_int > 6 and hour_int < 19:
         camera.resolution = (video_width, video_height)
         camera.iso = iso
         camera.framerate = fr
         stream = picamera.PiCameraCircularIO(camera, seconds = stream_duration)
-        camera.start_recording(stream, format = 'h264')
-        
-        dt_str = str(f"{dt.year}_{dt.month}_{dt.day}_{dt:%H}_{dt:%M}_{dt:%S}")
-        file1_h264 = path + str(box_id) + "_pre-trigger_" + dt_str + '.h264'
-        file2_h264 = path + str(box_id) + dt_str + '.h264'
-         
+        camera.start_recording(stream, format = 'h264') 
         
         try:
             while True:
@@ -129,6 +136,12 @@ with picamera.PiCamera() as camera:
                     GPIO.output(REC_LED, GPIO.HIGH)
                     # As soon as we detect motion, split the recording to
                     # record the frames "after" motion
+                    dt = datetime.now()
+                    dt_str = str(f"{dt.year}_{dt.month}_{dt.day}_{dt:%H}_{dt:%M}_{dt:%S}")
+                    #file1_h264 = path + str(box_id) + dt_str + "_pre-trigger" + '.h264'
+                    #file2_h264 = path + str(box_id) + dt_str + "_post-trigger" + '.h264'
+                    file1_h264 = path + str(box_id) + "_pre-trigger_" + dt_str + '.h264'
+                    file2_h264 = path + str(box_id) + "_post-trigger_" + dt_str + '.h264'
                     camera.split_recording(file2_h264)
                     # Record for the specified duration of time after motion detection
                     camera.wait_recording(record_duration)
