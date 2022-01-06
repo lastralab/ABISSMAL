@@ -26,6 +26,7 @@ from os import walk
 from PIL import Image
 from subprocess import call
 from pathlib import Path
+import numpy as np
 
 logger_setup('/home/pi/')
 
@@ -34,6 +35,9 @@ logger_setup('/home/pi/')
 
 path = "/home/pi/Data_ParentalCareTracking/Video/"
 prior_image = None
+
+# Time range (military) during which video will be recorded
+time_range = np.array([6, 19])
 
 # Video settings
 video_width = 640
@@ -48,8 +52,8 @@ record_duration = 10
 # Motion detection settings:
 # Threshold (how much a pixel has to change by to be marked as "changed")
 # Sensitivity (how many changed pixels before capturing an image)
-threshold = 10
-sensitivity = 20
+threshold = 50 # threshold of 10 picks up finer-scale movement (light table shaking, quick pass of hand)
+sensitivity = 80 # value of 20 picks up finer scale motions (light table shaking, quick pass of hand)
 
 REC_LED = 12
 VIDEO_PIN = 13
@@ -78,23 +82,17 @@ def detect_motion(camera):
         changedPixels = 0
         # xrange no longer exists in Python 3
         
-        # TKTK need to update since the stream isn't 100 x 75 pixels
-        #for x in range(0, video_width):
-        #    for y in range(0, video_height):
-                #pixdiff1 = abs(buffer1[x,y][0] - buffer2[x,y][0])
+        # Loop over the pixels expected in the x and y dimensions
+        # Detect changes in pixels in all 3 color channels
+        for x in range(0, video_width):
+            for y in range(0, video_height):
+                pixdiff1 = abs(buffer1[x,y][0] - buffer2[x,y][0])
                 # Green channel
                 # Originally noted to be the "highest quality" channel, and was the only channel monitored
-        #        pixdiff = abs(buffer1[x,y][1] - buffer2[x,y][1])
-                #pixdiff3 = abs(buffer1[x,y][2] - buffer2[x,y][2])
-        #        if pixdiff > threshold:
-        #            changedPixels += 1
-                    
-        for x in range(0, 100):
-            for y in range(0, 75):
-                # Check green channel only (originally noted to be the "highest quality" channel)
-                pixdiff = abs(buffer1[x,y][1] - buffer2[x,y][1])
-                if pixdiff > threshold:
-                    changedPixels += 1            
+                pixdiff2 = abs(buffer1[x,y][1] - buffer2[x,y][1])
+                pixdiff3 = abs(buffer1[x,y][2] - buffer2[x,y][2])
+                if (pixdiff1 + pixdiff2 + pixdiff3) > (threshold * 3):
+                    changedPixels += 1      
                     
         # Trigger if sufficient pixels changed
         if changedPixels > sensitivity:
@@ -115,12 +113,12 @@ def convert_video(filename):
     logging.info('Converted video ' + filename + ' to mp4.')
 
 
-# TKTK need to update filenames so date time is distinct and a separate pair of videos is made per trigger
 with picamera.PiCamera() as camera:
     general_time = datetime.now()
     hour_int = int(f"{general_time:%H}")
     
-    if hour_int > 6 and hour_int < 19:
+
+    if hour_int > time_range[0] and hour_int < time_range[1]:
         camera.resolution = (video_width, video_height)
         camera.iso = iso
         camera.framerate = fr
@@ -138,10 +136,8 @@ with picamera.PiCamera() as camera:
                     # record the frames "after" motion
                     dt = datetime.now()
                     dt_str = str(f"{dt.year}_{dt.month}_{dt.day}_{dt:%H}_{dt:%M}_{dt:%S}")
-                    #file1_h264 = path + str(box_id) + dt_str + "_pre-trigger" + '.h264'
-                    #file2_h264 = path + str(box_id) + dt_str + "_post-trigger" + '.h264'
-                    file1_h264 = path + str(box_id) + "_pre-trigger_" + dt_str + '.h264'
-                    file2_h264 = path + str(box_id) + "_post-trigger_" + dt_str + '.h264'
+                    file1_h264 = path + str(box_id) + "_" + dt_str + "_pre-trigger" + '.h264'
+                    file2_h264 = path + str(box_id) + "_" + dt_str + "_post-trigger" + '.h264'
                     camera.split_recording(file2_h264)
                     # Record for the specified duration of time after motion detection
                     camera.wait_recording(record_duration)
@@ -156,7 +152,9 @@ with picamera.PiCamera() as camera:
                     camera.wait_recording(1)
                     camera.split_recording(stream)
                     
-                    # TKTK need to add video conversions
+                    # Downside to conversion here is that will miss movements that occur while files converting
+                    convert_video(file1_h264)
+                    convert_video(file2_h264)
                     
         finally:
             camera.stop_recording()
