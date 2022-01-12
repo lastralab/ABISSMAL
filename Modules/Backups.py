@@ -22,7 +22,7 @@ logger_setup(pi_home)
 media_path = '/media/pi'
 data_path = 'Data_ParentalCareTracking/'
 
-logging.info('Started backups monitoring...')
+logging.info('Started backup monitoring...')
 
 
 def usb_connected(box_id):
@@ -35,24 +35,27 @@ def usb_connected(box_id):
                 # TODO send email
 
 
-def backup_init(destination, source):
-    dt = datetime.now()
-    date = dt.strftime("%m_%d_%Y")
-    if usb_connected(destination) and dt.hour > 20:
-        for module in modules:
-            src = source + '/' + module
-            path = media_path + destination + '/Data/' + module + '/' + date
-            files = os.listdir(src)
-            if len(files) > 0:
-                if not os.path.exists(path):
-                    os.makedirs(path)
-                for filename in files:
-                    shutil.move(os.path.join(source + '/' + module, filename), os.path.join(path, filename))
-                logging.info('Backed-up ' + module + 'data at ' + str(dt.hour) + ':' + str(dt.minute) + 'hrs')
+def backup_init(dt, date, destination, source):
+    for module in modules:
+        src = source + '/' + module
+        path = media_path + destination + '/Data/' + module + '/' + date
+        files = os.listdir(src)
+        if len(files) > 0:
+            if not os.path.exists(path):
+                os.makedirs(path)
+            for filename in files:
+                shutil.move(os.path.join(source + '/' + module, filename), os.path.join(path, filename))
+            logging.info('Backed-up ' + module + 'data at ' + str(dt.hour) + ':' + str(dt.minute) + 'hrs')
+        else:
+            pass
 
 
 try:
     while True:
-        backup_init(box_id, pi_home + data_path)
+        now = datetime.now()
+        folder = now.strftime("%m_%d_%Y")
+        if usb_connected(box_id) and now.hour == 16 and now.minute == 39:
+            backup_init(now, folder, box_id, pi_home + data_path)
 except KeyboardInterrupt:
     logging.info('Exiting Backups.py')
+
