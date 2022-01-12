@@ -9,7 +9,7 @@ import signal
 import sys
 import os
 import csv
-# import RPi.GPIO as GPIO
+import RPi.GPIO as GPIO
 from datetime import date
 from os.path import exists
 import smtplib
@@ -17,7 +17,7 @@ import smtplib
 # from email.message import EmailMessage
 
 box_id = 101
-modules = ['IRBB', 'RFID', 'Temp']
+modules = ['IRBB', 'RFID', 'Temp', 'Video']
 
 
 def logger_setup(default_dir):
@@ -94,7 +94,7 @@ def csv_writer(box_id, module, data_path, date, header, value):
             file.close()
 
 # Email Service helper function
-# TODO: test
+# // TODO:
 # def email_alert(toemail, module, text):
 #    subject = 'Module[' + module + ']'
 #    msg = EmailMessage()
@@ -106,5 +106,3 @@ def csv_writer(box_id, module, data_path, date, header, value):
 #    s = smtplib.SMTP('localhost')
 #    s.send_message(msg)
 #    s.quit()
-
-# TODO add backup function

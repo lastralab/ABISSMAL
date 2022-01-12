@@ -87,5 +87,3 @@ comms = RFIDSetup()
 SetReaderMode(comms)
 SetPollingDelay(comms)
 ReadTagPageZero(comms)
-
-
