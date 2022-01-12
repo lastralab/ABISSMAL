@@ -56,5 +56,3 @@ try:
         backup_init(box_id, pi_home + data_path)
 except KeyboardInterrupt:
     logging.info('Exiting Backups.py')
-
-# TODO rename external drive as box_id and label physically

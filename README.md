@@ -5,9 +5,9 @@ Grace Smith-Vidaurre
 
 Project board: https://github.com/lastralab/ParentalCareTracking/projects/1 <br>
 <h2>Git-flow</h2>
-- All branches get created from <b>main</b>
-- All pull requests get created to <b>staging</b>
-- Only tested and validated code from staging gets merged to main
+- All branches get created from <b>main</b><br>
+- All pull requests get created to <b>staging</b><br>
+- Only tested and validated code from staging gets merged to main<br>
 
 <h2>Overview</h2>
 Software to track parental care behavior in captive birds. This project requires a nest container and collects temperature data, parental visits, and video.
