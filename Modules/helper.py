@@ -9,14 +9,14 @@ import signal
 import sys
 import os
 import csv
-import RPi.GPIO as GPIO
+# import RPi.GPIO as GPIO
 from datetime import date
 from os.path import exists
 import smtplib
 
 # from email.message import EmailMessage
 
-box_id = 101
+box_id = 101  # TODO assign and change for each pi board, create list
 modules = ['IRBB', 'RFID', 'Temp', 'Video']
 
 
@@ -94,7 +94,7 @@ def csv_writer(box_id, module, data_path, date, header, value):
             file.close()
 
 # Email Service helper function
-# // TODO:
+# TODO: test
 # def email_alert(toemail, module, text):
 #    subject = 'Module[' + module + ']'
 #    msg = EmailMessage()
@@ -106,3 +106,5 @@ def csv_writer(box_id, module, data_path, date, header, value):
 #    s = smtplib.SMTP('localhost')
 #    s.send_message(msg)
 #    s.quit()
+
+# TODO add backup function
