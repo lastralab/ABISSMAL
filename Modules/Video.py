@@ -127,6 +127,8 @@ def convert_video(filename):
     call([command], shell = True)
     logging.info('Converted video ' + filename + ' to mp4.')
     os.remove(filename)
+    csv_writer(str(box_id), 'Video', path, f"{dt.year}_{dt.month}_{dt.day}",
+               header, [box_id, f"{dt.year}", f"{dt.month}", f"{dt.day}", f"{dt:%H:%M:%S.%f}", Path(filename).stem + '.mp4'])
 
 def combine_video(file1, file2):
     #file1 = path + Path(file1).stem + ".mp4"
