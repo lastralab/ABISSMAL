@@ -126,7 +126,7 @@ def convert_video(filename):
     command = "MP4Box -add " + filename + " " + file_mp4
     call([command], shell = True)
     logging.info('Converted video ' + filename + ' to mp4.')
-    #os.remove(filename)
+    os.remove(filename)
 
 def combine_video(file1, file2):
     #file1 = path + Path(file1).stem + ".mp4"
@@ -140,7 +140,7 @@ def combine_video(file1, file2):
     #os.remove(file1)
     #os.remove(file2)
     
-    convert_video(out_file)
+    #convert_video(out_file)
              
 
 with picamera.PiCamera() as camera:
@@ -183,10 +183,10 @@ with picamera.PiCamera() as camera:
                     camera.split_recording(stream)
                     
                     # Downside to conversion and combining here is that will miss movements that occur while files converting
-                    #convert_video(file1_h264)
-                    #convert_video(file2_h264)
+                    convert_video(file1_h264)
+                    convert_video(file2_h264)
                     
-                    combine_video(file1_h264, file2_h264)
+                    #combine_video(file1_h264, file2_h264)
                                         
                     
         finally:

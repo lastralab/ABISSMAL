@@ -22,7 +22,7 @@ python_v=$(which python)
 irbb_file="/Modules/IRBB.py"
 irbb_command="${python_v} ${location}${irbb_file}"
 
-video_file="/Modules/ring_buffer_video.py"
+video_file="/Modules/Video.py"
 video_command="${python_v} ${location}${video_file}"
 
 temp_file="/Modules/Temp.py"
