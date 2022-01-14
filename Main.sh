@@ -22,6 +22,9 @@ python_v=$(which python)
 irbb_file="/Modules/IRBB.py"
 irbb_command="${python_v} ${location}${irbb_file}"
 
+video_file="/Modules/Video.py"
+video_command="${python_v} ${location}${video_file}"
+
 temp_file="/Modules/Temp.py"
 temp_command="${python_v} ${location}${temp_file}"
 
@@ -50,6 +53,11 @@ echo -e "Starting screen name: ${Cyan}irbb${NC}..."
 sleep 1s
 screen -dmS irbb bash -c "${irbb_command}"
 echo -e "Started ${Cyan}irbb${NC}."
+
+echo -e "Starting screen name: ${Cyan}video${NC}..."
+sleep 1s
+screen -dmS video bash -c "${video_command}"
+echo -e "Started ${Cyan}video${NC}."
 
 echo -e "Starting screen name: ${Cyan}rfid${NC}..."
 sleep 1s
