@@ -22,11 +22,17 @@ python_v=$(which python)
 irbb_file="/Modules/IRBB.py"
 irbb_command="${python_v} ${location}${irbb_file}"
 
+video_file="/Modules/Video.py"
+video_command="${python_v} ${location}${video_file}"
+
 temp_file="/Modules/Temp.py"
 temp_command="${python_v} ${location}${temp_file}"
 
 rfid_file="/Modules/RFID.py"
 rfid_command="${python_v} ${location}${rfid_file}"
+
+backups_file="/Modules/Backups.py"
+backups_command="${python_v} ${location}${backups_file}"
 
 echo ""
 echo -e "${Blue}Project:${NC}     ${Green}P A R E N T A L   C A R E   T R A C K I N G${NC}"
@@ -48,6 +54,11 @@ sleep 1s
 screen -dmS irbb bash -c "${irbb_command}"
 echo -e "Started ${Cyan}irbb${NC}."
 
+echo -e "Starting screen name: ${Cyan}video${NC}..."
+sleep 1s
+screen -dmS video bash -c "${video_command}"
+echo -e "Started ${Cyan}video${NC}."
+
 echo -e "Starting screen name: ${Cyan}rfid${NC}..."
 sleep 1s
 screen -dmS rfid bash -c "${rfid_command}"
@@ -57,6 +68,11 @@ echo -e "Starting screen name: ${Cyan}temp${NC}..."
 sleep 1s
 screen -dmS temp bash -c "${temp_command}"
 echo -e "Started ${Cyan}temp${NC}."
+
+echo -e "Starting screen name: ${Cyan}backups${NC}..."
+sleep 1s
+screen -dmS temp bash -c "${backups_command}"
+echo -e "Started ${Cyan}backups${NC}."
 
 echo ""
 echo -e "To kill all screens, run:"
