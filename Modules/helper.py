@@ -15,7 +15,7 @@ from os.path import exists
 import smtplib
 # from email.message import EmailMessage
 
-box_id = 'BOX_01'
+box_id = 'Box_01'
 modules = ['IRBB', 'RFID', 'Temp', 'Video']
 
 
