@@ -19,7 +19,7 @@ pi_home = '/home/pi/'
 
 logger_setup(pi_home)
 
-media_path = '/media/pi'
+media_path = '/media/pi/'
 data_path = 'Data_ParentalCareTracking/'
 
 logging.info('Started backup monitoring...')
@@ -37,24 +37,37 @@ def usb_connected(box_id):
 
 def backup_init(dt, date, destination, source):
     for module in modules:
-        src = source + '/' + module
-        path = media_path + destination + '/Data/' + module + '/' + date
-        files = os.listdir(src)
-        if len(files) > 0:
-            if not os.path.exists(path):
-                os.makedirs(path)
-            for filename in files:
-                shutil.move(os.path.join(source + '/' + module, filename), os.path.join(path, filename))
-            logging.info('Backed-up ' + module + 'data at ' + str(dt.hour) + ':' + str(dt.minute) + 'hrs')
+        if(module == "Video"):
+            src = source + '/' + module
+            path = media_path + destination + '/Data/' + module + '/' + date
+            files = os.listdir(src)
+            if len(files) > 0:
+                if not os.path.exists(path):
+                    os.makedirs(path)
+                for filename in files:
+                    shutil.move(os.path.join(source + '/' + module, filename), os.path.join(path, filename))
+                logging.info('Backed-up ' + module + ' data at ' + str(dt.hour) + ':' + str(dt.minute) + 'hrs')
+            else:
+                pass
         else:
-            pass
+            src = source + '/' + module
+            path = media_path + destination + '/Data/' + module + '/'
+            files = os.listdir(src)
+            if len(files) > 0:
+                if not os.path.exists(path):
+                    os.makedirs(path)
+                for filename in files:
+                    shutil.move(os.path.join(source + '/' + module, filename), os.path.join(path, filename))
+                logging.info('Backed-up ' + module + ' data at ' + str(dt.hour) + ':' + str(dt.minute).zfill(2) + 'hrs')
+            else:
+                pass
 
 
 try:
     while True:
         now = datetime.now()
         folder = now.strftime("%m_%d_%Y")
-        if usb_connected(box_id) and now.hour == 16 and now.minute == 39:
+        if usb_connected(box_id) and now.hour == 15 and now.minute == 19:
             backup_init(now, folder, box_id, pi_home + data_path)
 except KeyboardInterrupt:
     logging.info('Exiting Backups.py')
