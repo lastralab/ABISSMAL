@@ -88,7 +88,7 @@ try:
     while True:
         now = datetime.now()
         folder = now.strftime("%Y_%m_%d")
-        if usb_connected(box_id) and now.hour == 20 and now.minute == 54:
+        if usb_connected(box_id) and now.hour == 20 and now.minute == 15:
             video_backup_init(now, folder, box_id, pi_home + data_path)
             csv_backup_init(now, box_id, pi_home + data_path)
 except KeyboardInterrupt:
