@@ -50,6 +50,8 @@ GPIO.setwarnings(False)
 GPIO.setup(REC_LED, GPIO.OUT)
 GPIO.output(REC_LED, GPIO.LOW)
 
+logging.info('Starting Video script')
+
 
 def detect_motion(cam):
     global prior_image
@@ -121,6 +123,9 @@ with picamera.PiCamera() as camera:
                     camera.split_recording(stream)
                     convert_video(file1_h264)
                     convert_video(file2_h264)
+        except KeyboardInterrupt:
+            logging.info('exiting Video')
+            GPIO.cleanup()
         finally:
             camera.stop_recording()
             camera.close()
