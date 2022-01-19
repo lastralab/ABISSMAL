@@ -90,7 +90,7 @@ def detect_motion(camera):
 def convert_video(filename):
     file_mp4 = path + Path(filename).stem + '.mp4'
     command = "MP4Box -add " + filename + " " + file_mp4
-    call([command], shell = True)
+    call([command], shell=True)
     logging.info('Converted video ' + filename + ' to mp4.')
     os.remove(filename)
     csv_writer(str(box_id), 'Video', path, f"{dt.year}_{dt.month}_{dt.day}",

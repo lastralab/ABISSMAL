@@ -38,7 +38,7 @@ def usb_connected(box_id):
 
 
 def video_backup_init(dt, date, destination, source):
-    src = source + '/Video'
+    src = source + 'Video'
     path = media_path + destination + '/Data/Video/' + date
     files = os.listdir(src)
     if len(files) > 0:
@@ -46,9 +46,12 @@ def video_backup_init(dt, date, destination, source):
             os.makedirs(path)
         for filename in files:
             if filename.endswith(video_extension):
-                shutil.move(os.path.join(source + '/Video/', filename), os.path.join(path, filename))
+                shutil.move(os.path.join(src, filename), os.path.join(path, filename))
                 logging.info('Backed-up videos at ' + str(dt.hour) + ':' + str(dt.minute).zfill(2) + 'hrs')
 
+            if filename.endswith('.h264'):
+                os.remove(os.path.join(src, filename))
+                
             else:
                 pass
     else:
@@ -60,7 +63,7 @@ def video_backup_init(dt, date, destination, source):
 
 def csv_backup_init(dt, date, destination, source):
     for module in modules:
-        src = source + '/' + module
+        src = source + module
         files = os.listdir(src)
         yesterday = dt - timedelta(days=1)
         yesterday_file = module + "_" + box_id + "_" + f"{yesterday.year}_{yesterday.month}_{yesterday.day}" + ".csv"
@@ -74,7 +77,7 @@ def csv_backup_init(dt, date, destination, source):
             for filename in files:
                 if filename.endswith(file_extension):
                     if (filename == yesterday_file):
-                        shutil.move(os.path.join(source + '/' + module, filename), os.path.join(path, filename))
+                        shutil.move(os.path.join(src, filename), os.path.join(path, filename))
                         logging.info(
                             'Backed-up ' + module + ' metadata at ' + str(dt.hour) + ':' + str(dt.minute).zfill(
                                 2) + 'hrs')
@@ -90,7 +93,7 @@ try:
     while True:
         now = datetime.now()
         folder = now.strftime("%Y_%m_%d")
-        if usb_connected(box_id) and now.hour == 19 and now.minute == 45:
+        if usb_connected(box_id) and now.hour == 20 and now.minute == 54:
             video_backup_init(now, folder, box_id, pi_home + data_path)
             csv_backup_init(now, folder, box_id, pi_home + data_path)
 except KeyboardInterrupt:
