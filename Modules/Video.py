@@ -61,7 +61,6 @@ def detect_motion(cam):
         return False
     else:
         buffer1 = prior_image.load()
-
         current_image = Image.open(stream)
         buffer2 = current_image.load()
         pixels = 0
