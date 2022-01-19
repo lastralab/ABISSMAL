@@ -71,7 +71,7 @@ echo -e "Started ${Cyan}temp${NC}."
 
 echo -e "Starting screen name: ${Cyan}backups${NC}..."
 sleep 1s
-screen -dmS temp bash -c "${backups_command}"
+screen -dmS backups bash -c "${backups_command}"
 echo -e "Started ${Cyan}backups${NC}."
 
 echo ""
