@@ -46,7 +46,7 @@ echo ""
 find Modules/ -type f -exec chmod 644 {} \;
 chown -R "${user_name}" .
 echo -e "To access a screen run:${Green} screen -r ${NC}${Purple}{name}${NC}"
-echo -e "To detach a screen press${RED} Ctrl + D${NC}"
+echo -e "To detach a screen press${Blue} Ctrl + A${NC} then type ${Blue}:${NC} to enter command mode and use command ${RED}\"detach\"${NC}"
 echo ""
 
 echo -e "Starting screen name: ${Cyan}irbb${NC}..."
