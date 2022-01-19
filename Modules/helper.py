@@ -17,6 +17,8 @@ import smtplib
 
 box_id = 'Box_01'
 modules = ['IRBB', 'RFID', 'Temp', 'Video']
+video_extension = '.mp4'
+file_extension = '.csv'
 
 
 def logger_setup(default_dir):
