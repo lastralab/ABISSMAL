@@ -9,6 +9,9 @@
   - >$ cd <path>/ParentalCareTracking/
   - >$ chmod +x Main.sh
 - SMTP install/setup to send email alerts
+  - >$ sudo apt-get install ssmtp
+    - Copy Setup/ssmtp.conf to /etc/ssmtp/ssmtp.conf
+    - Set email and password accordingly
 - Git store credentials:
   - >git config --global credential.helper store
   - >git pull 
