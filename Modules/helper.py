@@ -13,12 +13,14 @@ import csv
 from datetime import date
 from os.path import exists
 import smtplib
-# from email.message import EmailMessage
+from setup.email_service import source
+from setup.email_service import key
 
 box_id = 'Box_01'
 modules = ['IRBB', 'RFID', 'Temp', 'Video']
 video_extension = '.mp4'
 file_extension = '.csv'
+emails = ['gsvidaurre+pct@gmail.com', 'lastralab+pct@gmail.com']
 
 
 def logger_setup(default_dir):
@@ -87,16 +89,17 @@ def csv_writer(box_id, module, data_path, date, header, value):
             tmp_writer.writerow(value)
             file.close()
 
-# Email Service helper function
-# TODO: test
-# def email_alert(toemail, module, text):
-#    subject = 'Module[' + module + ']'
-#    msg = EmailMessage()
-#    msg.set_content(text)
-#    msg['Subject'] = f'Pi Alert: {subject}'
-#    msg['From'] = ''  # smtp localhost setup email
-#    msg['To'] = toemail
 
-#    s = smtplib.SMTP('localhost')
-#    s.send_message(msg)
-#    s.quit()
+def email_alert(module, text):
+    server = smtplib.SMTP('smtp.gmail.com', 587)
+    server.starttls()
+    server.login(source, key)
+    for email in emails:
+        subject = 'Module[' + module + ']'
+        msg = EmailMessage()
+        msg.set_content(text)
+        msg['Subject'] = f'PCT Alert: {subject}'
+        msg['From'] = source
+        msg['To'] = email
+        server.sendmail(source, email, msg)
+        server.quit()
