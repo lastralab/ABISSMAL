@@ -2,7 +2,7 @@
 <b>Authors</b>: nmoltta, gsvidaurre <br>
 <b>Date</b>: 22 November 2021
 
-## * <h2>Pre-requisites</h2>
+## <h2>Pre-requisites</h2>
 
 - Screen:
   - ```$ sudo apt-get install screen```
