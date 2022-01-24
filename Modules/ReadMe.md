@@ -2,10 +2,11 @@
 <b>Authors</b>: nmoltta, gsvidaurre <br>
 <b>Date</b>: 22 November 2021
 
-<h2>Pre-requisites</h2>
-- Screen: 
+## * <h2>Pre-requisites</h2>
+
+- Screen:
   - ```$ sudo apt-get install screen```
-- Fix Permissions: 
+- Fix Permissions:
   - ```$ cd <path>/ParentalCareTracking/```
   - ```$ chmod +x Main.sh```
 - SMTP install/setup to send email alerts
@@ -14,7 +15,9 @@
     - Set email and password accordingly
 - Git store credentials:
   - ```git config --global credential.helper store```
-  - ```git pull``` 
+  - ```git pull```
+
+## 
 
 <h3>Helper functions</h3>
 
@@ -38,7 +41,6 @@ sudo pip3 install signal
 
 The RPi.GPIO, time, and datetime libraries were already installed.
 
-
 <h1>Radio frequency identification - RFID</h1>
 
 **Description**: This file contains code to run and collect data from a 125kHz CognIot radio frequency identification (RFID) reader on a Raspberry Pi computer. The original code to control the RFID reader was obtained from https://github.com/CognIot/RFID_125kHz. The RFID reader is connected to an external circular antenna that sits at the entrance of the tunnel of the nest container (before both infrared beam breakers). The reader has been set to read EM4102 passive integrated transponder (PIT) tags held in a plastic leg bands made in sizes appropriate for different songbird species. This RFID system allows for identification of the individuals that enter and leave the nest chamber, and together with the infrared beam breakers, provides automated tracking of parental care behavior.
@@ -52,7 +54,6 @@ The RPi.GPIO, time, and datetime libraries were already installed.
 **Notes on usage**: The sensor must be connected to 3.3V for power and GPIO pin 4 for 1-wire data transfer. A single sub-folder per device should appear inside /sys/bus/w1/devices that starts with 28 after initial setup (see link above), ptherwise something is not connected correctly (e.g. when multiple folders appear that start with 00-). The script Temp.py must be executed with python3, otherwise some code will fail (e.g. the file = f statement in the print calls). May need to rerun setup of /w1 folder as in https://pimylifeup.com/raspberry-pi-temperature-sensor/ every time the Raspberry Pi computer restarts.
 
 **Data structure**: The function in Temp.py should return the recording chamber number, the temperature value in degrees Celsius and degrees Farenheit, year, month, day, and timestamp (HH:MM:SS). Each of these fields will be written out as a new line of a .csv file generated per day by a separate function.
-
 
 <h1>Video</h1>
 
