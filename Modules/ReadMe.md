@@ -4,22 +4,22 @@
 
 <h2>Pre-requisites</h2>
 - Screen: 
-  - >$ sudo apt-get install screen
+  - ```$ sudo apt-get install screen```
 - Fix Permissions: 
-  - >$ cd <path>/ParentalCareTracking/
-  - >$ chmod +x Main.sh
+  - ```$ cd <path>/ParentalCareTracking/```
+  - ```$ chmod +x Main.sh```
 - SMTP install/setup to send email alerts
-  - >$ sudo apt-get install ssmtp
+  - ```$ sudo apt-get install ssmtp```
     - Copy Setup/ssmtp.conf to /etc/ssmtp/ssmtp.conf
     - Set email and password accordingly
 - Git store credentials:
-  - >git config --global credential.helper store
-  - >git pull 
+  - ```git config --global credential.helper store```
+  - ```git pull``` 
 
 <h3>Helper functions</h3>
 
 - CSV writer
-- Email Service
+- Email Alert Service
 - Logging directory/files setup
 
 <h1>Infrared beam breaker - IRBB</h1>
