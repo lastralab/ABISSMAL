@@ -94,8 +94,10 @@ def email_alert(module, text):
     server = smtplib.SMTP('smtp.gmail.com', 587)
     server.starttls()
     server.login(source, key)
-    subject = 'PCT Alert -  Module[' + module + ']'
+    subject = 'PCT[' + box_id + ']: Error from ' + module + ' module'
     msg = 'Subject: {}\n\n{}'.format(subject, text)
     for email in emails:
         server.sendmail(source, email, msg)
+        logging.info('Email alert sent to ' + email + ' from ' + module)
+        print('Email alert sent to ' + email + ' from ' + module)
     server.quit()
