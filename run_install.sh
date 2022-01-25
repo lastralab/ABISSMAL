@@ -30,7 +30,7 @@ chown -R "${user_name}" .
 echo ""
 echo -e "${BIGreen}Enter the Box ID${NC} (Example: Box_01):"
 read -r boxid
-sed -i "s/^(box_id = 'Box_01').*/(box_id = '${boxid}')/" "${helper_path}"
+sed -i "" "s/^box_id.*/box_id = '${boxid}'/" "${helper_path}"
 echo -e "${Purple}Registered ${boxid}${NC}"
 echo ""
 
