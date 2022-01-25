@@ -4,7 +4,8 @@ Tania Molina<br>
 Grace Smith-Vidaurre
 
 Project board: https://github.com/lastralab/ParentalCareTracking/projects/1 <br>
-Project wiki: https://github.com/lastralab/ParentalCareTracking/wiki 
+Project wiki: https://github.com/lastralab/ParentalCareTracking/wiki
+
 <h2>Overview</h2>
 Software to track parental care behavior in captive birds. This project requires a nest container and collects temperature data, parental visits, and video.
 <br><br>
@@ -14,23 +15,35 @@ This parental care tracking system was developed and implemented for captive zeb
 <h2>Main Script</h2>
 <p>Runs all modules asynchronously and provides monitoring screens for each module to access via SSH.</p>
 
-<h2>Remote Access Setup - SSH</h2>
+Remote Access Setup - SSH</h2>
+
 - Change Raspberry Pi default password to avoid unwanted users
 - Write all passwords in a safe place
 - Follow steps from <a href="https://www.raspberrypi.com/documentation/computers/remote-access.html">Raspberry Pi Documentation - Remote Access</a>:
   - Find IP address
   - Enable SSH
 - > sudo apt-get update
+  >
 - > sudo apt install nmap
+  >
 - > hostname -I
+  >
 - > nmap -sn {hostname}/24
+  >
+
   - > Nmap scan report for {machine} (hostname)
+    >
 - > ping {machine}
+  >
 - From remote computer
   - > ssh pi@{hostname}
-  
-<h2>Troubleshooting</h2>
-<h3>LED still ON after detaching all screens</h3>
+    >
+
+Troubleshooting</h2>
+
+LED still ON after detaching all screens</h3>
+
 - Open terminal in root folder, run:
   - > screen -r irbb
+    >
   - Ctrl + C
