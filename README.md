@@ -14,8 +14,9 @@ This parental care tracking system was developed and implemented for captive zeb
 
 <h2>Installation</h2>
 
-1. Clone this repository.
-2. From root directory `/path/to/ParentalCareTracking/` run:
+1. Run `sudo apt-get install git`
+2. Clone this repository.
+3. From root directory `/path/to/ParentalCareTracking/` run:
 
    1. `sudo run_install.sh`
    2. Enter your password (we recommend to set a password for your raspberry pi)
@@ -31,10 +32,6 @@ Remote Access Setup - SSH
 
   - Find IP address
   - Enable SSH
-- > sudo apt-get update
-  >
-- > sudo apt install nmap
-  >
 - > hostname -I
   >
 - > nmap -sn {hostname}/24
