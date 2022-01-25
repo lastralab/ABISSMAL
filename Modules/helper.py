@@ -103,5 +103,5 @@ def email_alert(module, text):
             print('Email alert sent to ' + email + ' from ' + module)
         server.quit()
     else:
-        logging.error('Helper error: Email is not configured, emails won\'t be sent.')
-        print('Helper error: Email is not configured, emails won\'t be sent.')
+        logging.error('Helper error: Email is not configured, update Setup/email_service.py or emails won\'t be sent.')
+        print('Helper error: Email is not configured, update Setup/email_service.py or emails won\'t be sent.')
