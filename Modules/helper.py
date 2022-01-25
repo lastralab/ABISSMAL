@@ -13,8 +13,8 @@ import csv
 from datetime import date
 from os.path import exists
 import smtplib
-from setup.email_service import source
-from setup.email_service import key
+from Setup.email_service import source
+from Setup.email_service import key
 
 box_id = 'Box_01'
 modules = ['IRBB', 'RFID', 'Temp', 'Video']
@@ -94,12 +94,8 @@ def email_alert(module, text):
     server = smtplib.SMTP('smtp.gmail.com', 587)
     server.starttls()
     server.login(source, key)
+    subject = 'PCT Alert -  Module[' + module + ']'
+    msg = 'Subject: {}\n\n{}'.format(subject, text)
     for email in emails:
-        subject = 'Module[' + module + ']'
-        msg = EmailMessage()
-        msg.set_content(text)
-        msg['Subject'] = f'PCT Alert: {subject}'
-        msg['From'] = source
-        msg['To'] = email
         server.sendmail(source, email, msg)
-        server.quit()
+    server.quit()
