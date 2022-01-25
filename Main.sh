@@ -41,7 +41,7 @@ echo -e "${Blue}Date:${NC}        ${Blue}November 2021${NC}"
 echo -e "${Blue}Authors:${NC}     ${Cyan}Tania M. Molina${NC} & ${Cyan}Grace Smith-Vidaurre${NC}"
 echo ""
 
-echo -e "${Yellow}Setting permissions for user:${NC} ${user_name}${NC}"
+echo -e "${Yellow}Setting permissions for user:${NC} ${user_name}"
 echo ""
 find Modules/ -type f -exec chmod 644 {} \;
 chown -R "${user_name}" .

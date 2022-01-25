@@ -2,6 +2,7 @@
 # Author: nmoltta
 # Project: ParentalCareTracking
 # Date: 11/29/21
+# !/usr/bin/env python3
 
 import logging
 import time
@@ -9,7 +10,6 @@ import signal
 import sys
 import os
 import csv
-# import RPi.GPIO as GPIO
 from datetime import date
 from os.path import exists
 import smtplib
