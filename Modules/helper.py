@@ -91,13 +91,17 @@ def csv_writer(box_id, module, data_path, date, header, value):
 
 
 def email_alert(module, text):
-    server = smtplib.SMTP('smtp.gmail.com', 587)
-    server.starttls()
-    server.login(source, key)
-    subject = 'PCT[' + box_id + ']: Error from ' + module + ' module'
-    msg = 'Subject: {}\n\n{}'.format(subject, text)
-    for email in emails:
-        server.sendmail(source, email, msg)
-        logging.info('Email alert sent to ' + email + ' from ' + module)
-        print('Email alert sent to ' + email + ' from ' + module)
-    server.quit()
+    if source != 'email@gmail.com':
+        server = smtplib.SMTP('smtp.gmail.com', 587)
+        server.starttls()
+        server.login(source, key)
+        subject = 'PCT[' + box_id + ']: Error from ' + module + ' module'
+        msg = 'Subject: {}\n\n{}'.format(subject, text)
+        for email in emails:
+            server.sendmail(source, email, msg)
+            logging.info('Email alert sent to ' + email + ' from ' + module)
+            print('Email alert sent to ' + email + ' from ' + module)
+        server.quit()
+    else:
+        logging.error('Helper error: Email is not configured, emails won\'t be sent.')
+        print('Helper error: Email is not configured, emails won\'t be sent.')
