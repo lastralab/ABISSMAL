@@ -29,9 +29,8 @@ echo -e "${Blue}Repository:${NC}  https://github.com/lastralab/parentalcaretrack
 echo -e "${Blue}Installation script:${NC}        ${Blue}run_install.sh${NC}"
 echo -e "${Blue}Authors:${NC}     ${Cyan}Tania M. Molina & Grace Smith-Vidaurre${NC}"
 echo ""
-echo -e "${Yellow}Setting permissions for user:${NC} ${user_name}"
-find ./ -type f -exec chmod 644 {} \;
-chown -R "${user_name}" .
+echo -e "${Yellow}Running as:${NC} ${user_name}"
+find . -type f -exec chmod 644 {} \;
 echo ""
 echo -e "${BIGreen}Enter the Box ID${NC} (Example: Box_01)"
 echo -e "${Yellow}Press 'Enter' to skip configuration.${NC}"
