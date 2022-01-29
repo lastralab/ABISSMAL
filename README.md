@@ -18,7 +18,7 @@ This parental care tracking system was developed and implemented for captive zeb
 2. Clone this repository.
 3. From root directory `/path/to/ParentalCareTracking/` run:
 
-   1. `sudo run_install.sh`
+   1. `sudo bash run_install.sh`
    2. Enter your password (we recommend to set a password for your raspberry pi)
    3. Insert information accordingly
 
