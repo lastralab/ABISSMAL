@@ -102,6 +102,8 @@ try:
         if usb_connected(box_id) and now.hour == backup_hour and now.minute == backup_minute:
             video_backup_init(now, folder, box_id, pi_home + data_path)
             csv_backup_init(now, box_id, pi_home + data_path)
+        else:
+            break
 except KeyboardInterrrupt:
     print('Exiting backups')
     logging.info('Exiting backups')
