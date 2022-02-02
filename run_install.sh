@@ -37,7 +37,7 @@ echo -e "${Yellow}Press 'Enter' to skip configuration.${NC}"
 read -r boxid
 if [ -n "$boxid" ]
 then
-	sed -i "" "s/^box_id.*/box_id = '${boxid}'/" "${helper_path}"
+	sed -i "s/^box_id.*/box_id = '${boxid}'/" "${helper_path}"
   echo -e "${Purple}Registered ${boxid}${NC}"
 else
 	echo -e "${Yellow}Skipped.${NC}"
@@ -61,8 +61,8 @@ echo -e "${Yellow}Press 'Enter' to skip configuration.${NC}"
 read -r gmail
 if [ -n "$gmail" ]
 then
-	sed -i "" "s/^source.*/source = '${gmail}'/" "${email_setup_path}"
-  sed -i "" "s/^AuthUser.*/AuthUser=${gmail}/" "${email_config_path}"
+	sed -i "s/^source.*/source = '${gmail}'/" "${email_setup_path}"
+  sed -i "s/^AuthUser.*/AuthUser=${gmail}/" "${email_config_path}"
   echo -e "${Purple}Registered ${gmail}${NC}"
 else
 	echo -e "${Yellow}Skipped.${NC}"
@@ -74,8 +74,8 @@ echo -e "${Yellow}Press 'Enter' to skip configuration.${NC}"
 read -r -s pass
 if [ -n "$pass" ]
 then
-	sed -i "" "s/^key.*/key = '${pass}'/" "${email_setup_path}"
-  sed -i "" "s/^AuthPass.*/AuthPass=${pass}/" "${email_config_path}"
+	sed -i "s/^key.*/key = '${pass}'/" "${email_setup_path}"
+  sed -i "s/^AuthPass.*/AuthPass=${pass}/" "${email_config_path}"
   echo -e "${Purple}Registered password${NC}"
 else
 	echo -e "${Yellow}Skipped.${NC}"
@@ -88,7 +88,7 @@ echo -e "${Yellow}Press 'Enter' to skip configuration.${NC}"
 read -r emails
 if [ -n "$emails" ]
 then
-	sed -i "" "s/^emails.*/emails = [${emails}]/" "${helper_path}"
+	sed -i "s/^emails.*/emails = [${emails}]/" "${helper_path}"
   echo -e "${Purple}Registered emails = [${emails}]${NC}"
 else
 	echo -e "${Yellow}Skipped.${NC}"
@@ -100,8 +100,8 @@ echo -e "${Yellow}Press 'Enter' to skip configuration.${NC}"
 read -r hostname
 if [ -n "$hostname" ]
 then
-	sed -i "" "s/^${host_name}.*/${hostname}/" "${hostname_path}"
-  sed -i "" "s/^hostname.*/hostname=${hostname}/" "${email_config_path}"
+	sed -i "s/^${host_name}.*/${hostname}/" "${hostname_path}"
+  sed -i "s/^hostname.*/hostname=${hostname}/" "${email_config_path}"
   add="\$a127.0.1.1  ${hostname}"
   sed -i -e "${add} ${hosts_path}"
   mv /etc/ssmtp/ssmtp.conf /etc/ssmtp/ssmtp.conf.sample
