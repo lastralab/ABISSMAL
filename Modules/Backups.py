@@ -37,11 +37,11 @@ def usb_connected(box_id):
         for volume in os.listdir(media_path):
             if str(volume) == box_id:
                 return True
-            else:
-                exception = 'External drive not detected, backup won\'t be possible.'
-                print('Backups error: ' + exception)
-                logging.error('Backups error: ' + exception)
-                email_alert('Backups', 'Error: ' + exception)
+    else:
+        exception = 'External drive not detected, backup won\'t be possible.'
+        print('Backups error: ' + exception)
+        logging.error('Backups error: ' + exception)
+        email_alert('Backups', 'Error: ' + exception)
 
 
 def video_backup_init(dt, date, destination, source):
