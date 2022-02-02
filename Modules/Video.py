@@ -43,8 +43,7 @@ record_duration = 10
 threshold = 50
 sensitivity = 80
 
-REC_LED = 12
-VIDEO_PIN = 13
+REC_LED = 16
 GPIO.setmode(GPIO.BCM)
 GPIO.setwarnings(False)
 GPIO.setup(REC_LED, GPIO.OUT)
