@@ -13,6 +13,7 @@ from helper import box_id
 from helper import modules
 from helper import video_extension
 from helper import file_extension
+from helper import email_alert
 import os
 from datetime import *
 import shutil
@@ -21,10 +22,14 @@ pi_home = '/home/pi/'
 
 logger_setup(pi_home)
 
+backup_hour = 20
+backup_minute = 15
+
 media_path = '/media/pi/'
 data_path = 'Data_ParentalCareTracking/'
 
 logging.info('Started backup monitoring...')
+print('Started backup monitoring...')
 
 
 def usb_connected(box_id):
@@ -32,9 +37,11 @@ def usb_connected(box_id):
         for volume in os.listdir(media_path):
             if str(volume) == box_id:
                 return True
-            else:
-                logging.error('External drive not detected, backup won\'t be possible.')
-                # TODO send email
+    else:
+        exception = 'External drive not detected, backup won\'t be possible.'
+        print('Backups error: ' + exception)
+        logging.error('Backups error: ' + exception)
+        email_alert('Backups', 'Error: ' + exception)
 
 
 def video_backup_init(dt, date, destination, source):
@@ -47,6 +54,7 @@ def video_backup_init(dt, date, destination, source):
         for filename in files:
             if filename.endswith(video_extension):
                 shutil.move(os.path.join(src, filename), os.path.join(path, filename))
+                print('Backed-up videos at ' + str(dt.hour) + ':' + str(dt.minute).zfill(2) + 'hrs')
                 logging.info('Backed-up videos at ' + str(dt.hour) + ':' + str(dt.minute).zfill(2) + 'hrs')
             if filename.endswith('.h264'):
                 os.remove(os.path.join(src, filename))
@@ -73,6 +81,9 @@ def csv_backup_init(dt, destination, source):
                 if filename.endswith(file_extension):
                     if filename == yesterday_file:
                         shutil.move(os.path.join(src, filename), os.path.join(path, filename))
+                        print(
+                            'Backed-up ' + module + ' metadata at ' + str(dt.hour) + ':' + str(dt.minute).zfill(
+                                2) + 'hrs')
                         logging.info(
                             'Backed-up ' + module + ' metadata at ' + str(dt.hour) + ':' + str(dt.minute).zfill(
                                 2) + 'hrs')
@@ -88,8 +99,13 @@ try:
     while True:
         now = datetime.now()
         folder = now.strftime("%Y_%m_%d")
-        if usb_connected(box_id) and now.hour == 20 and now.minute == 15:
+        if usb_connected(box_id) and now.hour == backup_hour and now.minute == backup_minute:
             video_backup_init(now, folder, box_id, pi_home + data_path)
             csv_backup_init(now, box_id, pi_home + data_path)
-except KeyboardInterrupt:
+except KeyboardInterrrupt:
+    print('Exiting backups')
     logging.info('Exiting backups')
+except Exception as E:
+    print('Backups error: ' + str(E))
+    logging.error('Backups error: ' + str(E))
+    email_alert('Backups', 'Error: ' + str(E))
