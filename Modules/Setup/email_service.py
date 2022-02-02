@@ -3,6 +3,7 @@
 # Project: ParentalCareTracking
 # Date: 1/24/22
 
-# TODO update accordingly
+# !/usr/bin/env python3
+
 source = 'email@gmail.com'
 key = 'password'
