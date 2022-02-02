@@ -22,6 +22,9 @@ pi_home = '/home/pi/'
 
 logger_setup(pi_home)
 
+backup_hour = 20
+backup_minute = 15
+
 media_path = '/media/pi/'
 data_path = 'Data_ParentalCareTracking/'
 
@@ -96,7 +99,7 @@ try:
     while True:
         now = datetime.now()
         folder = now.strftime("%Y_%m_%d")
-        if usb_connected(box_id) and now.hour == 20 and now.minute == 15:
+        if usb_connected(box_id) and now.hour == backup_hour and now.minute == backup_minute:
             video_backup_init(now, folder, box_id, pi_home + data_path)
             csv_backup_init(now, box_id, pi_home + data_path)
 except KeyboardInterrrupt:
