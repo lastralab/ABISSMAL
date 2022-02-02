@@ -103,7 +103,7 @@ then
 	sed -i "s/^${host_name}.*/${hostname}/" "${hostname_path}"
   sed -i "s/^hostname.*/hostname=${hostname}/" "${email_config_path}"
   add="\$a127.0.1.1  ${hostname}"
-  sed -i -e "${add} ${hosts_path}"
+  sed -i -e "${add}" "${hosts_path}"
   mv /etc/ssmtp/ssmtp.conf /etc/ssmtp/ssmtp.conf.sample
   cp -r "${email_config_path}" /etc/ssmtp/
   sleep 1
