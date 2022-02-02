@@ -22,7 +22,7 @@ from helper import email_alert
 
 logger_setup('/home/pi/')
 
-BEAM_PIN_lead = 16
+BEAM_PIN_lead = 13
 BEAM_PIN_rear = 19
 warn = 0
 module = 'IRBB'
