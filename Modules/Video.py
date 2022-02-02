@@ -26,6 +26,7 @@ from PIL import Image
 from subprocess import call
 from pathlib import Path
 import numpy as np
+from helper import email_alert
 
 logger_setup('/home/pi/')
 
@@ -50,6 +51,7 @@ GPIO.setup(REC_LED, GPIO.OUT)
 GPIO.output(REC_LED, GPIO.LOW)
 
 logging.info('Starting Video script')
+print('Starting Video script')
 
 
 def detect_motion(cam):
@@ -85,6 +87,7 @@ def convert_video(filename):
     command = "MP4Box -add " + filename + " " + file_mp4
     call([command], shell=True)
     logging.info('Converted video ' + filename + ' to mp4.')
+    print('Starting Video script')
     os.remove(filename)
     csv_writer(str(box_id), 'Video', path, f"{dt.year}_{dt.month}_{dt.day}",
                header,
@@ -122,9 +125,14 @@ with picamera.PiCamera() as camera:
                     camera.split_recording(stream)
                     convert_video(file1_h264)
                     convert_video(file2_h264)
-        except KeyboardInterrupt:
-            logging.info('exiting Video')
+        except KeyboardInterrrupt:
+            print('Exiting Video')
+            logging.info('Exiting Video')
             GPIO.cleanup()
+        except Exception as E:
+            print('Video error: ' + str(E))
+            logging.error('Video error: ' + str(E))
+            email_alert('Video', 'Error: ' + str(E))
         finally:
             camera.stop_recording()
             camera.close()
