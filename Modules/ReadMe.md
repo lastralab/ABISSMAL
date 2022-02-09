@@ -2,18 +2,9 @@
 <b>Authors</b>: nmoltta, gsvidaurre <br>
 <b>Date</b>: 22 November 2021
 
-## <h2>Pre-requisites</h2>
+## <h2>Troubleshooting Git Credentials</h2>
 
-- Screen:
-  - ```$ sudo apt-get install screen```
-- Fix Permissions:
-  - ```$ cd <path>/ParentalCareTracking/```
-  - ```$ chmod +x Main.sh```
-- SMTP install/setup to send email alerts
-  - ```$ sudo apt-get install ssmtp```
-    - Copy Setup/ssmtp.conf to /etc/ssmtp/ssmtp.conf
-    - Set email and password accordingly
-- Git store credentials:
+- Set permanently:
   - ```git config --global credential.helper store```
   - ```git pull```
 
