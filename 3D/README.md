@@ -10,5 +10,5 @@
    * ![ScreenShot20220213at21147PM.png](./assets/1644779607403-Screen%20Shot%202022-02-13%20at%202.11.47%20PM.png)
 3. Camera Holder
    * Also serves as the nest container cap
-   * Holds the camera and provides ventilation
-   * ![ScreenShot20220213at14609PM.png](./assets/Screen%20Shot%202022-02-13%20at%201.46.09%20PM.png)
+   * Holds the camera and provides light and ventilation
+   * ![ScreenShot20220216at55246PM.png](./assets/Screen%20Shot%202022-02-16%20at%205.52.46%20PM.png)
