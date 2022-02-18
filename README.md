@@ -1,7 +1,7 @@
 <h1>ParentalCareTracking</h1>
 <b>Authors:</b><br>
-Tania Molina<br>
-Grace Smith-Vidaurre
+Tania Molina - <span style="pointer-events:none">lastralab@e-storecook.com</span><br>
+Grace Smith-Vidaurre - <span style="pointer-events:none">github@smith-vidaurre.com</span>
 
 Project board: https://github.com/lastralab/ParentalCareTracking/projects/1 <br>
 Project wiki: https://github.com/lastralab/ParentalCareTracking/wiki
@@ -17,9 +17,9 @@ This parental care tracking system was developed and implemented for captive zeb
 Please refer to our [Installation Overview](https://github.com/lastralab/ParentalCareTracking/wiki/Installation) before proceeding. There are a few pre-requisites to consider before running the installation script.
 
 1. Run `sudo apt-get install git` in your RaspberryPi.
-3. Go to desired directory to download this project.
-4. Clone this repository `git clone https://github.com/lastralab/ParentalCareTracking.git`
-5. From root directory `/path/to/ParentalCareTracking/` run:
+2. Go to desired directory to download this project.
+3. Clone this repository `git clone https://github.com/lastralab/ParentalCareTracking.git`
+4. From root directory `/path/to/ParentalCareTracking/` run:
 
    1. `sudo bash run_install.sh`
    2. Enter your password (we recommend to set a password for your raspberry pi)
