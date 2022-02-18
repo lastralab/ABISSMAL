@@ -1,6 +1,6 @@
 <h1>ParentalCareTracking</h1>
 <b>Authors:</b><br>
-Tania Molina - <span style="pointer-events:none">lastralab@e-storecook.com</span><br>
+Tania Molina - <span style="pointer-events:none">tan@e-storecook.com</span><br>
 Grace Smith-Vidaurre - <span style="pointer-events:none">github@smith-vidaurre.com</span>
 
 Project board: https://github.com/lastralab/ParentalCareTracking/projects/1 <br>
