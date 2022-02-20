@@ -6,8 +6,8 @@
 import subprocess
 import logging
 import time
-from Modules.helper import email_alert
-from Modules.helper import logger_setup
+from helper import email_alert
+from helper import logger_setup
 
 logger_setup('/home/pi/')
 modules = ['temp', 'video', 'rfid', 'irbb', 'backup']

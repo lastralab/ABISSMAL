@@ -34,7 +34,7 @@ rfid_command="${python_v} ${location}${rfid_file}"
 backups_file="/Modules/Backups.py"
 backups_command="${python_v} ${location}${backups_file}"
 
-monitor_file="/monitor.py"
+monitor_file="/Modules/monitor.py"
 monitor_command="${python_v} ${location}${monitor_file}"
 
 echo ""
