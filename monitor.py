@@ -25,6 +25,7 @@ def monitor_screens():
             print('Screen closed: ' + screen)
         else:
             logging.info('All screens running as expected.')
+            pass
 
 
 try:
@@ -32,6 +33,7 @@ try:
         monitor_screens()
         logging.info("Monitored screens.")
         time.sleep(60)
+        pass
 except Exception as E:
     logging.error('Monitor error: ' + str(E))
     email_alert('Monitor', 'Error while monitoring screens: ' + str(E))
