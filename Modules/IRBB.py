@@ -63,15 +63,13 @@ GPIO.add_event_detect(BEAM_PIN_rear, GPIO.FALLING,
 try:
     while True:
         pass
-
 except KeyboardInterrupt:
     logging.info('exiting IRBB')
     print('exiting IRBB')
     GPIO.cleanup()
-# TODO uncomment if needed:
-# except Exception as E:
-#     logging.error('IRBB error: ' + str(E))
-#     print('IRBB error: ' + str(E))
-#     email_alert('IRBB', 'Error: ' + str(E))
+except Exception as E:
+    logging.error('IRBB error: ' + str(E))
+    print('IRBB error: ' + str(E))
+    email_alert('IRBB', 'Error: ' + str(E))
 finally:
     GPIO.cleanup()
