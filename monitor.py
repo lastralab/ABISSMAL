@@ -9,7 +9,7 @@ from Modules.helper import email_alert
 from Modules.helper import logger_setup
 
 logger_setup('/home/pi/')
-modules = ['temp', 'video', 'rfid', 'irbb', 'backups']
+modules = ['temp', 'video', 'rfid', 'irbb', 'backup']
 
 logging.info('Starting Monitor script')
 print('Starting Monitor script')

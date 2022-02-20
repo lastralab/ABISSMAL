@@ -59,14 +59,14 @@ def logger_setup(default_dir):
     )
 
     logging.basicConfig(
-        format=format,
+        format=FORMAT,
         filename=default_dir + 'log/error.log',
         level=logging.ERROR,
         datefmt="%Y-%m-%d %H:%M:%S"
     )
 
     logging.basicConfig(
-        format=format,
+        format=FORMAT,
         filename=default_dir + 'log/warning.log',
         level=logging.WARNING,
         datefmt="%Y-%m-%d %H:%M:%S"
