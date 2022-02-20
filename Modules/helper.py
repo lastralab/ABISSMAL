@@ -55,13 +55,6 @@ def logger_setup(default_dir):
         encoding='utf-8',
         level=logging.DEBUG,
         datefmt="%Y-%m-%d %H:%M:%S")
-    logger = logging.getLogger(name)
-    logger.setLevel(logging.DEBUG)
-    ch = logging.StreamHandler()
-    ch.setLevel(logging.DEBUG)
-    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-    ch.setFormatter(formatter)
-    logger.addHandler(ch)
 
 
 def csv_writer(box_id, module, data_path, datestring, header, value):
