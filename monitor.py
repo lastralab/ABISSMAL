@@ -18,11 +18,13 @@ print('Starting Monitor script')
 
 def monitor_screens():
     screens = str(subprocess.getoutput("screen -list"))
-    for screen in screens:
+    for screen in modules:
         if screens.find(screen) == -1:
             email_alert(screen, 'Screen not running.')
             logging.error('Screen not running: ' + screen)
             print('Screen closed: ' + screen)
+        else:
+            pass
 
 
 try:
