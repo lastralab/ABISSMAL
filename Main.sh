@@ -34,12 +34,12 @@ rfid_command="${python_v} ${location}${rfid_file}"
 backups_file="/Modules/Backups.py"
 backups_command="${python_v} ${location}${backups_file}"
 
-monitor_file="/monitor.py"
+monitor_file="/Modules/monitor.py"
 monitor_command="${python_v} ${location}${monitor_file}"
 
 echo ""
 echo -e "${Blue}Project:${NC}     ${Green}P A R E N T A L   C A R E   T R A C K I N G${NC}"
-echo -e "${Blue}Repository:${NC}  https://github.com/lastralab/parentalcaretracking"
+echo -e "${Blue}Repository:${NC}  ${Blue}https://github.com/lastralab/parentalcaretracking"${NC}
 echo -e "${Blue}Date:${NC}        ${Blue}November 2021${NC}"
 echo -e "${Blue}Authors:${NC}     ${Cyan}Tania M. Molina${NC} & ${Cyan}Grace Smith-Vidaurre${NC}"
 echo ""
@@ -69,13 +69,14 @@ sleep 1s
 screen -dmS temp bash -c "${temp_command}"
 
 echo -e "Starting screen name: ${Cyan}backup${NC}..."
-sleep 2s
+sleep 1s
 screen -dmS backup bash -c "${backups_command}"
 
 echo -e "Starting screen name: ${Cyan}monitor${NC}..."
-sleep 2s
+sleep 1s
 screen -dmS monitor bash -c "${monitor_command}"
 echo ""
+sleep 3s
 screen -list
 
 echo ""

@@ -6,8 +6,8 @@
 import subprocess
 import logging
 import time
-from Modules.helper import email_alert
-from Modules.helper import logger_setup
+from helper import email_alert
+from helper import logger_setup
 
 logger_setup('/home/pi/')
 modules = ['temp', 'video', 'rfid', 'irbb', 'backup']
@@ -24,7 +24,7 @@ def monitor_screens():
             logging.error('Screen not running: ' + screen)
             print('Screen closed: ' + screen)
         else:
-            logging.info('All screens running as expected.')
+            pass
 
 
 try:
@@ -32,6 +32,7 @@ try:
         monitor_screens()
         logging.info("Monitored screens.")
         time.sleep(60)
+        pass
 except Exception as E:
     logging.error('Monitor error: ' + str(E))
     email_alert('Monitor', 'Error while monitoring screens: ' + str(E))

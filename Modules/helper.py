@@ -49,33 +49,19 @@ def logger_setup(default_dir):
     if not os.path.exists(video_data):
         os.makedirs(video_data)
 
-    FORMAT = "%(asctime)s: %(message)s"
+    FORMAT = "%(asctime)s %(levelname)s %(message)s"
 
     logging.basicConfig(
         format=FORMAT,
-        filename=default_dir + 'log/info.log',
+        filename=default_dir + 'log/pct_' + box_id + '.log',
         level=logging.INFO,
         datefmt="%Y-%m-%d %H:%M:%S"
     )
 
-    logging.basicConfig(
-        format=FORMAT,
-        filename=default_dir + 'log/error.log',
-        level=logging.ERROR,
-        datefmt="%Y-%m-%d %H:%M:%S"
-    )
 
-    logging.basicConfig(
-        format=FORMAT,
-        filename=default_dir + 'log/warning.log',
-        level=logging.WARNING,
-        datefmt="%Y-%m-%d %H:%M:%S"
-    )
-
-
-def csv_writer(box_id, module, data_path, date, header, value):
+def csv_writer(box_id, module, data_path, datestring, header, value):
     if data_path:
-        filename = module + '_' + box_id + '_' + date + '.csv'
+        filename = module + '_' + box_id + '_' + datestring + '.csv'
         full_path = data_path + "/" + filename
         if exists(full_path):
             file = open(full_path, 'a+')
