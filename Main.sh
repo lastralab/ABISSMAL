@@ -34,6 +34,9 @@ rfid_command="${python_v} ${location}${rfid_file}"
 backups_file="/Modules/Backups.py"
 backups_command="${python_v} ${location}${backups_file}"
 
+monitor_file="/monitor.py"
+monitor_command="${python_v} ${location}${monitor_file}"
+
 echo ""
 echo -e "${Blue}Project:${NC}     ${Green}P A R E N T A L   C A R E   T R A C K I N G${NC}"
 echo -e "${Blue}Repository:${NC}  https://github.com/lastralab/parentalcaretracking"
@@ -73,6 +76,11 @@ echo -e "Starting screen name: ${Cyan}backups${NC}..."
 sleep 1s
 screen -dmS backups bash -c "${backups_command}"
 echo -e "Started ${Cyan}backups${NC}."
+
+echo -e "Starting screen name: ${Cyan}monitor${NC}..."
+sleep 1s
+screen -dmS monitor bash -c "${monitor_command}"
+echo -e "Started ${Cyan}monitor${NC}."
 
 echo ""
 echo -e "To kill all screens, run:"
