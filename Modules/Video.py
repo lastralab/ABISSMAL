@@ -34,10 +34,10 @@ path = "/home/pi/Data_ParentalCareTracking/Video/"
 header = ['chamber_id', 'year', 'month', 'day', 'time_video_started', 'video_file_name']
 prior_image = None
 
-time_range = np.array([6, 23])
+time_range = np.array([6, 19])
 video_width = 640
 video_height = 480
-iso = 400
+iso = 800
 fr = 60
 stream_duration = 5
 record_duration = 10
@@ -97,7 +97,7 @@ def convert_video(filename):
 with picamera.PiCamera() as camera:
     general_time = datetime.now()
     hour_int = int(f"{general_time:%H}")
-    if time_range[0] < hour_int < time_range[1]:
+    if time_range[0] <= hour_int <= time_range[1]:
         camera.resolution = (video_width, video_height)
         camera.iso = iso
         camera.framerate = fr
@@ -134,6 +134,4 @@ with picamera.PiCamera() as camera:
             logging.error('Video error: ' + str(E))
             email_alert('Video', 'Error: ' + str(E))
         finally:
-            camera.stop_recording()
-            camera.close()
             GPIO.output(REC_LED, GPIO.LOW)

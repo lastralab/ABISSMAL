@@ -51,17 +51,16 @@ def RFIDSetup():
     return fd
 
 
-# set reader mode to EM4102 compatible
 def SetReaderMode(fd):
     WaitForCTS()
     wiringpi2.serialPutchar(fd, 0x76)
-    wiringpi2.serialPutchar(fd, 0x03)  # EM/MC2000
+    wiringpi2.serialPutchar(fd, 0x03)
 
 
 def SetPollingDelay(fd):
     WaitForCTS()
     wiringpi2.serialPutchar(fd, 0x50)
-    wiringpi2.serialPutchar(fd, 0x60)  # 262 ms
+    wiringpi2.serialPutchar(fd, 0x60)
 
 
 def ReadText(fd):
