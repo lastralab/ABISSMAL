@@ -69,11 +69,11 @@ sleep 1s
 screen -dmS temp bash -c "${temp_command}"
 
 echo -e "Starting screen name: ${Cyan}backup${NC}..."
-sleep 2s
+sleep 1s
 screen -dmS backup bash -c "${backups_command}"
 
 echo -e "Starting screen name: ${Cyan}monitor${NC}..."
-sleep 2s
+sleep 3s
 screen -dmS monitor bash -c "${monitor_command}"
 echo ""
 screen -list
