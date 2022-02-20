@@ -34,11 +34,11 @@ path = "/home/pi/Data_ParentalCareTracking/Video/"
 header = ['chamber_id', 'year', 'month', 'day', 'time_video_started', 'video_file_name']
 prior_image = None
 
-time_range = np.array([6, 19])
+time_range = np.array([6, 20])
 video_width = 640
 video_height = 480
 iso = 800
-fr = 60
+fr = 30
 stream_duration = 5
 record_duration = 10
 threshold = 50
