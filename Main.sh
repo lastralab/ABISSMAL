@@ -55,32 +55,26 @@ echo ""
 echo -e "Starting screen name: ${Cyan}irbb${NC}..."
 sleep 1s
 screen -dmS irbb bash -c "${irbb_command}"
-echo -e "Started ${Cyan}irbb${NC}."
 
 echo -e "Starting screen name: ${Cyan}video${NC}..."
 sleep 1s
 screen -dmS video bash -c "${video_command}"
-echo -e "Started ${Cyan}video${NC}."
 
 echo -e "Starting screen name: ${Cyan}rfid${NC}..."
 sleep 1s
 screen -dmS rfid bash -c "${rfid_command}"
-echo -e "Started ${Cyan}rfid${NC}."
 
 echo -e "Starting screen name: ${Cyan}temp${NC}..."
 sleep 1s
 screen -dmS temp bash -c "${temp_command}"
-echo -e "Started ${Cyan}temp${NC}."
 
-echo -e "Starting screen name: ${Cyan}backups${NC}..."
+echo -e "Starting screen name: ${Cyan}backup${NC}..."
 sleep 2s
-screen -dmS backups bash -c "${backups_command}"
-echo -e "Started ${Cyan}backups${NC}."
+screen -dmS backup bash -c "${backups_command}"
 
 echo -e "Starting screen name: ${Cyan}monitor${NC}..."
 sleep 2s
 screen -dmS monitor bash -c "${monitor_command}"
-echo -e "Started ${Cyan}monitor${NC}."
 echo ""
 screen -list
 
