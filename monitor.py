@@ -5,6 +5,7 @@
 
 import subprocess
 import logging
+import time
 from Modules.helper import email_alert
 from Modules.helper import logger_setup
 
@@ -27,6 +28,8 @@ def monitor_screens():
 try:
     while True:
         monitor_screens()
+        time.sleep(60)
+        pass
 except Exception as E:
     logging.error('Monitor error: ' + str(E))
     email_alert('Monitor', 'Error while monitoring screens: ' + str(E))

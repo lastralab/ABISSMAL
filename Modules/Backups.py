@@ -43,9 +43,9 @@ def usb_connected(box):
         email_alert('Backups', 'Error: ' + exception)
 
 
-def video_backup_init(dt, date, destination, source):
+def video_backup_init(dt, file, destination, source):
     src = source + 'Video'
-    path = media_path + destination + '/Data/Video/' + date
+    path = media_path + destination + '/Data/Video/' + file
     files = os.listdir(src)
     if len(files) > 0:
         if not os.path.exists(path):
@@ -103,7 +103,7 @@ try:
             video_backup_init(now, folder, box_id, pi_home + data_path)
             csv_backup_init(now, box_id, pi_home + data_path)
         else:
-            break
+            pass
 except KeyboardInterrrupt:
     print('Exiting backups')
     logging.info('Exiting backups')
