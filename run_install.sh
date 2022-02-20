@@ -45,15 +45,23 @@ fi
 sleep 1
 echo ""
 
-echo -e "${Yellow}Installing packages:${NC}"
-apt-get update
-apt-get install ntfs-3g
-apt-get install python3
-apt-get install gparted
-apt-get install screen
-chmod +x Main.sh
-apt-get install ssmtp
-apt install nmap
+echo -e "${Yellow}Press 'Enter' to skip installing packages.${NC}"
+read -r packs
+if [ -n "$packs" ]
+then
+	echo -e "${Yellow}Installing packages:${NC}"
+  apt-get update
+  apt-get install ntfs-3g
+  apt-get install python3
+  apt-get install gparted
+  apt-get install screen
+  chmod +x Main.sh
+  apt-get install ssmtp
+  apt install nmap
+  echo ""
+else
+	echo -e "${Yellow}Skipped.${NC}"
+fi
 echo ""
 
 echo -e "${BIGreen}Enter the email address to send emails from${NC} (gmail)"
