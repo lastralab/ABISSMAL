@@ -27,8 +27,8 @@ backup_minute = 15
 media_path = '/media/pi/'
 data_path = 'Data_ParentalCareTracking/'
 
-logging.info('Started backup monitoring...')
-print('Started backup monitoring...')
+logging.info('Started backup script...')
+print('Started backup script...')
 
 
 def usb_connected(box):
@@ -102,8 +102,7 @@ try:
         if usb_connected(box_id) and now.hour == backup_hour and now.minute == backup_minute:
             video_backup_init(now, folder, box_id, pi_home + data_path)
             csv_backup_init(now, box_id, pi_home + data_path)
-        else:
-            pass
+        pass
 except KeyboardInterrrupt:
     print('Exiting backups')
     logging.info('Exiting backups')
