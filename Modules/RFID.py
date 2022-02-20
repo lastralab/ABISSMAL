@@ -10,7 +10,6 @@ import numpy as np
 import time
 import sys
 from datetime import datetime
-
 import csv
 import logging
 from helper import logger_setup

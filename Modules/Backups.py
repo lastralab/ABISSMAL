@@ -8,7 +8,6 @@
 import sys
 import logging
 from helper import logger_setup
-from helper import csv_writer
 from helper import box_id
 from helper import modules
 from helper import video_extension
@@ -28,14 +27,14 @@ backup_minute = 15
 media_path = '/media/pi/'
 data_path = 'Data_ParentalCareTracking/'
 
-logging.info('Started backup monitoring...')
-print('Started backup monitoring...')
+logging.info('Started backup script...')
+print('Started backup script...')
 
 
-def usb_connected(box_id):
+def usb_connected(box):
     if len(os.listdir(media_path)) > 0:
         for volume in os.listdir(media_path):
-            if str(volume) == box_id:
+            if str(volume) == box:
                 return True
     else:
         exception = 'External drive not detected, backup won\'t be possible.'
@@ -44,9 +43,9 @@ def usb_connected(box_id):
         email_alert('Backups', 'Error: ' + exception)
 
 
-def video_backup_init(dt, date, destination, source):
+def video_backup_init(dt, file, destination, source):
     src = source + 'Video'
-    path = media_path + destination + '/Data/Video/' + date
+    path = media_path + destination + '/Data/Video/' + file
     files = os.listdir(src)
     if len(files) > 0:
         if not os.path.exists(path):
@@ -69,7 +68,8 @@ def csv_backup_init(dt, destination, source):
         src = source + module
         files = os.listdir(src)
         yesterday = dt - timedelta(days=1)
-        yesterday_file = module + "_" + box_id + "_" + f"{yesterday.year}_{yesterday.month}_{yesterday.day}" + ".csv"
+        date = str(yesterday.year) + "_" + str(yesterday.month) + "_" + str(yesterday.day)
+        yesterday_file = box_id + "_" + module + "_" + date + ".csv"
         if module != 'Video':
             path = media_path + destination + '/Data/' + module + '/'
         else:
@@ -102,8 +102,7 @@ try:
         if usb_connected(box_id) and now.hour == backup_hour and now.minute == backup_minute:
             video_backup_init(now, folder, box_id, pi_home + data_path)
             csv_backup_init(now, box_id, pi_home + data_path)
-        else:
-            break
+        pass
 except KeyboardInterrrupt:
     print('Exiting backups')
     logging.info('Exiting backups')
