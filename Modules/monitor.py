@@ -24,7 +24,6 @@ def monitor_screens():
             logging.error('Screen not running: ' + screen)
             print('Screen closed: ' + screen)
         else:
-            logging.info('All screens running as expected.')
             pass
 
 
