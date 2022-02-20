@@ -73,14 +73,16 @@ screen -dmS temp bash -c "${temp_command}"
 echo -e "Started ${Cyan}temp${NC}."
 
 echo -e "Starting screen name: ${Cyan}backups${NC}..."
-sleep 1s
+sleep 2s
 screen -dmS backups bash -c "${backups_command}"
 echo -e "Started ${Cyan}backups${NC}."
 
 echo -e "Starting screen name: ${Cyan}monitor${NC}..."
-sleep 1s
+sleep 2s
 screen -dmS monitor bash -c "${monitor_command}"
 echo -e "Started ${Cyan}monitor${NC}."
+echo ""
+screen -list
 
 echo ""
 echo -e "To kill all screens, run:"
