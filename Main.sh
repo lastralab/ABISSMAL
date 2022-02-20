@@ -39,7 +39,7 @@ monitor_command="${python_v} ${location}${monitor_file}"
 
 echo ""
 echo -e "${Blue}Project:${NC}     ${Green}P A R E N T A L   C A R E   T R A C K I N G${NC}"
-echo -e "${Blue}Repository:${NC}  https://github.com/lastralab/parentalcaretracking"
+echo -e "${Blue}Repository:${NC}  ${Blue}https://github.com/lastralab/parentalcaretracking"${NC}
 echo -e "${Blue}Date:${NC}        ${Blue}November 2021${NC}"
 echo -e "${Blue}Authors:${NC}     ${Cyan}Tania M. Molina${NC} & ${Cyan}Grace Smith-Vidaurre${NC}"
 echo ""
