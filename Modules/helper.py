@@ -49,28 +49,19 @@ def logger_setup(default_dir):
     if not os.path.exists(video_data):
         os.makedirs(video_data)
 
-    FORMAT = "%(asctime)s: %(message)s"
-
+    name = 'pct_' + box_id
     logging.basicConfig(
-        format=FORMAT,
-        filename=default_dir + 'log/info.log',
-        level=logging.INFO,
-        datefmt="%Y-%m-%d %H:%M:%S"
-    )
-
-    logging.basicConfig(
-        format=FORMAT,
-        filename=default_dir + 'log/error.log',
-        level=logging.ERROR,
-        datefmt="%Y-%m-%d %H:%M:%S"
-    )
-
-    logging.basicConfig(
-        format=FORMAT,
-        filename=default_dir + 'log/warning.log',
-        level=logging.WARNING,
-        datefmt="%Y-%m-%d %H:%M:%S"
-    )
+        filename=default_dir + 'log/' + name + '.log',
+        encoding='utf-8',
+        level=logging.DEBUG,
+        datefmt="%Y-%m-%d %H:%M:%S")
+    logger = logging.getLogger(name)
+    logger.setLevel(logging.DEBUG)
+    ch = logging.StreamHandler()
+    ch.setLevel(logging.DEBUG)
+    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    ch.setFormatter(formatter)
+    logger.addHandler(ch)
 
 
 def csv_writer(box_id, module, data_path, datestring, header, value):

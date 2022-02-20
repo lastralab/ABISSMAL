@@ -18,8 +18,6 @@ from helper import email_alert
 
 logger_setup('/home/pi/')
 
-logging.error('Testing error log')
-
 warn = 0
 module = 'Temp'
 header = ['chamber_id', 'year', 'month', 'day', 'time', 'degrees_Celsius', 'degrees_Farenheit']
