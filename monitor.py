@@ -29,6 +29,7 @@ try:
     while True:
         monitor_screens()
         time.sleep(60)
+        logging.info("Monitored screens.")
         pass
 except Exception as E:
     logging.error('Monitor error: ' + str(E))
