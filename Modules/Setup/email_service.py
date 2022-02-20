@@ -8,6 +8,6 @@
 source = 'lastrafotografica@gmail.com'
 key = 'Apocalipsis967!'
 
-# TODO uncomment before creating PR to main and delete lines 8, 9
+# TODO uncomment before creating PR to main and delete previous lines
 # source = 'email@gmail.com'
 # key = 'password'
