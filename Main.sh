@@ -73,9 +73,10 @@ sleep 1s
 screen -dmS backup bash -c "${backups_command}"
 
 echo -e "Starting screen name: ${Cyan}monitor${NC}..."
-sleep 3s
+sleep 1s
 screen -dmS monitor bash -c "${monitor_command}"
 echo ""
+sleep 3s
 screen -list
 
 echo ""
