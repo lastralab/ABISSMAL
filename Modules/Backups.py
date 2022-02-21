@@ -22,7 +22,7 @@ pi_home = '/home/pi/'
 logger_setup(pi_home)
 
 backup_hour = 20
-backup_minute = 15
+backup_minute = 30
 
 media_path = '/media/pi/'
 data_path = 'Data_ParentalCareTracking/'
@@ -81,18 +81,18 @@ def csv_backup_init(dt, destination, source):
                 if filename.endswith(file_extension):
                     if filename == yesterday_file:
                         shutil.move(os.path.join(src, filename), os.path.join(path, filename))
-                        print(
-                            'Backed-up ' + module + ' metadata at ' + str(dt.hour) + ':' + str(dt.minute).zfill(
-                                2) + 'hrs')
-                        logging.info(
-                            'Backed-up ' + module + ' metadata at ' + str(dt.hour) + ':' + str(dt.minute).zfill(
-                                2) + 'hrs')
                     else:
                         pass
                 else:
                     pass
         else:
             pass
+        print(
+            'Backed-up ' + module + ' metadata at ' + str(dt.hour) + ':' + str(dt.minute).zfill(
+                2) + 'hrs')
+        logging.info(
+            'Backed-up ' + module + ' metadata at ' + str(dt.hour) + ':' + str(dt.minute).zfill(
+                2) + 'hrs')
 
 
 try:
