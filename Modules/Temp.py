@@ -56,14 +56,14 @@ try:
     while True:
         dt = datetime.now()
         temp = read_temp()
-        logging.info('Temperature sensor reading at:' + f"{dt:%H:%M:%S.%f}")
-        print('Temperature sensor reading at:' + f"{dt:%H:%M:%S.%f}")
+        logging.info('Temperature sensor reading.')
+        print('Temperature sensor reading')
         csv_writer(str(box_id), module, temp_data, f"{dt.year}_{dt.month}_{dt.day}", header,
                    [box_id, f"{dt.year}", f"{dt.month}", f"{dt.day}", f"{dt:%H:%M:%S.%f}", temp[0], temp[1]])
         time.sleep(60)
 except KeyboardInterrupt:
-    logging.info('Exiting Temp')
+    logging.info('Exiting Temperature')
 except Exception as E:
-    logging.error('Temp error: ' + str(E))
-    print('Temp error: ' + str(E))
-    email_alert('Temp', 'Error: ' + str(E))
+    logging.error('Temperature error: ' + str(E))
+    print('Temperature error: ' + str(E))
+    email_alert('Temperature', 'Error: ' + str(E))

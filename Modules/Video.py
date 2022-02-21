@@ -25,7 +25,6 @@ from os import walk
 from PIL import Image
 from subprocess import call
 from pathlib import Path
-import numpy as np
 from helper import email_alert
 
 logger_setup('/home/pi/')
@@ -34,11 +33,11 @@ path = "/home/pi/Data_ParentalCareTracking/Video/"
 header = ['chamber_id', 'year', 'month', 'day', 'time_video_started', 'video_file_name']
 prior_image = None
 
-time_range = np.array([6, 23])
-video_width = 640
-video_height = 480
-iso = 400
-fr = 60
+time_range = [6, 19]
+video_width = 1280
+video_height = 720
+iso = 800
+fr = 30
 stream_duration = 5
 record_duration = 10
 threshold = 50
@@ -94,46 +93,49 @@ def convert_video(filename):
                [box_id, f"{dt.year}", f"{dt.month}", f"{dt.day}", f"{dt:%H:%M:%S.%f}", Path(filename).stem + '.mp4'])
 
 
-with picamera.PiCamera() as camera:
-    general_time = datetime.now()
-    hour_int = int(f"{general_time:%H}")
-    if time_range[0] < hour_int < time_range[1]:
-        camera.resolution = (video_width, video_height)
-        camera.iso = iso
-        camera.framerate = fr
-        stream = picamera.PiCameraCircularIO(camera, seconds=stream_duration)
-        camera.start_recording(stream, format='h264')
-        try:
-            while True:
-                camera.wait_recording(1)
-                if detect_motion(camera):
-                    print('Motion detected; Recording started')
-                    logging.info("Starting video recording...")
-                    GPIO.output(REC_LED, GPIO.HIGH)
-                    dt = datetime.now()
-                    dt_str = str(f"{dt.year}_{dt.month}_{dt.day}_{dt:%H}_{dt:%M}_{dt:%S}")
-                    file1_h264 = path + str(box_id) + "_" + dt_str + "_pre_trigger" + '.h264'
-                    file2_h264 = path + str(box_id) + "_" + dt_str + "_post_trigger" + '.h264'
-                    camera.split_recording(file2_h264)
-                    camera.wait_recording(record_duration)
-                    stream.copy_to(file1_h264, seconds=stream_duration)
-                    stream.clear()
-                    print('Recording finished')
-                    logging.info("Video recorded")
-                    GPIO.output(REC_LED, GPIO.LOW)
+while True:
+    with picamera.PiCamera() as camera:
+        general_time = datetime.now()
+        hour_int = int(f"{general_time:%H}")
+        logging.debug("hour_int: " + str(hour_int))
+        if time_range[0] <= hour_int <= time_range[1]:
+            logging.debug("time_range: " + str(time_range[0]) + ', ' + str(time_range[1]))
+            camera.resolution = (video_width, video_height)
+            camera.iso = iso
+            camera.framerate = fr
+            stream = picamera.PiCameraCircularIO(camera, seconds=stream_duration)
+            camera.start_recording(stream, format='h264')
+            try:
+                while True:
                     camera.wait_recording(1)
-                    camera.split_recording(stream)
-                    convert_video(file1_h264)
-                    convert_video(file2_h264)
-        except KeyboardInterrrupt:
-            print('Exiting Video')
-            logging.info('Exiting Video')
-            GPIO.cleanup()
-        except Exception as E:
-            print('Video error: ' + str(E))
-            logging.error('Video error: ' + str(E))
-            email_alert('Video', 'Error: ' + str(E))
-        finally:
-            camera.stop_recording()
-            camera.close()
-            GPIO.output(REC_LED, GPIO.LOW)
+                    if detect_motion(camera):
+                        print('Motion detected; Recording started')
+                        logging.info("Starting video recording...")
+                        GPIO.output(REC_LED, GPIO.HIGH)
+                        dt = datetime.now()
+                        dt_str = str(f"{dt.year}_{dt.month}_{dt.day}_{dt:%H}_{dt:%M}_{dt:%S}")
+                        file1_h264 = path + str(box_id) + "_" + dt_str + "_pre_trigger" + '.h264'
+                        file2_h264 = path + str(box_id) + "_" + dt_str + "_post_trigger" + '.h264'
+                        camera.split_recording(file2_h264)
+                        camera.wait_recording(record_duration)
+                        stream.copy_to(file1_h264, seconds=stream_duration)
+                        stream.clear()
+                        print('Recording finished')
+                        logging.info("Video recorded")
+                        GPIO.output(REC_LED, GPIO.LOW)
+                        camera.wait_recording(1)
+                        camera.split_recording(stream)
+                        convert_video(file1_h264)
+                        convert_video(file2_h264)
+            except KeyboardInterrrupt:
+                print('Exiting Video')
+                logging.info('Exiting Video')
+                GPIO.cleanup()
+            except Exception as E:
+                print('Video error: ' + str(E))
+                logging.error('Video error: ' + str(E))
+                email_alert('Video', 'Error: ' + str(E))
+            finally:
+                GPIO.output(REC_LED, GPIO.LOW)
+        else:
+            pass
