@@ -20,7 +20,7 @@ box_id = 'Box_01'
 modules = ['IRBB', 'RFID', 'Temp', 'Video']
 video_extension = '.mp4'
 file_extension = '.csv'
-emails = ['gsvidaurre+pct@gmail.com', 'lastralab+pct@gmail.com']
+emails = []
 
 
 def logger_setup(default_dir):
