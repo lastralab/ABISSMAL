@@ -26,9 +26,10 @@ backup_minute = 30
 
 media_path = '/media/pi/'
 data_path = 'Data_ParentalCareTracking/'
+log_path = '/home/pi/log/'
 
-logging.info('Started backup script...')
-print('Started backup script...')
+logging.info('Started backup script.')
+print('Started backup script.')
 
 
 def usb_connected(box):
@@ -53,23 +54,26 @@ def video_backup_init(dt, file, destination, source):
         for filename in files:
             if filename.endswith(video_extension):
                 shutil.move(os.path.join(src, filename), os.path.join(path, filename))
-                print('Backed-up videos at ' + str(dt.hour) + ':' + str(dt.minute).zfill(2) + 'hrs')
-                logging.info('Backed-up videos at ' + str(dt.hour) + ':' + str(dt.minute).zfill(2) + 'hrs')
             if filename.endswith('.h264'):
                 os.remove(os.path.join(src, filename))
             else:
                 pass
+            print('Backed-up videos')
+            logging.info('Backed-up videos')
     else:
+        print('No videos backed-up. No videos found')
+        logging.error('No videos backed-up. No videos found. Check camera/video module.')
+        email_alert('Backup', 'No videos backed-up. No videos found. Check camera/video module.')
         pass
 
 
 def csv_backup_init(dt, destination, source):
+    yesterday = dt - timedelta(days=1)
+    ydate = str(yesterday.year) + "_" + str(yesterday.month) + "_" + str(yesterday.day)
     for module in modules:
         src = source + module
         files = os.listdir(src)
-        yesterday = dt - timedelta(days=1)
-        date = str(yesterday.year) + "_" + str(yesterday.month) + "_" + str(yesterday.day)
-        yesterday_file = box_id + "_" + module + "_" + date + ".csv"
+        yesterday_file = box_id + "_" + module + "_" + ydate + ".csv"
         if module != 'Video':
             path = media_path + destination + '/Data/' + module + '/'
         else:
@@ -85,14 +89,46 @@ def csv_backup_init(dt, destination, source):
                         pass
                 else:
                     pass
+            print('Backed-up ' + module + ' metadata')
+            logging.info('Backed-up ' + module + ' metadata')
         else:
+            print('Backup error: CSV files not found in module: ' + module)
+            logging.error('Backup error: CSV files not found in module: ' + module)
+            email_alert('Backup', 'Error: CSV files not found in module: ' + module)
             pass
-        print(
-            'Backed-up ' + module + ' metadata at ' + str(dt.hour) + ':' + str(dt.minute).zfill(
-                2) + 'hrs')
-        logging.info(
-            'Backed-up ' + module + ' metadata at ' + str(dt.hour) + ':' + str(dt.minute).zfill(
-                2) + 'hrs')
+    logs = os.listdir(log_path)
+    if len(logs) > 0:
+        path = media_path + destination + '/Data/Logs/' + yesterday.strftime("%Y_%m_%d")
+        logfile = log_path + 'pct_' + box_id + '.log'
+        today = str(dt.year) + "_" + str(dt.month) + "_" + str(dt.day)
+        to_backup = log_path + today + '_pct_' + box_id + '.log'
+        os.rename(logfile, to_backup)
+        logging.info('Created log file to backup tomorrow.')
+        print('Created log file to backup tomorrow.')
+        if not os.path.exists(path):
+            os.makedirs(path)
+        for log in logs:
+            if log.endswith('.log'):
+                yesterday_log = ydate + '_pct_' + box_id + '.log'
+                if log == yesterday_log:
+                    shutil.move(os.path.join(log_path, log), os.path.join(path, log))
+                    print('Backed-up log')
+                    logging.info('Backed-up log')
+                else:
+                    print('Backup Warning: Log file from yesterday not found.')
+                    logging.warning('Backup Error: Log file from yesterday not found.')
+                    email_alert('Backup', 'Warning: Log file from yesterday not found.')
+                    pass
+            else:
+                print('Backup Error: .log files not found.')
+                logging.warning('Backup Error: .log files not found.')
+                email_alert('Backup', 'Warning: .log files not found.')
+                pass
+    else:
+        print('Backup Error: Logs not found in /home/pi/log/')
+        logging.error('Backup Error: Logs not found in /home/pi/log/')
+        email_alert('Backup', 'Error: Logs not found in /home/pi/log/')
+        pass
 
 
 try:
