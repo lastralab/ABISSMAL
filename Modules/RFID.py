@@ -26,7 +26,7 @@ module = 'RFID'
 header = ['chamber_id', 'year', 'month', 'day', 'timestamp', 'PIT_tag_ID']
 rfid_data = "/home/pi/Data_ParentalCareTracking/RFID"
 
-logging.info('started RFID script')
+logging.info('Started RFID script.')
 
 GPIO_PIN = 1
 
@@ -44,7 +44,7 @@ def RFIDSetup():
     wiringpi2.serialFlush(fd)
     if response != 0 and fd <= 0:
         print("Unable to Setup communications")
-        logging.error("Unable to Setup communications")
+        logging.error("RFID Error: Unable to Setup communications")
         email_alert('RFID', 'Error: Unable to setup communications')
         sys.exit()
     return fd
@@ -97,15 +97,15 @@ def ReadTagPageZero(fd):
                 notag = False
                 ans = ReadText(fd)
                 dt = datetime.now()
-                logging.info('RFID activity detected at:' + f"{dt:%H:%M:%S.%f}")
-                print('RFID activity detected at:' + f"{dt:%H:%M:%S.%f}")
+                logging.info('RFID activity detected')
+                print('RFID activity detected')
                 csv_writer(str(box_id), module, rfid_data, f"{dt.year}_{dt.month}_{dt.day}", header,
                            [box_id, f"{dt.year}", f"{dt.month}", f"{dt.day}", f"{dt:%H:%M:%S.%f}", ans])
                 notag = True
 
     except KeyboardInterrupt:
-        logging.info('exiting RFID')
-        print('exiting RFID')
+        logging.info('Exiting RFID')
+        print('Exiting RFID')
     except Exception as E:
         logging.error('RFID error: ' + str(E))
         print('RFID error: ' + str(E))
