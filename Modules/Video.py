@@ -93,21 +93,18 @@ def convert_video(filename):
                [box_id, f"{dt.year}", f"{dt.month}", f"{dt.day}", f"{dt:%H:%M:%S.%f}", Path(filename).stem + '.mp4'])
 
 
-while True:
-    with picamera.PiCamera() as camera:
-        general_time = datetime.now()
-        hour_int = int(f"{general_time:%H}")
-        logging.debug("hour_int: " + str(hour_int))
-        if time_range[0] <= hour_int <= time_range[1]:
-            logging.debug("time_range: " + str(time_range[0]) + ', ' + str(time_range[1]))
-            camera.resolution = (video_width, video_height)
-            camera.iso = iso
-            camera.framerate = fr
-            stream = picamera.PiCameraCircularIO(camera, seconds=stream_duration)
-            camera.start_recording(stream, format='h264')
-            try:
-                while True:
-                    camera.wait_recording(1)
+try:
+    while True:
+        with picamera.PiCamera() as camera:
+            general_time = datetime.now()
+            hour_int = int(f"{general_time:%H}")
+            if int(time_range[0]) <= hour_int <= int(time_range[1]):
+                camera.resolution = (video_width, video_height)
+                camera.iso = iso
+                camera.framerate = fr
+                stream = picamera.PiCameraCircularIO(camera, seconds=stream_duration)
+                camera.start_recording(stream, format='h264')
+                try:
                     if detect_motion(camera):
                         print('Motion detected; Recording started')
                         logging.info("Starting video recording...")
@@ -127,15 +124,20 @@ while True:
                         camera.split_recording(stream)
                         convert_video(file1_h264)
                         convert_video(file2_h264)
-            except KeyboardInterrrupt:
-                print('Exiting Video')
-                logging.info('Exiting Video')
-                GPIO.cleanup()
-            except Exception as E:
-                print('Video error: ' + str(E))
-                logging.error('Video error: ' + str(E))
-                email_alert('Video', 'Error: ' + str(E))
-            finally:
-                GPIO.output(REC_LED, GPIO.LOW)
-        else:
-            pass
+                    else:
+                        GPIO.output(REC_LED, GPIO.LOW)
+                        pass
+                except Exception as E:
+                    print('Video error: ' + str(E))
+                    logging.error('Video error: ' + str(E))
+                    email_alert('Video', 'Error: ' + str(E))
+except KeyboardInterrrupt:
+    print('Exiting Video')
+    logging.info('Exiting Video')
+    GPIO.cleanup()
+except Exception as E:
+    print('Video error: ' + str(E))
+    logging.error('Video error: ' + str(E))
+    email_alert('Video', 'Error: ' + str(E))
+finally:
+    GPIO.output(REC_LED, GPIO.LOW)
