@@ -45,7 +45,7 @@ fi
 sleep 1
 echo ""
 
-echo -e "${Yellow}Press 'Enter' to skip installing packages.${NC}"
+echo -e "${Yellow}Press 'Enter' to skip or insert any character to install required packages.${NC}"
 read -r packs
 if [ -n "$packs" ]
 then
