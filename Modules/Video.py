@@ -99,7 +99,6 @@ try:
             general_time = datetime.now()
             hour_int = int(f"{general_time:%H}")
             if int(time_range[0]) <= hour_int <= int(time_range[1]):
-                # logging.warning("time_range: [" + str(time_range[0]) + ', ' + str(time_range[1]) + ']')
                 camera.resolution = (video_width, video_height)
                 camera.iso = iso
                 camera.framerate = fr
