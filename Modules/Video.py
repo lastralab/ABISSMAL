@@ -28,11 +28,12 @@ from pathlib import Path
 from helper import email_alert
 
 logger_setup('/home/pi/')
+logging.info('Starting Video script')
+print('Starting Video script')
 
 path = "/home/pi/Data_ParentalCareTracking/Video/"
 header = ['chamber_id', 'year', 'month', 'day', 'time_video_started', 'video_file_name']
 prior_image = None
-
 time_range = [6, 19]
 video_width = 1280
 video_height = 720
@@ -48,9 +49,6 @@ GPIO.setmode(GPIO.BCM)
 GPIO.setwarnings(False)
 GPIO.setup(REC_LED, GPIO.OUT)
 GPIO.output(REC_LED, GPIO.LOW)
-
-logging.info('Starting Video script')
-print('Starting Video script')
 
 
 def detect_motion(cam):

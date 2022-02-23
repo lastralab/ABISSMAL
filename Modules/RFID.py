@@ -22,18 +22,15 @@ logger_setup("/home/pi/")
 
 warn = 0
 module = 'RFID'
-
 header = ['chamber_id', 'year', 'month', 'day', 'timestamp', 'PIT_tag_ID']
 rfid_data = "/home/pi/Data_ParentalCareTracking/RFID"
-
 logging.info('Started RFID script.')
-
 GPIO_PIN = 1
 
 
 def WaitForCTS():
     while wiringpi2.digitalRead(GPIO_PIN):
-        time.sleep(0.001)
+        time.sleep(0.01)
     return
 
 
@@ -85,24 +82,20 @@ def ReadInt(fd):
 
 
 def ReadTagPageZero(fd):
-    notag = True
     try:
-        while notag:
+        while True:
             WaitForCTS()
             wiringpi2.serialPutchar(fd, 0x52)
             wiringpi2.serialPutchar(fd, 0x00)
             time.sleep(0.1)
             ans = ReadInt(fd)
             if ans == int("0xD6", 16):
-                notag = False
                 ans = ReadText(fd)
                 dt = datetime.now()
                 logging.info('RFID activity detected')
                 print('RFID activity detected')
                 csv_writer(str(box_id), module, rfid_data, f"{dt.year}_{dt.month}_{dt.day}", header,
                            [box_id, f"{dt.year}", f"{dt.month}", f"{dt.day}", f"{dt:%H:%M:%S.%f}", ans])
-                notag = True
-
     except KeyboardInterrupt:
         logging.info('Exiting RFID')
         print('Exiting RFID')
