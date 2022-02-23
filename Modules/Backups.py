@@ -16,13 +16,14 @@ from helper import email_alert
 import os
 from datetime import *
 import shutil
+import time
 
 pi_home = '/home/pi/'
 
 logger_setup(pi_home)
 
 backup_hour = 10
-backup_minute = 0
+backup_minute = 10
 
 media_path = '/media/pi/'
 data_path = pi_home + 'Data_ParentalCareTracking/'
@@ -111,6 +112,7 @@ def logs_backup_init(day, destination, source):
             os.rename(logfile, to_backup)
             with open(logfile, mode='a'):
                 pass
+            logger_setup(pi_home)
             logging.info('Created log file to backup tomorrow: ' + to_backup)
             print('Created log file to backup tomorrow.')
         else:
@@ -152,6 +154,7 @@ try:
             video_backup_init(folder, media_path + box_id, data_path)
             csv_backup_init(now, media_path + box_id, data_path)
             logs_backup_init(now, media_path + box_id, log_path)
+            time.sleep(61)
         pass
 except KeyboardInterrrupt:
     print('Exiting backups')
