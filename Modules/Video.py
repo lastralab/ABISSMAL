@@ -43,7 +43,6 @@ stream_duration = 5
 record_duration = 10
 threshold = 50
 sensitivity = 80
-
 REC_LED = 16
 GPIO.setmode(GPIO.BCM)
 GPIO.setwarnings(False)
@@ -52,35 +51,31 @@ GPIO.output(REC_LED, GPIO.LOW)
 
 
 def detect_motion(cam):
-    try:
-        global prior_image
-        streaming = io.BytesIO()
-        cam.capture(streaming, format='jpeg', use_video_port=True)
-        streaming.seek(0)
-        if prior_image is None:
-            prior_image = Image.open(streaming)
-            return False
+    global prior_image
+    streaming = io.BytesIO()
+    cam.capture(streaming, format='jpeg', use_video_port=True)
+    streaming.seek(0)
+    if prior_image is None:
+        prior_image = Image.open(streaming)
+        return False
+    else:
+        buffer1 = prior_image.load()
+        current_image = Image.open(streaming)
+        buffer2 = current_image.load()
+        pixels = 0
+        for x in range(0, video_width):
+            for y in range(0, video_height):
+                pixdiff1 = abs(buffer1[x, y][0] - buffer2[x, y][0])
+                pixdiff2 = abs(buffer1[x, y][1] - buffer2[x, y][1])
+                pixdiff3 = abs(buffer1[x, y][2] - buffer2[x, y][2])
+                if (pixdiff1 + pixdiff2 + pixdiff3) > (threshold * 3):
+                    pixels += 1
+        if pixels > sensitivity:
+            result = True
         else:
-            buffer1 = prior_image.load()
-            current_image = Image.open(streaming)
-            buffer2 = current_image.load()
-            pixels = 0
-            for x in range(0, video_width):
-                for y in range(0, video_height):
-                    pixdiff1 = abs(buffer1[x, y][0] - buffer2[x, y][0])
-                    pixdiff2 = abs(buffer1[x, y][1] - buffer2[x, y][1])
-                    pixdiff3 = abs(buffer1[x, y][2] - buffer2[x, y][2])
-                    if (pixdiff1 + pixdiff2 + pixdiff3) > (threshold * 3):
-                        pixels += 1
-            if pixels > sensitivity:
-                result = True
-            else:
-                result = False
-            prior_image = current_image
-            return result
-    except Exception as Exc:
-        logging.error('Camera motion detection error: ' + str(Exc))
-        email_alert('Video', 'Motion Detection Error: ' + str(Exc))
+            result = False
+        prior_image = current_image
+        return result
 
 
 def convert_video(filename):
@@ -101,9 +96,9 @@ def convert_video(filename):
 try:
     while True:
         with picamera.PiCamera() as camera:
+            general_time = datetime.now()
+            hour_int = int(f"{general_time:%H}")
             if int(time_range[0]) <= hour_int <= int(time_range[1]):
-                general_time = datetime.now()
-                hour_int = int(f"{general_time:%H}")
                 camera.resolution = (video_width, video_height)
                 camera.iso = iso
                 camera.framerate = fr
@@ -134,6 +129,7 @@ try:
                         GPIO.output(REC_LED, GPIO.LOW)
                         pass
                 except Exception as E:
+                    GPIO.cleanup()
                     print('Video error: ' + str(E))
                     logging.error('Video error: ' + str(E))
                     email_alert('Video', 'Error: ' + str(E))
