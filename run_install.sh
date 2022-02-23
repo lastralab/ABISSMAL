@@ -91,7 +91,9 @@ fi
 echo ""
 
 echo -e "${BIGreen}Enter email(s) to send error alerts.${NC}"
-echo -e "${RED}Note: Each email must contain single quotes '' as the example: 'email1@gmail.com', 'email2@gmail.com'${NC}"
+echo -e "${RED}Note:${NC} ${Yellow}Each email must be contained in single quotes ' ' as the example:${NC}"
+echo -e "${Cyan}'email1@gmail.com', 'email2@gmail.com'${NC}"
+echo ""
 echo -e "${Yellow}Press 'Enter' to skip configuration.${NC}"
 read -r emails
 if [ -n "$emails" ]
@@ -118,9 +120,10 @@ then
   echo -e "${Purple}Registered new hostname and updated hosts file${NC}"
   echo -e "${Green}Installation complete.${NC}"
   sleep 1
-  echo "${RED}Raspberry pi needs to be restarted at this point to update the new configuration${NC}"
-  echo "${Green}Restarting in 5 seconds...${NC}"
-  sleep 5
+  echo -e "${RED}Raspberry pi needs to be restarted at this point${NC}"
+  sleep 1
+  echo -e "${RED}Restarting in 5 seconds...${NC}"
+  sleep 6
   echo ""
   reboot
 else
