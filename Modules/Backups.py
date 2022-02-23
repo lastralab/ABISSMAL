@@ -21,11 +21,11 @@ pi_home = '/home/pi/'
 
 logger_setup(pi_home)
 
-backup_hour = 20
-backup_minute = 30
+backup_hour = 10
+backup_minute = 0
 
 media_path = '/media/pi/'
-data_path = 'Data_ParentalCareTracking/'
+data_path = pi_home + 'Data_ParentalCareTracking/'
 log_path = '/home/pi/log/'
 
 logging.info('Started backup script.')
@@ -44,9 +44,9 @@ def usb_connected(box):
         email_alert('Backups', 'Error: ' + exception)
 
 
-def video_backup_init(dt, file, destination, source):
+def video_backup_init(foldername, destination, source):
     src = source + 'Video'
-    path = media_path + destination + '/Data/Video/' + file
+    path = destination + '/Data/Video/' + foldername
     files = os.listdir(src)
     if len(files) > 0:
         if not os.path.exists(path):
@@ -54,36 +54,36 @@ def video_backup_init(dt, file, destination, source):
         for filename in files:
             if filename.endswith(video_extension):
                 shutil.move(os.path.join(src, filename), os.path.join(path, filename))
-            if filename.endswith('.h264'):
-                os.remove(os.path.join(src, filename))
+                print('Backed-up video ' + filename)
+                logging.info('Backed-up video ' + filename)
             else:
                 pass
-            print('Backed-up videos')
-            logging.info('Backed-up videos')
+            if filename.endswith('.h264'):
+                os.remove(os.path.join(src, filename))
+                print('Deleted video from source: ' + filename)
+                logging.info('Deleted video from source' + filename)
+            else:
+                pass
     else:
-        print('No videos backed-up. No videos found')
-        logging.error('No videos backed-up. No videos found. Check camera/video module.')
-        email_alert('Backup', 'No videos backed-up. No videos found. Check camera/video module.')
+        print('No videos backed-up. No files found')
+        logging.error('No videos backed-up. No files found. Check camera/video module.')
+        email_alert('Backup', 'No videos backed-up. Check camera/video module. No files found in source: ' + source)
         pass
 
 
-def csv_backup_init(dt, destination, source):
-    yesterday = dt - timedelta(days=1)
-    ydate = str(yesterday.year) + "_" + str(yesterday.month) + "_" + str(yesterday.day)
+def csv_backup_init(today, destination, source):
+    today_string = str(today.year) + "_" + str(today.month) + "_" + str(today.day)
     for module in modules:
         src = source + module
         files = os.listdir(src)
-        yesterday_file = box_id + "_" + module + "_" + ydate + ".csv"
-        if module != 'Video':
-            path = media_path + destination + '/Data/' + module + '/'
-        else:
-            path = media_path + destination + '/Data/Video/' + yesterday.strftime("%Y_%m_%d")
+        today_file = module + '_' + box_id + "_" + today_string + ".csv"
+        path = destination + '/Data/' + module + '/'
         if len(files) > 0:
             if not os.path.exists(path):
                 os.makedirs(path)
             for filename in files:
                 if filename.endswith(file_extension):
-                    if filename == yesterday_file:
+                    if filename != today_file:
                         shutil.move(os.path.join(src, filename), os.path.join(path, filename))
                     else:
                         pass
@@ -92,19 +92,32 @@ def csv_backup_init(dt, destination, source):
             print('Backed-up ' + module + ' metadata')
             logging.info('Backed-up ' + module + ' metadata')
         else:
-            print('Backup error: CSV files not found in module: ' + module)
-            logging.error('Backup error: CSV files not found in module: ' + module)
-            email_alert('Backup', 'Error: CSV files not found in module: ' + module)
+            print('CSV files not found in module: ' + module)
+            logging.warning('Backup: CSV files not found in module: ' + module)
+            email_alert('Backup', 'Warning: CSV files not found in module: ' + module)
             pass
-    logs = os.listdir(log_path)
+
+
+def logs_backup_init(day, destination, source):
+    today = str(day.year) + "_" + str(day.month) + "_" + str(day.day)
+    yday = day - timedelta(days=1)
+    ydate = str(yday.year) + "_" + str(yday.month) + "_" + str(yday.day)
+    logs = os.listdir(source)
     if len(logs) > 0:
-        path = media_path + destination + '/Data/Logs/' + yesterday.strftime("%Y_%m_%d")
+        path = destination + '/Data/Logs/'
         logfile = log_path + 'pct_' + box_id + '.log'
-        today = str(dt.year) + "_" + str(dt.month) + "_" + str(dt.day)
         to_backup = log_path + today + '_pct_' + box_id + '.log'
-        os.rename(logfile, to_backup)
-        logging.info('Created log file to backup tomorrow.')
-        print('Created log file to backup tomorrow.')
+        if os.path.exists(logfile):
+            os.rename(logfile, to_backup)
+            with open(logfile, mode='a'):
+                pass
+            logging.info('Created log file to backup tomorrow: ' + to_backup)
+            print('Created log file to backup tomorrow.')
+        else:
+            with open(logfile, mode='a'):
+                pass
+            logging.info('Created log file to backup today: ' + logfile)
+            print('Created log file to backup today.')
         if not os.path.exists(path):
             os.makedirs(path)
         for log in logs:
@@ -120,8 +133,8 @@ def csv_backup_init(dt, destination, source):
                     email_alert('Backup', 'Warning: Log file from yesterday not found.')
                     pass
             else:
-                print('Backup Error: .log files not found.')
-                logging.warning('Backup Error: .log files not found.')
+                print('Backup Warning: .log files not found.')
+                logging.warning('Backup: .log files not found.')
                 email_alert('Backup', 'Warning: .log files not found.')
                 pass
     else:
@@ -134,10 +147,11 @@ def csv_backup_init(dt, destination, source):
 try:
     while True:
         now = datetime.now()
-        folder = now.strftime("%Y_%m_%d")
         if usb_connected(box_id) and now.hour == backup_hour and now.minute == backup_minute:
-            video_backup_init(now, folder, box_id, pi_home + data_path)
-            csv_backup_init(now, box_id, pi_home + data_path)
+            folder = now.strftime("%Y_%m_%d")
+            video_backup_init(folder, media_path + box_id, data_path)
+            csv_backup_init(now, media_path + box_id, data_path)
+            logs_backup_init(now, media_path + box_id, log_path)
         pass
 except KeyboardInterrrupt:
     print('Exiting backups')
