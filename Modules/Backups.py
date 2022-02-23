@@ -22,8 +22,8 @@ pi_home = '/home/pi/'
 
 logger_setup(pi_home)
 
-backup_hour = 10
-backup_minute = 10
+backup_hour = 20
+backup_minute = 15
 
 media_path = '/media/pi/'
 data_path = pi_home + 'Data_ParentalCareTracking/'
