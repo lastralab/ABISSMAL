@@ -19,12 +19,10 @@ import shutil
 import time
 
 pi_home = '/home/pi/'
-
 logger_setup(pi_home)
 
 backup_hour = 20
 backup_minute = 15
-
 media_path = '/media/pi/'
 data_path = pi_home + 'Data_ParentalCareTracking/'
 log_path = '/home/pi/log/'
@@ -32,11 +30,15 @@ log_path = '/home/pi/log/'
 logging.info('Started backup script.')
 print('Started backup script.')
 
+logging.info('Backups will run once at ' + str(backup_hour) + ':' + str(backup_minute) + 'hrs every day')
+print('Backups will start at ' + str(backup_hour) + ':' + str(backup_minute) + 'hrs')
+
 
 def usb_connected(box):
     if len(os.listdir(media_path)) > 0:
         for volume in os.listdir(media_path):
             if str(volume) == box:
+                print('External drive name matches box_id')
                 return True
     else:
         exception = 'External drive not detected, backup won\'t be possible.'
