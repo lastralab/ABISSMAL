@@ -24,7 +24,7 @@ warn = 0
 module = 'RFID'
 header = ['chamber_id', 'year', 'month', 'day', 'timestamp', 'PIT_tag_ID']
 rfid_data = "/home/pi/Data_ParentalCareTracking/RFID"
-logging.info('Started RFID script.')
+logging.info('Started RFID script')
 GPIO_PIN = 1
 
 

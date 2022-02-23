@@ -27,8 +27,8 @@ media_path = '/media/pi/'
 data_path = pi_home + 'Data_ParentalCareTracking/'
 log_path = '/home/pi/log/'
 
-logging.info('Started backup script.')
-print('Started backup script.')
+logging.info('Started backup script')
+print('Started backup script')
 
 logging.info('Backups will run once at ' + str(backup_hour) + ':' + str(backup_minute) + 'hrs every day')
 print('Backups will start at ' + str(backup_hour) + ':' + str(backup_minute) + 'hrs')
