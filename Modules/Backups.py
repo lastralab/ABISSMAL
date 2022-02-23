@@ -38,7 +38,6 @@ def usb_connected(box):
     if len(os.listdir(media_path)) > 0:
         for volume in os.listdir(media_path):
             if str(volume) == box:
-                print('External drive name matches box_id')
                 return True
     else:
         exception = 'External drive not detected, backup won\'t be possible.'
