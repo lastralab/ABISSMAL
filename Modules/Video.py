@@ -54,51 +54,58 @@ print('Starting Video script')
 
 
 def detect_motion(cam):
-    global prior_image
-    streaming = io.BytesIO()
-    cam.capture(streaming, format='jpeg', use_video_port=True)
-    streaming.seek(0)
-    if prior_image is None:
-        prior_image = Image.open(streaming)
-        return False
-    else:
-        buffer1 = prior_image.load()
-        current_image = Image.open(streaming)
-        buffer2 = current_image.load()
-        pixels = 0
-        for x in range(0, video_width):
-            for y in range(0, video_height):
-                pixdiff1 = abs(buffer1[x, y][0] - buffer2[x, y][0])
-                pixdiff2 = abs(buffer1[x, y][1] - buffer2[x, y][1])
-                pixdiff3 = abs(buffer1[x, y][2] - buffer2[x, y][2])
-                if (pixdiff1 + pixdiff2 + pixdiff3) > (threshold * 3):
-                    pixels += 1
-        if pixels > sensitivity:
-            result = True
+    try:
+        global prior_image
+        streaming = io.BytesIO()
+        cam.capture(streaming, format='jpeg', use_video_port=True)
+        streaming.seek(0)
+        if prior_image is None:
+            prior_image = Image.open(streaming)
+            return False
         else:
-            result = False
-        prior_image = current_image
-        return result
+            buffer1 = prior_image.load()
+            current_image = Image.open(streaming)
+            buffer2 = current_image.load()
+            pixels = 0
+            for x in range(0, video_width):
+                for y in range(0, video_height):
+                    pixdiff1 = abs(buffer1[x, y][0] - buffer2[x, y][0])
+                    pixdiff2 = abs(buffer1[x, y][1] - buffer2[x, y][1])
+                    pixdiff3 = abs(buffer1[x, y][2] - buffer2[x, y][2])
+                    if (pixdiff1 + pixdiff2 + pixdiff3) > (threshold * 3):
+                        pixels += 1
+            if pixels > sensitivity:
+                result = True
+            else:
+                result = False
+            prior_image = current_image
+            return result
+    except Exception as Exc:
+        logging.error('Camera motion detection error: ' + str(Exc))
+        email_alert('Video', 'Motion Detection Error: ' + str(Exc))
 
 
 def convert_video(filename):
-    file_mp4 = path + Path(filename).stem + '.mp4'
-    command = "MP4Box -add " + filename + " " + file_mp4
-    call([command], shell=True)
-    logging.info('Converted video to mp4.')
-    print('Converted video')
-    os.remove(filename)
-    csv_writer(str(box_id), 'Video', path, f"{dt.year}_{dt.month}_{dt.day}",
-               header,
-               [box_id, f"{dt.year}", f"{dt.month}", f"{dt.day}", f"{dt:%H:%M:%S.%f}", Path(filename).stem + '.mp4'])
+    try:
+        file_mp4 = path + Path(filename).stem + '.mp4'
+        command = "MP4Box -add " + filename + " " + file_mp4
+        call([command], shell=True)
+        print('Converted video')
+        os.remove(filename)
+        csv_writer(str(box_id), 'Video', path, f"{dt.year}_{dt.month}_{dt.day}",
+                   header,
+                   [box_id, f"{dt.year}", f"{dt.month}", f"{dt.day}", f"{dt:%H:%M:%S.%f}", Path(filename).stem + '.mp4'])
+    except Exception as Err:
+        logging.error('Converting video error: ' + str(Err))
+        email_alert('Video', 'Convert Error: ' + str(Err))
 
 
 try:
     while True:
         with picamera.PiCamera() as camera:
-            general_time = datetime.now()
-            hour_int = int(f"{general_time:%H}")
             if int(time_range[0]) <= hour_int <= int(time_range[1]):
+                general_time = datetime.now()
+                hour_int = int(f"{general_time:%H}")
                 camera.resolution = (video_width, video_height)
                 camera.iso = iso
                 camera.framerate = fr
@@ -107,7 +114,7 @@ try:
                 try:
                     if detect_motion(camera):
                         print('Motion detected; Recording started')
-                        logging.info("Starting video recording...")
+                        logging.info("Motion detected, starting recordings...")
                         GPIO.output(REC_LED, GPIO.HIGH)
                         dt = datetime.now()
                         dt_str = str(f"{dt.year}_{dt.month}_{dt.day}_{dt:%H}_{dt:%M}_{dt:%S}")
@@ -118,12 +125,13 @@ try:
                         stream.copy_to(file1_h264, seconds=stream_duration)
                         stream.clear()
                         print('Recording finished')
-                        logging.info("Video recorded")
+                        logging.info("Videos recorded")
                         GPIO.output(REC_LED, GPIO.LOW)
                         camera.wait_recording(1)
                         camera.split_recording(stream)
                         convert_video(file1_h264)
                         convert_video(file2_h264)
+                        logging.info('Converted videos to mp4')
                     else:
                         GPIO.output(REC_LED, GPIO.LOW)
                         pass
@@ -131,6 +139,8 @@ try:
                     print('Video error: ' + str(E))
                     logging.error('Video error: ' + str(E))
                     email_alert('Video', 'Error: ' + str(E))
+            else:
+                pass
 except KeyboardInterrrupt:
     print('Exiting Video')
     logging.info('Exiting Video')
