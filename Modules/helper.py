@@ -27,34 +27,26 @@ def logger_setup(default_dir):
 
     if not os.path.exists(default_dir + 'log'):
         os.makedirs(default_dir + 'log')
-
     main_data = default_dir + 'Data_ParentalCareTracking'
     if not os.path.exists(main_data):
         os.makedirs(main_data)
-
     irbb_data = main_data + "/IRBB"
     rfid_data = main_data + "/RFID"
     temp_data = main_data + "/Temp"
     video_data = main_data + "/Video"
-
     if not os.path.exists(irbb_data):
         os.makedirs(irbb_data)
-
     if not os.path.exists(rfid_data):
         os.makedirs(rfid_data)
-
     if not os.path.exists(temp_data):
         os.makedirs(temp_data)
-
     if not os.path.exists(video_data):
         os.makedirs(video_data)
-
-    FORMAT = "%(asctime)s %(levelname)s %(message)s"
-
+    format_log = "%(asctime)s %(levelname)s %(message)s"
     logging.basicConfig(
-        format=FORMAT,
+        format=format_log,
         filename=default_dir + 'log/pct_' + box_id + '.log',
-        level=logging.INFO,
+        level=logging.DEBUG,
         datefmt="%Y-%m-%d %H:%M:%S"
     )
 
