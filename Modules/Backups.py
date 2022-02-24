@@ -119,7 +119,13 @@ def logs_backup_init(day, destination, source):
             os.rename(logfile, to_backup)
             with open(logfile, mode='a'):
                 pass
-            logger_setup(pi_home)
+            format_log = "%(asctime)s %(levelname)s %(message)s"
+            logging.basicConfig(
+                format=format_log,
+                filename=pi_home + 'log/pct_' + box_id + '.log',
+                level=logging.DEBUG,
+                datefmt="%Y-%m-%d %H:%M:%S"
+            )
             logging.info('Created log file to backup tomorrow: ' + to_backup)
             print('Created log file to backup tomorrow.')
         else:
