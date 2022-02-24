@@ -27,8 +27,8 @@ media_path = '/media/pi/'
 data_path = pi_home + 'Data_ParentalCareTracking/'
 log_path = '/home/pi/log/'
 
-logging.info('Started backup script.')
-print('Started backup script.')
+logging.info('Started backup script')
+print('Started backup script')
 
 logging.info('Backups will run once at ' + str(backup_hour) + ':' + str(backup_minute) + 'hrs every day')
 print('Backups will start at ' + str(backup_hour) + ':' + str(backup_minute) + 'hrs')
@@ -51,21 +51,27 @@ def video_backup_init(foldername, destination, source):
     path = destination + '/Data/Video/' + foldername
     files = os.listdir(src)
     if len(files) > 0:
+        videos = 0
+        deleted = 0
         if not os.path.exists(path):
             os.makedirs(path)
         for filename in files:
             if filename.endswith(video_extension):
                 shutil.move(os.path.join(src, filename), os.path.join(path, filename))
                 print('Backed-up video ' + filename)
-                logging.info('Backed-up video ' + filename)
+                videos = videos + 1
             else:
                 pass
             if filename.endswith('.h264'):
                 os.remove(os.path.join(src, filename))
                 print('Deleted video from source: ' + filename)
-                logging.info('Deleted video from source' + filename)
+                deleted = deleted + 1
             else:
                 pass
+        print('Backed-up ' + str(videos) + ' videos')
+        print('Deleted ' + str(deleted) + ' videos')
+        logging.info('Backed-up ' + str(videos) + ' .h264 videos')
+        logging.info('Deleted ' + str(deleted) + ' .h264 videos')
     else:
         print('No videos backed-up. No files found')
         logging.error('No videos backed-up. No files found. Check camera/video module.')
@@ -113,7 +119,13 @@ def logs_backup_init(day, destination, source):
             os.rename(logfile, to_backup)
             with open(logfile, mode='a'):
                 pass
-            logger_setup(pi_home)
+            format_log = "%(asctime)s %(levelname)s %(message)s"
+            logging.basicConfig(
+                format=format_log,
+                filename=pi_home + 'log/pct_' + box_id + '.log',
+                level=logging.DEBUG,
+                datefmt="%Y-%m-%d %H:%M:%S"
+            )
             logging.info('Created log file to backup tomorrow: ' + to_backup)
             print('Created log file to backup tomorrow.')
         else:
