@@ -49,6 +49,9 @@ GPIO.setwarnings(False)
 GPIO.setup(REC_LED, GPIO.OUT)
 GPIO.output(REC_LED, GPIO.LOW)
 
+logging.info('Video will be recorded between ' + str(time_range[0]) + ' and ' + str(time_range[1]) + 'hours')
+print('Video will be recorded between ' + str(time_range[0]) + ' and ' + str(time_range[1]) + 'hours')
+
 
 def detect_motion(cam):
     global prior_image
