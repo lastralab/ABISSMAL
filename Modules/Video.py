@@ -147,4 +147,6 @@ except Exception as E:
     logging.error('Video error: ' + str(E))
     email_alert('Video', 'Error: ' + str(E))
 finally:
+    camera.stop_recording()
+    camera.close()
     GPIO.output(REC_LED, GPIO.LOW)
