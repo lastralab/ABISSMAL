@@ -44,6 +44,7 @@ record_duration = 10
 threshold = 50
 sensitivity = 80
 REC_LED = 16
+timeout = 60
 GPIO.setmode(GPIO.BCM)
 GPIO.setwarnings(False)
 GPIO.setup(REC_LED, GPIO.OUT)
@@ -99,6 +100,7 @@ def convert_video(filename):
 try:
     while True:
         with picamera.PiCamera() as camera:
+            camera
             general_time = datetime.now()
             hour_int = int(f"{general_time:%H}")
             if int(time_range[0]) <= hour_int <= int(time_range[1]):
@@ -106,9 +108,9 @@ try:
                 camera.iso = iso
                 camera.framerate = fr
                 stream = picamera.PiCameraCircularIO(camera, seconds=stream_duration)
-                camera.start_recording(stream, format='h264')
                 try:
                     if detect_motion(camera):
+                        camera.start_recording(stream, format='h264')
                         print('Motion detected; Recording started')
                         logging.info("Motion detected, starting recordings...")
                         GPIO.output(REC_LED, GPIO.HIGH)
@@ -134,11 +136,8 @@ try:
                 except Exception as E:
                     GPIO.cleanup()
                     print('Video error: ' + str(E))
-                    logging.error('Video: ' + str(E))
+                    logging.error('Video during recording time: ' + str(E))
                     email_alert('Video', 'Error: ' + str(E))
-                    camera.stop_recording()
-                    camera.close()
-                    logging.error('Video: Camera stopped recording because of exception: ' + str(E))
             else:
                 pass
 except KeyboardInterrrupt:
@@ -147,7 +146,7 @@ except KeyboardInterrrupt:
     GPIO.cleanup()
 except Exception as E:
     print('Video error: ' + str(E))
-    logging.error('Video error: ' + str(E))
+    logging.error('Video while loop: ' + str(E))
     email_alert('Video', 'Error: ' + str(E))
 finally:
     camera.close()
