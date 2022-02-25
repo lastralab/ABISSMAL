@@ -25,7 +25,6 @@ backup_hour = 20
 backup_minute = 15
 media_path = '/media/pi/'
 data_path = pi_home + 'Data_ParentalCareTracking/'
-log_path = '/home/pi/log/'
 
 logging.info('Started backup script')
 print('Started backup script')
@@ -106,59 +105,6 @@ def csv_backup_init(today, destination, source):
             pass
 
 
-# def logs_backup_init(day, destination, source):
-#     today = str(day.year) + "_" + str(day.month) + "_" + str(day.day)
-#     yday = day - timedelta(days=1)
-#     ydate = str(yday.year) + "_" + str(yday.month) + "_" + str(yday.day)
-#     logs = os.listdir(source)
-#     if len(logs) > 0:
-#         path = destination + '/Data/Logs/'
-#         logfile = log_path + 'pct_' + box_id + '.log'
-#         to_backup = log_path + today + '_pct_' + box_id + '.log'
-#         if os.path.exists(logfile):
-#             os.rename(logfile, to_backup)
-#             with open(logfile, mode='a'):
-#                 pass
-#             format_log = "%(asctime)s %(levelname)s %(message)s"
-#             logging.basicConfig(
-#                 format=format_log,
-#                 filename=pi_home + 'log/pct_' + box_id + '.log',
-#                 level=logging.DEBUG,
-#                 datefmt="%Y-%m-%d %H:%M:%S"
-#             )
-#             logging.info('Created log file to backup tomorrow: ' + to_backup)
-#             print('Created log file to backup tomorrow.')
-#         else:
-#             with open(logfile, mode='a'):
-#                 pass
-#             logging.info('Created log file to backup today: ' + logfile)
-#             print('Created log file to backup today.')
-#         if not os.path.exists(path):
-#             os.makedirs(path)
-#         for log in logs:
-#             if log.endswith('.log'):
-#                 yesterday_log = ydate + '_pct_' + box_id + '.log'
-#                 if log == yesterday_log:
-#                     shutil.move(os.path.join(log_path, log), os.path.join(path, log))
-#                     print('Backed-up log')
-#                     logging.info('Backed-up log')
-#                 else:
-#                     print('Backup Warning: Log file from yesterday not found.')
-#                     logging.warning('Backup Error: Log file from yesterday not found.')
-#                     email_alert('Backup', 'Warning: Log file from yesterday not found.')
-#                     pass
-#             else:
-#                 print('Backup Warning: .log files not found.')
-#                 logging.warning('Backup: .log files not found.')
-#                 email_alert('Backup', 'Warning: .log files not found.')
-#                 pass
-#     else:
-#         print('Backup Error: Logs not found in /home/pi/log/')
-#         logging.error('Backup Error: Logs not found in /home/pi/log/')
-#         email_alert('Backup', 'Error: Logs not found in /home/pi/log/')
-#         pass
-
-
 try:
     while True:
         now = datetime.now()
@@ -166,7 +112,6 @@ try:
             folder = now.strftime("%Y_%m_%d")
             video_backup_init(folder, media_path + box_id, data_path)
             csv_backup_init(now, media_path + box_id, data_path)
-            # logs_backup_init(now, media_path + box_id, log_path)
             time.sleep(61)
         pass
 except KeyboardInterrrupt:
