@@ -1,11 +1,13 @@
 ---
 name: Task/Documentation
 about: Software development not involved
-title: ''
+title: '[Task/Wiki] Short description'
 labels: documentation, task
 assignees: ''
 
 ---
 
-Hardware issue
-Request more documentation about specific functionality
+Note:
+Remove label 'task' or 'documentation' accordingly. Both can stay if this issue is about both.
+
+Description:

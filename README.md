@@ -26,11 +26,6 @@ Please refer to our [Installation Overview](https://github.com/lastralab/Parenta
    3. Insert setup information accordingly
    4. Run `bash Main.sh` to start collecting data
 
-### Troubleshooting
+## Troubleshooting
 
-LED still ON after detaching all screens</h3>
-
-- Open terminal in root folder, run:
-  - > screen -r irbb
-    >
-  - Ctrl + C
+Please refer to our Wiki [Troubleshooting](https://github.com/lastralab/ParentalCareTracking/wiki/Installation#troubleshooting)

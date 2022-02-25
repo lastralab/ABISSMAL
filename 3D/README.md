@@ -2,7 +2,7 @@
 
 ### .stl Models ready for 3D printing
 
-1. Nest entrance model (bobine)
+1. Nest entrance model (bobbin)
    * Used to make the antennas for RFID
    * ![ScreenShot20220213at21219PM.png](./assets/Screen%20Shot%202022-02-13%20at%202.12.19%20PM.png)
 2. Antenna Cover

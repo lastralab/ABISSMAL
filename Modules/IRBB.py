@@ -29,8 +29,8 @@ module = 'IRBB'
 header = ['chamber_id', 'sensor_id', 'year', 'month', 'day', 'timestamp']
 irbb_data = "/home/pi/Data_ParentalCareTracking/IRBB/"
 
-logging.info('Started IRBB')
-print('Started IRBB')
+logging.info('Started IRBB script')
+print('Started IRBB script')
 
 GPIO.setmode(GPIO.BCM)
 GPIO.setup(BEAM_PIN_lead, GPIO.IN, pull_up_down=GPIO.PUD_UP)

@@ -30,7 +30,7 @@ def monitor_screens():
 try:
     while True:
         monitor_screens()
-        logging.info("Monitored screens.")
+        logging.info("Monitored screens")
         time.sleep(60)
         pass
 except Exception as E:

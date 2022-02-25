@@ -29,7 +29,7 @@ echo -e "${Blue}Repository:${NC}  https://github.com/lastralab/parentalcaretrack
 echo -e "${Blue}Installation script:${NC}        ${Blue}run_install.sh${NC}"
 echo -e "${Blue}Authors:${NC}     ${Cyan}Tania M. Molina & Grace Smith-Vidaurre${NC}"
 echo ""
-echo -e "${Yellow}Running as:${NC} ${user_name}"
+echo -e "${Yellow}Setting permissions for ${user_name}...${NC}"
 find . -type f -exec chmod 644 {} \;
 echo ""
 echo -e "${BIGreen}Enter the Box ID${NC} (Example: Box_01)"
@@ -45,7 +45,7 @@ fi
 sleep 1
 echo ""
 
-echo -e "${Yellow}Press 'Enter' to skip installing packages.${NC}"
+echo -e "${Yellow}Press 'Enter' to skip or insert any character to install required packages.${NC}"
 read -r packs
 if [ -n "$packs" ]
 then
@@ -91,7 +91,9 @@ fi
 echo ""
 
 echo -e "${BIGreen}Enter email(s) to send error alerts.${NC}"
-echo -e "${RED}Note: Each email must contain single quotes '' as the example: 'email1@gmail.com', 'email2@gmail.com'${NC}"
+echo -e "${RED}Note:${NC} ${Yellow}Each email must be contained in single quotes ' ' as the example:${NC}"
+echo -e "${Cyan}'email1@gmail.com', 'email2@gmail.com'${NC}"
+echo ""
 echo -e "${Yellow}Press 'Enter' to skip configuration.${NC}"
 read -r emails
 if [ -n "$emails" ]
@@ -118,9 +120,10 @@ then
   echo -e "${Purple}Registered new hostname and updated hosts file${NC}"
   echo -e "${Green}Installation complete.${NC}"
   sleep 1
-  echo "${RED}Raspberry pi needs to be restarted at this point to update the new configuration${NC}"
-  echo "${Green}Restarting in 5 seconds...${NC}"
-  sleep 5
+  echo -e "${RED}Raspberry pi needs to be restarted at this point${NC}"
+  sleep 1
+  echo -e "${RED}Restarting in 5 seconds...${NC}"
+  sleep 6
   echo ""
   reboot
 else
