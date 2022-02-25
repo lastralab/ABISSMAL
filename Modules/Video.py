@@ -136,6 +136,8 @@ try:
                     print('Video error: ' + str(E))
                     logging.error('Video error: ' + str(E))
                     email_alert('Video', 'Error: ' + str(E))
+                    camera.stop_recording()
+                    logging.error('Video: Camera stopped recording because of exception: ' + str(E))
             else:
                 pass
 except KeyboardInterrrupt:
@@ -147,4 +149,5 @@ except Exception as E:
     logging.error('Video error: ' + str(E))
     email_alert('Video', 'Error: ' + str(E))
 finally:
+    camera.close()
     GPIO.output(REC_LED, GPIO.LOW)
