@@ -134,9 +134,10 @@ try:
                 except Exception as E:
                     GPIO.cleanup()
                     print('Video error: ' + str(E))
-                    logging.error('Video error: ' + str(E))
-                    email_alert('Video', 'Error: ' + str(E))
+                    logging.error('Video: ' + str(E) + ' ' + str(E.with_traceback()))
+                    email_alert('Video', 'Error: ' + str(E) + '. ' + str(E.with_traceback()))
                     camera.stop_recording()
+                    camera.close()
                     logging.error('Video: Camera stopped recording because of exception: ' + str(E))
             else:
                 pass
