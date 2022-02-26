@@ -27,14 +27,14 @@ media_path = '/media/pi/'
 data_path = pi_home + 'Data_ParentalCareTracking/'
 log_path = '/home/pi/log/'
 
-logger = get_logger(date.today())
+logging = get_logger(datetime.today())
 
-logger.info('Started backup script')
+logging.info('Started backup script')
 print('Started backup script')
 
-logger.info('CSV and Video Backups will run once every day at ' + str(backup_hour) + ':' + str(backup_minute) + 'hrs')
+logging.info('CSV and Video Backups will run once every day at ' + str(backup_hour) + ':' + str(backup_minute) + 'hrs')
 print('CSV and Video Backups will run once every day at ' + str(backup_hour) + ':' + str(backup_minute) + 'hrs')
-logger.info('Log Backup will run once at 0:00hrs every day')
+logging.info('Log Backup will run once at 0:00hrs every day')
 print('Log Backup will run once at 0:00hrs every day')
 
 
@@ -44,7 +44,6 @@ def usb_connected(box):
             if str(volume) == box:
                 return True
     else:
-        logging = get_logger(date.today())
         exception = 'External drive not detected, backup won\'t be possible.'
         print('Backups error: ' + exception)
         logging.error('Backups error: ' + exception)
@@ -55,7 +54,6 @@ def video_backup_init(foldername, destination, source):
     src = source + 'Video'
     path = destination + '/Data/Video/' + foldername
     files = os.listdir(src)
-    logging = get_logger(date.today())
     if len(files) > 0:
         videos = 0
         deleted = 0
@@ -87,7 +85,6 @@ def video_backup_init(foldername, destination, source):
 
 def csv_backup_init(today, destination, source):
     today_string = str(today.year) + "_" + str(today.month) + "_" + str(today.day)
-    logging = get_logger(today)
     for module in modules:
         src = source + module
         files = os.listdir(src)
@@ -115,7 +112,6 @@ def csv_backup_init(today, destination, source):
 
 def logs_backup_init(day, destination, source):
     today = str(day.year) + "_" + str(day.month) + "_" + str(day.day)
-    logging = get_logger(today)
     logs = os.listdir(source)
     if len(logs) > 0:
         path = destination + '/Data/Logs/'
@@ -161,11 +157,9 @@ try:
         else:
             pass
 except KeyboardInterrrupt:
-    logging = get_logger(datetime.today())
     print('Exiting backups')
     logging.info('Exiting backups')
 except Exception as E:
-    logging = get_logger(datetime.today())
     print('Backups error: ' + str(E))
     logging.error('Backups error: ' + str(E))
     email_alert('Backups', 'Error: ' + str(E))
