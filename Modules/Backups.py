@@ -17,6 +17,7 @@ import os
 from datetime import *
 import shutil
 import time
+from helper import set_logger
 
 pi_home = '/home/pi/'
 logger_setup(pi_home)
@@ -25,12 +26,15 @@ backup_hour = 20
 backup_minute = 15
 media_path = '/media/pi/'
 data_path = pi_home + 'Data_ParentalCareTracking/'
+log_path = '/home/pi/log/'
 
 logging.info('Started backup script')
 print('Started backup script')
 
-logging.info('Backups will run once at ' + str(backup_hour) + ':' + str(backup_minute) + 'hrs every day')
-print('Backups will start at ' + str(backup_hour) + ':' + str(backup_minute) + 'hrs')
+logging.info('CSV and Video Backups will run once every day at ' + str(backup_hour) + ':' + str(backup_minute) + 'hrs')
+print('CSV and Video Backups will run once every day at ' + str(backup_hour) + ':' + str(backup_minute) + 'hrs')
+logging.info('Log Backup will run once at 0:00hrs every day')
+print('Log Backup will run once at 0:00hrs every day')
 
 
 def usb_connected(box):
@@ -105,6 +109,39 @@ def csv_backup_init(today, destination, source):
             pass
 
 
+def logs_backup_init(day, destination, source):
+    today = str(day.year) + "_" + str(day.month) + "_" + str(day.day)
+    logs = os.listdir(source)
+    if len(logs) > 0:
+        path = destination + '/Data/Logs/'
+        today_log = today + '_pct_' + box_id + '.log'
+        if not os.path.exists(path):
+            os.makedirs(path)
+        for log in logs:
+            logs_qty = 0
+            if log.endswith('.log'):
+                if log != today_log:
+                    shutil.move(os.path.join(log_path, log), os.path.join(path, log))
+                    logs_qty = logs_qty + 1
+                else:
+                    print('Backup Warning: Old Log files not found.')
+                    logging.warning('Backup: Old Log files not found.')
+                    email_alert('Backup', 'Warning: Old Log files not found in source.')
+                print('Backed-up logs: ' + str(logs_qty))
+                logging.info('Backed-up logs total: ' + str(logs_qty))
+                pass
+            else:
+                print('Backup Warning: .log files not found in source.')
+                logging.warning('Backup: .log files not found in source.')
+                email_alert('Backup', 'Warning: .log files not found in source.')
+                pass
+    else:
+        print('Backup Error: Empty Log dir: /home/pi/log/')
+        logging.error('Backup: Empty Log dir /home/pi/log/')
+        email_alert('Backup', 'Error: Empty Log directory /home/pi/log/')
+        pass
+
+
 try:
     while True:
         now = datetime.now()
@@ -113,7 +150,11 @@ try:
             video_backup_init(folder, media_path + box_id, data_path)
             csv_backup_init(now, media_path + box_id, data_path)
             time.sleep(61)
-        pass
+        elif usb_connected(box_id) and now.hour == 0 and now.minute == 0:
+            logs_backup_init(now, media_path + box_id, log_path)
+            time.sleep(61)
+        else:
+            pass
 except KeyboardInterrrupt:
     print('Exiting backups')
     logging.info('Exiting backups')

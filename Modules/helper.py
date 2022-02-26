@@ -3,7 +3,7 @@
 # Project: ParentalCareTracking
 # Date: 11/29/21
 # !/usr/bin/env python3
-
+import datetime
 import logging
 import time
 import signal
@@ -21,6 +21,19 @@ modules = ['IRBB', 'RFID', 'Temp', 'Video']
 video_extension = '.mp4'
 file_extension = '.csv'
 emails = []
+
+
+def set_logger(default_dir):
+    day = date.today()
+    today = str(day.year) + "_" + str(day.month) + "_" + str(day.day)
+    format_log = "%(asctime)s %(levelname)s %(message)s"
+    logging.getLogger(default_dir + 'log/' + today + '_pct_' + box_id + '.log')
+    logging.basicConfig(
+        format=format_log,
+        filename=default_dir + 'log/' + today + '_pct_' + box_id + '.log',
+        level=logging.DEBUG,
+        datefmt="%Y-%m-%d %H:%M:%S"
+    )
 
 
 def logger_setup(default_dir):
@@ -42,15 +55,9 @@ def logger_setup(default_dir):
             os.makedirs(temp_data)
         if not os.path.exists(video_data):
             os.makedirs(video_data)
-        format_log = "%(asctime)s %(levelname)s %(message)s"
-        logging.basicConfig(
-            format=format_log,
-            filename=default_dir + 'log/pct_' + box_id + '.log',
-            level=logging.DEBUG,
-            datefmt="%Y-%m-%d %H:%M:%S"
-        )
+        set_logger(default_dir)
     except Exception as E:
-        logging.error('Helper Logger Setup Error: ' + str(E))
+        print('Helper Logger Setup Error: ' + str(E))
         email_alert('Helper', 'Logger Setup Error: ' + str(E))
 
 
