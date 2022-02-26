@@ -13,11 +13,10 @@ import sys
 import csv
 import re
 import RPi.GPIO as GPIO
-import logging
 import io
 import random
 import picamera
-from helper import logger_setup
+from helper import dir_setup
 from helper import csv_writer
 from helper import box_id
 from time import sleep
@@ -26,9 +25,11 @@ from PIL import Image
 from subprocess import call
 from pathlib import Path
 from helper import email_alert
+from helper import get_logger
 
-logger_setup('/home/pi/')
-logging.info('Starting Video script')
+dir_setup('/home/pi/')
+logger = get_logger(datetime.today())
+logger.info('Starting Video script')
 print('Starting Video script')
 
 path = "/home/pi/Data_ParentalCareTracking/Video/"
@@ -49,7 +50,7 @@ GPIO.setwarnings(False)
 GPIO.setup(REC_LED, GPIO.OUT)
 GPIO.output(REC_LED, GPIO.LOW)
 
-logging.info('Video will be recorded between ' + str(time_range[0]) + ' and ' + str(time_range[1]) + ' hours')
+logger.info('Video will be recorded between ' + str(time_range[0]) + ' and ' + str(time_range[1]) + ' hours')
 print('Video will be recorded between ' + str(time_range[0]) + ' and ' + str(time_range[1]) + ' hours')
 
 
@@ -92,6 +93,7 @@ def convert_video(filename):
                    header,
                    [box_id, f"{dt.year}", f"{dt.month}", f"{dt.day}", f"{dt:%H:%M:%S.%f}", Path(filename).stem + '.mp4'])
     except Exception as Err:
+        logging = get_logger(datetime.today())
         logging.error('Converting video error: ' + str(Err))
         email_alert('Video', 'Convert Error: ' + str(Err))
 
@@ -101,6 +103,7 @@ try:
         with picamera.PiCamera() as camera:
             general_time = datetime.now()
             hour_int = int(f"{general_time:%H}")
+            logging = get_logger(general_time)
             if int(time_range[0]) <= hour_int <= int(time_range[1]):
                 camera.resolution = (video_width, video_height)
                 camera.iso = iso
@@ -140,10 +143,12 @@ try:
                 pass
 except KeyboardInterrrupt:
     print('Exiting Video')
+    logging = get_logger(datetime.today())
     logging.info('Exiting Video')
     GPIO.cleanup()
 except Exception as E:
     print('Video error: ' + str(E))
+    logging = get_logger(datetime.today())
     logging.error('Video error: ' + str(E))
     email_alert('Video', 'Error: ' + str(E))
 finally:
