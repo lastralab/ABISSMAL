@@ -6,25 +6,25 @@
 # !/usr/bin/env python3
 
 import wiringpi as wiringpi2
-import numpy as np
 import time
 import sys
 from datetime import datetime
 import csv
-import logging
-from helper import logger_setup
+from helper import dir_setup
 from helper import csv_writer
 from helper import box_id
 from helper import email_alert
 from time import sleep
+from helper import get_logger
 
-logger_setup("/home/pi/")
+dir_setup("/home/pi/")
 
 warn = 0
 module = 'RFID'
 header = ['chamber_id', 'year', 'month', 'day', 'timestamp', 'PIT_tag_ID']
 rfid_data = "/home/pi/Data_ParentalCareTracking/RFID"
-logging.info('Started RFID script')
+logger = get_logger(datetime.today())
+logger.info('Started RFID script')
 GPIO_PIN = 1
 
 
@@ -39,6 +39,7 @@ def RFIDSetup():
     wiringpi2.pinMode(GPIO_PIN, 0)
     fd = wiringpi2.serialOpen('/dev/serial0', 9600)
     wiringpi2.serialFlush(fd)
+    logging = get_logger(datetime.today())
     if response != 0 and fd <= 0:
         print("Unable to Setup communications")
         logging.error("RFID Error: Unable to Setup communications")
@@ -92,14 +93,17 @@ def ReadTagPageZero(fd):
             if ans == int("0xD6", 16):
                 ans = ReadText(fd)
                 dt = datetime.now()
+                logging = get_logger(dt)
                 logging.info('RFID activity detected')
                 print('RFID activity detected')
                 csv_writer(str(box_id), module, rfid_data, f"{dt.year}_{dt.month}_{dt.day}", header,
                            [box_id, f"{dt.year}", f"{dt.month}", f"{dt.day}", f"{dt:%H:%M:%S.%f}", ans])
     except KeyboardInterrupt:
+        logging = get_logger(datetime.today())
         logging.info('Exiting RFID')
         print('Exiting RFID')
     except Exception as E:
+        logging = get_logger(datetime.today())
         logging.error('RFID error: ' + str(E))
         print('RFID error: ' + str(E))
         email_alert('RFID', 'Error: ' + str(E))

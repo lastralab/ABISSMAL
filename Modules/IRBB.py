@@ -11,16 +11,16 @@ from datetime import datetime
 import sys
 import csv
 import RPi.GPIO as GPIO
-import logging
-from helper import logger_setup
+from helper import dir_setup
 from helper import csv_writer
 from helper import box_id
 from time import sleep
 from subprocess import call
 from os import walk
 from helper import email_alert
+from helper import get_logger
 
-logger_setup('/home/pi/')
+dir_setup('/home/pi/')
 
 BEAM_PIN_lead = 13
 BEAM_PIN_rear = 19
@@ -29,7 +29,8 @@ module = 'IRBB'
 header = ['chamber_id', 'sensor_id', 'year', 'month', 'day', 'timestamp']
 irbb_data = "/home/pi/Data_ParentalCareTracking/IRBB/"
 
-logging.info('Started IRBB script')
+logger = get_logger(datetime.today())
+logger.info('Started IRBB script')
 print('Started IRBB script')
 
 GPIO.setmode(GPIO.BCM)
@@ -41,6 +42,7 @@ GPIO.setwarnings(False)
 def detect_beam_breaks_callback(BEAM_PIN, sensor_id):
     if not GPIO.input(BEAM_PIN):
         dt = datetime.now()
+        logging = get_logger(dt)
         logging.info('IRBB activity detected in sensor: ' + sensor_id)
         print('IRBB activity detected in sensor: ' + sensor_id)
         csv_writer(str(box_id), 'IRBB', irbb_data, f"{dt.year}_{dt.month}_{dt.day}",
@@ -64,10 +66,12 @@ try:
     while True:
         pass
 except KeyboardInterrupt:
+    logging = get_logger(datetime.today())
     logging.info('exiting IRBB')
     print('exiting IRBB')
     GPIO.cleanup()
 except Exception as E:
+    logging = get_logger(datetime.today())
     logging.error('IRBB error: ' + str(E))
     print('IRBB error: ' + str(E))
     email_alert('IRBB', 'Error: ' + str(E))
