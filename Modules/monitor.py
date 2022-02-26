@@ -4,20 +4,23 @@
 # Date: 2/20/22
 
 import subprocess
-import logging
 import time
 from helper import email_alert
-from helper import logger_setup
+from helper import dir_setup
+from helper import get_logger
+import datetime
 
-logger_setup('/home/pi/')
+dir_setup('/home/pi/')
 modules = ['temp', 'video', 'rfid', 'irbb', 'backup']
 
-logging.info('Starting Monitor script')
+logger = get_logger(datetime.date.today())
+logger.info('Starting Monitor script')
 print('Starting Monitor script')
 
 
 def monitor_screens():
     screens = str(subprocess.getoutput("screen -list"))
+    logging = get_logger(datetime.date.today())
     for screen in modules:
         if screens.find(screen) == -1:
             email_alert(screen, 'Screen not running.')
@@ -30,10 +33,12 @@ def monitor_screens():
 try:
     while True:
         monitor_screens()
+        logging = get_logger(datetime.date.today())
         logging.info("Monitored screens")
         time.sleep(60)
         pass
 except Exception as E:
+    logging = get_logger(datetime.date.today())
     logging.error('Monitor error: ' + str(E))
     email_alert('Monitor', 'Error while monitoring screens: ' + str(E))
     print('Monitor error: ' + str(E))

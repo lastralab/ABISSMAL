@@ -2,9 +2,10 @@
 # Author: nmoltta
 # Project: ParentalCareTracking
 # Date: 11/29/21
+
 # !/usr/bin/env python3
+
 import datetime
-import logging
 import time
 import signal
 import sys
@@ -15,6 +16,7 @@ from os.path import exists
 import smtplib
 from Setup.email_service import source
 from Setup.email_service import key
+import log
 
 box_id = 'Box_01'
 modules = ['IRBB', 'RFID', 'Temp', 'Video']
@@ -23,20 +25,14 @@ file_extension = '.csv'
 emails = []
 
 
-def set_logger(default_dir):
-    day = date.today()
-    today = str(day.year) + "_" + str(day.month) + "_" + str(day.day)
-    format_log = "%(asctime)s %(levelname)s %(message)s"
-    logging.getLogger(default_dir + 'log/' + today + '_pct_' + box_id + '.log')
-    logging.basicConfig(
-        format=format_log,
-        filename=default_dir + 'log/' + today + '_pct_' + box_id + '.log',
-        level=logging.DEBUG,
-        datefmt="%Y-%m-%d %H:%M:%S"
-    )
+def get_logger(day):
+    name = str(day.year) + '_' + str(day.month) + '_' + str(day.day) + '_pct_' + box_id + '.log'
+    logger = log.setup_custom_logger('/home/pi/log/' + name)
+    print('Used logger: ' + name)
+    return logger
 
 
-def logger_setup(default_dir):
+def dir_setup(default_dir):
     try:
         if not os.path.exists(default_dir + 'log'):
             os.makedirs(default_dir + 'log')
@@ -55,7 +51,6 @@ def logger_setup(default_dir):
             os.makedirs(temp_data)
         if not os.path.exists(video_data):
             os.makedirs(video_data)
-        set_logger(default_dir)
     except Exception as E:
         print('Helper Logger Setup Error: ' + str(E))
         email_alert('Helper', 'Logger Setup Error: ' + str(E))
@@ -78,11 +73,15 @@ def csv_writer(box_id, module, data_path, datestring, header, value):
                 tmp_writer.writerow(value)
                 file.close()
     except Exception as E:
+        logging = log.setup_custom_logger('/home/pi/log/' + datestring + '_pct_log.log')
         logging.error('Helper CSV Writter Error: ' + str(E))
         email_alert('Helper', 'CSV Writter Error: ' + str(E))
 
 
 def email_alert(module, text):
+    today = date.today()
+    datestring = str(today.year) + '_' + str(today.month) + '_' + str(today.day)
+    logging = log.setup_custom_logger('/home/pi/log/' + datestring + '_pct_log.log')
     try:
         if source != 'email@gmail.com':
             server = smtplib.SMTP('smtp.gmail.com', 587)
