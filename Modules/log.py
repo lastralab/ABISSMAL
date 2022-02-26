@@ -15,7 +15,7 @@ def setup_custom_logger(name):
     formatter = logging.Formatter(fmt="%(asctime)s %(levelname)s %(message)s")
     handler = logging.StreamHandler()
     handler.setFormatter(formatter)
-    logger = logging.getLogger(name)
+    logger = logging.getLogger('/home/pi/log/' + name)
     logger.setLevel(logging.DEBUG)
     logger.addHandler(handler)
     logging.FileHandler('/home/pi/log/' + name, mode='a', encoding=None, delay=False)
