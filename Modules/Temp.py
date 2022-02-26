@@ -17,8 +17,8 @@ from helper import email_alert
 from helper import get_logger
 
 dir_setup('/home/pi/')
-logger = get_logger(datetime.today())
-logger.info('Started Temp')
+logging = get_logger(datetime.today())
+logging.info('Started Temp')
 print('Started Temp')
 
 warn = 0
@@ -56,17 +56,14 @@ try:
     while True:
         dt = datetime.now()
         temp = read_temp()
-        logging = get_logger(dt)
         logging.info('Temperature registered')
         print('Temperature registered')
         csv_writer(str(box_id), module, temp_data, f"{dt.year}_{dt.month}_{dt.day}", header,
                    [box_id, f"{dt.year}", f"{dt.month}", f"{dt.day}", f"{dt:%H:%M:%S.%f}", temp[0], temp[1]])
         time.sleep(60)
 except KeyboardInterrupt:
-    logging = get_logger(datetime.today())
     logging.info('Exiting Temperature')
 except Exception as E:
-    logging = get_logger(datetime.today())
     logging.error('Temperature error: ' + str(E))
     print('Temperature error: ' + str(E))
     email_alert('Temperature', 'Error: ' + str(E))
