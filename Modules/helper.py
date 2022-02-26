@@ -73,15 +73,14 @@ def csv_writer(box_id, module, data_path, datestring, header, value):
                 tmp_writer.writerow(value)
                 file.close()
     except Exception as E:
-        logging = log.setup_custom_logger('/home/pi/log/' + datestring + '_pct_log.log')
+        logging = get_logger(datetime.date.today())
         logging.error('Helper CSV Writter Error: ' + str(E))
         email_alert('Helper', 'CSV Writter Error: ' + str(E))
 
 
 def email_alert(module, text):
     today = date.today()
-    datestring = str(today.year) + '_' + str(today.month) + '_' + str(today.day)
-    logging = log.setup_custom_logger('/home/pi/log/' + datestring + '_pct_log.log')
+    logging = get_logger(today)
     try:
         if source != 'email@gmail.com':
             server = smtplib.SMTP('smtp.gmail.com', 587)
