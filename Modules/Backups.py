@@ -4,7 +4,7 @@
 # Date: 1/12/22
 
 # !/usr/bin/env python3
-
+import datetime
 import sys
 from helper import dir_setup
 from helper import box_id
@@ -153,6 +153,7 @@ try:
             time.sleep(61)
         elif usb_connected(box_id) and now.hour == 0 and now.minute == 0:
             logs_backup_init(now, media_path + box_id, log_path)
+            get_logger(datetime.today())
             time.sleep(61)
         else:
             pass
