@@ -111,31 +111,28 @@ def csv_backup_init(today, destination, source):
 
 
 def logs_backup_init(day, destination, source):
-    today = str(day.year) + "_" + str(day.month) + "_" + str(day.day)
+    yday = day - timedelta(days=1)
+    today = str(yday.year) + "_" + str(yday.month) + "_" + str(yday.day)
     logs = os.listdir(source)
     if len(logs) > 0:
         path = destination + '/Data/Logs/'
         today_log = today + '_pct_' + box_id + '.log'
+        logs_qty = 0
         if not os.path.exists(path):
             os.makedirs(path)
         for log in logs:
-            logs_qty = 0
             if log.endswith('.log'):
-                if log != today_log:
+                if not log == today_log:
                     shutil.move(os.path.join(log_path, log), os.path.join(path, log))
                     logs_qty = logs_qty + 1
-                else:
-                    print('Backup Warning: Old Log files not found.')
-                    logging.warning('Backup: Old Log files not found.')
-                    email_alert('Backup', 'Warning: Old Log files not found in source.')
-                print('Backed-up logs: ' + str(logs_qty))
-                logging.info('Backed-up logs total: ' + str(logs_qty))
                 pass
             else:
                 print('Backup Warning: .log files not found in source.')
                 logging.warning('Backup: .log files not found in source.')
                 email_alert('Backup', 'Warning: .log files not found in source.')
                 pass
+        print('Backed-up logs: ' + str(logs_qty))
+        logging.info('Backed-up logs total: ' + str(logs_qty))
     else:
         print('Backup Error: Empty Log dir: /home/pi/log/')
         logging.error('Backup: Empty Log dir /home/pi/log/')
