@@ -23,6 +23,7 @@ def setup_custom_logger(name):
     else:
         logging.shutdown()
         reload(logging)
+        logging.FileHandler('/home/pi/log/' + name)
         logger = logging.getLogger('/home/pi/log/' + name)
         format_log = "%(asctime)s %(levelname)s %(message)s"
         logging.basicConfig(
