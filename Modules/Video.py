@@ -129,9 +129,6 @@ with picamera.PiCamera() as camera:
                     convert_video(file2_h264)
                     print('Converted videos to mp4')
                     logging.info("Converted videos to mp4")
-                pass
-            else:
-                pass
     except Exception as E:
         print('Video error: ' + str(E))
         logging.error('Video: ' + str(E))
