@@ -98,13 +98,13 @@ def convert_video(filename):
 
 
 with picamera.PiCamera() as camera:
-    try:
-        camera.resolution = (video_width, video_height)
-        camera.iso = iso
-        camera.framerate = fr
-        stream = picamera.PiCameraCircularIO(camera, seconds=stream_duration)
-        camera.start_recording(stream, format='h264')
-        while True:
+    camera.resolution = (video_width, video_height)
+    camera.iso = iso
+    camera.framerate = fr
+    stream = picamera.PiCameraCircularIO(camera, seconds=stream_duration)
+    camera.start_recording(stream, format='h264')
+    while True:
+        try:
             general_time = datetime.now()
             hour_int = int(f"{general_time:%H}")
             if int(time_range[0]) <= hour_int <= int(time_range[1]):
@@ -129,11 +129,9 @@ with picamera.PiCamera() as camera:
                     convert_video(file2_h264)
                     print('Converted videos to mp4')
                     logging.info("Converted videos to mp4")
-    except Exception as E:
-        print('Video error: ' + str(E))
-        logging.error('Video: ' + str(E))
-        email_alert('Video', 'Error: ' + str(E))
-    finally:
-        camera.stop_recording()
-        camera.close()
-        GPIO.output(REC_LED, GPIO.LOW)
+        except Exception as E:
+            print('Video error: ' + str(E))
+            logging.error('Video: ' + str(E))
+            email_alert('Video', 'Error: ' + str(E))
+        finally:
+            GPIO.output(REC_LED, GPIO.LOW)
