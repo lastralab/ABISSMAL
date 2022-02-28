@@ -97,55 +97,46 @@ def convert_video(filename):
         email_alert('Video', 'Convert Error: ' + str(Err))
 
 
-try:
-    while True:
-        with picamera.PiCamera() as camera:
+with picamera.PiCamera() as camera:
+    try:
+        camera.resolution = (video_width, video_height)
+        camera.iso = iso
+        camera.framerate = fr
+        stream = picamera.PiCameraCircularIO(camera, seconds=stream_duration)
+        camera.start_recording(stream, format='h264')
+        while True:
             general_time = datetime.now()
             hour_int = int(f"{general_time:%H}")
             if int(time_range[0]) <= hour_int <= int(time_range[1]):
-                camera.resolution = (video_width, video_height)
-                camera.iso = iso
-                camera.framerate = fr
-                stream = picamera.PiCameraCircularIO(camera, seconds=stream_duration)
-                camera.start_recording(stream, format='h264')
-                try:
-                    if detect_motion(camera):
-                        print('Motion detected; Recording started')
-                        logging.info("Motion detected, starting recordings...")
-                        GPIO.output(REC_LED, GPIO.HIGH)
-                        dt = datetime.now()
-                        dt_str = str(f"{dt.year}_{dt.month}_{dt.day}_{dt:%H}_{dt:%M}_{dt:%S}")
-                        file1_h264 = path + str(box_id) + "_" + dt_str + "_pre_trigger" + '.h264'
-                        file2_h264 = path + str(box_id) + "_" + dt_str + "_post_trigger" + '.h264'
-                        camera.split_recording(file2_h264)
-                        camera.wait_recording(record_duration)
-                        stream.copy_to(file1_h264, seconds=stream_duration)
-                        stream.clear()
-                        print('Recording finished')
-                        logging.info("Videos recorded")
-                        GPIO.output(REC_LED, GPIO.LOW)
-                        camera.wait_recording(1)
-                        camera.split_recording(stream)
-                        convert_video(file1_h264)
-                        convert_video(file2_h264)
-                        logging.info('Converted videos to mp4')
-                    else:
-                        GPIO.output(REC_LED, GPIO.LOW)
-                        pass
-                except Exception as E:
-                    GPIO.cleanup()
-                    print('Video error: ' + str(E))
-                    logging.error('Video error: ' + str(E))
-                    email_alert('Video', 'Error: ' + str(E))
+                if detect_motion(camera):
+                    print('Motion detected; Recording started')
+                    logging.info("Motion detected. Starting video recordings")
+                    GPIO.output(REC_LED, GPIO.HIGH)
+                    dt = datetime.now()
+                    dt_str = str(f"{dt.year}_{dt.month}_{dt.day}_{dt:%H}_{dt:%M}_{dt:%S}")
+                    file1_h264 = path + str(box_id) + "_" + dt_str + "_pre_trigger" + '.h264'
+                    file2_h264 = path + str(box_id) + "_" + dt_str + "_post_trigger" + '.h264'
+                    camera.split_recording(file2_h264)
+                    camera.wait_recording(record_duration)
+                    stream.copy_to(file1_h264, seconds=stream_duration)
+                    stream.clear()
+                    print('Recording finished')
+                    logging.info("Videos recorded")
+                    GPIO.output(REC_LED, GPIO.LOW)
+                    camera.wait_recording(1)
+                    camera.split_recording(stream)
+                    convert_video(file1_h264)
+                    convert_video(file2_h264)
+                    print('Converted videos to mp4')
+                    logging.info("Converted videos to mp4")
+                pass
             else:
                 pass
-except KeyboardInterrrupt:
-    print('Exiting Video')
-    logging.info('Exiting Video')
-    GPIO.cleanup()
-except Exception as E:
-    print('Video error: ' + str(E))
-    logging.error('Video error: ' + str(E))
-    email_alert('Video', 'Error: ' + str(E))
-finally:
-    GPIO.output(REC_LED, GPIO.LOW)
+    except Exception as E:
+        print('Video error: ' + str(E))
+        logging.error('Video: ' + str(E))
+        email_alert('Video', 'Error: ' + str(E))
+    finally:
+        camera.stop_recording()
+        camera.close()
+        GPIO.output(REC_LED, GPIO.LOW)
