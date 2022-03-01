@@ -45,7 +45,7 @@ fi
 sleep 1
 echo ""
 
-echo -e "${Yellow}Press 'Enter' to skip or insert any character to install required packages.${NC}"
+echo -e "${Yellow}Press 'Y/y' to install required packages or hit 'Enter' to skip installation.${NC}"
 read -r packs
 if [ -n "$packs" ]
 then
@@ -121,7 +121,7 @@ then
   echo -e "${Green}Installation complete.${NC}"
   sleep 1
   echo -e "${RED}Raspberry pi needs to be restarted at this point${NC}"
-  sleep 1
+  echo ""
   echo -e "${RED}Restarting in 5 seconds...${NC}"
   sleep 6
   echo ""
