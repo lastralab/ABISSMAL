@@ -63,6 +63,7 @@ GPIO.add_event_detect(BEAM_PIN_rear, GPIO.FALLING,
 
 try:
     while True:
+        logging = get_logger(datetime.today())
         pass
 except KeyboardInterrupt:
     logging.info('exiting IRBB')

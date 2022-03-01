@@ -32,6 +32,7 @@ def monitor_screens():
 try:
     while True:
         monitor_screens()
+        logging = get_logger(datetime.today())
         logging.info("Monitored screens")
         time.sleep(60)
         pass

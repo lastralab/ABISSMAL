@@ -13,13 +13,6 @@ import os
 def setup_custom_logger(name):
     if os.path.exists('/home/pi/log/' + name):
         logger = logging.getLogger('/home/pi/log/' + name)
-        format_log = "%(asctime)s %(levelname)s %(message)s"
-        logging.basicConfig(
-            format=format_log,
-            filename='/home/pi/log/' + name,
-            level=logging.DEBUG,
-            datefmt="%Y-%m-%d %H:%M:%S"
-        )
     else:
         logging.shutdown()
         reload(logging)

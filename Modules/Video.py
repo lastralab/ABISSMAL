@@ -106,6 +106,7 @@ with picamera.PiCamera() as camera:
         camera.start_recording(stream, format='h264')
         while True:
             general_time = datetime.now()
+            logging = get_logger(general_time)
             hour_int = int(f"{general_time:%H}")
             if int(time_range[0]) <= hour_int <= int(time_range[1]):
                 if detect_motion(camera):

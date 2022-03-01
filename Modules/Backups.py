@@ -56,7 +56,6 @@ def video_backup_init(foldername, destination, source):
     files = os.listdir(src)
     if len(files) > 0:
         videos = 0
-        deleted = 0
         if not os.path.exists(path):
             os.makedirs(path)
         for filename in files:
@@ -66,16 +65,8 @@ def video_backup_init(foldername, destination, source):
                 videos = videos + 1
             else:
                 pass
-            if filename.endswith('.h264'):
-                os.remove(os.path.join(src, filename))
-                print('Deleted video from source: ' + filename)
-                deleted = deleted + 1
-            else:
-                pass
         print('Backed-up ' + str(videos) + ' videos')
-        print('Deleted ' + str(deleted) + ' .h264 videos')
         logging.info('Backed-up ' + str(videos) + ' videos')
-        logging.info('Deleted ' + str(deleted) + ' .h264 videos')
     else:
         print('No videos backed-up. No files found')
         logging.error('No videos backed-up. No files found. Check camera/video module.')
@@ -150,7 +141,7 @@ try:
             time.sleep(61)
         elif usb_connected(box_id) and now.hour == 0 and now.minute == 0:
             logs_backup_init(now, media_path + box_id, log_path)
-            get_logger(datetime.today())
+            logging = get_logger(datetime.today())
             time.sleep(61)
         else:
             pass

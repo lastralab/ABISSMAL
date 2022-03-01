@@ -82,9 +82,9 @@ def ReadInt(fd):
 
 
 def ReadTagPageZero(fd):
-    logging = get_logger(datetime.today())
     try:
         while True:
+            logging = get_logger(datetime.today())
             WaitForCTS()
             wiringpi2.serialPutchar(fd, 0x52)
             wiringpi2.serialPutchar(fd, 0x00)
