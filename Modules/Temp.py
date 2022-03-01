@@ -55,6 +55,7 @@ def read_temp():
 try:
     while True:
         dt = datetime.now()
+        logging = get_logger(dt)
         temp = read_temp()
         logging.info('Temperature registered')
         print('Temperature registered')
