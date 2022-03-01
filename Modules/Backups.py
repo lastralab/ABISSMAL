@@ -139,15 +139,12 @@ try:
             video_backup_init(folder, media_path + box_id, data_path)
             csv_backup_init(now, media_path + box_id, data_path)
             time.sleep(61)
-        elif usb_connected(box_id) and now.hour == 12 and now.minute == 0:
+        elif usb_connected(box_id) and now.hour == 0 and now.minute == 0:
             logs_backup_init(now, media_path + box_id, log_path)
             logging = get_logger(datetime.today())
             time.sleep(61)
         else:
             pass
-except KeyboardInterrrupt:
-    print('Exiting backups')
-    logging.info('Exiting backups')
 except Exception as E:
     print('Backups error: ' + str(E))
     logging.error('Backups error: ' + str(E))
