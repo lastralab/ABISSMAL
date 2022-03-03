@@ -42,6 +42,7 @@ GPIO.setwarnings(False)
 def detect_beam_breaks_callback(BEAM_PIN, sensor_id):
     if not GPIO.input(BEAM_PIN):
         dt = datetime.now()
+        time.sleep(1)
         logging = get_logger(datetime.today())
         logging.info('IRBB activity detected in sensor: ' + sensor_id)
         print('IRBB activity detected in sensor: ' + sensor_id)
