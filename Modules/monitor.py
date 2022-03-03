@@ -18,7 +18,8 @@ logging.info('Starting Monitor script')
 print('Starting Monitor script')
 
 
-def monitor_screens():
+def monitor_screens(today):
+    logging = get_logger(today)
     screens = str(subprocess.getoutput("screen -list"))
     for screen in modules:
         if screens.find(screen) == -1:
@@ -31,10 +32,9 @@ def monitor_screens():
 
 try:
     while True:
-        monitor_screens()
-        logging = get_logger(datetime.date.today())
+        monitor_screens(datetime.date.today())
         logging.info("Monitored screens")
-        time.sleep(60)
+        time.sleep(300)
         pass
 except Exception as E:
     logging.error('Monitor error: ' + str(E))

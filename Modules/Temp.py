@@ -54,14 +54,15 @@ def read_temp():
 
 try:
     while True:
+        time.sleep(30)
+        logging = get_logger(datetime.today())
         dt = datetime.now()
-        logging = get_logger(dt)
         temp = read_temp()
         logging.info('Temperature registered')
         print('Temperature registered')
         csv_writer(str(box_id), module, temp_data, f"{dt.year}_{dt.month}_{dt.day}", header,
                    [box_id, f"{dt.year}", f"{dt.month}", f"{dt.day}", f"{dt:%H:%M:%S.%f}", temp[0], temp[1]])
-        time.sleep(60)
+        time.sleep(30)
 except KeyboardInterrupt:
     logging.info('Exiting Temperature')
 except Exception as E:

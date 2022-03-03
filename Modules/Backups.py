@@ -106,6 +106,7 @@ def logs_backup_init(day, destination, source):
     today = str(yday.year) + "_" + str(yday.month) + "_" + str(yday.day)
     logs = os.listdir(source)
     if len(logs) > 0:
+        logging = get_logger(datetime.today())
         path = destination + '/Data/Logs/'
         today_log = today + '_pct_' + box_id + '.log'
         logs_qty = 0
@@ -125,6 +126,7 @@ def logs_backup_init(day, destination, source):
         print('Backed-up logs: ' + str(logs_qty))
         logging.info('Backed-up logs total: ' + str(logs_qty))
     else:
+        logging = get_logger(datetime.today())
         print('Backup Error: Empty Log dir: /home/pi/log/')
         logging.error('Backup: Empty Log dir /home/pi/log/')
         email_alert('Backup', 'Error: Empty Log directory /home/pi/log/')
