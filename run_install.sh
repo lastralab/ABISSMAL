@@ -64,7 +64,7 @@ else
 fi
 echo ""
 
-echo -e "${BIGreen}Enter the email address to send emails from${NC} (gmail)"
+echo -e "${BIGreen}Enter the email address to send emails from${NC} (sapo)"
 echo -e "${Yellow}Press 'Enter' to skip configuration.${NC}"
 read -r gmail
 if [ -n "$gmail" ]
