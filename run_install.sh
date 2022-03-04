@@ -77,7 +77,7 @@ else
 fi
 echo ""
 
-echo -e "${BIGreen}Enter the email password${NC}"
+echo -e "${BIGreen}Enter the email password (Note: Do not copy & paste)${NC}"
 echo -e "${Yellow}Press 'Enter' to skip configuration.${NC}"
 read -r -s pass
 if [ -n "$pass" ]
