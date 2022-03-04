@@ -85,11 +85,11 @@ def ReadTagPageZero(fd):
     try:
         while True:
             WaitForCTS()
+            logging = get_logger(datetime.today())
             wiringpi2.serialPutchar(fd, 0x52)
             wiringpi2.serialPutchar(fd, 0x00)
             time.sleep(0.1)
             ans = ReadInt(fd)
-            logging = get_logger(datetime.today())
             if ans == int("0xD6", 16):
                 ans = ReadText(fd)
                 dt = datetime.now()

@@ -18,8 +18,7 @@ logging.info('Starting Monitor script')
 print('Starting Monitor script')
 
 
-def monitor_screens(today):
-    logging = get_logger(today)
+def monitor_screens():
     screens = str(subprocess.getoutput("screen -list"))
     for screen in modules:
         if screens.find(screen) == -1:
@@ -32,7 +31,8 @@ def monitor_screens(today):
 
 try:
     while True:
-        monitor_screens(datetime.date.today())
+        monitor_screens()
+        logging = get_logger(datetime.date.today())
         logging.info("Monitored screens")
         time.sleep(300)
         pass
