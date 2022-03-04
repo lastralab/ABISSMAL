@@ -89,10 +89,10 @@ def ReadTagPageZero(fd):
             wiringpi2.serialPutchar(fd, 0x00)
             time.sleep(0.1)
             ans = ReadInt(fd)
+            logging = get_logger(datetime.today())
             if ans == int("0xD6", 16):
                 ans = ReadText(fd)
                 dt = datetime.now()
-                logging = get_logger(datetime.today())
                 logging.info('RFID activity detected')
                 print('RFID activity detected')
                 csv_writer(str(box_id), module, rfid_data, f"{dt.year}_{dt.month}_{dt.day}", header,
