@@ -28,7 +28,6 @@ emails = []
 def get_logger(day):
     name = str(day.year) + '_' + str(day.month) + '_' + str(day.day) + '_pct_' + box_id + '.log'
     logger = log.setup_custom_logger(name)
-    print('Used logger: ' + name)
     return logger
 
 

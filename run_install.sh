@@ -64,7 +64,7 @@ else
 fi
 echo ""
 
-echo -e "${BIGreen}Enter the email address to send emails from${NC} (gmail)"
+echo -e "${BIGreen}Enter the email address to send emails from${NC} (smtp/imap enabled)"
 echo -e "${Yellow}Press 'Enter' to skip configuration.${NC}"
 read -r gmail
 if [ -n "$gmail" ]
@@ -77,7 +77,7 @@ else
 fi
 echo ""
 
-echo -e "${BIGreen}Enter the email password${NC}"
+echo -e "${BIGreen}Enter the email password (Note: Do not copy & paste)${NC}"
 echo -e "${Yellow}Press 'Enter' to skip configuration.${NC}"
 read -r -s pass
 if [ -n "$pass" ]
