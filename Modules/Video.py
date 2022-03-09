@@ -13,11 +13,10 @@ import sys
 import csv
 import re
 import RPi.GPIO as GPIO
-import logging
 import io
 import random
 import picamera
-from helper import logger_setup
+from helper import dir_setup
 from helper import csv_writer
 from helper import box_id
 from time import sleep
@@ -26,8 +25,10 @@ from PIL import Image
 from subprocess import call
 from pathlib import Path
 from helper import email_alert
+from helper import get_logger
 
-logger_setup('/home/pi/')
+dir_setup('/home/pi/')
+logging = get_logger(datetime.today())
 logging.info('Starting Video script')
 print('Starting Video script')
 
@@ -44,7 +45,6 @@ record_duration = 10
 threshold = 50
 sensitivity = 80
 REC_LED = 16
-timeout = 60
 GPIO.setmode(GPIO.BCM)
 GPIO.setwarnings(False)
 GPIO.setup(REC_LED, GPIO.OUT)
@@ -106,6 +106,7 @@ with picamera.PiCamera() as camera:
         camera.start_recording(stream, format='h264')
         while True:
             general_time = datetime.now()
+            logging = get_logger(general_time)
             hour_int = int(f"{general_time:%H}")
             if int(time_range[0]) <= hour_int <= int(time_range[1]):
                 if detect_motion(camera):
