@@ -82,7 +82,7 @@ def email_alert(module, text):
     logging = get_logger(today)
     try:
         if source != 'email@gmail.com':
-            server = smtplib.SMTP('smtp.office365.com', 587)
+            server = smtplib.SMTP('smtp.gmail.com', 587)
             server.starttls()
             server.login(source, key)
             subject = 'PCT[' + box_id + ']: Error from ' + module + ' module'
