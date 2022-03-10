@@ -69,6 +69,7 @@ read -r cron
 if [ -n "$cron" ]
 then
   chmod +x cron.sh
+  crontab -e
   crontab -l > pct_cron
   echo "0 0 * * * bash cron.sh" >> pct_cron
   crontab pct_cron
