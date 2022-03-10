@@ -44,7 +44,7 @@ echo -e "${Blue}Date:${NC}        ${Blue}November 2021${NC}"
 echo -e "${Blue}Authors:${NC}     ${Cyan}Tania M. Molina${NC} & ${Cyan}Grace Smith-Vidaurre${NC}"
 echo ""
 
-echo -e "${Yellow}Insert y/Y to configure cron to backup logs or press 'Enter' to skip.${NC}"
+echo -e "${Yellow}Insert y/Y to configure Cron or press 'Enter' to skip.${NC}"
 read -r cron
 if [ -n "$cron" ]
 then
