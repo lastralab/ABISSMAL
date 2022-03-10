@@ -45,7 +45,7 @@ fi
 sleep 1
 echo ""
 
-echo -e "${Yellow}Press 'Enter' to skip or insert any character to install required packages.${NC}"
+echo -e "${Yellow}Insert y/Y to install required packages or press 'Enter' to skip.${NC}"
 read -r packs
 if [ -n "$packs" ]
 then
@@ -63,6 +63,22 @@ else
 	echo -e "${Yellow}Skipped.${NC}"
 fi
 echo ""
+
+echo -e "${Yellow}Insert y/Y to configure cron to backup logs or press 'Enter' to skip.${NC}"
+read -r cron
+if [ -n "$cron" ]
+then
+  chmod +x cron.sh
+  crontab -l > pct_cron
+  echo "0 0 * * * bash cron.sh" >> pct_cron
+  crontab pct_cron
+  rm pct_cron
+  echo -e "${Purple}Configured Cron Job to run every day at midnight${NC}"
+else
+	echo -e "${Yellow}Skipped.${NC}"
+fi
+echo ""
+
 
 echo -e "${BIGreen}Enter the email address to send emails from${NC} (gmail)"
 echo -e "${Yellow}Press 'Enter' to skip configuration.${NC}"
