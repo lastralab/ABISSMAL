@@ -45,7 +45,7 @@ fi
 sleep 1
 echo ""
 
-echo -e "${Yellow}Insert y/Y to install required packages or press 'Enter' to skip.${NC}"
+echo -e "${Yellow}Insert any key to install required packages or press 'Enter' to skip.${NC}"
 read -r packs
 if [ -n "$packs" ]
 then
@@ -79,7 +79,6 @@ else
 fi
 echo ""
 
-
 echo -e "${BIGreen}Enter the email address to send emails from${NC} (gmail)"
 echo -e "${Yellow}Press 'Enter' to skip configuration.${NC}"
 read -r gmail
@@ -93,7 +92,7 @@ else
 fi
 echo ""
 
-echo -e "${BIGreen}Enter the email password${NC}"
+echo -e "${BIGreen}Enter the email password (Note: Do not copy & paste)${NC}"
 echo -e "${Yellow}Press 'Enter' to skip configuration.${NC}"
 read -r -s pass
 if [ -n "$pass" ]
@@ -137,7 +136,7 @@ then
   echo -e "${Green}Installation complete.${NC}"
   sleep 1
   echo -e "${RED}Raspberry pi needs to be restarted at this point${NC}"
-  sleep 1
+  echo ""
   echo -e "${RED}Restarting in 5 seconds...${NC}"
   sleep 6
   echo ""

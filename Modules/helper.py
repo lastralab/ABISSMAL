@@ -2,9 +2,10 @@
 # Author: nmoltta
 # Project: ParentalCareTracking
 # Date: 11/29/21
+
 # !/usr/bin/env python3
 
-import logging
+import datetime
 import time
 import signal
 import sys
@@ -15,6 +16,7 @@ from os.path import exists
 import smtplib
 from Setup.email_service import source
 from Setup.email_service import key
+import log
 
 box_id = 'Box_01'
 modules = ['IRBB', 'RFID', 'Temp', 'Video']
@@ -23,7 +25,13 @@ file_extension = '.csv'
 emails = []
 
 
-def logger_setup(default_dir):
+def get_logger(day):
+    name = str(day.year) + '_' + str(day.month) + '_' + str(day.day) + '_pct_' + box_id + '.log'
+    logger = log.setup_custom_logger(name)
+    return logger
+
+
+def dir_setup(default_dir):
     try:
         if not os.path.exists(default_dir + 'log'):
             os.makedirs(default_dir + 'log')
@@ -42,15 +50,8 @@ def logger_setup(default_dir):
             os.makedirs(temp_data)
         if not os.path.exists(video_data):
             os.makedirs(video_data)
-        format_log = "%(asctime)s %(levelname)s %(message)s"
-        logging.basicConfig(
-            format=format_log,
-            filename=default_dir + 'log/pct_' + box_id + '.log',
-            level=logging.DEBUG,
-            datefmt="%Y-%m-%d %H:%M:%S"
-        )
     except Exception as E:
-        logging.error('Helper Logger Setup Error: ' + str(E))
+        print('Helper Logger Setup Error: ' + str(E))
         email_alert('Helper', 'Logger Setup Error: ' + str(E))
 
 
@@ -71,11 +72,14 @@ def csv_writer(box_id, module, data_path, datestring, header, value):
                 tmp_writer.writerow(value)
                 file.close()
     except Exception as E:
+        logging = get_logger(datetime.date.today())
         logging.error('Helper CSV Writter Error: ' + str(E))
         email_alert('Helper', 'CSV Writter Error: ' + str(E))
 
 
 def email_alert(module, text):
+    today = date.today()
+    logging = get_logger(today)
     try:
         if source != 'email@gmail.com':
             server = smtplib.SMTP('smtp.gmail.com', 587)

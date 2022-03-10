@@ -4,10 +4,9 @@
 # Date: 1/12/22
 
 # !/usr/bin/env python3
-
+import datetime
 import sys
-import logging
-from helper import logger_setup
+from helper import dir_setup
 from helper import box_id
 from helper import modules
 from helper import video_extension
@@ -17,20 +16,26 @@ import os
 from datetime import *
 import shutil
 import time
+from helper import get_logger
 
 pi_home = '/home/pi/'
-logger_setup(pi_home)
+dir_setup(pi_home)
 
 backup_hour = 20
 backup_minute = 15
 media_path = '/media/pi/'
 data_path = pi_home + 'Data_ParentalCareTracking/'
+log_path = '/home/pi/log/'
+
+logging = get_logger(datetime.today())
 
 logging.info('Started backup script')
 print('Started backup script')
 
-logging.info('Backups will run once at ' + str(backup_hour) + ':' + str(backup_minute) + 'hrs every day')
-print('Backups will start at ' + str(backup_hour) + ':' + str(backup_minute) + 'hrs')
+logging.info('CSV and Video Backups will run once every day at ' + str(backup_hour) + ':' + str(backup_minute) + 'hrs')
+print('CSV and Video Backups will run once every day at ' + str(backup_hour) + ':' + str(backup_minute) + 'hrs')
+logging.info('Log Backup will run once at 0:00hrs every day')
+print('Log Backup will run once at 0:00hrs every day')
 
 
 def usb_connected(box):
@@ -51,7 +56,6 @@ def video_backup_init(foldername, destination, source):
     files = os.listdir(src)
     if len(files) > 0:
         videos = 0
-        deleted = 0
         if not os.path.exists(path):
             os.makedirs(path)
         for filename in files:
@@ -61,16 +65,8 @@ def video_backup_init(foldername, destination, source):
                 videos = videos + 1
             else:
                 pass
-            if filename.endswith('.h264'):
-                os.remove(os.path.join(src, filename))
-                print('Deleted video from source: ' + filename)
-                deleted = deleted + 1
-            else:
-                pass
         print('Backed-up ' + str(videos) + ' videos')
-        print('Deleted ' + str(deleted) + ' .h264 videos')
         logging.info('Backed-up ' + str(videos) + ' videos')
-        logging.info('Deleted ' + str(deleted) + ' .h264 videos')
     else:
         print('No videos backed-up. No files found')
         logging.error('No videos backed-up. No files found. Check camera/video module.')
@@ -105,6 +101,38 @@ def csv_backup_init(today, destination, source):
             pass
 
 
+def logs_backup_init(day, destination, source):
+    yday = day - timedelta(days=1)
+    today = str(yday.year) + "_" + str(yday.month) + "_" + str(yday.day)
+    logs = os.listdir(source)
+    if len(logs) > 0:
+        logging = get_logger(datetime.today())
+        path = destination + '/Data/Logs/'
+        today_log = today + '_pct_' + box_id + '.log'
+        logs_qty = 0
+        if not os.path.exists(path):
+            os.makedirs(path)
+        for log in logs:
+            if log.endswith('.log'):
+                if not log == today_log:
+                    shutil.move(os.path.join(log_path, log), os.path.join(path, log))
+                    logs_qty = logs_qty + 1
+                pass
+            else:
+                print('Backup Warning: .log files not found in source.')
+                logging.warning('Backup: .log files not found in source.')
+                email_alert('Backup', 'Warning: .log files not found in source.')
+                pass
+        print('Backed-up logs: ' + str(logs_qty))
+        logging.info('Backed-up logs total: ' + str(logs_qty))
+    else:
+        logging = get_logger(datetime.today())
+        print('Backup Error: Empty Log dir: /home/pi/log/')
+        logging.error('Backup: Empty Log dir /home/pi/log/')
+        email_alert('Backup', 'Error: Empty Log directory /home/pi/log/')
+        pass
+
+
 try:
     while True:
         now = datetime.now()
@@ -113,10 +141,12 @@ try:
             video_backup_init(folder, media_path + box_id, data_path)
             csv_backup_init(now, media_path + box_id, data_path)
             time.sleep(61)
-        pass
-except KeyboardInterrrupt:
-    print('Exiting backups')
-    logging.info('Exiting backups')
+        elif usb_connected(box_id) and now.hour == 0 and now.minute == 0:
+            logs_backup_init(now, media_path + box_id, log_path)
+            logging = get_logger(datetime.today())
+            time.sleep(61)
+        else:
+            pass
 except Exception as E:
     print('Backups error: ' + str(E))
     logging.error('Backups error: ' + str(E))

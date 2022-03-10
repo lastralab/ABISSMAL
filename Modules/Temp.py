@@ -8,15 +8,16 @@ import glob
 import time
 from datetime import datetime
 import csv
-import logging
 from pathlib import Path
-from helper import logger_setup
+from helper import dir_setup
 from helper import csv_writer
 from helper import box_id
 from time import sleep
 from helper import email_alert
+from helper import get_logger
 
-logger_setup('/home/pi/')
+dir_setup('/home/pi/')
+logging = get_logger(datetime.today())
 logging.info('Started Temp')
 print('Started Temp')
 
@@ -60,6 +61,7 @@ try:
         csv_writer(str(box_id), module, temp_data, f"{dt.year}_{dt.month}_{dt.day}", header,
                    [box_id, f"{dt.year}", f"{dt.month}", f"{dt.day}", f"{dt:%H:%M:%S.%f}", temp[0], temp[1]])
         time.sleep(60)
+        logging = get_logger(datetime.today())
 except KeyboardInterrupt:
     logging.info('Exiting Temperature')
 except Exception as E:
