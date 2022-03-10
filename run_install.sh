@@ -45,7 +45,7 @@ fi
 sleep 1
 echo ""
 
-echo -e "${Yellow}Press 'Y/y' to install required packages or hit 'Enter' to skip installation.${NC}"
+echo -e "${Yellow}Insert any key to install required packages or press 'Enter' to skip.${NC}"
 read -r packs
 if [ -n "$packs" ]
 then
@@ -64,7 +64,7 @@ else
 fi
 echo ""
 
-echo -e "${BIGreen}Enter the email address to send emails from${NC} (smtp/imap enabled)"
+echo -e "${BIGreen}Enter the email address to send emails from${NC} (gmail)"
 echo -e "${Yellow}Press 'Enter' to skip configuration.${NC}"
 read -r gmail
 if [ -n "$gmail" ]
