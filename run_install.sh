@@ -109,7 +109,7 @@ echo -e "${Yellow}Insert 'y/Y' to configure Cron or press 'Enter' to skip.${NC}"
 read -r cron
 if [ -n "$cron" ]
 then
-  sed -i -e "0 0 * * * root ${location}/cron.sh") /etc/crontab
+  sed -i -e "0 0 * * * root ${location}/cron.sh" /etc/crontab
   echo -e "${Purple}Configured Cron Job to run every day at midnight${NC}"
 else
 	echo -e "${Yellow}Skipped.${NC}"
