@@ -69,11 +69,7 @@ read -r cron
 if [ -n "$cron" ]
 then
   chmod +x cron.sh
-  crontab -e
-  crontab -l > pct_cron
-  echo "0 0 * * * bash cron.sh" >> pct_cron
-  crontab pct_cron
-  rm pct_cron
+  (crontab -l 2>/dev/null; echo "0 0 * * * bash cron.sh") | crontab -
   echo -e "${Purple}Configured Cron Job to run every day at midnight${NC}"
 else
 	echo -e "${Yellow}Skipped.${NC}"
