@@ -117,6 +117,7 @@ then
   mv /etc/ssmtp/ssmtp.conf /etc/ssmtp/ssmtp.conf.sample
   cp -r "${email_config_path}" /etc/ssmtp/
   sleep 1
+  chmod +x cron.sh
   echo -e "${Purple}Registered new hostname and updated hosts file${NC}"
   echo -e "${Green}Installation complete.${NC}"
   sleep 1
