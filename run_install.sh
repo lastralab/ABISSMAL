@@ -105,7 +105,18 @@ else
 fi
 echo ""
 
-echo -e "${BIGreen}Enter the new hostname${NC} (Example: raspberrypi + box number)"
+echo -e "${Yellow}Insert 'y/Y' to configure Cron or press 'Enter' to skip.${NC}"
+read -r cron
+if [ -n "$cron" ]
+then
+  sed -i -e "0 0 * * * root ${location}/cron.sh") /etc/crontab
+  echo -e "${Purple}Configured Cron Job to run every day at midnight${NC}"
+else
+	echo -e "${Yellow}Skipped.${NC}"
+fi
+echo ""
+
+echo -e "${BIGreen}Enter the new hostname to configure email service${NC} (Example: raspberrypi + box number)"
 echo -e "${Yellow}Press 'Enter' to skip configuration.${NC}"
 read -r hostname
 if [ -n "$hostname" ]

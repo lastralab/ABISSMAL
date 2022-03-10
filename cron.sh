@@ -43,4 +43,4 @@ sleep 1s
 screen -dmS backup bash -c "${backups_command}"
 sleep 1s
 screen -dmS monitor bash -c "${monitor_command}"
-echo "Ran cron job"
+echo "Ran PCT cron job"
