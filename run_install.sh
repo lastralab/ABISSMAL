@@ -110,10 +110,10 @@ echo -e "${Yellow}Insert 'y/Y' to configure Cron or press 'Enter' to skip.${NC}"
 read -r cron
 if [ -n "$cron" ]
 then
-  sed -i -e "\$a0 0   * * *   root ${bash_v} ${location}/cron.sh" "/etc/crontab"
+  sed -i -e "\$a30 */6  * * *   root ${bash_v} ${location}/cron.sh" "/etc/crontab"
   chmod +x cron.sh
   service cron reload
-  echo -e "${Purple}Configured Cron Job to run every day at midnight${NC}"
+  echo -e "${Purple}Configured Cron Job to run every 6 hrs at the 30th minute${NC}"
 else
 	echo -e "${Yellow}Skipped.${NC}"
 fi
