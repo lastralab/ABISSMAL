@@ -7,8 +7,8 @@
 ##
 
 user_name=$(whoami)
-location=$(pwd)
-python_v=$(which python)
+location=""
+python_v=""
 
 irbb_file="/Modules/IRBB.py"
 irbb_command="${python_v} ${location}${irbb_file}"
@@ -28,15 +28,11 @@ monitor_command="${python_v} ${location}${monitor_file}"
 find Modules/ -type f -exec chmod 644 {} \;
 chown -R "${user_name}" .
 
-echo "$(date): PCT Starting cron"
+echo "$(date): PCT Starting cron as ${user_name}"
 screen -ls | grep temp | cut -d. -f1 | awk '{print $1}' | xargs kill
-sleep 1s
 screen -ls | grep irbb | cut -d. -f1 | awk '{print $1}' | xargs kill
-sleep 1s
 screen -ls | grep rfid | cut -d. -f1 | awk '{print $1}' | xargs kill
-sleep 1s
 screen -ls | grep backup | cut -d. -f1 | awk '{print $1}' | xargs kill
-sleep 1s
 screen -ls | grep monitor | cut -d. -f1 | awk '{print $1}' | xargs kill
 echo "$(date): PCT Killed screens"
 sleep 1s
@@ -54,5 +50,6 @@ echo "$(date): PCT Started screen: backup"
 sleep 1s
 screen -dmS monitor bash -c "${monitor_command}"
 echo "$(date): PCT Started screen: monitor"
-sleep 1s
+sleep 2s
+screen -list
 echo "$(date): Ran PCT cron job"
