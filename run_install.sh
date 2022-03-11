@@ -111,6 +111,7 @@ read -r cron
 if [ -n "$cron" ]
 then
   sed -i -e "\$a0 0   * * *   root ${bash_v} ${location}/cron.sh" "/etc/crontab"
+  chmod +x cron.sh
   service cron reload
   echo -e "${Purple}Configured Cron Job to run every day at midnight${NC}"
 else
