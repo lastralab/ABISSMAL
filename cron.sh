@@ -28,19 +28,31 @@ monitor_command="${python_v} ${location}${monitor_file}"
 find Modules/ -type f -exec chmod 644 {} \;
 chown -R "${user_name}" .
 
+echo "$(date): PCT Starting cron"
 screen -ls | grep temp | cut -d. -f1 | awk '{print $1}' | xargs kill
+sleep 1s
 screen -ls | grep irbb | cut -d. -f1 | awk '{print $1}' | xargs kill
+sleep 1s
 screen -ls | grep rfid | cut -d. -f1 | awk '{print $1}' | xargs kill
+sleep 1s
 screen -ls | grep backup | cut -d. -f1 | awk '{print $1}' | xargs kill
+sleep 1s
 screen -ls | grep monitor | cut -d. -f1 | awk '{print $1}' | xargs kill
+echo "$(date): PCT Killed screens"
 sleep 1s
 screen -dmS temp bash -c "${temp_command}"
+echo "$(date): PCT Started screen: temp"
 sleep 1s
 screen -dmS irbb bash -c "${irbb_command}"
+echo "$(date): PCT Started screen: irbb"
 sleep 1s
 screen -dmS rfid bash -c "${rfid_command}"
+echo "$(date): PCT Started screen: rfid"
 sleep 1s
 screen -dmS backup bash -c "${backups_command}"
+echo "$(date): PCT Started screen: backup"
 sleep 1s
 screen -dmS monitor bash -c "${monitor_command}"
-echo "Ran PCT cron job"
+echo "$(date): PCT Started screen: monitor"
+sleep 1s
+echo "$(date): Ran PCT cron job"
