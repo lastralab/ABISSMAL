@@ -113,8 +113,8 @@ read -r cron
 if [ -n "$cron" ]
 then
   sed -i -e "\$a0 0  * * *   pi ${bash_v} ${location}/cron.sh" "/etc/crontab"
-  sed -i "s/^location=.*/location='${location}'/ ${cron_path}"
-  sed -i "s/^python_v=.*/python_v='${python_v}'/ ${cron_path}"
+  sed -i "s#^location=.*#location='${location}'#" "${cron_path}"
+  sed -i "s#^python_v=.*#python_v='${python_v}'#" "${cron_path}"
   chmod +x cron.sh
   service cron reload
   echo -e "${Purple}Configured Cron Job to run every day at midnight${NC}"
