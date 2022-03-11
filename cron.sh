@@ -7,8 +7,8 @@
 ##
 
 user_name=$(whoami)
-location=""
-python_v=""
+location=
+python_v=
 
 irbb_file="/Modules/IRBB.py"
 irbb_command="${python_v} ${location}${irbb_file}"
