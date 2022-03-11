@@ -22,6 +22,7 @@ email_setup_path="${location}/Modules/Setup/email_service.py"
 email_config_path="${location}/Modules/Setup/ssmtp.conf"
 hostname_path="/etc/hostname"
 hosts_path="/etc/hosts"
+bash_v = $(which bash)
 
 echo ""
 echo -e "${Blue}Project:${NC}     ${Green}P A R E N T A L   C A R E   T R A C K I N G${NC}"
@@ -109,7 +110,8 @@ echo -e "${Yellow}Insert 'y/Y' to configure Cron or press 'Enter' to skip.${NC}"
 read -r cron
 if [ -n "$cron" ]
 then
-  sed -i -e "0 0 * * * root ${location}/cron.sh" /etc/crontab
+  sed -i -e "\$a0 0   * * *   root ${bash_v} ${location}/cron.sh" "/etc/crontab"
+  service cron reload
   echo -e "${Purple}Configured Cron Job to run every day at midnight${NC}"
 else
 	echo -e "${Yellow}Skipped.${NC}"
