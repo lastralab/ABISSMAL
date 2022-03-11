@@ -120,7 +120,7 @@ then
   chmod +x cron.sh
   service cron reload
   echo -e "${Purple}Configured Cron Job to run every day at midnight${NC}"
-  echo -e "${Cyan}'PCT Cron jobs will be logged in /home/pi/log/pct_cron.log'${NC}"
+  echo -e "PCT Cron jobs will be logged in ${Cyan}/home/pi/log/pct_cron.log${NC}"
 else
 	echo -e "${Yellow}Skipped.${NC}"
 fi
