@@ -18,6 +18,7 @@ user_name=$(whoami)
 location=$(pwd)
 host_name=$(hostname)
 helper_path="${location}/Modules/helper.py"
+cron_path="${location}/cron.sh"
 email_setup_path="${location}/Modules/Setup/email_service.py"
 email_config_path="${location}/Modules/Setup/ssmtp.conf"
 hostname_path="/etc/hostname"
@@ -107,13 +108,13 @@ else
 fi
 echo ""
 
-echo -e "${Yellow}Insert 'y/Y' to configure Cron or press 'Enter' to skip.${NC}"
+echo -e "${Yellow}Insert 'Y/y' to configure Cron or press 'Enter' to skip.${NC}"
 read -r cron
 if [ -n "$cron" ]
 then
   sed -i -e "\$a0 0  * * *   pi ${bash_v} ${location}/cron.sh" "/etc/crontab"
-  sed -i "s/^location.*/location=${location}/" "${location}/cron.sh"
-  sed -i "s/^python_v.*/python_v=${python_v}/" "${location}/cron.sh"
+  sed -i "s/^location.*/location=${location}/" "${cron_path}"
+  sed -i "s/^python_v.*/python_v=${python_v}/" "${cron_path}"
   chmod +x cron.sh
   service cron reload
   echo -e "${Purple}Configured Cron Job to run every 6 hrs at the 30th minute${NC}"
