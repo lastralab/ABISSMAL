@@ -44,18 +44,6 @@ echo -e "${Blue}Date:${NC}        ${Blue}November 2021${NC}"
 echo -e "${Blue}Authors:${NC}     ${Cyan}Tania M. Molina${NC} & ${Cyan}Grace Smith-Vidaurre${NC}"
 echo ""
 
-echo -e "${Yellow}Insert 'y/Y' to configure Cron or press 'Enter' to skip.${NC}"
-read -r cron
-if [ -n "$cron" ]
-then
-  chmod +x cron.sh
-  (crontab -l 2>/dev/null; echo "0 0 * * * ${location}/cron.sh") | crontab -
-  echo -e "${Purple}Configured Cron Job to run every day at midnight${NC}"
-else
-	echo -e "${Yellow}Skipped.${NC}"
-fi
-echo ""
-
 echo -e "${Yellow}Setting permissions for user:${NC} ${user_name}"
 echo ""
 find Modules/ -type f -exec chmod 644 {} \;

@@ -22,6 +22,7 @@ email_setup_path="${location}/Modules/Setup/email_service.py"
 email_config_path="${location}/Modules/Setup/ssmtp.conf"
 hostname_path="/etc/hostname"
 hosts_path="/etc/hosts"
+bash_v = $(which bash)
 
 echo ""
 echo -e "${Blue}Project:${NC}     ${Green}P A R E N T A L   C A R E   T R A C K I N G${NC}"
@@ -105,7 +106,19 @@ else
 fi
 echo ""
 
-echo -e "${BIGreen}Enter the new hostname${NC} (Example: raspberrypi + box number)"
+echo -e "${Yellow}Insert 'y/Y' to configure Cron or press 'Enter' to skip.${NC}"
+read -r cron
+if [ -n "$cron" ]
+then
+  sed -i -e "\$a0 0   * * *   root ${bash_v} ${location}/cron.sh" "/etc/crontab"
+  service cron reload
+  echo -e "${Purple}Configured Cron Job to run every day at midnight${NC}"
+else
+	echo -e "${Yellow}Skipped.${NC}"
+fi
+echo ""
+
+echo -e "${BIGreen}Enter the new hostname to configure email service${NC} (Example: raspberrypi + box number)"
 echo -e "${Yellow}Press 'Enter' to skip configuration.${NC}"
 read -r hostname
 if [ -n "$hostname" ]
@@ -117,6 +130,7 @@ then
   mv /etc/ssmtp/ssmtp.conf /etc/ssmtp/ssmtp.conf.sample
   cp -r "${email_config_path}" /etc/ssmtp/
   sleep 1
+  chmod +x cron.sh
   echo -e "${Purple}Registered new hostname and updated hosts file${NC}"
   echo -e "${Green}Installation complete.${NC}"
   sleep 1
