@@ -28,7 +28,6 @@ monitor_command="${python_v} ${location}${monitor_file}"
 find Modules/ -type f -exec chmod 644 {} \;
 chown -R "${user_name}" .
 
-echo "$(date): PCT Starting cron as ${user_name}"
 screen -ls | grep temp | cut -d. -f1 | awk '{print $1}' | xargs kill
 screen -ls | grep irbb | cut -d. -f1 | awk '{print $1}' | xargs kill
 screen -ls | grep rfid | cut -d. -f1 | awk '{print $1}' | xargs kill
@@ -46,4 +45,4 @@ sleep 1s
 screen -dmS monitor bash -c "${monitor_command}"
 sleep 2s
 screen -list
-echo "$(date): Ran PCT cron job"
+echo "$(date): Ran PCT cron job as ${user_name}"
