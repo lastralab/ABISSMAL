@@ -34,22 +34,16 @@ screen -ls | grep irbb | cut -d. -f1 | awk '{print $1}' | xargs kill
 screen -ls | grep rfid | cut -d. -f1 | awk '{print $1}' | xargs kill
 screen -ls | grep backup | cut -d. -f1 | awk '{print $1}' | xargs kill
 screen -ls | grep monitor | cut -d. -f1 | awk '{print $1}' | xargs kill
-echo "$(date): PCT Killed screens"
 sleep 1s
 screen -dmS temp bash -c "${temp_command}"
-echo "$(date): PCT Started screen: temp"
 sleep 1s
 screen -dmS irbb bash -c "${irbb_command}"
-echo "$(date): PCT Started screen: irbb"
 sleep 1s
 screen -dmS rfid bash -c "${rfid_command}"
-echo "$(date): PCT Started screen: rfid"
 sleep 1s
 screen -dmS backup bash -c "${backups_command}"
-echo "$(date): PCT Started screen: backup"
 sleep 1s
 screen -dmS monitor bash -c "${monitor_command}"
-echo "$(date): PCT Started screen: monitor"
 sleep 2s
 screen -list
 echo "$(date): Ran PCT cron job"
