@@ -114,6 +114,7 @@ if [ -n "$cron" ]
 then
   mkdir /home/pi/log/
   touch /home/pi/log/pct_cron.log
+  chmod +rw /home/pi/log/pct_cron.log
   sed -i -e "\$a0 0  * * *   pi ${bash_v} ${location}/cron.sh >> /home/pi/log/pct_cron.log" "/etc/crontab"
   sed -i "s#^location=.*#location='${location}'#" "${cron_path}"
   sed -i "s#^python_v=.*#python_v='${python_v}'#" "${cron_path}"
