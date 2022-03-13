@@ -112,12 +112,9 @@ echo -e "${Yellow}Insert 'Y/y' to configure Cron or press 'Enter' to skip.${NC}"
 read -r cron
 if [ -n "$cron" ]
 then
-  mkdir /home/pi/log/
-  touch /home/pi/log/pct_cron.log
   sed -i -e "\$a15 0  * * *   pi ${bash_v} ${location}/cron.sh >> /home/pi/log/pct_cron.log" "/etc/crontab"
-  sed -i "s#^location=.*#location='${location}'#" "${cron_path}"
-  sed -i "s#^python_v=.*#python_v='${python_v}'#" "${cron_path}"
-  chmod +x cron.sh
+  sed -i "s#^location=.*#location=\"${location}\"#" "${cron_path}"
+  sed -i "s#^python_v=.*#python_v=\"${python_v}\"#" "${cron_path}"
   service cron reload
   echo -e "${Purple}Configured Cron Job to run every 6th hour at minute 15${NC}"
   echo -e "PCT Cron jobs will be logged in ${Cyan}/home/pi/log/pct_cron.log${NC}"
