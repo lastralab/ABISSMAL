@@ -26,8 +26,6 @@ monitor_file="/Modules/monitor.py"
 monitor_command="${python_v} ${location}${monitor_file}"
 
 find Modules/ -type f -exec chmod 644 {} \;
-chown -R "${user_name}" .
-chown -R "${user_name}" /home/pi/log/pct_cron.log
 
 screen -ls | grep temp | cut -d. -f1 | awk '{print $1}' | xargs kill
 screen -ls | grep irbb | cut -d. -f1 | awk '{print $1}' | xargs kill
