@@ -30,7 +30,6 @@ find Modules/ -type f -exec chmod 644 {} \;
 screen -ls | grep temp | cut -d. -f1 | awk '{print $1}' | xargs kill
 screen -ls | grep irbb | cut -d. -f1 | awk '{print $1}' | xargs kill
 screen -ls | grep rfid | cut -d. -f1 | awk '{print $1}' | xargs kill
-screen -ls | grep backup | cut -d. -f1 | awk '{print $1}' | xargs kill
 screen -ls | grep monitor | cut -d. -f1 | awk '{print $1}' | xargs kill
 sleep 1s
 screen -dmS temp bash -c "${temp_command}"
@@ -38,8 +37,6 @@ sleep 1s
 screen -dmS irbb bash -c "${irbb_command}"
 sleep 1s
 screen -dmS rfid bash -c "${rfid_command}"
-sleep 1s
-screen -dmS backup bash -c "${backups_command}"
 sleep 1s
 screen -dmS monitor bash -c "${monitor_command}"
 sleep 2s
