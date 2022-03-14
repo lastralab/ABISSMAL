@@ -18,10 +18,13 @@ user_name=$(whoami)
 location=$(pwd)
 host_name=$(hostname)
 helper_path="${location}/Modules/helper.py"
+cron_path="${location}/cron.sh"
 email_setup_path="${location}/Modules/Setup/email_service.py"
 email_config_path="${location}/Modules/Setup/ssmtp.conf"
 hostname_path="/etc/hostname"
 hosts_path="/etc/hosts"
+bash_v=$(which bash)
+python_v=$(which python)
 
 echo ""
 echo -e "${Blue}Project:${NC}     ${Green}P A R E N T A L   C A R E   T R A C K I N G${NC}"
@@ -45,7 +48,7 @@ fi
 sleep 1
 echo ""
 
-echo -e "${Yellow}Press 'Y/y' to install required packages or hit 'Enter' to skip installation.${NC}"
+echo -e "${Yellow}Insert y/Y to install required packages or press 'Enter' to skip.${NC}"
 read -r packs
 if [ -n "$packs" ]
 then
@@ -64,7 +67,7 @@ else
 fi
 echo ""
 
-echo -e "${BIGreen}Enter the email address to send emails from${NC} (smtp/imap enabled)"
+echo -e "${BIGreen}Enter the email address to send emails from${NC} (smtp enabled)"
 echo -e "${Yellow}Press 'Enter' to skip configuration.${NC}"
 read -r gmail
 if [ -n "$gmail" ]
@@ -105,7 +108,22 @@ else
 fi
 echo ""
 
-echo -e "${BIGreen}Enter the new hostname${NC} (Example: raspberrypi + box number)"
+echo -e "${Yellow}Insert 'Y/y' to configure Cron or press 'Enter' to skip.${NC}"
+read -r cron
+if [ -n "$cron" ]
+then
+  sed -i -e "\$a15 0  * * *   pi ${bash_v} ${location}/cron.sh >> /home/pi/log/pct_cron.log" "/etc/crontab"
+  sed -i "s#^location=.*#location=\"${location}\"#" "${cron_path}"
+  sed -i "s#^python_v=.*#python_v=\"${python_v}\"#" "${cron_path}"
+  service cron reload
+  echo -e "${Purple}Configured Cron Job to run every day at 00:15${NC}"
+  echo -e "PCT Cron jobs will be logged in ${Cyan}/home/pi/log/pct_cron.log${NC}"
+else
+	echo -e "${Yellow}Skipped.${NC}"
+fi
+echo ""
+
+echo -e "${BIGreen}Enter the new hostname to configure email service${NC} (Example: raspberrypi + box number)"
 echo -e "${Yellow}Press 'Enter' to skip configuration.${NC}"
 read -r hostname
 if [ -n "$hostname" ]
@@ -117,6 +135,7 @@ then
   mv /etc/ssmtp/ssmtp.conf /etc/ssmtp/ssmtp.conf.sample
   cp -r "${email_config_path}" /etc/ssmtp/
   sleep 1
+  chmod +x cron.sh
   echo -e "${Purple}Registered new hostname and updated hosts file${NC}"
   echo -e "${Green}Installation complete.${NC}"
   sleep 1

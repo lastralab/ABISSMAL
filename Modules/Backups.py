@@ -114,7 +114,7 @@ def logs_backup_init(day, destination, source):
             os.makedirs(path)
         for log in logs:
             if log.endswith('.log'):
-                if not log == today_log:
+                if not (log == today_log or log == 'pct_cron.log'):
                     shutil.move(os.path.join(log_path, log), os.path.join(path, log))
                     logs_qty = logs_qty + 1
                 pass

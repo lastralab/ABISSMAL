@@ -11,4 +11,5 @@
 3. Camera Holder
    * Also serves as the nest container cap
    * Holds the camera and provides light and ventilation
+   * Compatible with Arducam Lens Board and RPi NoIR Camera V2.
    * ![ScreenShot20220216at55246PM.png](./assets/Screen%20Shot%202022-02-16%20at%205.52.46%20PM.png)
