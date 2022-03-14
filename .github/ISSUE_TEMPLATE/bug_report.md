@@ -24,9 +24,9 @@ A clear and concise description of what you expected to happen.
 If applicable, add screenshots to help explain your problem.
 
 **Raspberry Pi information (please complete the following information):**
- - OS: [e.g. Raspbian 64bit]
- - Module version [e.g. 4B]
- - Python Version [e.g. Python 3.7]
+ - OS: [64bit]
+ - Module version [4B]
+ - Python Version [3.7.3]
 
 
 **Additional context**
