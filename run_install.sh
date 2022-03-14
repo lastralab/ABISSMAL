@@ -116,7 +116,7 @@ then
   sed -i "s#^location=.*#location=\"${location}\"#" "${cron_path}"
   sed -i "s#^python_v=.*#python_v=\"${python_v}\"#" "${cron_path}"
   service cron reload
-  echo -e "${Purple}Configured Cron Job to run every 6th hour at minute 15${NC}"
+  echo -e "${Purple}Configured Cron Job to run every day at 00:15${NC}"
   echo -e "PCT Cron jobs will be logged in ${Cyan}/home/pi/log/pct_cron.log${NC}"
 else
 	echo -e "${Yellow}Skipped.${NC}"
