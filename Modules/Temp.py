@@ -56,12 +56,12 @@ try:
     while True:
         dt = datetime.now()
         temp = read_temp()
-        C = str(round(temp[0], 2)) + u'\N{DEGREE SIGN}' + 'C'
-        F = str(round(temp[1], 2)) + u'\N{DEGREE SIGN}' + 'F'
-        logging.info('Temperature reading: ' + C + ', ' + F)
+        C = str(round(temp[0], 2))
+        F = str(round(temp[1], 2))
+        logging.info('Temperature reading: ' + C + u'\N{DEGREE SIGN}' + 'C, ' + F + u'\N{DEGREE SIGN}' + 'F')
         print('Temperature registered')
         csv_writer(str(box_id), module, temp_data, f"{dt.year}_{dt.month}_{dt.day}", header,
-                   [box_id, f"{dt.year}", f"{dt.month}", f"{dt.day}", f"{dt:%H:%M:%S.%f}", temp[0], temp[1]])
+                   [box_id, f"{dt.year}", f"{dt.month}", f"{dt.day}", f"{dt:%H:%M:%S.%f}", C, F])
         time.sleep(60)
         logging = get_logger(datetime.today())
 except KeyboardInterrupt:
