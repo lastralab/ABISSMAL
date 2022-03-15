@@ -93,7 +93,7 @@ def ReadTagPageZero(fd):
             if ans == int("0xD6", 16):
                 ans = ReadText(fd)
                 dt = datetime.now()
-                logging.info('RFID activity detected')
+                logging.info('RFID read proximity: ' + str(ans))
                 print('RFID activity detected')
                 csv_writer(str(box_id), module, rfid_data, f"{dt.year}_{dt.month}_{dt.day}", header,
                            [box_id, f"{dt.year}", f"{dt.month}", f"{dt.day}", f"{dt:%H:%M:%S.%f}", ans])
