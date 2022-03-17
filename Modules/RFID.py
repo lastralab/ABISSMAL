@@ -21,7 +21,7 @@ dir_setup("/home/pi/")
 
 warn = 0
 module = 'RFID'
-header = ['chamber_id', 'year', 'month', 'day', 'timestamp', 'PIT_tag_ID']
+header = ['chamber_id', 'year', 'month', 'day', 'timestamp', 'mapped_id', 'PIT_tag_ID']
 rfid_data = "/home/pi/Data_ParentalCareTracking/RFID"
 logging = get_logger(datetime.today())
 logging.info('Started RFID script')
@@ -98,7 +98,7 @@ def ReadTagPageZero(fd):
                 logging.info('RFID read proximity: ' + tag)
                 print('RFID activity detected')
                 csv_writer(str(box_id), module, rfid_data, f"{dt.year}_{dt.month}_{dt.day}", header,
-                           [box_id, f"{dt.year}", f"{dt.month}", f"{dt.day}", f"{dt:%H:%M:%S.%f}", tag])
+                           [box_id, f"{dt.year}", f"{dt.month}", f"{dt.day}", f"{dt:%H:%M:%S.%f}", tag, ans])
     except KeyboardInterrupt:
         logging = get_logger(datetime.today())
         logging.info('Exiting RFID')
