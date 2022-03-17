@@ -21,12 +21,13 @@ dir_setup("/home/pi/")
 
 warn = 0
 module = 'RFID'
-header = ['chamber_id', 'year', 'month', 'day', 'timestamp', 'mapped_id', 'PIT_tag_ID']
+header = ['chamber_id', 'year', 'month', 'day', 'timestamp', 'PIT_tag_ID']
 rfid_data = "/home/pi/Data_ParentalCareTracking/RFID"
 logging = get_logger(datetime.today())
 logging.info('Started RFID script')
 GPIO_PIN = 1
 female = ''
+male = ''
 
 
 def WaitForCTS():
@@ -94,10 +95,14 @@ def ReadTagPageZero(fd):
             if ans == int("0xD6", 16):
                 ans = ReadText(fd)
                 dt = datetime.now()
-                tag = 'female' if ans == female else 'male'
+                tag = ans
+                if ans == female:
+                    tag = 'female'
+                elif ans == male:
+                    tag = 'male'
                 logging.info('RFID read proximity: ' + tag)
                 print('RFID activity detected')
-                csv_writer(str(box_id), module, rfid_data, f"{dt.year}_{dt.month}_{dt.day}", header, [box_id, f"{dt.year}", f"{dt.month}", f"{dt.day}", f"{dt:%H:%M:%S.%f}", tag, ans])
+                csv_writer(str(box_id), module, rfid_data, f"{dt.year}_{dt.month}_{dt.day}", header, [box_id, f"{dt.year}", f"{dt.month}", f"{dt.day}", f"{dt:%H:%M:%S.%f}", ans])
                 time.sleep(1)
     except KeyboardInterrupt:
         logging = get_logger(datetime.today())
