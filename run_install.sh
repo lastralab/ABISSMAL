@@ -18,6 +18,7 @@ user_name=$(whoami)
 location=$(pwd)
 host_name=$(hostname)
 helper_path="${location}/Modules/helper.py"
+rfid_path="${location}/Modules/RFID.py"
 cron_path="${location}/cron.sh"
 email_setup_path="${location}/Modules/Setup/email_service.py"
 email_config_path="${location}/Modules/Setup/ssmtp.conf"
@@ -42,6 +43,19 @@ if [ -n "$boxid" ]
 then
 	sed -i "s/^box_id.*/box_id = '${boxid}'/" "${helper_path}"
   echo -e "${Purple}Registered ${boxid}${NC}"
+else
+	echo -e "${Yellow}Skipped.${NC}"
+fi
+sleep 1
+echo ""
+
+echo -e "${BIGreen}Enter RF tag identifier for female${NC} (Format: '01-10-3F-8F-D1')"
+echo -e "${Yellow}Press 'Enter' to skip configuration.${NC}"
+read -r fem
+if [ -n "$fem" ]
+then
+	sed -i "s/^female =.*/female = '${fem}'/" "${rfid_path}"
+  echo -e "${Purple}Registered Female Tag: ${fem}${NC}"
 else
 	echo -e "${Yellow}Skipped.${NC}"
 fi
