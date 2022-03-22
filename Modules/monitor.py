@@ -15,7 +15,7 @@ modules = ['temp', 'video', 'rfid', 'irbb', 'backup']
 
 logging = get_logger(datetime.date.today())
 logging.info('Starting Monitor script')
-print('Starting Monitor script')
+print('Started Monitor script')
 
 
 def monitor_screens():
