@@ -6,7 +6,6 @@
 # !/usr/bin/env python3
 
 import time
-import signal
 from datetime import datetime
 import sys
 import csv
