@@ -30,7 +30,7 @@ from helper import get_logger
 dir_setup('/home/pi/')
 logging = get_logger(datetime.today())
 logging.info('Starting Video script')
-print('Starting Video script')
+print('Started Video script')
 
 path = "/home/pi/Data_ParentalCareTracking/Video/"
 header = ['chamber_id', 'year', 'month', 'day', 'time_video_started', 'video_file_name']
