@@ -40,7 +40,6 @@ GPIO.setwarnings(False)
 
 
 def detect_beam_breaks_callback(BEAM_PIN, sensor_id):
-    logging = get_logger(datetime.today())
     if not GPIO.input(BEAM_PIN):
         dt = datetime.now()
         time.sleep(1)
@@ -48,12 +47,6 @@ def detect_beam_breaks_callback(BEAM_PIN, sensor_id):
         print('IRBB activity detected in sensor: ' + sensor_id)
         csv_writer(str(box_id), 'IRBB', irbb_data, f"{dt.year}_{dt.month}_{dt.day}",
                    header, [box_id, sensor_id, f"{dt.year}", f"{dt.month}", f"{dt.day}", f"{dt:%H:%M:%S.%f}"])
-
-
-# Manual Ctrl + C
-def signal_handler():
-    GPIO.cleanup()
-    sys.exit(0)
     
 
 GPIO.add_event_detect(BEAM_PIN_lead, GPIO.FALLING,

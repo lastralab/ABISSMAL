@@ -87,7 +87,6 @@ def ReadTagPageZero(fd):
     try:
         while True:
             WaitForCTS()
-            logging = get_logger(datetime.today())
             wiringpi2.serialPutchar(fd, 0x52)
             wiringpi2.serialPutchar(fd, 0x00)
             time.sleep(0.1)
@@ -105,11 +104,9 @@ def ReadTagPageZero(fd):
                 csv_writer(str(box_id), module, rfid_data, f"{dt.year}_{dt.month}_{dt.day}", header, [box_id, f"{dt.year}", f"{dt.month}", f"{dt.day}", f"{dt:%H:%M:%S.%f}", ans])
                 time.sleep(1)
     except KeyboardInterrupt:
-        logging = get_logger(datetime.today())
         logging.info('Exiting RFID')
         print('Exiting RFID')
     except Exception as E:
-        logging = get_logger(datetime.today())
         logging.error('RFID error: ' + str(E))
         print('RFID error: ' + str(E))
         email_alert('RFID', 'Error: ' + str(E))
