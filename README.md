@@ -24,7 +24,8 @@ Please refer to our [Installation Overview](https://github.com/lastralab/Parenta
    1. `sudo bash run_install.sh`
    2. Enter your password (we recommend to set a password for your raspberry pi)
    3. Insert setup information accordingly
-   4. Run `bash Main.sh` to start collecting data
+   4. Raspberry pi will be restarted automatically to apply changes
+   5. Run `bash Main.sh` to start collecting data
 
 ## Troubleshooting
 
