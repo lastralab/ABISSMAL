@@ -62,12 +62,26 @@ fi
 sleep 1
 echo ""
 
+echo -e "${BIGreen}Enter RF tag identifier for male${NC} (Format: '01-10-3F-8F-D1')"
+echo -e "${Yellow}Press 'Enter' to skip configuration.${NC}"
+read -r mal
+if [ -n "$mal" ]
+then
+	sed -i "s/^male =.*/male = '${fem}'/" "${rfid_path}"
+  echo -e "${Purple}Registered Male Tag: ${fem}${NC}"
+else
+	echo -e "${Yellow}Skipped.${NC}"
+fi
+sleep 1
+echo ""
+
 echo -e "${Yellow}Insert y/Y to install required packages or press 'Enter' to skip.${NC}"
 read -r packs
 if [ -n "$packs" ]
 then
 	echo -e "${Yellow}Installing packages:${NC}"
   apt-get update
+  pip3 install signal
   apt-get install ntfs-3g
   apt-get install python3
   apt-get install gparted
