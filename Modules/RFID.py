@@ -89,8 +89,8 @@ def ReadTagPageZero(fd):
             WaitForCTS()
             wiringpi2.serialPutchar(fd, 0x52)
             wiringpi2.serialPutchar(fd, 0x00)
-            time.sleep(0.1)
             ans = ReadInt(fd)
+            time.sleep(0.1)
             if ans == int("0xD6", 16):
                 ans = ReadText(fd)
                 dt = datetime.now()
