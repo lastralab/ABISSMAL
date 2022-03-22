@@ -7,7 +7,6 @@
 
 import os
 import time
-import signal
 from datetime import datetime
 import sys
 import csv
