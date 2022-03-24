@@ -25,7 +25,7 @@ dir_setup(pi_home)
 
 backup_hour = 20
 backup_minute = 15
-low_storage = 6
+low_storage = 200
 media_path = '/media/pi/'
 data_path = pi_home + 'Data_ParentalCareTracking/'
 log_path = '/home/pi/log/'
