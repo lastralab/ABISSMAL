@@ -17,12 +17,15 @@ from datetime import *
 import shutil
 import time
 from helper import get_logger
+import subprocess
+import re
 
 pi_home = '/home/pi/'
 dir_setup(pi_home)
 
 backup_hour = 20
 backup_minute = 15
+low_storage = 200
 media_path = '/media/pi/'
 data_path = pi_home + 'Data_ParentalCareTracking/'
 log_path = '/home/pi/log/'
@@ -133,6 +136,18 @@ def logs_backup_init(day, destination, source):
         pass
 
 
+def monitor_storage(path):
+    logging = get_logger(datetime.today())
+    output = subprocess.check_output('df -h --output=avail ' + path + ' | grep -v Avail', shell=True, text=True)
+    gigs = int(''.join(re.findall('[0-9]', output)))
+    if gigs <= low_storage:
+        msg = 'Warning: External drive available space is lower than ' + str(low_storage) + 'G. Needs to be empty soon.'
+        email_alert('Backup', msg)
+        logging.error(msg)
+    else:
+        logging.info('Storage Monitor: Total space available in external drive: ' + str(gigs) + 'G')
+
+
 try:
     while True:
         now = datetime.now()
@@ -143,6 +158,7 @@ try:
             time.sleep(61)
         elif usb_connected(box_id) and now.hour == 0 and now.minute == 0:
             logs_backup_init(now, media_path + box_id, log_path)
+            monitor_storage(media_path + box_id)
             logging = get_logger(datetime.today())
             time.sleep(61)
         else:
