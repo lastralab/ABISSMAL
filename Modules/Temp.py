@@ -68,7 +68,13 @@ try:
                        [box_id, f"{dt.year}", f"{dt.month}", f"{dt.day}", f"{dt:%H:%M:%S.%f}", temp[0], temp[1]])
             time.sleep(60)
         else:
-            pass
+            C = str("N/A")
+            F = str("N/A")
+            logging.info('Temperature reading: N/A')
+            print('Temperature registered as N/A')
+            csv_writer(str(box_id), module, temp_data, f"{dt.year}_{dt.month}_{dt.day}", header,
+                       [box_id, f"{dt.year}", f"{dt.month}", f"{dt.day}", f"{dt:%H:%M:%S.%f}", C, F])
+            time.sleep(60)
 except KeyboardInterrupt:
     logging.info('Exiting Temperature')
 except Exception as E:
