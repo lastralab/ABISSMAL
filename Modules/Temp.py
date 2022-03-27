@@ -71,6 +71,7 @@ try:
             C = str("N/A")
             F = str("N/A")
             logging.info('Temperature reading: N/A')
+            email_alert('Temp', 'Warning: Sensor reading returned N/A, run cron.sh if it you get this warning again.')
             print('Temperature registered as N/A')
             csv_writer(str(box_id), module, temp_data, f"{dt.year}_{dt.month}_{dt.day}", header,
                        [box_id, f"{dt.year}", f"{dt.month}", f"{dt.day}", f"{dt:%H:%M:%S.%f}", C, F])
