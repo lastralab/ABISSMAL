@@ -42,7 +42,7 @@ fr = 30
 stream_duration = 5
 record_duration = 10
 threshold = 50
-sensitivity = 80
+sensitivity = 2800
 REC_LED = 16
 GPIO.setmode(GPIO.BCM)
 GPIO.setwarnings(False)
@@ -74,6 +74,8 @@ def detect_motion(cam):
                 if (pixdiff1 + pixdiff2 + pixdiff3) > (threshold * 3):
                     pixels += 1
         if pixels > sensitivity:
+            logging.info('DEBUGGING: sensitivity: ' + str(sensitivity) + ' is < than pixels')
+            logging.info('DEBUGGING: pixels: ' + str(pixels))
             result = True
         else:
             result = False
