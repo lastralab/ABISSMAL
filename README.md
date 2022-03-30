@@ -1,20 +1,21 @@
-<h1>ParentalCareTracking</h1>
+<h1>Parental Care Tracking System</h1>
 <b>Authors:</b><br>
-Tania Molina - <span style="pointer-events:none">tan@e-storecook.com</span><br>
-Grace Smith-Vidaurre - <span style="pointer-events:none">github@smith-vidaurre.com</span>
+Grace Smith-Vidaurre, PhD - <span style="pointer-events:none">github@smith-vidaurre.com</span>
+<br>
+Tania Molina-Medrano - <span style="pointer-events:none">tan@e-storecook.com</span><br>
 
 Project board: https://github.com/lastralab/ParentalCareTracking/projects/1 <br>
 Project wiki: https://github.com/lastralab/ParentalCareTracking/wiki
 
 <h2>Project Overview</h2>
-Software to track parental care behavior in captive birds. This project requires a nest container and collects temperature data, parental visits, and video.
+IoT system to track parental care behavior in captive birds. This project requires a nest container and collects temperature data, parental visits, and video.
 <br><br>
 Temperature data is collected every minute all day and night. Parental visits are tracked using radio frequency identification (RFID) and infrared beam breakers all day and night. The RFID system requires an antenna at the entrance of the nest container and leg bands on birds with PIT tags. Two beam breakers are placed behind the RFID antenna to detect direction of movement (did a bird enter or leave?) and also to provide backup data in case the RFID antenna fails. Videos are recorded for short periods of time around parental visits during the day only.
 This parental care tracking system was developed and implemented for captive zebra finches (*Taeniopygia guttata*). A main script controls data collection, error/warnings documentation in logs, data transfer to a USB, and e-mail alerts.
 
-# Installation
+# Installing PCTS
 
-Please refer to our [Installation Overview](https://github.com/lastralab/ParentalCareTracking/wiki/Installation) before proceeding. There are a few pre-requisites to consider before running the installation script.
+Please refer to our Wiki [Installation Overview](https://github.com/lastralab/ParentalCareTracking/wiki/Installation) before proceeding. There are a few pre-requisites to consider before running the installation script.
 
 1. Run `sudo apt-get install git` in your RaspberryPi.
 2. Go to desired directory to download this project.
@@ -30,3 +31,6 @@ Please refer to our [Installation Overview](https://github.com/lastralab/Parenta
 ## Troubleshooting
 
 Please refer to our Wiki [Troubleshooting](https://github.com/lastralab/ParentalCareTracking/wiki/Installation#troubleshooting)
+
+# Updating PCTS
+
