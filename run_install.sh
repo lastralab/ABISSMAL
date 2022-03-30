@@ -88,6 +88,7 @@ then
   chmod +x Main.sh
   apt-get install ssmtp
   apt install nmap
+  apt-get install -y gpac
   echo ""
 else
 	echo -e "${Yellow}Skipped.${NC}"
