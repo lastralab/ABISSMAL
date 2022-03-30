@@ -74,8 +74,7 @@ def detect_motion(cam):
                 if (pixdiff1 + pixdiff2 + pixdiff3) > (threshold * 3):
                     pixels += 1
         if pixels > sensitivity:
-            logging.info('DEBUGGING: sensitivity: ' + str(sensitivity) + ' is < than pixels')
-            logging.info('DEBUGGING: pixels: ' + str(pixels))
+            logging.debug('DEBUGGING: sensitivity: ' + str(sensitivity) + ' is < ' + str(pixels) + 'pixels')
             result = True
         else:
             result = False
