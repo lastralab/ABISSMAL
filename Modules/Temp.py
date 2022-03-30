@@ -41,28 +41,41 @@ def read_temp_raw():
 
 def read_temp():
     lines = read_temp_raw()
-    while lines[0].strip()[-3:] != 'YES':
-        time.sleep(0.2)
-        lines = read_temp_raw()
-    equals_pos = lines[1].find('t=')
-    if equals_pos != -1:
-        temp_string = lines[1][equals_pos + 2:]
-        temp_c = float(temp_string) / 1000.0
-        temp_f = (temp_c * (9.0 / 5.0)) + 32.0
-        return temp_c, temp_f
+    if len(lines) > 1:
+        while lines[0].strip()[-3:] != 'YES':
+            time.sleep(0.25)
+            lines = read_temp_raw()
+        equals_pos = lines[1].find('t=')
+        if equals_pos != -1:
+            temp_string = lines[1][equals_pos + 2:]
+            temp_c = float(temp_string) / 1000.0
+            temp_f = (temp_c * (9.0 / 5.0)) + 32.0
+            return temp_c, temp_f
+    else:
+        return None
 
 
 try:
     while True:
         dt = datetime.now()
         temp = read_temp()
-        C = str(round(temp[0], 2))
-        F = str(round(temp[1], 2))
-        logging.info('Temperature reading: ' + C + u'\N{DEGREE SIGN}' + 'C, ' + F + u'\N{DEGREE SIGN}' + 'F')
-        print('Temperature registered')
-        csv_writer(str(box_id), module, temp_data, f"{dt.year}_{dt.month}_{dt.day}", header,
-                   [box_id, f"{dt.year}", f"{dt.month}", f"{dt.day}", f"{dt:%H:%M:%S.%f}", temp[0], temp[1]])
-        time.sleep(60)
+        if temp is not None:
+            C = str(round(temp[0], 2))
+            F = str(round(temp[1], 2))
+            logging.info('Temperature reading: ' + C + u'\N{DEGREE SIGN}' + 'C, ' + F + u'\N{DEGREE SIGN}' + 'F')
+            print('Temperature registered')
+            csv_writer(str(box_id), module, temp_data, f"{dt.year}_{dt.month}_{dt.day}", header,
+                       [box_id, f"{dt.year}", f"{dt.month}", f"{dt.day}", f"{dt:%H:%M:%S.%f}", temp[0], temp[1]])
+            time.sleep(60)
+        else:
+            C = str("N/A")
+            F = str("N/A")
+            logging.info('Temperature reading: N/A')
+            email_alert('Temp', 'Warning: Sensor reading returned N/A, run cron.sh if it you get this warning again.')
+            print('Temperature registered as N/A')
+            csv_writer(str(box_id), module, temp_data, f"{dt.year}_{dt.month}_{dt.day}", header,
+                       [box_id, f"{dt.year}", f"{dt.month}", f"{dt.day}", f"{dt:%H:%M:%S.%f}", C, F])
+            time.sleep(60)
 except KeyboardInterrupt:
     logging.info('Exiting Temperature')
 except Exception as E:
