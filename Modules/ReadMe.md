@@ -1,5 +1,7 @@
 <h1>Parental Care Tracking</h1>
-<b>Authors</b>: nmoltta, gsvidaurre <br>
+Grace Smith-Vidaurre, PhD - <span style="pointer-events:none">github@smith-vidaurre.com</span><br>
+Tania Molina-Medrano - <span style="pointer-events:none">tan@e-storecook.com</span><br>
+
 <b>Date</b>: 22 November 2021
 
 <h3>Helper functions</h3>
@@ -25,7 +27,7 @@ The main setup sets up a pull up resistor to detect a falling edge that represen
 
 <h1>Temperature sensor  - Temp</h1>
 
-**Description**: This file contains code to run and collect data from a waterproof 1-wire DS18B20 temperature sensor on a Raspberry Pi computer. The original code to control the temperature sensor was obtained from https://pimylifeup.com/raspberry-pi-temperature-sensor/. The sensor will provide temperature data from inside the nest chamber, but will not provide incubation temperature unless strategically placed to do so (which may be complicated by the fact that some birds continue to add nesting material and can bury the sensor). Temperature data inside the nest chamber complements parental visits captured by the RFID antenna and infrared beam breakers.
+**Description**: This file contains coTania M. de to run and collect data from a waterproof 1-wire DS18B20 temperature sensor on a Raspberry Pi computer. The original code to control the temperature sensor was obtained from https://pimylifeup.com/raspberry-pi-temperature-sensor/. The sensor will provide temperature data from inside the nest chamber, but will not provide incubation temperature unless strategically placed to do so (which may be complicated by the fact that some birds continue to add nesting material and can bury the sensor). Temperature data inside the nest chamber complements parental visits captured by the RFID antenna and infrared beam breakers.
 
 **Notes on usage**: The sensor must be connected to 3.3V for power and GPIO pin 4 for 1-wire data transfer. A single sub-folder per device should appear inside /sys/bus/w1/devices that starts with 28 after initial setup (see link above), ptherwise something is not connected correctly (e.g. when multiple folders appear that start with 00-). The script Temp.py must be executed with python3, otherwise some code will fail (e.g. the file = f statement in the print calls). May need to rerun setup of /w1 folder as in https://pimylifeup.com/raspberry-pi-temperature-sensor/ every time the Raspberry Pi computer restarts.
 
@@ -33,8 +35,8 @@ The main setup sets up a pull up resistor to detect a falling edge that represen
 
 <h1>Video</h1>
 
-**Description**: This file contains code to run and collect videos from a Raspberry Pi (G) fisheye lens camera. Videos will be strategically recorded in h264 format to capture parent-offspring interactions within several seconds of visits to the nest chamber. These videos are intended to be used in later projects, and complement automated tracking of parental visits to the nest chamber currently obtained by the RFID antenna and infrared beam breakers.
+**Description**: This file contains code to run and collect videos from a Raspberry Pi (G) fisheye lens camera. Videos will be strategically recorded in h264 format and converted to mp4 to capture parent-offspring interactions within several seconds of visits to the nest chamber. These videos are intended to be used in later projects, and complement automated tracking of parental visits to the nest chamber currently obtained by the RFID antenna and infrared beam breakers.
 
-**Notes on usage**: Since video data is computationally intensive to record, and expensive both to store and score, videos will be recorded around parental visits to the nest chamber. Either RFID or the infrared beam breakers should trigger video recording. Ideally, video recording will capture several seconds before the given parent enters (perhaps 10 seconds), and will record for a set amount of time after the trigger (e.g. 30 or 60 seconds). This code still needs to be optimized for resolution and size given the height of the nest container. A set of manually scored videos can possibly be used for automated tracking of behavior, but since these videos will be short it may be possible to score behaviors manually with an animal behavior app.
+**Notes on usage**: Since video data is computationally intensive to record, and expensive both to store and score, videos will be recorded using a high sensitivity threshold for motion detection. We ran some tests by placing the camera on a desk and walking and sitting nearby. In Video.py line 77, the sensitivity vs pixel difference is getting logged every time the pixel difference gets higher than the sensitivity threshold. Our test results provided an ideal sensitivity value of 18000, which will only detect motion when there's movement in front of the camera, but not when vibrations around it are slightly moving the camera. You can trace that log line and modify the sensitivity according to your needs.
 
 **Data structure**: The function in Video.py "detect_motion(cam)" should return videos that contain the recording chamber number, and the year, month, day, and timestamp (HH:MM:SS) in the file name of each video.

@@ -41,7 +41,7 @@ echo ""
 echo -e "${Blue}Project:${NC}     ${Green}P A R E N T A L   C A R E   T R A C K I N G${NC}"
 echo -e "${Blue}Repository:${NC}  ${Blue}https://github.com/lastralab/parentalcaretracking"${NC}
 echo -e "${Blue}Date:${NC}        ${Blue}November 2021${NC}"
-echo -e "${Blue}Authors:${NC}     ${Cyan}Tania M. Molina${NC} & ${Cyan}Grace Smith-Vidaurre${NC}"
+echo -e "${Blue}Authors:${NC}     ${Cyan}Molina-Medrano, T.${NC} & ${Cyan}Smith-Vidaurre, G.${NC}"
 echo ""
 
 echo -e "${Yellow}Setting permissions for user:${NC} ${user_name}"
