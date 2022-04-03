@@ -13,9 +13,11 @@ IoT system to track parental care behavior in captive birds. This project requir
 Temperature data is collected every minute all day and night. Parental visits are tracked using radio frequency identification (RFID) and infrared beam breakers all day and night. The RFID system requires an antenna at the entrance of the nest container and leg bands on birds with PIT tags. Two beam breakers are placed behind the RFID antenna to detect direction of movement (did a bird enter or leave?) and also to provide backup data in case the RFID antenna fails. Videos are recorded for short periods of time around parental visits during the day only.
 This parental care tracking system was developed and implemented for captive zebra finches (*Taeniopygia guttata*). A main script controls data collection, error/warnings documentation in logs, data transfer to a USB, and e-mail alerts.
 
-# Installing PCTS
-
+# Pre-requisites
 Please refer to our Wiki [Installation Overview](https://github.com/lastralab/ParentalCareTracking/wiki/Installation) before proceeding. There are a few pre-requisites to consider before running the installation script.
+
+
+# Installing PCTS
 
 1. Run `sudo apt-get install git` in your RaspberryPi.
 2. Go to desired directory to download this project.
@@ -33,7 +35,4 @@ Please refer to our Wiki [Installation Overview](https://github.com/lastralab/Pa
 
 Please refer to our Wiki [Troubleshooting](https://github.com/lastralab/ParentalCareTracking/wiki/Installation#troubleshooting)
 
-# Updating PCTS
-
-- TODO
 
