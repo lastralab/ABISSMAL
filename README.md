@@ -4,7 +4,6 @@ Grace Smith-Vidaurre, PhD - <span style="pointer-events:none">grace&#64;smith<sp
 <br>
 Tania Molina-Medrano - <span style="pointer-events:none;">tanis.mo&#64;e<span style="display:none">&nbsp;</span>-storecook.com</span><br>
 
-Project board: https://github.com/lastralab/ParentalCareTracking/projects/1 <br>
 Project wiki: https://github.com/lastralab/ParentalCareTracking/wiki
 
 <h2>Project Overview</h2>
