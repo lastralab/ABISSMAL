@@ -1,8 +1,8 @@
 <h1>Parental Care Tracking System</h1>
 <b>Authors:</b><br>
-Grace Smith-Vidaurre, PhD - <span style="pointer-events:none">github@smith-vidaurre.com</span>
+Grace Smith-Vidaurre, PhD - <span style="pointer-events:none">grace&#64;smith<span style="display:none">&nbsp;</span>-vidaurre.com</span>
 <br>
-Tania Molina-Medrano - <span style="pointer-events:none">tan@e-storecook.com</span><br>
+Tania Molina-Medrano - <span style="pointer-events:none;">tanis.mo&#64;e<span style="display:none">&nbsp;</span>-storecook.com</span><br>
 
 Project board: https://github.com/lastralab/ParentalCareTracking/projects/1 <br>
 Project wiki: https://github.com/lastralab/ParentalCareTracking/wiki
@@ -33,6 +33,6 @@ Please refer to our Wiki [Installation Overview](https://github.com/lastralab/Pa
 
 ## Troubleshooting
 
-Please refer to our Wiki [Troubleshooting](https://github.com/lastralab/ParentalCareTracking/wiki/Installation#troubleshooting)
+Please refer to our [Wiki](https://github.com/lastralab/ParentalCareTracking/wiki/Installation#troubleshooting)
 
 
