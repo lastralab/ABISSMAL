@@ -36,6 +36,5 @@ sleep 1s
 screen -dmS rfid bash -c "${rfid_command}"
 sleep 1s
 screen -dmS monitor bash -c "${monitor_command}"
-sleep 2s
-screen -list
+sleep 1s
 echo "$(date): Ran PCT cron job as ${user_name}"
