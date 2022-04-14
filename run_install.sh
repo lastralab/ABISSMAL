@@ -27,10 +27,16 @@ hosts_path="/etc/hosts"
 bash_v=$(which bash)
 python_v=$(which python)
 
-echo ""
-echo -e "${Blue}Project:${NC}     ${Green}P A R E N T A L   C A R E   T R A C K I N G${NC}"
+echo -e "${Green}
+  _____   _____ _______ _____
+ |  __ \ / ____|__   __/ ____|
+ | |__) | |       | | | (___
+ |  ___/| |       | |  \___ \ \r
+ | |    | |____   | |  ____) |
+ |_|     \_____|  |_| |_____/
+${NC}"
+echo -e "${Green}Parental Care Tracking System${NC}"
 echo -e "${Blue}Repository:${NC}  https://github.com/lastralab/parentalcaretracking"
-echo -e "${Blue}Installation script:${NC}        ${Blue}run_install.sh${NC}"
 echo -e "${Blue}Authors:${NC}     ${Cyan}Molina-Medrano, T. & Smith-Vidaurre, G.${NC}"
 echo ""
 echo -e "${Yellow}Setting permissions for ${user_name}...${NC}"

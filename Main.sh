@@ -37,8 +37,15 @@ backups_command="${python_v} ${location}${backups_file}"
 monitor_file="/Modules/monitor.py"
 monitor_command="${python_v} ${location}${monitor_file}"
 
-echo ""
-echo -e "${Blue}Project:${NC}     ${Green}P A R E N T A L   C A R E   T R A C K I N G${NC}"
+echo -e "${Green}
+  _____   _____ _______ _____
+ |  __ \ / ____|__   __/ ____|
+ | |__) | |       | | | (___
+ |  ___/| |       | |  \___ \ \r
+ | |    | |____   | |  ____) |
+ |_|     \_____|  |_| |_____/
+${NC}"
+echo -e "${Green}Parental Care Tracking System${NC}"
 echo -e "${Blue}Repository:${NC}  ${Blue}https://github.com/lastralab/parentalcaretracking"${NC}
 echo -e "${Blue}Date:${NC}        ${Blue}November 2021${NC}"
 echo -e "${Blue}Authors:${NC}     ${Cyan}Molina-Medrano, T.${NC} & ${Cyan}Smith-Vidaurre, G.${NC}"
