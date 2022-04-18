@@ -34,7 +34,7 @@ print('Started Video script')
 path = "/home/pi/Data_ParentalCareTracking/Video/"
 header = ['chamber_id', 'year', 'month', 'day', 'time_video_started', 'video_file_name']
 prior_image = None
-time_range = [6, 19]
+time_range = [6, 20]
 video_width = 1280
 video_height = 720
 iso = 800
