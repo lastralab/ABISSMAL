@@ -42,7 +42,7 @@ fr = 30
 stream_duration = 5
 record_duration = 10
 threshold = 50
-sensitivity = 18000
+sensitivity = 9000
 REC_LED = 16
 GPIO.setmode(GPIO.BCM)
 GPIO.setwarnings(False)
