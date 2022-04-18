@@ -17,7 +17,14 @@ Please refer to our Wiki [Installation Overview](https://github.com/lastralab/Pa
 
 
 # Installing PCTS
-
+<pre>
+  _____   _____ _______ _____
+ |  __ \ / ____|__   __/ ____|
+ | |__) | |       | | | (___
+ |  ___/| |       | |  \___ \
+ | |    | |____   | |  ____) |
+ |_|     \_____|  |_| |_____/
+</pre>
 1. Run `sudo apt-get install git` in your RaspberryPi.
 2. Go to desired directory to download this project.
 3. Clone this repository `git clone https://github.com/lastralab/ParentalCareTracking.git`
