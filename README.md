@@ -35,7 +35,7 @@ Please refer to our Wiki [Installation Overview](https://github.com/lastralab/Pa
    3. Insert setup information accordingly
    4. Raspberry pi will be restarted automatically to apply changes
    5. If you are using ssh connection, you might need to <a href="https://github.com/lastralab/ParentalCareTracking/wiki/Installation#external-drive-not-found">mount the external drive</a> 
-   6. Run `bash Main.sh` to start collecting data
+   6. Run `bash Main.sh` without sudo to start collecting data
 
 ## Troubleshooting
 
