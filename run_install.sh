@@ -87,6 +87,7 @@ if [ -n "$packs" ]
 then
 	echo -e "${Yellow}Installing packages:${NC}"
   apt-get update
+  apt install -y vim
   apt-get install ntfs-3g
   apt-get install python3
   apt-get install gparted
