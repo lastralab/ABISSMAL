@@ -13,3 +13,6 @@
    * Holds the camera and provides light and ventilation
    * Compatible with Arducam Lens Board and RPi NoIR Camera V2.
    * ![ScreenShot20220216at55246PM.png](./assets/Screen%20Shot%202022-02-16%20at%205.52.46%20PM.png)
+
+4. IR Camera Holder
+   ![IRCam](assets/Screen Shot 2022-04-29 at 3.28.15 PM.png)
