@@ -87,9 +87,18 @@ if [ -n "$packs" ]
 then
 	echo -e "${Yellow}Installing packages:${NC}"
   apt-get update
+  apt-get install build-essential tk-dev libncurses5-dev libncursesw5-dev libreadline6-dev libdb5.3-dev libgdbm-dev libsqlite3-dev libssl-dev libbz2-dev libexpat1-dev liblzma-dev zlib1g-dev libffi-dev -y
+  su -c 'wget https://www.python.org/ftp/python/3.7/Python-3.7.3.tgz' pi
+  su -c 'tar xf Python-3.7.3.tar.xz' pi
+  cd Python-3.7.3
+  su -c './configure --enable-optimizations' pi
+  su -c 'make -j -l 4' pi
+  make altinstall
+  su -c 'curl -O https://bootstrap.pypa.io/get-pip.py' pi
+  python3 get-pip.py
+  su -c 'pip install wiringpi' pi
   apt install -y vim
   apt-get install ntfs-3g
-  apt-get install python3
   apt-get install gparted
   apt-get install screen
   chmod +x Main.sh
