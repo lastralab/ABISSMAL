@@ -90,9 +90,14 @@ then
   apt-get install fish
   apt-get install build-essential tk-dev libncurses5-dev libncursesw5-dev libreadline6-dev libdb5.3-dev libgdbm-dev libsqlite3-dev libssl-dev libbz2-dev libexpat1-dev liblzma-dev zlib1g-dev libffi-dev -y
   apt-get install python3
-  su -c 'curl -O https://bootstrap.pypa.io/get-pip.py' pi
-  python3 get-pip.py
-  su -c 'pip install wiringpi' pi
+  curl -O https://bootstrap.pypa.io/get-pip.py
+  python -m ensurepip --upgrade
+  python get-pip.py
+  python -m pip install --upgrade pip
+  apt install python3-pip
+  pip3 install wiringpi
+  pip3 install rpi-gpio
+  pip3 install picamera
   apt install -y vim
   apt-get install ntfs-3g
   apt-get install gparted
