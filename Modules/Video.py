@@ -32,7 +32,7 @@ logging.info('Starting Video script')
 print('Started Video script')
 
 path = "/home/pi/Data_ParentalCareTracking/Video/"
-header = ['chamber_id', 'year', 'month', 'day', 'time_video_started', 'video_file_name']
+header = ['chamber_id', 'sensor_id', 'year', 'month', 'day', 'time_video_started', 'video_file_name']
 prior_image = None
 time_range = [6, 20]
 video_width = 1280
@@ -91,7 +91,7 @@ def convert_video(filename):
         os.remove(filename)
         csv_writer(str(box_id), 'Video', path, f"{dt.year}_{dt.month}_{dt.day}",
                    header,
-                   [box_id, f"{dt.year}", f"{dt.month}", f"{dt.day}", f"{dt:%H:%M:%S.%f}", Path(filename).stem + '.mp4'])
+                   [box_id, 'Camera', f"{dt.year}", f"{dt.month}", f"{dt.day}", f"{dt:%H:%M:%S.%f}", Path(filename).stem + '.mp4'])
     except Exception as Err:
         logging.error('Converting video error: ' + str(Err))
         email_alert('Video', 'Convert Error: ' + str(Err))

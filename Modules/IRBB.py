@@ -21,8 +21,8 @@ from helper import get_logger
 
 dir_setup('/home/pi/')
 
-BEAM_PIN_lead = 13
-BEAM_PIN_rear = 19
+BEAM_PIN_outer = 13
+BEAM_PIN_inner = 19
 warn = 0
 module = 'IRBB'
 header = ['chamber_id', 'sensor_id', 'year', 'month', 'day', 'timestamp']
@@ -48,11 +48,11 @@ def detect_beam_breaks_callback(BEAM_PIN, sensor_id):
         time.sleep(0.5)
     
 
-GPIO.add_event_detect(BEAM_PIN_lead, GPIO.FALLING,
-                      callback=lambda x: detect_beam_breaks_callback(BEAM_PIN_lead, "lead"), bouncetime=100)
+GPIO.add_event_detect(BEAM_PIN_outer, GPIO.FALLING,
+                      callback=lambda x: detect_beam_breaks_callback(BEAM_PIN_outer, "outer beam breaker"), bouncetime=100)
 
-GPIO.add_event_detect(BEAM_PIN_rear, GPIO.FALLING,
-                      callback=lambda x: detect_beam_breaks_callback(BEAM_PIN_rear, "rear"), bouncetime=100)
+GPIO.add_event_detect(BEAM_PIN_inner, GPIO.FALLING,
+                      callback=lambda x: detect_beam_breaks_callback(BEAM_PIN_inner, "inner beam breaker"), bouncetime=100)
 
 
 try:
