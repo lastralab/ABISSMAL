@@ -34,7 +34,7 @@ print('Started Video script')
 path = "/home/pi/Data_ParentalCareTracking/Video/"
 header = ['chamber_id', 'year', 'month', 'day', 'time_video_started', 'video_file_name']
 prior_image = None
-time_range = [1, 24]
+video_time_range = [1, 24]
 video_width = 1280
 video_height = 720
 iso = 400
@@ -44,13 +44,14 @@ record_duration = 10
 threshold = 50
 sensitivity = 9000
 REC_LED = 16
+LED_time_range = [6, 18]
 GPIO.setmode(GPIO.BCM)
 GPIO.setwarnings(False)
 GPIO.setup(REC_LED, GPIO.OUT)
 GPIO.output(REC_LED, GPIO.LOW)
 
-logging.info('Video will be recorded between ' + str(time_range[0]) + ' and ' + str(time_range[1] + 1) + ' hours')
-print('Video will be recorded between ' + str(time_range[0]) + ' and ' + str(time_range[1] + 1) + ' hours')
+logging.info('Video will be recorded between ' + str(video_time_range[0]) + ' and ' + str(video_time_range[1] + 1) + ' hours')
+print('Video will be recorded between ' + str(video_time_range[0]) + ' and ' + str(video_time_range[1] + 1) + ' hours')
 
 
 def detect_motion(cam):
@@ -108,11 +109,12 @@ with picamera.PiCamera() as camera:
             general_time = datetime.now()
             logging = get_logger(general_time)
             hour_int = int(f"{general_time:%H}")
-            if int(time_range[0]) <= hour_int <= int(time_range[1]):
+            if int(video_time_range[0]) <= hour_int <= int(video_time_range[1]):
                 if detect_motion(camera):
                     print('Motion detected; Recording started')
                     logging.info("Motion detected. Starting video recordings")
-                    GPIO.output(REC_LED, GPIO.HIGH)
+                    if int(LED_time_range[0] <= hour_int <= int(LED_time_range[1]):
+                        GPIO.output(REC_LED, GPIO.HIGH)
                     dt = datetime.now()
                     dt_str = str(f"{dt.year}_{dt.month}_{dt.day}_{dt:%H}_{dt:%M}_{dt:%S}")
                     file1_h264 = path + str(box_id) + "_" + dt_str + "_pre_trigger" + '.h264'
@@ -123,7 +125,8 @@ with picamera.PiCamera() as camera:
                     stream.clear()
                     print('Recording finished')
                     logging.info("Videos recorded")
-                    GPIO.output(REC_LED, GPIO.LOW)
+                    if int(LED_time_range[0] <= hour_int <= int(LED_time_range[1]):
+                        GPIO.output(REC_LED, GPIO.LOW)
                     camera.wait_recording(1)
                     camera.split_recording(stream)
                     convert_video(file1_h264)
