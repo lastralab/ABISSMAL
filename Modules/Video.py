@@ -44,7 +44,7 @@ record_duration = 10
 threshold = 50
 sensitivity = 9000
 REC_LED = 16
-led_time_range = [6, 18]
+LED_time_range = [6, 18]
 GPIO.setmode(GPIO.BCM)
 GPIO.setwarnings(False)
 GPIO.setup(REC_LED, GPIO.OUT)
