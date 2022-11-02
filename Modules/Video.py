@@ -34,7 +34,7 @@ print('Started Video script')
 path = "/home/pi/Data_ParentalCareTracking/Video/"
 header = ['chamber_id', 'year', 'month', 'day', 'time_video_started', 'video_file_name']
 prior_image = None
-video_time_range = [0, 23]
+video_time_range = [1, 24]
 video_width = 1280
 video_height = 720
 iso = 400
@@ -113,7 +113,7 @@ with picamera.PiCamera() as camera:
                 if detect_motion(camera):
                     print('Motion detected; Recording started')
                     logging.info("Motion detected. Starting video recordings")
-                    if int(LED_time_range[0]) <= hour_int <= int(LED_time_range[1]):
+                    if int(LED_time_range[0] <= hour_int <= int(LED_time_range[1]):
                         GPIO.output(REC_LED, GPIO.HIGH)
                     dt = datetime.now()
                     dt_str = str(f"{dt.year}_{dt.month}_{dt.day}_{dt:%H}_{dt:%M}_{dt:%S}")
@@ -125,7 +125,7 @@ with picamera.PiCamera() as camera:
                     stream.clear()
                     print('Recording finished')
                     logging.info("Videos recorded")
-                    if int(LED_time_range[0]) <= hour_int <= int(LED_time_range[1]):
+                    if int(LED_time_range[0] <= hour_int <= int(LED_time_range[1]):
                         GPIO.output(REC_LED, GPIO.LOW)
                     camera.wait_recording(1)
                     camera.split_recording(stream)

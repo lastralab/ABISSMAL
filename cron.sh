@@ -7,8 +7,8 @@
 ##
 
 user_name=$(whoami)
-location="/home/pi/Desktop/ParentalCareTracking"
-python_v="/usr/bin/python"
+location=null
+python_v=null
 
 irbb_file="/Modules/IRBB.py"
 irbb_command="${python_v} ${location}${irbb_file}"

@@ -5,5 +5,5 @@
 
 # !/usr/bin/env python3
 
-source = 'lastrafotografica@gmail.com'
-key = 'Apocalipsis967^'
+source = 'email@gmail.com'
+key = 'password'
