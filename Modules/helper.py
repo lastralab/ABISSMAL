@@ -17,11 +17,11 @@ from Setup.email_service import source
 from Setup.email_service import key
 import log
 
-box_id = 'Box_01'
+box_id = 'Box_00'
 modules = ['IRBB', 'RFID', 'Temp', 'Video']
 video_extension = '.mp4'
 file_extension = '.csv'
-emails = []
+emails = ['lastrafotografica+PCTS@gmail.com']
 
 
 def get_logger(day):

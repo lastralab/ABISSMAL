@@ -26,7 +26,7 @@ rfid_data = "/home/pi/Data_ParentalCareTracking/RFID"
 logging = get_logger(datetime.today())
 logging.info('Started RFID script')
 GPIO_PIN = 1
-female = ''
+female = '01-10-3F-8F-D1'
 male = ''
 
 
