@@ -93,7 +93,7 @@ then
   apt-get install gparted
   apt-get install screen
   chmod +x Main.sh
-  apt-get install ssmtp
+#  apt-get install ssmtp
   apt install nmap
   apt-get install -y gpac
   echo ""
@@ -102,46 +102,46 @@ else
 fi
 echo ""
 
-echo -e "${BIGreen}Enter the email address to send emails from${NC} (smtp enabled)"
-echo -e "${Yellow}Press 'Enter' to skip configuration.${NC}"
-read -r gmail
-if [ -n "$gmail" ]
-then
-	sed -i "s/^source.*/source = '${gmail}'/" "${email_setup_path}"
-  sed -i "s/^AuthUser.*/AuthUser=${gmail}/" "${email_config_path}"
-  echo -e "${Purple}Registered ${gmail}${NC}"
-else
-	echo -e "${Yellow}Skipped.${NC}"
-fi
-echo ""
+#echo -e "${BIGreen}Enter the email address to send emails from${NC} (smtp enabled)"
+#echo -e "${Yellow}Press 'Enter' to skip configuration.${NC}"
+#read -r gmail
+#if [ -n "$gmail" ]
+#then
+#	sed -i "s/^source.*/source = '${gmail}'/" "${email_setup_path}"
+#  sed -i "s/^AuthUser.*/AuthUser=${gmail}/" "${email_config_path}"
+#  echo -e "${Purple}Registered ${gmail}${NC}"
+#else
+#	echo -e "${Yellow}Skipped.${NC}"
+#fi
+#echo ""
 
-echo -e "${BIGreen}Enter the email password (Note: Do not copy & paste)${NC}"
-echo -e "${Yellow}Press 'Enter' to skip configuration.${NC}"
-read -r -s pass
-if [ -n "$pass" ]
-then
-	sed -i "s/^key.*/key = '${pass}'/" "${email_setup_path}"
-  sed -i "s/^AuthPass.*/AuthPass=${pass}/" "${email_config_path}"
-  echo -e "${Purple}Registered password${NC}"
-else
-	echo -e "${Yellow}Skipped.${NC}"
-fi
-echo ""
+#echo -e "${BIGreen}Enter the email password${NC}"
+#echo -e "${Yellow}Press 'Enter' to skip configuration.${NC}"
+#read -r -s pass
+#if [ -n "$pass" ]
+#then
+#	sed -i "s/^key.*/key = '${pass}'/" "${email_setup_path}"
+#  sed -i "s/^AuthPass.*/AuthPass=${pass}/" "${email_config_path}"
+#  echo -e "${Purple}Registered password${NC}"
+#else
+#	echo -e "${Yellow}Skipped.${NC}"
+#fi
+#echo ""
 
-echo -e "${BIGreen}Enter email(s) to send error alerts.${NC}"
-echo -e "${RED}Note:${NC} ${Yellow}Each email must be contained in single quotes ' ' as the example:${NC}"
-echo -e "${Cyan}'email1@gmail.com', 'email2@gmail.com'${NC}"
-echo ""
-echo -e "${Yellow}Press 'Enter' to skip configuration.${NC}"
-read -r emails
-if [ -n "$emails" ]
-then
-	sed -i "s/^emails.*/emails = [${emails}]/" "${helper_path}"
-  echo -e "${Purple}Registered emails = [${emails}]${NC}"
-else
-	echo -e "${Yellow}Skipped.${NC}"
-fi
-echo ""
+#echo -e "${BIGreen}Enter email(s) to send error alerts.${NC}"
+#echo -e "${RED}Note:${NC} ${Yellow}Each email must be contained in single quotes ' ' as the example:${NC}"
+#echo -e "${Cyan}'email1@gmail.com', 'email2@gmail.com'${NC}"
+#echo ""
+#echo -e "${Yellow}Press 'Enter' to skip configuration.${NC}"
+#read -r emails
+#if [ -n "$emails" ]
+#then
+#	sed -i "s/^emails.*/emails = [${emails}]/" "${helper_path}"
+#  echo -e "${Purple}Registered emails = [${emails}]${NC}"
+#else
+#	echo -e "${Yellow}Skipped.${NC}"
+#fi
+#echo ""
 
 echo -e "${Yellow}Insert 'Y/y' to configure Cron or press 'Enter' to skip.${NC}"
 read -r cron
@@ -151,38 +151,19 @@ then
   sed -i "s#^location=.*#location=\"${location}\"#" "${cron_path}"
   sed -i "s#^python_v=.*#python_v=\"${python_v}\"#" "${cron_path}"
   service cron reload
+  chmod +x cron.sh
   echo -e "${Purple}Configured Cron Job to run every day at midnight${NC}"
   echo -e "PCT Cron jobs will be logged in ${Cyan}/home/pi/log/pct_cron.log${NC}"
 else
 	echo -e "${Yellow}Skipped.${NC}"
 fi
 echo ""
-
-echo -e "${BIGreen}Enter the new hostname to configure email service${NC} (Example: raspberrypi + box number)"
-echo -e "${Yellow}Press 'Enter' to skip configuration.${NC}"
-read -r hostname
-if [ -n "$hostname" ]
-then
-	sed -i "s/^${host_name}.*/${hostname}/" "${hostname_path}"
-  sed -i "s/^hostname.*/hostname=${hostname}/" "${email_config_path}"
-  add="\$a127.0.1.1  ${hostname}"
-  sed -i -e "${add}" "${hosts_path}"
-  mv /etc/ssmtp/ssmtp.conf /etc/ssmtp/ssmtp.conf.sample
-  cp -r "${email_config_path}" /etc/ssmtp/
-  sleep 1
-  chmod +x cron.sh
-  echo -e "${Purple}Registered new hostname and updated hosts file${NC}"
-  echo -e "${Green}Installation complete.${NC}"
-  sleep 1
-  echo -e "${RED}Raspberry pi needs to be restarted at this point${NC}"
-  echo ""
-  echo -e "${RED}Restarting in 5 seconds...${NC}"
-  sleep 6
-  echo ""
-  reboot
-else
-	echo -e "${Yellow}Skipped.${NC}"
-fi
+sleep 1
+echo -e "${Green}Installation complete${NC}"
+sleep 1
+echo -e "${RED}Raspberry pi needs to be restarted at this point${NC}"
 echo ""
-echo -e "${Green}Installation complete.${NC}"
+echo -e "${RED}Restarting in 5 seconds...${NC}"
+sleep 6
 echo ""
+reboot

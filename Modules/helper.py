@@ -51,7 +51,7 @@ def dir_setup(default_dir):
             os.makedirs(video_data)
     except Exception as E:
         print('Helper Logger Setup Error: ' + str(E))
-        email_alert('Helper', 'Logger Setup Error: ' + str(E))
+        # email_alert('Helper', 'Logger Setup Error: ' + str(E))
 
 
 def csv_writer(box_id, module, data_path, datestring, header, value):

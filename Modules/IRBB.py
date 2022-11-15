@@ -65,6 +65,6 @@ except KeyboardInterrupt:
 except Exception as E:
     logging.error('IRBB error: ' + str(E))
     print('IRBB error: ' + str(E))
-    email_alert('IRBB', 'Error: ' + str(E))
+    # email_alert('IRBB', 'Error: ' + str(E))
 finally:
     GPIO.cleanup()
