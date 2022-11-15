@@ -44,7 +44,7 @@ def RFIDSetup():
     if response != 0 and fd <= 0:
         print("Unable to Setup communications")
         logging.error("RFID Error: Unable to Setup communications")
-        email_alert('RFID', 'Error: Unable to setup communications')
+        # email_alert('RFID', 'Error: Unable to setup communications')
         sys.exit()
     return fd
 
@@ -109,7 +109,7 @@ def ReadTagPageZero(fd):
     except Exception as E:
         logging.error('RFID error: ' + str(E))
         print('RFID error: ' + str(E))
-        email_alert('RFID', 'Error: ' + str(E))
+        # email_alert('RFID', 'Error: ' + str(E))
 
 
 comms = RFIDSetup()
