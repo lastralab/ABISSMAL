@@ -22,7 +22,7 @@ def monitor_screens():
     screens = str(subprocess.getoutput("screen -list"))
     for screen in modules:
         if screens.find(screen) == -1:
-            email_alert(screen, 'Screen not running.')
+            # email_alert(screen, 'Screen not running.')
             logging.error('Screen not running: ' + screen)
             print('Screen closed: ' + screen)
         else:
@@ -37,6 +37,6 @@ try:
         pass
 except Exception as E:
     logging.error('Monitor error: ' + str(E))
-    email_alert('Monitor', 'Error while monitoring screens: ' + str(E))
+    # email_alert('Monitor', 'Error while monitoring screens: ' + str(E))
     print('Monitor error: ' + str(E))
     pass

@@ -50,7 +50,7 @@ def usb_connected(box):
         exception = 'External drive not detected, backup won\'t be possible.'
         print('Backups error: ' + exception)
         logging.error('Backups error: ' + exception)
-        email_alert('Backups', 'Error: ' + exception)
+        # email_alert('Backups', 'Error: ' + exception)
 
 
 def video_backup_init(foldername, destination, source):
@@ -73,7 +73,7 @@ def video_backup_init(foldername, destination, source):
     else:
         print('No videos backed-up. No files found')
         logging.error('No videos backed-up. No files found. Check camera/video module.')
-        email_alert('Backup', 'No videos backed-up. Check camera/video module. No files found in source: ' + source)
+        # email_alert('Backup', 'No videos backed-up. Check camera/video module. No files found in source: ' + source)
         pass
 
 
@@ -100,7 +100,7 @@ def csv_backup_init(today, destination, source):
         else:
             print('CSV files not found in module: ' + module)
             logging.warning('Backup: CSV files not found in module: ' + module)
-            email_alert('Backup', 'Warning: CSV files not found in module: ' + module)
+            # email_alert('Backup', 'Warning: CSV files not found in module: ' + module)
             pass
 
 
@@ -124,7 +124,7 @@ def logs_backup_init(day, destination, source):
             else:
                 print('Backup Warning: .log files not found in source.')
                 logging.warning('Backup: .log files not found in source.')
-                email_alert('Backup', 'Warning: .log files not found in source.')
+                # email_alert('Backup', 'Warning: .log files not found in source.')
                 pass
         print('Backed-up logs: ' + str(logs_qty))
         logging.info('Backed-up logs total: ' + str(logs_qty))
@@ -132,7 +132,7 @@ def logs_backup_init(day, destination, source):
         logging = get_logger(datetime.today())
         print('Backup Error: Empty Log dir: /home/pi/log/')
         logging.error('Backup: Empty Log dir /home/pi/log/')
-        email_alert('Backup', 'Error: Empty Log directory /home/pi/log/')
+        # email_alert('Backup', 'Error: Empty Log directory /home/pi/log/')
         pass
 
 
@@ -142,7 +142,7 @@ def monitor_storage(path):
     gigs = int(''.join(re.findall('[0-9]', output)))
     if gigs <= low_storage:
         msg = 'Warning: External drive available space is lower than ' + str(low_storage) + 'G. Needs to be empty soon.'
-        email_alert('Backup', msg)
+        # email_alert('Backup', msg)
         logging.error(msg)
     else:
         logging.info('Storage Monitor: Total space available in external drive: ' + str(gigs) + 'G')
@@ -166,4 +166,4 @@ try:
 except Exception as E:
     print('Backups error: ' + str(E))
     logging.error('Backups error: ' + str(E))
-    email_alert('Backups', 'Error: ' + str(E))
+    # email_alert('Backups', 'Error: ' + str(E))

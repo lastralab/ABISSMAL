@@ -95,7 +95,7 @@ def convert_video(filename):
                    [box_id, f"{dt.year}", f"{dt.month}", f"{dt.day}", f"{dt:%H:%M:%S.%f}", Path(filename).stem + '.mp4'])
     except Exception as Err:
         logging.error('Converting video error: ' + str(Err))
-        email_alert('Video', 'Convert Error: ' + str(Err))
+        # email_alert('Video', 'Convert Error: ' + str(Err))
 
 
 with picamera.PiCamera() as camera:
@@ -139,7 +139,7 @@ with picamera.PiCamera() as camera:
     except Exception as E:
         print('Video error: ' + str(E))
         logging.error('Video: ' + str(E))
-        email_alert('Video', 'Error: ' + str(E))
+        # email_alert('Video', 'Error: ' + str(E))
     finally:
         camera.stop_recording()
         camera.close()
