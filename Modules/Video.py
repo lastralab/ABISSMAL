@@ -121,21 +121,17 @@ with picamera.PiCamera() as camera:
                     file2_h264 = path + str(box_id) + "_" + dt_str + "_post_trigger" + '.h264'
                     camera.split_recording(file2_h264)
                     camera.wait_recording(record_duration)
+                    camera.split_recording(stream)
                     stream.copy_to(file1_h264, seconds=stream_duration)
-                    stream.clear()
+                    # stream.clear()
                     print('Recording finished')
                     logging.info("Videos recorded")
                     if int(LED_time_range[0]) <= hour_int <= int(LED_time_range[1]):
                         GPIO.output(REC_LED, GPIO.LOW)
-                    camera.wait_recording(1)
-                    camera.split_recording(stream)
                     convert_video(file1_h264)
                     convert_video(file2_h264)
                     print('Converted videos to mp4')
                     logging.info("Converted videos to mp4")
-                    sleep(15)
-            else:
-                pass
     except Exception as E:
         print('Video error: ' + str(E))
         logging.error('Video: ' + str(E))
