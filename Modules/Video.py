@@ -39,8 +39,8 @@ video_width = 1280
 video_height = 720
 iso = 400
 fr = 30
-stream_duration = 5
-record_duration = 10
+stream_duration = 7
+record_duration = 8
 threshold = 50
 sensitivity = 9000
 REC_LED = 16
@@ -133,7 +133,7 @@ with picamera.PiCamera() as camera:
                     convert_video(file2_h264)
                     print('Converted videos to mp4')
                     logging.info("Converted videos to mp4")
-                pass
+                    sleep(15)
             else:
                 pass
     except Exception as E:
