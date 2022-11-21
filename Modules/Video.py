@@ -39,8 +39,8 @@ video_width = 1280
 video_height = 720
 iso = 400
 fr = 30
-stream_duration = 7
-record_duration = 8
+stream_duration = 6
+record_duration = 9
 threshold = 50
 sensitivity = 9000
 REC_LED = 16
@@ -52,6 +52,11 @@ GPIO.output(REC_LED, GPIO.LOW)
 
 logging.info('Video will be recorded between ' + str(video_time_range[0]) + ' and ' + str(video_time_range[1] + 1) + ' hours')
 print('Video will be recorded between ' + str(video_time_range[0]) + ' and ' + str(video_time_range[1] + 1) + ' hours')
+
+
+def set_prior_image(current_image):
+    global prior_image
+    prior_image = current_image
 
 
 def detect_motion(cam):
@@ -79,7 +84,7 @@ def detect_motion(cam):
             result = True
         else:
             result = False
-        prior_image = current_image
+        set_prior_image(current_image)
         return result
 
 
@@ -109,33 +114,32 @@ with picamera.PiCamera() as camera:
             general_time = datetime.now()
             logging = get_logger(general_time)
             hour_int = int(f"{general_time:%H}")
-            if int(video_time_range[0]) <= hour_int <= int(video_time_range[1]):
-                if detect_motion(camera):
-                    print('Motion detected; Recording started')
-                    logging.info("Motion detected. Starting video recordings")
-                    if int(LED_time_range[0]) <= hour_int <= int(LED_time_range[1]):
-                        GPIO.output(REC_LED, GPIO.HIGH)
-                    dt = datetime.now()
-                    dt_str = str(f"{dt.year}_{dt.month}_{dt.day}_{dt:%H}_{dt:%M}_{dt:%S}")
-                    file1_h264 = path + str(box_id) + "_" + dt_str + "_pre_trigger" + '.h264'
-                    file2_h264 = path + str(box_id) + "_" + dt_str + "_post_trigger" + '.h264'
-                    camera.split_recording(file2_h264)
-                    camera.wait_recording(record_duration)
-                    stream.copy_to(file1_h264, seconds=stream_duration)
-                    stream.clear()
-                    print('Recording finished')
-                    logging.info("Videos recorded")
-                    if int(LED_time_range[0]) <= hour_int <= int(LED_time_range[1]):
-                        GPIO.output(REC_LED, GPIO.LOW)
-                    camera.wait_recording(1)
-                    camera.split_recording(stream)
-                    convert_video(file1_h264)
-                    convert_video(file2_h264)
-                    print('Converted videos to mp4')
-                    logging.info("Converted videos to mp4")
-                    sleep(15)
-            else:
-                pass
+            if (int(video_time_range[0]) <= hour_int <= int(video_time_range[1])) and detect_motion(camera):
+                print('Motion detected; Recording started')
+                logging.info("Motion detected. Starting video recordings")
+                dt = datetime.now()
+                dt_str = str(f"{dt.year}_{dt.month}_{dt.day}_{dt:%H}_{dt:%M}_{dt:%S}")
+                file1_h264 = path + str(box_id) + "_" + dt_str + "_pre_trigger" + '.h264'
+                file2_h264 = path + str(box_id) + "_" + dt_str + "_post_trigger" + '.h264'
+                if int(LED_time_range[0]) <= hour_int <= int(LED_time_range[1]):
+                    GPIO.output(REC_LED, GPIO.HIGH)
+                camera.split_recording(file2_h264)
+                camera.wait_recording(record_duration)
+                camera.split_recording(stream)
+                stream.copy_to(file1_h264, seconds=stream_duration)
+                stream.clear()
+                streaming = io.BytesIO()
+                camera.capture(streaming, format='jpeg', use_video_port=True)
+                streaming.seek(0)
+                set_prior_image(Image.open(streaming))
+                print('Recording finished')
+                logging.info("Videos recorded")
+                if int(LED_time_range[0]) <= hour_int <= int(LED_time_range[1]):
+                    GPIO.output(REC_LED, GPIO.LOW)
+                convert_video(file1_h264)
+                convert_video(file2_h264)
+                print('Converted videos to mp4')
+                logging.info("Converted videos to mp4")
     except Exception as E:
         print('Video error: ' + str(E))
         logging.error('Video: ' + str(E))
