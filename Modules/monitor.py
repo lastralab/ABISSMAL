@@ -5,13 +5,26 @@
 
 import subprocess
 import time
-from helper import email_alert
+# from helper import email_alert
 from helper import dir_setup
 from helper import get_logger
+from helper import modules as mods
 import datetime
 
 dir_setup('/home/pi/')
-modules = ['temp', 'video', 'rfid', 'irbb', 'backup']
+modules = []
+
+for module in mods:
+    if module == 'Video':
+        modules.append('video')
+    if module == 'IRBB':
+        modules.append('irbb')
+    if module == 'RFID':
+        modules.append('rfid')
+    if module == 'Temp':
+        modules.append('temp')
+
+modules.append('backup')
 
 logging = get_logger(datetime.date.today())
 logging.info('Starting Monitor script')

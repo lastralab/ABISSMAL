@@ -37,6 +37,15 @@ backups_command="${python_v} ${location}${backups_file}"
 monitor_file="/Modules/monitor.py"
 monitor_command="${python_v} ${location}${monitor_file}"
 
+helper_file="Modules/helper.py"
+
+v='"Video"'
+r='"RFID"'
+i='"IRBB"'
+t='"Temp"'
+comma=', '
+modules_string=''
+
 echo -e "${Green}
   _____   _____ _______ _____
  |  __ \ / ____|__   __/ ____|
@@ -63,21 +72,50 @@ echo -e "To access a screen run:${Green} screen -r ${NC}${Purple}{name}${NC}"
 echo -e "To detach a screen press${Blue} Ctrl + A${NC} then type ${Blue}:${NC} to enter command mode and use command ${RED}\"detach\"${NC}"
 echo ""
 
-echo -e "Starting screen name: ${Cyan}irbb${NC}..."
-sleep 1s
-screen -dmS irbb bash -c "${irbb_command}"
+echo -e "${Cyan}Enter first letter of the modules to track, separated by a comma [example:v,i,r,t]:${NC} ${Purple}(V/v)ideo/(R/r)fid/(I/i)rbb/(T/t)emp${NC}"
+read -r modules
 
-echo -e "Starting screen name: ${Cyan}video${NC}..."
-sleep 1s
-screen -dmS video bash -c "${video_command}"
+if [[ $modules == *"V"* || $modules == *"v"* ]];
+then
+  	modules_string="${modules_string}${v}${comma}"
+    echo -e "${Purple}Enabled Video${NC}"
+    echo -e "Starting screen name: ${Cyan}video${NC}..."
+    sleep 1s
+    screen -dmS video bash -c "${video_command}"
+    echo ""
+fi
 
-echo -e "Starting screen name: ${Cyan}rfid${NC}..."
-sleep 1s
-screen -dmS rfid bash -c "${rfid_command}"
+if [[ $modules == *"I"* || $modules == *"i"* ]];
+then
+  	modules_string="${modules_string}${i}${comma}"
+    echo -e "${Purple}Enabled IRBB${NC}"
+    echo -e "Starting screen name: ${Cyan}irbb${NC}..."
+    sleep 1s
+    screen -dmS irbb bash -c "${irbb_command}"
+    echo ""
+fi
 
-echo -e "Starting screen name: ${Cyan}temp${NC}..."
-sleep 1s
-screen -dmS temp bash -c "${temp_command}"
+if [[ $modules == *"R"* || $modules == *"r"* ]];
+then
+  	modules_string="${modules_string}${r}${comma}"
+    echo -e "${Purple}Enabled RFID${NC}"
+    echo -e "Starting screen name: ${Cyan}rfid${NC}..."
+    sleep 1s
+    screen -dmS rfid bash -c "${rfid_command}"
+    echo ""
+fi
+
+if [[ $modules == *"T"* || $modules == *"t"* ]];
+then
+  	modules_string="${modules_string}${t}${comma}"
+    echo -e "${Purple}Enabled Temp${NC}"
+    echo -e "Starting screen name: ${Cyan}temp${NC}..."
+    sleep 1s
+    screen -dmS temp bash -c "${temp_command}"
+    echo ""
+fi
+
+sed -i "s/^modules.*/modules = [${modules_string}]/" "${helper_file}"
 
 echo -e "Starting screen name: ${Cyan}backup${NC}..."
 sleep 1s
