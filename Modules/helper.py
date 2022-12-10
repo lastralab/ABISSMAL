@@ -18,7 +18,7 @@ from Setup.email_service import key
 import log
 
 box_id = 'Box_01'
-modules = ['IRBB', 'RFID', 'Temp', 'Video']
+modules = ["Video", ]
 video_extension = '.mp4'
 file_extension = '.csv'
 emails = []
