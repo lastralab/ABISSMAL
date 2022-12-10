@@ -35,10 +35,10 @@ logging = get_logger(datetime.today())
 logging.info('Started backup script')
 print('Started backup script')
 
-logging.info('CSV and Video Backups will run once every day at ' + str(backup_hour) + ':' + str(backup_minute) + 'hrs')
-print('CSV and Video Backups will run once every day at ' + str(backup_hour) + ':' + str(backup_minute) + 'hrs')
-logging.info('Log Backup will run once at 0:00hrs every day')
-print('Log Backup will run once at 0:00hrs every day')
+logging.info('Data transfer will run once every day at ' + str(backup_hour) + ':' + str(backup_minute) + 'hrs')
+print('Data transfer will run once every day at ' + str(backup_hour) + ':' + str(backup_minute) + 'hrs')
+logging.info('Logs transfer will run once at 0:00hrs every day')
+print('Logs transfer will run once at 0:00hrs every day')
 
 
 def usb_connected(box):
