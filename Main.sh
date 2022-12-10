@@ -45,6 +45,7 @@ i='"IRBB"'
 t='"Temp"'
 comma=', '
 modules_string=''
+selected=false
 
 echo -e "${Green}
   _____   _____ _______ _____
@@ -72,12 +73,14 @@ echo -e "To access a screen run:${Green} screen -r ${NC}${Purple}{name}${NC}"
 echo -e "To detach a screen press${Blue} Ctrl + A${NC} then type ${Blue}:${NC} to enter command mode and use command ${RED}\"detach\"${NC}"
 echo ""
 
-echo -e "${Cyan}Enter first letter of the modules to track, separated by a comma [example:v,i,r,t]:${NC} ${Purple}(V/v)ideo/(R/r)fid/(I/i)rbb/(T/t)emp${NC}"
+echo -e "${Cyan}Enter first letter of the modules to track, separated by a comma:${NC}"
+echo -e "${Cyan}[example:v,i,r,t] ${NC}${Purple}(V/v)ideo/(R/r)fid/(I/i)rbb/(T/t)emp${NC}"
 read -r modules
 
 if [[ $modules == *"V"* || $modules == *"v"* ]];
 then
   	modules_string="${modules_string}${v}${comma}"
+  	selected=true
     echo -e "${Purple}Enabled Video${NC}"
     echo -e "Starting screen name: ${Cyan}video${NC}..."
     sleep 1s
@@ -88,6 +91,7 @@ fi
 if [[ $modules == *"I"* || $modules == *"i"* ]];
 then
   	modules_string="${modules_string}${i}${comma}"
+  	selected=true
     echo -e "${Purple}Enabled IRBB${NC}"
     echo -e "Starting screen name: ${Cyan}irbb${NC}..."
     sleep 1s
@@ -98,6 +102,7 @@ fi
 if [[ $modules == *"R"* || $modules == *"r"* ]];
 then
   	modules_string="${modules_string}${r}${comma}"
+  	selected=true
     echo -e "${Purple}Enabled RFID${NC}"
     echo -e "Starting screen name: ${Cyan}rfid${NC}..."
     sleep 1s
@@ -108,6 +113,7 @@ fi
 if [[ $modules == *"T"* || $modules == *"t"* ]];
 then
   	modules_string="${modules_string}${t}${comma}"
+  	selected=true
     echo -e "${Purple}Enabled Temp${NC}"
     echo -e "Starting screen name: ${Cyan}temp${NC}..."
     sleep 1s
@@ -115,22 +121,26 @@ then
     echo ""
 fi
 
-sed -i "s/^modules.*/modules = [${modules_string}]/" "${helper_file}"
+if [[ $selected == true ]];
+then
+  	sed -i "s/^modules.*/modules = [${modules_string}]/" "${helper_file}"
+    echo -e "Starting screen name: ${Cyan}backup${NC}..."
+    sleep 1s
+    screen -dmS backup bash -c "${backups_command}"
+    echo -e "Starting screen name: ${Cyan}monitor${NC}..."
+    sleep 1s
+    screen -dmS monitor bash -c "${monitor_command}"
+    echo ""
+    sleep 3s
+    screen -list
+    echo ""
+    echo -e "To kill all detached screens, run:"
+    echo -e "${BIGreen}screen -ls | grep Detached | cut -d. -f1 | awk '{print \$1}' | xargs kill${NC}"
+    echo ""
+else
+    echo ""
+    echo -e "${RED}No modules were activated, please enter valid letters.${NC}"
+    echo ""
+fi
 
-echo -e "Starting screen name: ${Cyan}backup${NC}..."
-sleep 1s
-screen -dmS backup bash -c "${backups_command}"
-
-echo -e "Starting screen name: ${Cyan}monitor${NC}..."
-sleep 1s
-screen -dmS monitor bash -c "${monitor_command}"
-echo ""
-sleep 3s
-screen -list
-
-echo ""
-echo -e "To kill all detached screens, run:"
-echo -e "${BIGreen}screen -ls | grep Detached | cut -d. -f1 | awk '{print \$1}' | xargs kill${NC}"
-
-echo ""
 
