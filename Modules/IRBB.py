@@ -33,8 +33,8 @@ logging.info('Started IRBB script')
 print('Started IRBB script')
 
 GPIO.setmode(GPIO.BCM)
-GPIO.setup(BEAM_PIN_lead, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-GPIO.setup(BEAM_PIN_rear, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+GPIO.setup(BEAM_PIN_outer, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+GPIO.setup(BEAM_PIN_inner, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 GPIO.setwarnings(False)
 
 
@@ -49,10 +49,10 @@ def detect_beam_breaks_callback(BEAM_PIN, sensor_id):
     
 
 GPIO.add_event_detect(BEAM_PIN_outer, GPIO.FALLING,
-                      callback=lambda x: detect_beam_breaks_callback(BEAM_PIN_outer, "outer beam breaker"), bouncetime=100)
+                      callback=lambda x: detect_beam_breaks_callback(BEAM_PIN_outer, "Outer Beam Breaker"), bouncetime=100)
 
 GPIO.add_event_detect(BEAM_PIN_inner, GPIO.FALLING,
-                      callback=lambda x: detect_beam_breaks_callback(BEAM_PIN_inner, "inner beam breaker"), bouncetime=100)
+                      callback=lambda x: detect_beam_breaks_callback(BEAM_PIN_inner, "Inner Beam Breaker"), bouncetime=100)
 
 
 try:
