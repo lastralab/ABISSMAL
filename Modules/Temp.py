@@ -23,7 +23,7 @@ print('Started Temp')
 
 warn = 0
 module = 'Temp'
-header = ['chamber_id', 'year', 'month', 'day', 'time', 'degrees_Celsius', 'degrees_Farenheit']
+header = ['chamber_id', 'sensor_id', 'year', 'month', 'day', 'time', 'degrees_Celsius', 'degrees_Farenheit']
 temp_data = '/home/pi/Data_ParentalCareTracking/Temp'
 os.system('modprobe w1-gpio')
 os.system('modprobe w1-therm')
@@ -65,7 +65,7 @@ try:
             logging.info('Temperature reading: ' + C + u'\N{DEGREE SIGN}' + 'C, ' + F + u'\N{DEGREE SIGN}' + 'F')
             print('Temperature registered')
             csv_writer(str(box_id), module, temp_data, f"{dt.year}_{dt.month}_{dt.day}", header,
-                       [box_id, f"{dt.year}", f"{dt.month}", f"{dt.day}", f"{dt:%H:%M:%S.%f}", temp[0], temp[1]])
+                       [box_id, 'Temperature', f"{dt.year}", f"{dt.month}", f"{dt.day}", f"{dt:%H:%M:%S.%f}", temp[0], temp[1]])
             time.sleep(60)
         else:
             C = str("N/A")
