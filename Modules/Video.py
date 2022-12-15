@@ -32,7 +32,8 @@ logging.info('Starting Video script')
 print('Started Video script')
 
 path = "/home/pi/Data_ParentalCareTracking/Video/"
-header = ['chamber_id', 'year', 'month', 'day', 'time_video_started', 'video_file_name']
+motion_header = ['chamber_id', 'year', 'month', 'day', 'time_video_started', 'total_pixels_motionTrigger']
+video_header = ['chamber_id', 'year', 'month', 'day', 'time_video_started', 'video_file_name']
 prior_image = None
 video_time_range = [0, 23]
 video_width = 1280
@@ -81,9 +82,13 @@ def detect_motion(cam):
                     pixels += 1
         if pixels > sensitivity:
             logging.debug('Video: sensitivity = ' + str(sensitivity) + ' < ' + str(pixels) + ' pixels')
-            result = True
+            # dt = datetime.now()
+            csv_writer(str(box_id), 'Video_MotionDetection', path, f"{dt.year}_{dt.month}_{dt.day}",
+                   motion_header,
+                   [box_id, f"{dt.year}", f"{dt.month}", f"{dt.day}", f"{dt:%H:%M:%S.%f}", pixels])
+            return True
         else:
-            result = False
+            return False
         set_prior_image(current_image)
         return result
 
@@ -95,8 +100,8 @@ def convert_video(filename):
         call([command], shell=True)
         print('Converted video')
         os.remove(filename)
-        csv_writer(str(box_id), 'Video', path, f"{dt.year}_{dt.month}_{dt.day}",
-                   header,
+        csv_writer(str(box_id), 'Video_Files', path, f"{dt.year}_{dt.month}_{dt.day}",
+                   video_header,
                    [box_id, f"{dt.year}", f"{dt.month}", f"{dt.day}", f"{dt:%H:%M:%S.%f}", Path(filename).stem + '.mp4'])
     except Exception as Err:
         logging.error('Converting video error: ' + str(Err))
@@ -114,10 +119,11 @@ with picamera.PiCamera() as camera:
             general_time = datetime.now()
             logging = get_logger(general_time)
             hour_int = int(f"{general_time:%H}")
+            dt = datetime.now()
             if (int(video_time_range[0]) <= hour_int <= int(video_time_range[1])) and detect_motion(camera):
                 print('Motion detected; Recording started')
                 logging.info("Motion detected. Starting video recordings")
-                dt = datetime.now()
+                # dt = datetime.now()
                 dt_str = str(f"{dt.year}_{dt.month}_{dt.day}_{dt:%H}_{dt:%M}_{dt:%S}")
                 file1_h264 = path + str(box_id) + "_" + dt_str + "_pre_trigger" + '.h264'
                 file2_h264 = path + str(box_id) + "_" + dt_str + "_post_trigger" + '.h264'
