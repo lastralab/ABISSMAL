@@ -82,7 +82,6 @@ def detect_motion(cam):
                     pixels += 1
         if pixels > sensitivity:
             logging.debug('Video: sensitivity = ' + str(sensitivity) + ' < ' + str(pixels) + ' pixels')
-            # dt = datetime.now()
             csv_writer(str(box_id), 'Video_MotionDetection', path, f"{dt.year}_{dt.month}_{dt.day}",
                    motion_header,
                    [box_id, f"{dt.year}", f"{dt.month}", f"{dt.day}", f"{dt:%H:%M:%S.%f}", pixels])
@@ -123,7 +122,6 @@ with picamera.PiCamera() as camera:
             if (int(video_time_range[0]) <= hour_int <= int(video_time_range[1])) and detect_motion(camera):
                 print('Motion detected; Recording started')
                 logging.info("Motion detected. Starting video recordings")
-                # dt = datetime.now()
                 dt_str = str(f"{dt.year}_{dt.month}_{dt.day}_{dt:%H}_{dt:%M}_{dt:%S}")
                 file1_h264 = path + str(box_id) + "_" + dt_str + "_pre_trigger" + '.h264'
                 file2_h264 = path + str(box_id) + "_" + dt_str + "_post_trigger" + '.h264'
