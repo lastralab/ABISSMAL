@@ -74,7 +74,7 @@ echo -e "To detach a screen press${Blue} Ctrl + A${NC} then type ${Blue}:${NC} t
 echo ""
 
 echo -e "${Cyan}Enter first letter of the modules to track, separated by a comma:${NC}"
-echo -e "${Cyan}[example:v,i,r,t] ${NC}${Purple}(V/v)ideo/(R/r)fid/(I/i)rbb/(T/t)emp${NC}"
+echo -e "${Cyan}[example:virt] ${NC}${Purple}(V/v)ideo/(R/r)fid/(I/i)rbb/(T/t)emp${NC}"
 read -r modules
 
 if [[ $modules == *"V"* || $modules == *"v"* ]];
