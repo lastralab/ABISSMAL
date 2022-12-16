@@ -37,6 +37,16 @@ backups_command="${python_v} ${location}${backups_file}"
 monitor_file="/Modules/monitor.py"
 monitor_command="${python_v} ${location}${monitor_file}"
 
+helper_file="Modules/helper.py"
+
+v='"Video"'
+r='"RFID"'
+i='"IRBB"'
+t='"Temp"'
+comma=', '
+modules_string=''
+selected=false
+
 echo -e "${Green}
   _____   _____ _______ _____
  |  __ \ / ____|__   __/ ____|
@@ -63,36 +73,74 @@ echo -e "To access a screen run:${Green} screen -r ${NC}${Purple}{name}${NC}"
 echo -e "To detach a screen press${Blue} Ctrl + A${NC} then type ${Blue}:${NC} to enter command mode and use command ${RED}\"detach\"${NC}"
 echo ""
 
-echo -e "Starting screen name: ${Cyan}irbb${NC}..."
-sleep 1s
-screen -dmS irbb bash -c "${irbb_command}"
+echo -e "${Cyan}Enter first letter of the modules to track, separated by a comma:${NC}"
+echo -e "${Cyan}[example:v,i,r,t] ${NC}${Purple}(V/v)ideo/(R/r)fid/(I/i)rbb/(T/t)emp${NC}"
+read -r modules
 
-echo -e "Starting screen name: ${Cyan}video${NC}..."
-sleep 1s
-screen -dmS video bash -c "${video_command}"
+if [[ $modules == *"V"* || $modules == *"v"* ]];
+then
+  	modules_string="${modules_string}${v}${comma}"
+  	selected=true
+    echo -e "${Purple}Enabled Video${NC}"
+    echo -e "Starting screen name: ${Cyan}video${NC}..."
+    sleep 1s
+    screen -dmS video bash -c "${video_command}"
+    echo ""
+fi
 
-echo -e "Starting screen name: ${Cyan}rfid${NC}..."
-sleep 1s
-screen -dmS rfid bash -c "${rfid_command}"
+if [[ $modules == *"I"* || $modules == *"i"* ]];
+then
+  	modules_string="${modules_string}${i}${comma}"
+  	selected=true
+    echo -e "${Purple}Enabled IRBB${NC}"
+    echo -e "Starting screen name: ${Cyan}irbb${NC}..."
+    sleep 1s
+    screen -dmS irbb bash -c "${irbb_command}"
+    echo ""
+fi
 
-echo -e "Starting screen name: ${Cyan}temp${NC}..."
-sleep 1s
-screen -dmS temp bash -c "${temp_command}"
+if [[ $modules == *"R"* || $modules == *"r"* ]];
+then
+  	modules_string="${modules_string}${r}${comma}"
+  	selected=true
+    echo -e "${Purple}Enabled RFID${NC}"
+    echo -e "Starting screen name: ${Cyan}rfid${NC}..."
+    sleep 1s
+    screen -dmS rfid bash -c "${rfid_command}"
+    echo ""
+fi
 
-echo -e "Starting screen name: ${Cyan}backup${NC}..."
-sleep 1s
-screen -dmS backup bash -c "${backups_command}"
+if [[ $modules == *"T"* || $modules == *"t"* ]];
+then
+  	modules_string="${modules_string}${t}${comma}"
+  	selected=true
+    echo -e "${Purple}Enabled Temp${NC}"
+    echo -e "Starting screen name: ${Cyan}temp${NC}..."
+    sleep 1s
+    screen -dmS temp bash -c "${temp_command}"
+    echo ""
+fi
 
-echo -e "Starting screen name: ${Cyan}monitor${NC}..."
-sleep 1s
-screen -dmS monitor bash -c "${monitor_command}"
-echo ""
-sleep 3s
-screen -list
+if [[ $selected == true ]];
+then
+  	sed -i "s/^modules.*/modules = [${modules_string}]/" "${helper_file}"
+    echo -e "Starting screen name: ${Cyan}backup${NC}..."
+    sleep 1s
+    screen -dmS backup bash -c "${backups_command}"
+    echo -e "Starting screen name: ${Cyan}monitor${NC}..."
+    sleep 1s
+    screen -dmS monitor bash -c "${monitor_command}"
+    echo ""
+    sleep 3s
+    screen -list
+    echo ""
+    echo -e "To kill all detached screens, run:"
+    echo -e "${BIGreen}screen -ls | grep Detached | cut -d. -f1 | awk '{print \$1}' | xargs kill${NC}"
+    echo ""
+else
+    echo ""
+    echo -e "${RED}No modules were activated, please enter valid letters.${NC}"
+    echo ""
+fi
 
-echo ""
-echo -e "To kill all detached screens, run:"
-echo -e "${BIGreen}screen -ls | grep Detached | cut -d. -f1 | awk '{print \$1}' | xargs kill${NC}"
-
-echo ""
 
