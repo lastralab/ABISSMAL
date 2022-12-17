@@ -103,7 +103,6 @@ then
   apt-get install gparted
   apt-get install screen
   chmod +x Main.sh
-#  apt-get install ssmtp
   apt install nmap
   apt-get install -y gpac
   echo ""
