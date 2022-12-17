@@ -32,7 +32,7 @@ logging.info('Starting Video script')
 print('Started Video script')
 
 path = "/home/pi/Data_ParentalCareTracking/Video/"
-header = ['chamber_id', 'sensor_id', 'year', 'month', 'day', 'time_video_started', 'video_file_name']
+header = ['chamber_id', 'sensor_id', 'year', 'month', 'day', 'time_video_started', 'video_file_name', 'total_pixels_motionTrigger']
 prior_image = None
 video_time_range = [0, 23]
 video_width = 1280
@@ -66,7 +66,7 @@ def detect_motion(cam):
     streaming.seek(0)
     if prior_image is None:
         prior_image = Image.open(streaming)
-        return False
+        return [False]
     else:
         buffer1 = prior_image.load()
         current_image = Image.open(streaming)
@@ -80,15 +80,16 @@ def detect_motion(cam):
                 if (pixdiff1 + pixdiff2 + pixdiff3) > (threshold * 3):
                     pixels += 1
         if pixels > sensitivity:
+            date = datetime.now()
             logging.debug('Video: sensitivity = ' + str(sensitivity) + ' < ' + str(pixels) + ' pixels')
-            result = True
+            result = [True, pixels, date]
         else:
-            result = False
+            result = [False, None, None]
         set_prior_image(current_image)
         return result
 
 
-def convert_video(filename):
+def convert_video(filename, pixels, dt):
     try:
         file_mp4 = path + Path(filename).stem + '.mp4'
         command = "MP4Box -add " + filename + " " + file_mp4
@@ -97,7 +98,7 @@ def convert_video(filename):
         os.remove(filename)
         csv_writer(str(box_id), 'Video', path, f"{dt.year}_{dt.month}_{dt.day}",
                    header,
-                   [box_id, 'Camera', f"{dt.year}", f"{dt.month}", f"{dt.day}", f"{dt:%H:%M:%S.%f}", Path(filename).stem + '.mp4'])
+                   [box_id, 'Camera', f"{dt.year}", f"{dt.month}", f"{dt.day}", f"{dt:%H:%M:%S.%f}", Path(filename).stem + '.mp4', pixels])
     except Exception as Err:
         logging.error('Converting video error: ' + str(Err))
         # email_alert('Video', 'Convert Error: ' + str(Err))
@@ -114,10 +115,11 @@ with picamera.PiCamera() as camera:
             general_time = datetime.now()
             logging = get_logger(general_time)
             hour_int = int(f"{general_time:%H}")
-            if (int(video_time_range[0]) <= hour_int <= int(video_time_range[1])) and detect_motion(camera):
+            motion = detect_motion(camera)
+            if (int(video_time_range[0]) <= hour_int <= int(video_time_range[1])) and motion[0]:
+                dt = motion[2]
                 print('Motion detected; Recording started')
                 logging.info("Motion detected. Starting video recordings")
-                dt = datetime.now()
                 dt_str = str(f"{dt.year}_{dt.month}_{dt.day}_{dt:%H}_{dt:%M}_{dt:%S}")
                 file1_h264 = path + str(box_id) + "_" + dt_str + "_pre_trigger" + '.h264'
                 file2_h264 = path + str(box_id) + "_" + dt_str + "_post_trigger" + '.h264'
@@ -136,8 +138,8 @@ with picamera.PiCamera() as camera:
                 logging.info("Videos recorded")
                 if int(LED_time_range[0]) <= hour_int <= int(LED_time_range[1]):
                     GPIO.output(REC_LED, GPIO.LOW)
-                convert_video(file1_h264)
-                convert_video(file2_h264)
+                convert_video(file1_h264, motion[1], dt)
+                convert_video(file2_h264, motion[1], dt)
                 print('Converted videos to mp4')
                 logging.info("Converted videos to mp4")
     except Exception as E:
