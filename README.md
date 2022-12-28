@@ -1,4 +1,11 @@
-<h1>Automated Behavior-Based and Identification System that Monitors Aminal Locales</h1>
+<h1>Automated
+Behavioral Tracking by
+Integrating
+Sensors that
+Survey and
+Monitor data from
+Animal
+Locomotion</h1>
 <b>Authors:</b><br>
 Tania Molina-Medrano - <span style="pointer-events:none;">tanis.mo&#64;e<span style="display:none">&nbsp;</span>-storecook.com</span><br>
 Grace Smith-Vidaurre, PhD - <span style="pointer-events:none">grace&#64;smith<span style="display:none">&nbsp;</span>-vidaurre.com</span>
@@ -18,13 +25,13 @@ Please refer to our Wiki [Installation Overview](https://github.com/lastralab/Pa
 
 # Installing ABBISMAL
 <pre>
-           ____  ____ _____  _____ __  __          _      
-     /\   |  _ \|  _ \_   _|/ ____|  \/  |   /\   | |     
-    /  \  | |_) | |_) || | | (___ | \  / |  /  \  | |     
-   / /\ \ |  _ <|  _ < | |  \___ \| |\/| | / /\ \ | |     
-  / ____ \| |_) | |_) || |_ ____) | |  | |/ ____ \| |____ 
- /_/    \_\____/|____/_____|_____/|_|  |_/_/    \_\______|
-                                                          
+           ____ _____  _____ _____ __  __          _      
+     /\   |  _ \_   _|/ ____/ ____|  \/  |   /\   | |     
+    /  \  | |_) || | | (___| (___ | \  / |  /  \  | |     
+   / /\ \ |  _ < | |  \___ \\___ \| |\/| | / /\ \ | |     
+  / ____ \| |_) || |_ ____) |___) | |  | |/ ____ \| |____ 
+ /_/    \_\____/_____|_____/_____/|_|  |_/_/    \_\______|
+                                                  
 </pre>
 1. Run `sudo apt-get install git` in your RaspberryPi.
 2. Go to desired directory to download this project.
