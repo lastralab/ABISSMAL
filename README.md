@@ -1,8 +1,8 @@
-<h1>Parental Care Tracking System</h1>
+<h1>Automated Behavior-Based and Identification System that Monitors Aminal Locales</h1>
 <b>Authors:</b><br>
+Tania Molina-Medrano - <span style="pointer-events:none;">tanis.mo&#64;e<span style="display:none">&nbsp;</span>-storecook.com</span><br>
 Grace Smith-Vidaurre, PhD - <span style="pointer-events:none">grace&#64;smith<span style="display:none">&nbsp;</span>-vidaurre.com</span>
 <br>
-Tania Molina-Medrano - <span style="pointer-events:none;">tanis.mo&#64;e<span style="display:none">&nbsp;</span>-storecook.com</span><br>
 
 Project wiki: https://github.com/lastralab/ParentalCareTracking/wiki
 
@@ -18,27 +18,28 @@ Please refer to our Wiki [Installation Overview](https://github.com/lastralab/Pa
 
 # Installing PCTS
 <pre>
-  _____   _____ _______ _____
- |  __ \ / ____|__   __/ ____|
- | |__) | |       | | | (___
- |  ___/| |       | |  \___ \
- | |    | |____   | |  ____) |
- |_|     \_____|  |_| |_____/
+           ____  ____ _____  _____ __  __          _      
+     /\   |  _ \|  _ \_   _|/ ____|  \/  |   /\   | |     
+    /  \  | |_) | |_) || | | (___ | \  / |  /  \  | |     
+   / /\ \ |  _ <|  _ < | |  \___ \| |\/| | / /\ \ | |     
+  / ____ \| |_) | |_) || |_ ____) | |  | |/ ____ \| |____ 
+ /_/    \_\____/|____/_____|_____/|_|  |_/_/    \_\______|
+                                                          
 </pre>
 1. Run `sudo apt-get install git` in your RaspberryPi.
 2. Go to desired directory to download this project.
-3. Clone this repository `git clone https://github.com/lastralab/ParentalCareTracking.git`
-4. From root directory `/path/to/ParentalCareTracking/` run:
+3. Clone this repository `git clone https://github.com/lastralab/Abbismal.git`
+4. From root directory `/path/to/Abbismal/` run:
 
    1. `sudo bash run_install.sh`
    2. Enter your password (we recommend to set a password for your raspberry pi)
    3. Insert setup information accordingly
    4. Raspberry pi will be restarted automatically to apply changes
-   5. If you are using ssh connection, you might need to <a href="https://github.com/lastralab/ParentalCareTracking/wiki/Installation#external-drive-not-found">mount the external drive</a> 
+   5. If you are using ssh connection, you might need to <a href="https://github.com/lastralab/Abbismal/wiki/Installation#external-drive-not-found">mount the external drive</a> 
    6. Run `bash Main.sh` without sudo to start collecting data
 
 ## Troubleshooting
 
-Please refer to our [Wiki](https://github.com/lastralab/ParentalCareTracking/wiki/Installation#troubleshooting)
+Please refer to our [Wiki](https://github.com/lastralab/Abbismal/wiki/Installation#troubleshooting)
 
 
