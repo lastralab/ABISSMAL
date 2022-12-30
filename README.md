@@ -1,11 +1,5 @@
-<h1>(A)utomated
-(B)ehavioral Tracking by
-(I)ntegrating
-(S)ensors that
-(S)urvey and
-(M)onitor data from
-(A)nimal
-(L)ocomotion</h1>
+<h1>(A)utomated (b)ehavioral tracking by (i)ntegrating (s)ensors that (s)urvey (m)ovements (a)round a target (l)ocation
+</h1>
 <b>Authors:</b><br>
 Tania Molina-Medrano - <span style="pointer-events:none;">tanis.mo&#64;e<span style="display:none">&nbsp;</span>-storecook.com</span><br>
 Grace Smith-Vidaurre, PhD - <span style="pointer-events:none">grace&#64;smith<span style="display:none">&nbsp;</span>-vidaurre.com</span>
