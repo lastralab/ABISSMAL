@@ -91,6 +91,7 @@ def detect_motion(cam):
 
 def convert_video(filename, pixels, dt):
     try:
+        logging.debug('Video converting date: ' + f"{dt.year}_{dt.month}_{dt.day} " + f"{dt:%H:%M:%S.%f}")
         file_mp4 = path + Path(filename).stem + '.mp4'
         command = "MP4Box -add " + filename + " " + file_mp4
         call([command], shell=True)
@@ -120,9 +121,9 @@ with picamera.PiCamera() as camera:
                 dt = motion[2]
                 print('Motion detected; Recording started')
                 logging.info("Motion detected. Starting video recordings")
-                dt_str = str(f"{dt.year}_{dt.month}_{dt.day}_{dt:%H}_{dt:%M}_{dt:%S}")
-                file1_h264 = path + str(box_id) + "_" + dt_str + "_pre_trigger" + '.h264'
-                file2_h264 = path + str(box_id) + "_" + dt_str + "_post_trigger" + '.h264'
+                dt_str = str(f"{dt.year}-{dt.month}-{dt.day}_{dt.hour}-{dt.minute}-")
+                file1_h264 = path + str(box_id) + "_" + dt_str + f"{dt.second - 5}" + "_pre" + '.h264'
+                file2_h264 = path + str(box_id) + "_" + dt_str + f"{dt.second}" + "_post" + '.h264'
                 if int(LED_time_range[0]) <= hour_int <= int(LED_time_range[1]):
                     GPIO.output(REC_LED, GPIO.HIGH)
                 camera.split_recording(file2_h264)
