@@ -1,6 +1,6 @@
 # Created by PyCharm
 # Author: nmoltta, gsvidaurre
-# Project: ParentalCareTracking
+# Project: Abissmal
 # Date: 12/13/21
 
 import os
@@ -24,7 +24,7 @@ print('Started Temp')
 warn = 0
 module = 'Temp'
 header = ['chamber_id', 'sensor_id', 'year', 'month', 'day', 'time', 'degrees_Celsius', 'degrees_Farenheit']
-temp_data = '/home/pi/Data_ParentalCareTracking/Temp'
+temp_data = '/home/pi/Data_Abissmal/Temp'
 os.system('modprobe w1-gpio')
 os.system('modprobe w1-therm')
 base_dir = '/sys/bus/w1/devices/'
