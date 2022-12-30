@@ -5,7 +5,7 @@
 
 import subprocess
 import time
-# from helper import sms_alert
+from helper import sms_alert
 from helper import dir_setup
 from helper import get_logger
 from helper import modules as mods
