@@ -25,7 +25,6 @@ box_id = 'Box_01'
 modules = []
 video_extension = '.mp4'
 file_extension = '.csv'
-emails = []
 
 
 def get_logger(day):

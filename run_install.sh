@@ -87,46 +87,49 @@ echo -e "${Yellow}Press 'Enter' to skip configuration.${NC}"
 read -r sms
 if [ -n "$sms" ]
 then
+  sed -i "s/^Sid.*/Sid = '${sms}'/" "${sms_setup_path}"
+  echo -e "${Purple}Registered SID${NC}"
   echo -e "${Yellow}Enter your Twilio Account Token to enable SMS alerts${NC}"
   echo -e "${Yellow}Press 'Enter' to skip configuration.${NC}"
   read -r -s token
   if [ -n "$token" ]
   then
-    sed -i "s/^Sid.*/Sid = '${token}'/" "${sms_setup_path}"
+    sed -i "s/^Token.*/Token = '${token}'/" "${sms_setup_path}"
     echo -e "${Purple}Registered Token${NC}"
+    echo ""
+    echo -e "${BIGreen}Enter Sender Phone Number.${NC}"
+    echo -e "${Yellow}Press 'Enter' to skip configuration.${NC}"
+    read -r sender
+    if [ -n "$sender" ]
+    then
+      sed -i "s/^Sender.*/Sender = '${sender}'/" "${sms_setup_path}"
+      echo -e "${Purple}Registered Sender${NC}"
+      echo ""
+      echo -e "${BIGreen}Enter recipient number (s) to send alerts.${NC}"
+      echo -e "${RED}Note:${NC} ${Yellow}Each number must be contained in single quotes ' ' and separated by a comma, as the example:${NC}"
+      echo -e "${Cyan}'9998887766', '5554443322'${NC}"
+      echo -e "${Yellow}Press 'Enter' to skip configuration.${NC}"
+      echo ""
+      read -r emails
+      if [ -n "$emails" ]
+      then
+        sed -i "s/^Recipients.*/Recipients = [${emails}]/" "${sms_setup_path}"
+        echo -e "${Purple}Registered recipient(s) = [${emails}]${NC}"
+        sed -i "s/^Enabled.*/Enabled = True/" "${sms_setup_path}"
+        echo ""
+        echo -e "${Purple}Enabled Twilio SMS alerts${NC}"
+      else
+        echo -e "${Yellow}Skipped.${NC}"
+      fi
+      echo ""
+    else
+      echo -e "${Yellow}Skipped.${NC}"
+    fi
+    echo ""
   else
     echo -e "${Yellow}Skipped.${NC}"
   fi
   echo ""
-
-  echo -e "${BIGreen}Enter Sender Phone Number.${NC}"
-  echo -e "${Yellow}Press 'Enter' to skip configuration.${NC}"
-  read -r sender
-  if [ -n "$sender" ]
-  then
-    sed -i "s/^Sender.*/Sender = '${sender}'/" "${sms_setup_path}"
-    echo -e "${Purple}Registered Sender${NC}"
-  else
-    echo -e "${Yellow}Skipped.${NC}"
-  fi
-  echo ""
-
-  echo -e "${BIGreen}Enter recipient number (s) to send alerts.${NC}"
-  echo -e "${RED}Note:${NC} ${Yellow}Each number must be contained in single quotes ' ' and separated by a comma, as the example:${NC}"
-  echo -e "${Cyan}'9998887766', '5554443322'${NC}"
-  echo ""
-  echo -e "${Yellow}Press 'Enter' to skip configuration.${NC}"
-  read -r emails
-  if [ -n "$emails" ]
-  then
-    sed -i "s/^Recipients.*/Recipients = [${emails}]/" "${helper_path}"
-    echo -e "${Purple}Registered recipient(s) = [${emails}]${NC}"
-  else
-    echo -e "${Yellow}Skipped.${NC}"
-  fi
-  echo ""
-	sed -i "s/^Sid.*/Sid = '${sms}'/" "${sms_setup_path}"
-  echo -e "${Purple}Registered SID${NC}"
 else
 	echo -e "${Yellow}Skipped.${NC}"
 fi
