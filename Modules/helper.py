@@ -88,8 +88,8 @@ def sms_alert(module, text):
             for recipient in Recipients:
                 client = Client(Sid, Token)
                 message = client.messages.create(
-                    to=recipient,
-                    from_=Sender,
+                    to='+1'+recipient,
+                    from_='+1'+Sender,
                     body=msg)
                 logging.info('SMS sent to ' + recipient + ' from ' + module)
                 logging.info(message.sid)
