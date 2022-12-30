@@ -158,12 +158,12 @@ echo -e "${RED}Raspberry pi needs to be restarted at this point${NC}"
 echo ""
 echo -e "${RED}Restarting in 5 seconds...${NC}"
 sleep 1
-echo "${RED}4${NC}"
+echo -e "${RED}4${NC}"
 sleep 1
-echo "${RED}3${NC}"
+echo -e "${RED}3${NC}"
 sleep 1
-echo "${RED}2${NC}"
+echo -e "${RED}2${NC}"
 sleep 1
-echo "${RED}1${NC}"
+echo -e "${RED}1${NC}"
 echo ""
 reboot
