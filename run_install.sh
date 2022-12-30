@@ -118,22 +118,23 @@ then
         sed -i "s/^Enabled.*/Enabled = True/" "${sms_setup_path}"
         echo ""
         echo -e "${Purple}Enabled Twilio SMS alerts${NC}"
+        echo ""
       else
         echo -e "${Yellow}Skipped.${NC}"
+        echo ""
       fi
-      echo ""
     else
       echo -e "${Yellow}Skipped.${NC}"
+      echo ""
     fi
-    echo ""
   else
     echo -e "${Yellow}Skipped.${NC}"
+    echo ""
   fi
-  echo ""
 else
 	echo -e "${Yellow}Skipped.${NC}"
+	echo ""
 fi
-echo ""
 
 echo -e "${Yellow}Insert 'Y/y' to configure Cron or press 'Enter' to skip.${NC}"
 read -r cron
