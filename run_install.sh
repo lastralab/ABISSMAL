@@ -56,32 +56,6 @@ fi
 sleep 1
 echo ""
 
-echo -e "${BIGreen}Enter RF tag identifier for female${NC} (Format: '01-10-3F-8F-D1')"
-echo -e "${Yellow}Press 'Enter' to skip configuration.${NC}"
-read -r fem
-if [ -n "$fem" ]
-then
-	sed -i "s/^female =.*/female = '${fem}'/" "${rfid_path}"
-  echo -e "${Purple}Registered Female Tag: ${fem}${NC}"
-else
-	echo -e "${Yellow}Skipped.${NC}"
-fi
-sleep 1
-echo ""
-
-echo -e "${BIGreen}Enter RF tag identifier for male${NC} (Format: '01-10-3F-8F-D1')"
-echo -e "${Yellow}Press 'Enter' to skip configuration.${NC}"
-read -r mal
-if [ -n "$mal" ]
-then
-	sed -i "s/^male =.*/male = '${fem}'/" "${rfid_path}"
-  echo -e "${Purple}Registered Male Tag: ${fem}${NC}"
-else
-	echo -e "${Yellow}Skipped.${NC}"
-fi
-sleep 1
-echo ""
-
 echo -e "${Yellow}Insert y/Y to install required packages or press 'Enter' to skip.${NC}"
 read -r packs
 if [ -n "$packs" ]
