@@ -136,7 +136,7 @@ else
 	echo ""
 fi
 
-echo -e "${Yellow}Insert 'Y/y' to configure Cron or press 'Enter' to skip.${NC}"
+echo -e "${Green}Insert 'Y/y' to configure Cron or press 'Enter' to skip.${NC}"
 read -r cron
 if [ -n "$cron" ]
 then
@@ -157,6 +157,13 @@ sleep 1
 echo -e "${RED}Raspberry pi needs to be restarted at this point${NC}"
 echo ""
 echo -e "${RED}Restarting in 5 seconds...${NC}"
-sleep 6
+sleep 1
+echo "${RED}4${NC}"
+sleep 1
+echo "${RED}3${NC}"
+sleep 1
+echo "${RED}2${NC}"
+sleep 1
+echo "${RED}1${NC}"
 echo ""
 reboot
