@@ -89,6 +89,7 @@ if [ -n "$sms" ]
 then
   sed -i "s/^Sid.*/Sid = '${sms}'/" "${sms_setup_path}"
   echo -e "${Purple}Registered SID${NC}"
+  echo ""
   echo -e "${Green}Enter your Twilio Account Token to enable SMS alerts${NC}"
   echo -e "${Yellow}Press 'Enter' to skip configuration.${NC}"
   read -r -s token
