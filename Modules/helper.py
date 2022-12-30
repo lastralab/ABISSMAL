@@ -13,8 +13,12 @@ import csv
 from datetime import date
 from os.path import exists
 import smtplib
-from Setup.email_service import source
-from Setup.email_service import key
+from Setup.twilioSMS import Sender
+from Setup.twilioSMS import Recipients
+from twilio.rest import Client
+from Setup.twilioSMS import Enabled
+from Setup.twilioSMS import Sid
+from Setup.twilioSMS import Token
 import log
 
 box_id = 'Box_01'
@@ -51,7 +55,7 @@ def dir_setup(default_dir):
             os.makedirs(video_data)
     except Exception as E:
         print('Helper Logger Setup Error: ' + str(E))
-        # email_alert('Helper', 'Logger Setup Error: ' + str(E))
+        sms_alert('Helper', 'Logger Setup Error: ' + str(E))
 
 
 def csv_writer(box_id, module, data_path, datestring, header, value):
@@ -73,27 +77,27 @@ def csv_writer(box_id, module, data_path, datestring, header, value):
     except Exception as E:
         logging = get_logger(datetime.date.today())
         logging.error('Helper CSV Writter Error: ' + str(E))
-        email_alert('Helper', 'CSV Writter Error: ' + str(E))
+        sms_alert('Helper', 'CSV Writter Error: ' + str(E))
 
 
-def email_alert(module, text):
+def sms_alert(module, text):
     today = date.today()
     logging = get_logger(today)
     try:
-        if source != 'email@gmail.com':
-            server = smtplib.SMTP('smtp.gmail.com', 587)
-            server.starttls()
-            server.login(source, key)
-            subject = 'Abissmal[' + box_id + ']: Error from ' + module + ' module'
-            msg = 'Subject: {}\n\n{}'.format(subject, text)
-            for email in emails:
-                server.sendmail(source, email, msg)
-                logging.info('Email alert sent to ' + email + ' from ' + module)
-                print('Email alert sent to ' + email + ' from ' + module)
-            server.quit()
+        if Enabled and Sid != '' and Token != '' and Sender != '' and Recipients != []:
+            msg = 'Abissmal[' + box_id + '-' + module + ']: ' + text
+            for recipient in Recipients:
+                client = Client(Sid, Token)
+                message = client.messages.create(
+                    to=recipient,
+                    from_=Sender,
+                    body=msg)
+                logging.info('SMS sent to ' + recipient + ' from ' + module)
+                logging.info(message.sid)
+                print('SMS sent to ' + recipient + ' from ' + module)
         else:
-            logging.error('Email service is not configured, use run_install.sh or emails won\'t be sent.')
-            print('Email is not configured, update Setup/email_service.py or emails won\'t be sent.')
+            logging.info('Twilio service is not configured, use run_install.sh or SMS won\'t be sent.')
+            print('Twilio is not configured, update Setup/email_service.py or emails won\'t be sent.')
     except Exception as Exc:
-        logging.error('Helper Email Alert Error: ' + str(Exc))
-        print('Email Alert error: ' + str(Exc))
+        logging.error('Helper sending SMS Error: ' + str(Exc))
+        print('Sending SMS error: ' + str(Exc))

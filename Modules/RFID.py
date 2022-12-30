@@ -13,7 +13,7 @@ import csv
 from helper import dir_setup
 from helper import csv_writer
 from helper import box_id
-from helper import email_alert
+from helper import sms_alert
 from time import sleep
 from helper import get_logger
 
@@ -42,7 +42,7 @@ def RFIDSetup():
     if response != 0 and fd <= 0:
         print("Unable to Setup communications")
         logging.error("RFID Error: Unable to Setup communications")
-        # email_alert('RFID', 'Error: Unable to setup communications')
+        sms_alert('RFID', 'Error: Unable to setup communications')
         sys.exit()
     return fd
 
@@ -102,7 +102,7 @@ def ReadTagPageZero(fd):
     except Exception as E:
         logging.error('RFID error: ' + str(E))
         print('RFID error: ' + str(E))
-        # email_alert('RFID', 'Error: ' + str(E))
+        sms_alert('RFID', 'Error: ' + str(E))
 
 
 comms = RFIDSetup()

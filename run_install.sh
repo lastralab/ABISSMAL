@@ -16,14 +16,9 @@ Cyan='\033[0;96m'
 
 user_name=$(whoami)
 location=$(pwd)
-host_name=$(hostname)
 helper_path="${location}/Modules/helper.py"
-rfid_path="${location}/Modules/RFID.py"
 cron_path="${location}/cron.sh"
-email_setup_path="${location}/Modules/Setup/email_service.py"
-email_config_path="${location}/Modules/Setup/ssmtp.conf"
-hostname_path="/etc/hostname"
-hosts_path="/etc/hosts"
+sms_setup_path="${location}/Modules/Setup/twilioSMS.py"
 bash_v=$(which bash)
 python_v=$(which python)
 
@@ -73,6 +68,7 @@ then
   pip3 install wiringpi
   pip3 install rpi-gpio
   pip3 install picamera
+  pip3 install twilio
   apt install -y vim
   apt-get install ntfs-3g
   apt-get install gparted
@@ -86,46 +82,55 @@ else
 fi
 echo ""
 
-#echo -e "${BIGreen}Enter the email address to send emails from${NC} (smtp enabled)"
-#echo -e "${Yellow}Press 'Enter' to skip configuration.${NC}"
-#read -r gmail
-#if [ -n "$gmail" ]
-#then
-#	sed -i "s/^source.*/source = '${gmail}'/" "${email_setup_path}"
-#  sed -i "s/^AuthUser.*/AuthUser=${gmail}/" "${email_config_path}"
-#  echo -e "${Purple}Registered ${gmail}${NC}"
-#else
-#	echo -e "${Yellow}Skipped.${NC}"
-#fi
-#echo ""
+echo -e "${Yellow}Enter your Twilio Account SID to enable SMS alerts${NC}"
+echo -e "${Yellow}Press 'Enter' to skip configuration.${NC}"
+read -r sms
+if [ -n "$sms" ]
+then
+  echo -e "${Yellow}Enter your Twilio Account Token to enable SMS alerts${NC}"
+  echo -e "${Yellow}Press 'Enter' to skip configuration.${NC}"
+  read -r -s token
+  if [ -n "$token" ]
+  then
+    sed -i "s/^Sid.*/Sid = '${token}'/" "${sms_setup_path}"
+    echo -e "${Purple}Registered Token${NC}"
+  else
+    echo -e "${Yellow}Skipped.${NC}"
+  fi
+  echo ""
 
-#echo -e "${BIGreen}Enter the email password${NC}"
-#echo -e "${Yellow}Press 'Enter' to skip configuration.${NC}"
-#read -r -s pass
-#if [ -n "$pass" ]
-#then
-#	sed -i "s/^key.*/key = '${pass}'/" "${email_setup_path}"
-#  sed -i "s/^AuthPass.*/AuthPass=${pass}/" "${email_config_path}"
-#  echo -e "${Purple}Registered password${NC}"
-#else
-#	echo -e "${Yellow}Skipped.${NC}"
-#fi
-#echo ""
+  echo -e "${BIGreen}Enter Sender Phone Number.${NC}"
+  echo -e "${Yellow}Press 'Enter' to skip configuration.${NC}"
+  read -r sender
+  if [ -n "$sender" ]
+  then
+    sed -i "s/^Sender.*/Sender = '${sender}'/" "${sms_setup_path}"
+    echo -e "${Purple}Registered Sender${NC}"
+  else
+    echo -e "${Yellow}Skipped.${NC}"
+  fi
+  echo ""
 
-#echo -e "${BIGreen}Enter email(s) to send error alerts.${NC}"
-#echo -e "${RED}Note:${NC} ${Yellow}Each email must be contained in single quotes ' ' as the example:${NC}"
-#echo -e "${Cyan}'email1@gmail.com', 'email2@gmail.com'${NC}"
-#echo ""
-#echo -e "${Yellow}Press 'Enter' to skip configuration.${NC}"
-#read -r emails
-#if [ -n "$emails" ]
-#then
-#	sed -i "s/^emails.*/emails = [${emails}]/" "${helper_path}"
-#  echo -e "${Purple}Registered emails = [${emails}]${NC}"
-#else
-#	echo -e "${Yellow}Skipped.${NC}"
-#fi
-#echo ""
+  echo -e "${BIGreen}Enter recipient number (s) to send alerts.${NC}"
+  echo -e "${RED}Note:${NC} ${Yellow}Each number must be contained in single quotes ' ' and separated by a comma, as the example:${NC}"
+  echo -e "${Cyan}'9998887766', '5554443322'${NC}"
+  echo ""
+  echo -e "${Yellow}Press 'Enter' to skip configuration.${NC}"
+  read -r emails
+  if [ -n "$emails" ]
+  then
+    sed -i "s/^Recipients.*/Recipients = [${emails}]/" "${helper_path}"
+    echo -e "${Purple}Registered recipient(s) = [${emails}]${NC}"
+  else
+    echo -e "${Yellow}Skipped.${NC}"
+  fi
+  echo ""
+	sed -i "s/^Sid.*/Sid = '${sms}'/" "${sms_setup_path}"
+  echo -e "${Purple}Registered SID${NC}"
+else
+	echo -e "${Yellow}Skipped.${NC}"
+fi
+echo ""
 
 echo -e "${Yellow}Insert 'Y/y' to configure Cron or press 'Enter' to skip.${NC}"
 read -r cron
