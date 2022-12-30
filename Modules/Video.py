@@ -1,6 +1,6 @@
 # Created by PyCharm
 # Author: nmoltta, gsvidaurre
-# Project: ParentalCareTracking
+# Project: Abissmal
 # Date: 12/21/21
 
 # !/usr/bin/env python3
@@ -31,7 +31,7 @@ logging = get_logger(datetime.today())
 logging.info('Starting Video script')
 print('Started Video script')
 
-path = "/home/pi/Data_ParentalCareTracking/Video/"
+path = "/home/pi/Data_Abissmal/Video/"
 header = ['chamber_id', 'sensor_id', 'year', 'month', 'day', 'time_video_started', 'video_file_name', 'total_pixels_motionTrigger']
 prior_image = None
 video_time_range = [0, 23]

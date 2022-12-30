@@ -1,6 +1,6 @@
 # Created by PyCharm
 # Author: nmoltta, gsvidaurre
-# Project: ParentalCareTracking
+# Project: Abissmal
 # Date: 11/13/21
 
 # !/usr/bin/env python3
@@ -22,7 +22,7 @@ dir_setup("/home/pi/")
 warn = 0
 module = 'RFID'
 header = ['chamber_id', 'sensor_id', 'year', 'month', 'day', 'timestamp', 'PIT_tag_ID']
-rfid_data = "/home/pi/Data_ParentalCareTracking/RFID"
+rfid_data = "/home/pi/Data_Abissmal/RFID"
 logging = get_logger(datetime.today())
 logging.info('Started RFID script')
 GPIO_PIN = 1
