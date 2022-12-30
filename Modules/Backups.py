@@ -1,6 +1,6 @@
 # Created by PyCharm
 # Author: nmoltta
-# Project: ParentalCareTracking
+# Project: Abissmal
 # Date: 1/12/22
 
 # !/usr/bin/env python3
@@ -27,7 +27,7 @@ backup_hour = 20
 backup_minute = 15
 low_storage = 200
 media_path = '/media/pi/'
-data_path = pi_home + 'Data_ParentalCareTracking/'
+data_path = pi_home + 'Data_Abissmal/'
 log_path = '/home/pi/log/'
 
 logging = get_logger(datetime.today())
@@ -111,13 +111,13 @@ def logs_backup_init(day, destination, source):
     if len(logs) > 0:
         logging = get_logger(datetime.today())
         path = destination + '/Data/Logs/'
-        today_log = today + '_pct_' + box_id + '.log'
+        today_log = today + '_abissmal_' + box_id + '.log'
         logs_qty = 0
         if not os.path.exists(path):
             os.makedirs(path)
         for log in logs:
             if log.endswith('.log'):
-                if not (log == today_log or log == 'pct_cron.log'):
+                if not (log == today_log or log == 'abissmal_cron.log'):
                     shutil.move(os.path.join(log_path, log), os.path.join(path, log))
                     logs_qty = logs_qty + 1
                 pass

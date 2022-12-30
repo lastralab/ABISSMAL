@@ -1,6 +1,6 @@
 # Created by PyCharm
 # Author: nmoltta, gsvidaurre
-# Project: ParentalCareTracking
+# Project: Abissmal
 # Date: 11/29/21
 
 # !/usr/bin/env python3
@@ -25,7 +25,7 @@ emails = []
 
 
 def get_logger(day):
-    name = str(day.year) + '_' + str(day.month) + '_' + str(day.day) + '_pct_' + box_id + '.log'
+    name = str(day.year) + '_' + str(day.month) + '_' + str(day.day) + '_abissmal_' + box_id + '.log'
     logger = log.setup_custom_logger(name)
     return logger
 
@@ -34,7 +34,7 @@ def dir_setup(default_dir):
     try:
         if not os.path.exists(default_dir + 'log'):
             os.makedirs(default_dir + 'log')
-        main_data = default_dir + 'Data_ParentalCareTracking'
+        main_data = default_dir + 'Data_Abissmal'
         if not os.path.exists(main_data):
             os.makedirs(main_data)
         irbb_data = main_data + "/IRBB"
@@ -84,7 +84,7 @@ def email_alert(module, text):
             server = smtplib.SMTP('smtp.gmail.com', 587)
             server.starttls()
             server.login(source, key)
-            subject = 'PCT[' + box_id + ']: Error from ' + module + ' module'
+            subject = 'Abissmal[' + box_id + ']: Error from ' + module + ' module'
             msg = 'Subject: {}\n\n{}'.format(subject, text)
             for email in emails:
                 server.sendmail(source, email, msg)

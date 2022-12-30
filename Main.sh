@@ -2,7 +2,7 @@
 ##
  # Created by PyCharm
  # Author: nmoltta
- # Project: ParentalCareTracking
+ # Project: Abissmal
  # Date: 12/08/2021
 ##
 
@@ -56,7 +56,7 @@ echo -e "${Green}
  /_/    \_\____/_____|_____/_____/|_|  |_/_/    \_\______|
 
 ${NC}"
-echo -e "${Green}Parental Care Tracking System${NC}"
+echo -e "${Green}Automated behavioral tracking by integrating sensors that survey movements around a target location${NC}"
 echo -e "${Blue}Repository:${NC}  ${Blue}https://github.com/lastralab/parentalcaretracking"${NC}
 echo -e "${Blue}Date:${NC}        ${Blue}November 2021${NC}"
 echo -e "${Blue}Authors:${NC}     ${Cyan}Molina-Medrano, T.${NC} & ${Cyan}Smith-Vidaurre, G.${NC}"
@@ -67,9 +67,9 @@ echo ""
 find Modules/ -type f -exec chmod 644 {} \;
 chown -R "${user_name}" .
 mkdir -p /home/pi/log/
-filename="/home/pi/log/pct_cron.log"
+filename="/home/pi/log/abissmal_cron.log"
 [[ -f ${filename} ]] || touch ${filename}
-echo -e "${Yellow}/home/pi/log/pct_cron.log ready to log cron jobs as${NC} ${user_name}"
+echo -e "${Yellow}/home/pi/log/abissmal_cron.log ready to log cron jobs as${NC} ${user_name}"
 echo -e "To access a screen run:${Green} screen -r ${NC}${Purple}{name}${NC}"
 echo -e "To detach a screen press${Blue} Ctrl + A${NC} then type ${Blue}:${NC} to enter command mode and use command ${RED}\"detach\"${NC}"
 echo ""

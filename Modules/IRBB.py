@@ -1,6 +1,6 @@
 # Created by PyCharm
 # Author: nmoltta, gsvidaurre
-# Project: ParentalCareTracking
+# Project: Abissmal
 # Date: 11/16/2021
 
 # !/usr/bin/env python3
@@ -26,7 +26,7 @@ BEAM_PIN_inner = 19
 warn = 0
 module = 'IRBB'
 header = ['chamber_id', 'sensor_id', 'year', 'month', 'day', 'timestamp']
-irbb_data = "/home/pi/Data_ParentalCareTracking/IRBB/"
+irbb_data = "/home/pi/Data_Abissmal/IRBB/"
 
 logging = get_logger(datetime.today())
 logging.info('Started IRBB script')

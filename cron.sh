@@ -2,7 +2,7 @@
 ##
  # Created by PyCharm
  # Author: nmoltta
- # Project: ParentalCareTracking
+ # Project: Abissmal
  # Date: 03/08/2022
 ##
 
@@ -37,4 +37,4 @@ screen -dmS rfid bash -c "${rfid_command}"
 sleep 1s
 screen -dmS monitor bash -c "${monitor_command}"
 sleep 1s
-echo "$(date): Ran PCT cron job as ${user_name}"
+echo "$(date): Ran Abissmal cron job as ${user_name}"
