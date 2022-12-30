@@ -117,7 +117,7 @@ then
         echo -e "${Purple}Registered recipient(s) = [${emails}]${NC}"
         sed -i "s/^Enabled.*/Enabled = True/" "${sms_setup_path}"
         echo ""
-        echo -e "${Purple}Enabled Twilio SMS alerts${NC}"
+        echo -e "${BIGreen}Enabled Twilio SMS alerts${NC}"
         echo ""
       else
         echo -e "${Yellow}Skipped.${NC}"
