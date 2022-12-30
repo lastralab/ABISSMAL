@@ -165,5 +165,6 @@ sleep 1
 echo -e "${RED}2${NC}"
 sleep 1
 echo -e "${RED}1${NC}"
+sleep 1
 echo ""
 reboot
