@@ -48,7 +48,7 @@ LED_time_range = [6, 18]
 GPIO.setmode(GPIO.BCM)
 GPIO.setwarnings(False)
 GPIO.setup(REC_LED, GPIO.OUT)
-GPIO.output(REC_LED, GPIO.LOW)
+GPIO.PWM(REC_LED, 40)
 
 logging.info('Video will be recorded between ' + str(video_time_range[0]) + ' and ' + str(video_time_range[1] + 1) + ' hours')
 print('Video will be recorded between ' + str(video_time_range[0]) + ' and ' + str(video_time_range[1] + 1) + ' hours')
