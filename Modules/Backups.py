@@ -29,7 +29,7 @@ low_storage = 200
 media_path = '/media/pi/'
 data_path = pi_home + 'Data_Abissmal/'
 log_path = '/home/pi/log/'
-
+volume_id = ''
 logging = get_logger(datetime.today())
 
 logging.info('Started backup script')
@@ -41,11 +41,15 @@ logging.info('Logs transfer will run once at 0:00hrs every day')
 print('Logs transfer will run once at 0:00hrs every day')
 
 
-def usb_connected(box):
+def usb_connected():
     if len(os.listdir(media_path)) > 0:
+        global volume_id
         for volume in os.listdir(media_path):
-            if str(volume) == box:
+            if len(os.listdir(media_path + volume)) > 0:
+                volume_id = str(volume)
                 return True
+            pass
+        pass
     else:
         exception = 'External drive not detected, backup won\'t be possible.'
         print('Backups error: ' + exception)
@@ -150,17 +154,20 @@ def monitor_storage(path):
 
 try:
     while True:
-        now = datetime.now()
-        if usb_connected(box_id) and now.hour == backup_hour and now.minute == backup_minute:
-            folder = now.strftime("%Y_%m_%d")
-            video_backup_init(folder, media_path + box_id, data_path)
-            csv_backup_init(now, media_path + box_id, data_path)
-            time.sleep(61)
-        elif usb_connected(box_id) and now.hour == 0 and now.minute == 0:
-            logs_backup_init(now, media_path + box_id, log_path)
-            monitor_storage(media_path + box_id)
-            logging = get_logger(datetime.today())
-            time.sleep(61)
+        if usb_connected():
+            now = datetime.now()
+            if now.hour == backup_hour and now.minute == backup_minute:
+                folder = now.strftime("%Y_%m_%d")
+                video_backup_init(folder, media_path + volume_id, data_path)
+                csv_backup_init(now, media_path + volume_id, data_path)
+                time.sleep(61)
+            elif now.hour == 0 and now.minute == 0:
+                logs_backup_init(now, media_path + volume_id, log_path)
+                monitor_storage(media_path + volume_id)
+                logging = get_logger(datetime.today())
+                time.sleep(61)
+            else:
+                pass
         else:
             pass
 except Exception as E:
