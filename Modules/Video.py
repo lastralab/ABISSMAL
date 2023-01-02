@@ -23,7 +23,7 @@ from os import walk
 from PIL import Image
 from subprocess import call
 from pathlib import Path
-from helper import email_alert
+from helper import sms_alert
 from helper import get_logger
 
 dir_setup('/home/pi/')
@@ -101,7 +101,7 @@ def convert_video(filename, pixels, dt):
                    [box_id, 'Camera', f"{dt.year}", f"{dt.month}", f"{dt.day}", f"{dt:%H:%M:%S.%f}", Path(filename).stem + '.mp4', pixels])
     except Exception as Err:
         logging.error('Converting video error: ' + str(Err))
-        # email_alert('Video', 'Convert Error: ' + str(Err))
+        sms_alert('Video', 'Convert Error: ' + str(Err))
 
 
 with picamera.PiCamera() as camera:
@@ -145,7 +145,7 @@ with picamera.PiCamera() as camera:
     except Exception as E:
         print('Video error: ' + str(E))
         logging.error('Video: ' + str(E))
-        # email_alert('Video', 'Error: ' + str(E))
+        sms_alert('Video', 'Error: ' + str(E))
     finally:
         camera.stop_recording()
         camera.close()
