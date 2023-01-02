@@ -11,7 +11,7 @@
 <h3>Helper functions</h3>
 
 - CSV writer
-- Email Alert Service
+- SMS Alert Service
 - Logging setup
 - Directories setup
 

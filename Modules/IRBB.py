@@ -16,7 +16,7 @@ from helper import box_id
 from time import sleep
 from subprocess import call
 from os import walk
-from helper import email_alert
+from helper import sms_alert
 from helper import get_logger
 
 dir_setup('/home/pi/')
@@ -65,6 +65,6 @@ except KeyboardInterrupt:
 except Exception as E:
     logging.error('IRBB error: ' + str(E))
     print('IRBB error: ' + str(E))
-    # email_alert('IRBB', 'Error: ' + str(E))
+    sms_alert('IRBB', 'Error: ' + str(E))
 finally:
     GPIO.cleanup()
