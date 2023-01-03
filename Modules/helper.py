@@ -86,7 +86,6 @@ def sms_alert(module, text):
             msg = box_id + '[' + module + '] ' + text
             for recipient in Recipients:
                 client = Client(Sid, Token)
-
                 message = client.messages.create(
                     to='+1'+recipient,
                     from_='+1'+Sender,
