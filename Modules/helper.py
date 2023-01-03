@@ -53,7 +53,6 @@ def dir_setup(default_dir):
         if not os.path.exists(video_data):
             os.makedirs(video_data)
     except Exception as E:
-        print('Helper Logger Setup Error: ' + str(E))
         sms_alert('Helper', 'Logger Setup Error: ' + str(E))
 
 
@@ -84,19 +83,19 @@ def sms_alert(module, text):
     logging = get_logger(today)
     try:
         if Enabled and Sid != '' and Token != '' and Sender != '' and Recipients != []:
-            msg = 'Abissmal[' + box_id + '-' + module + '] ' + text
+            msg = box_id + '[' + module + '] ' + text
             for recipient in Recipients:
                 client = Client(Sid, Token)
                 message = client.messages.create(
                     to='+1'+recipient,
                     from_='+1'+Sender,
                     body=msg)
-                logging.info('SMS sent to ...' + recipient[-4:] + ' from ' + module)
-                logging.info(message.sid)
-                print('SMS sent to ...' + recipient[-4:] + ' from ' + module)
+                if message.error_message is None:
+                    logging.info('SMS sent to ...' + recipient[-4:] + ' from ' + module)
+                else:
+                    logging.error('SMS alert not sent. ' + message.error_message)
+                    logging.debug(message.sid)
         else:
-            logging.info('Twilio service is not configured, use run_install.sh or SMS won\'t be sent.')
-            print('Twilio is not configured, update Setup/email_service.py or emails won\'t be sent.')
+            logging.info('Twilio service is not configured, SMS won\'t be sent. Ignore this if it\'s expected.')
     except Exception as Exc:
         logging.error('Helper sending SMS Error: ' + str(Exc))
-        print('Sending SMS error: ' + str(Exc))
