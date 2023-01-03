@@ -84,14 +84,14 @@ def sms_alert(module, text):
     logging = get_logger(today)
     try:
         if Enabled and Sid != '' and Token != '' and Sender != '' and Recipients != []:
-            msg = 'Abissmal[' + box_id + '] ' + module + ' ' + text
+            msg = box_id + '[' + module + '] ' + text
             for recipient in Recipients:
                 client = Client(Sid, Token)
                 message = client.messages.create(
                     to='+1'+recipient,
                     from_='+1'+Sender,
                     body=msg)
-                logging.info('status: ' + message.status)
+                print(message.sid)
                 if message.status != 'failed':
                     logging.info('SMS sent to ...' + recipient[-4:] + ' from ' + module)
                     print('SMS sent to ...' + recipient[-4:] + ' from ' + module)

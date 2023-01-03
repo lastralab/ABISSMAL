@@ -102,7 +102,7 @@ def csv_backup_init(today, destination, source):
             print('Backed-up ' + module + ' metadata')
             logging.info('Backed-up ' + module + ' metadata')
         else:
-            print('CSV files not found in module: ' + module)
+            print('CSV files not found in module: ' + module + '. Nothing to transfer.')
             logging.warning('Backup: CSV files not found in module: ' + module)
             sms_alert('Backup', 'Warning: CSV files not found in module: ' + module)
             pass
