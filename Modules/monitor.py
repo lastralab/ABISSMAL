@@ -13,21 +13,16 @@ import datetime
 
 dir_setup('/home/pi/')
 modules = []
-flags = []
 
 for module in mods:
     if module == 'Video':
         modules.append('video')
-        flags['video'] = False
     if module == 'IRBB':
         modules.append('irbb')
-        flags['irbb'] = False
     if module == 'RFID':
         modules.append('rfid')
-        flags['rfid'] = False
     if module == 'Temp':
         modules.append('temp')
-        flags['temp'] = False
 
 modules.append('backup')
 
@@ -37,11 +32,11 @@ print('Started Monitor script')
 
 
 def monitor_screens():
-    global flags
+    global modules
     screens = str(subprocess.getoutput("screen -list"))
     for screen in modules:
-        if screens.find(screen) == -1 and flags[screen] = False:
-            flags[screen] = True;
+        if screens.find(screen) == -1:
+            modules.remove(screen)
             sms_alert('Monitor', 'Screen "' + screen + '" not running.')
             logging.error('Screen not running: ' + screen)
             print('Screen closed: ' + screen)
