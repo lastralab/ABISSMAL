@@ -96,6 +96,6 @@ def sms_alert(module, text):
                     logging.error('SMS alert not sent. ' + message.error_message)
                     logging.debug(message.sid)
         else:
-            logging.info('Twilio service is not configured, use run_install.sh or SMS won\'t be sent.')
+            logging.info('Twilio service is not configured, SMS won\'t be sent. Ignore this if it\'s expected.')
     except Exception as Exc:
         logging.error('Helper sending SMS Error: ' + str(Exc))
