@@ -86,17 +86,16 @@ def sms_alert(module, text):
             msg = box_id + '[' + module + '] ' + text
             for recipient in Recipients:
                 client = Client(Sid, Token)
+
                 message = client.messages.create(
                     to='+1'+recipient,
                     from_='+1'+Sender,
                     body=msg)
-                if message.status != 'failed' and message.status != 'undelivered':
+                if message.error_message is None:
                     logging.info('SMS sent to ...' + recipient[-4:] + ' from ' + module)
                 else:
-                    details = message.sid
-                    logging.error(message.error_message)
-                    logging.debug(details)
-                    logging.error('SMS alert not sent.')
+                    logging.error('SMS alert not sent. ' + message.error_message)
+                    logging.debug(message.sid)
         else:
             logging.info('Twilio service is not configured, use run_install.sh or SMS won\'t be sent.')
     except Exception as Exc:
