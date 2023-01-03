@@ -37,7 +37,7 @@ def monitor_screens():
     for screen in modules:
         if screens.find(screen) == -1:
             modules.remove(screen)
-            sms_alert('Monitor', 'Screen "' + screen + '" not running.')
+            sms_alert('Monitor', 'Error: Screen "' + screen + '" not running.')
             logging.error('Screen not running: ' + screen)
             print('Screen closed: ' + screen)
         else:
