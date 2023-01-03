@@ -91,15 +91,12 @@ def sms_alert(module, text):
                     to='+1'+recipient,
                     from_='+1'+Sender,
                     body=msg)
-                print(message.sid)
-                if message.status != 'failed':
+                if message.status != 'failed' and message.status != 'undelivered':
                     logging.info('SMS sent to ...' + recipient[-4:] + ' from ' + module)
-                    print('SMS sent to ...' + recipient[-4:] + ' from ' + module)
                 else:
-                    logging.error(message.sid)
+                    logging.error(message.error_message)
+                    logging.error('SMS alert not sent.')
         else:
             logging.info('Twilio service is not configured, use run_install.sh or SMS won\'t be sent.')
-            print('Twilio is not configured, update Setup/twilioSMS.py or texts won\'t be sent.')
     except Exception as Exc:
         logging.error('Helper sending SMS Error: ' + str(Exc))
-        print('Sending SMS error: ' + str(Exc))
