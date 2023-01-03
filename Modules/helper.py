@@ -84,19 +84,22 @@ def sms_alert(module, text):
     logging = get_logger(today)
     try:
         if Enabled and Sid != '' and Token != '' and Sender != '' and Recipients != []:
-            msg = 'Abissmal[' + box_id + '-' + module + '] ' + text
+            msg = box_id + '[' + module + '] ' + text
             for recipient in Recipients:
                 client = Client(Sid, Token)
                 message = client.messages.create(
                     to='+1'+recipient,
                     from_='+1'+Sender,
                     body=msg)
-                logging.info('SMS sent to ...' + recipient[-4:] + ' from ' + module)
-                logging.info(message.sid)
-                print('SMS sent to ...' + recipient[-4:] + ' from ' + module)
+                print(message.sid)
+                if message.status != 'failed':
+                    logging.info('SMS sent to ...' + recipient[-4:] + ' from ' + module)
+                    print('SMS sent to ...' + recipient[-4:] + ' from ' + module)
+                else:
+                    logging.error(message.sid)
         else:
             logging.info('Twilio service is not configured, use run_install.sh or SMS won\'t be sent.')
-            print('Twilio is not configured, update Setup/email_service.py or emails won\'t be sent.')
+            print('Twilio is not configured, update Setup/twilioSMS.py or texts won\'t be sent.')
     except Exception as Exc:
         logging.error('Helper sending SMS Error: ' + str(Exc))
         print('Sending SMS error: ' + str(Exc))

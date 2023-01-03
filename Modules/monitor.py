@@ -32,15 +32,17 @@ print('Started Monitor script')
 
 
 def monitor_screens():
+    global modules
     screens = str(subprocess.getoutput("screen -list"))
     for screen in modules:
         if screens.find(screen) == -1:
-            sms_alert(screen, 'Screen not running.')
+            modules.remove(screen)
+            sms_alert('Monitor', 'Error: Screen "' + screen + '" not running.')
             logging.error('Screen not running: ' + screen)
             print('Screen closed: ' + screen)
         else:
             pass
-
+        
 
 try:
     while True:
