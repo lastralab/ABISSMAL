@@ -1,9 +1,10 @@
 #' @title find_rfid_perching_events
 #' @description Use the raw radio frequency identification (RFID) data to identify perching events (e.g. periods of time when an individual was perched on the RFID antenna). This function is performed for each unique passive integrated transponder (PIT) tag in the dataset. The function identifies runs of RFID detections separated by the given temporal threshold or less, then takes the first and last detection of each run and return these timestamps with start and end labels. Note that unlike the RFID pre-processing function, this function groups the data frame not only by PIT tag ID but also by date to avoid artificially long perching periods
 #' 
+#' @param rfid_col_nm A string with the column name for the RFID events
+#' #' @param group_col_nm A string with the column name that contains PIT tag identifiers, so that perching events are identified for each unique PIT tag. This column name is used to group the data frame by unique PIT tags
 #' @param threshold A single numeric value. This represents a temporal threshold in seconds that will be used to identify RFID detections that occurred in close succession (e.g. within 1 or 2 seconds) as perching events
-#' @param group_col_nm A character object with the column name that contains PIT tag identifiers, so that perching events are identified for each unique PIT tag. This column name is used to group the data frame by unique PIT tags
-#' 
+#'
 #' @return A data frame object with all metadata columns in the original data frame, as well as columns indicating the timestamp of the start of the perching period identified, the end of the given perching period, and the temporal threshold used for pre-processing (in seconds). In other words, each row is a perching period
 
 
@@ -12,7 +13,25 @@
 # group_col_nm <- "PIT_tag_ID"
 
 # This function will group by date AND the specified column. The argument group_col_nm cannot be NULL here
-find_rfid_perching_events <- function(.x, group_col_nm, threshold){
+find_rfid_perching_events <- function(.x, rfid_col_nm, group_col_nm, threshold){
+  
+  # Check that the raw data is a data frame
+  if(!is.data.frame(.x)){
+    stop('The input object needs to be a data frame')
+  }
+  
+  # Check that the temporal threshold is a number
+  if(!is.integer(threshold)){
+    stop('The temporal threshold needs to be an integer in seconds')
+  }
+  
+  # Check that the input dataset has the PIT tag ID column that will be grouped
+  if(!group_col_nm %in% names(.x)){
+    stop('The column name specified as `group_col_nm` does not exist')
+  }
+  
+  # Check that the timestamps are in the right format TKTK
+  # if(!class(.x$rfid_col_nm))
   
   # Need to look for perching events by PIT tag AND day
   # Otherwise the logic below ends up including the last event of a day and the first of the next day as the start and end indices, which leads to strangely long perching periods sometimes
@@ -107,7 +126,7 @@ find_rfid_perching_events <- function(.x, group_col_nm, threshold){
       perching_temporal_thresh = threshold
     )
   
-  # What is this shit?!
+  # What is this!
   # 4 - 3  01-10-3F-65-01  2022-04-03 12:45:23  2022-04-03 14:46:56
   
   # row index 144
@@ -149,21 +168,21 @@ find_rfid_perching_events <- function(.x, group_col_nm, threshold){
   
 }
 
-# Apply the function above
-rfid_perching <- pct_df3 %>% 
-  dplyr::filter(data_type == "RFID") %>% 
-  dplyr::mutate(grping = 1) %>% 
-  group_split(grping) %>% 
-  map_dfr(
-    ~ find_rfid_perching_events(.x, threshold = 1, group_col_nm = "PIT_tag_ID")
-  )
-
-glimpse(rfid_perching)
-
-rfid_perching %>% 
-  # head(n = 100) %>% 
-  View()
-
-# Write this data out
-rfid_perching %>%
-  write.csv(., file.path(out_path, "rfid_perching_data.csv"), row.names = FALSE)
+# # Apply the function above
+# rfid_perching <- pct_df3 %>% 
+#   dplyr::filter(data_type == "RFID") %>% 
+#   dplyr::mutate(grping = 1) %>% 
+#   group_split(grping) %>% 
+#   map_dfr(
+#     ~ find_rfid_perching_events(.x, threshold = 1, group_col_nm = "PIT_tag_ID")
+#   )
+# 
+# glimpse(rfid_perching)
+# 
+# rfid_perching %>% 
+#   # head(n = 100) %>% 
+#   View()
+# 
+# # Write this data out
+# rfid_perching %>%
+#   write.csv(., file.path(out_path, "rfid_perching_data.csv"), row.names = FALSE)
