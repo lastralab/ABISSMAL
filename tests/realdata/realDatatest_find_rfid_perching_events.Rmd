@@ -1,0 +1,313 @@
+---
+title: "Test find_rfid_perching_events with real data"
+author: "Grace Smith-Vidaurre"
+date: "2023-01-04"
+output: html_document
+---
+
+```{r echo = TRUE, eval = TRUE, message = FALSE}
+
+rm(list = ls())
+
+X <- c("tidyverse", "pbapply", "plyr", "dplyr", "data.table", "parallel", "scales", "ggplot2", "knitr", "gridExtra", "grid", "Rmisc", "tidyquant", "ggpubr")
+
+invisible(lapply(X, library, character.only = TRUE))
+
+# install.packages("tidyquant")
+
+# Suppress summarise warnings from dplyr
+options(dplyr.summarise.inform = FALSE)
+
+# path <- "/home/gsvidaurre/Desktop/PostdocResearch/ParentalCareTracking_EarlyData/Data"
+# gpath <- "/home/gsvidaurre/Desktop/PostdocResearch/ParentalCareTracking_EarlyData/Figures"
+gpath <- "/home/gsvidaurre/Desktop/MANUSCRIPTS/Prep/ParentalCareTracking_MethodsPaper/Figures"
+
+path <- "/media/gsvidaurre/Box_01/Data"
+
+raw_path <- "/home/gsvidaurre/Desktop/MANUSCRIPTS/Prep/ParentalCareTracking_MethodsPaper/raw"
+
+out_path <- "/home/gsvidaurre/Desktop/MANUSCRIPTS/Prep/ParentalCareTracking_MethodsPaper/analysis_output"
+
+seed <- 401
+cores <- parallel::detectCores() - 2
+
+```
+
+Read in data for a single date (data saved on Desktop). TKTK make this a different path or something
+```{r read in data}
+
+irbb <- read.csv(file.path(file.path(path, "IRBB"), "IRBB_Box_01_2022_3_31.csv"))
+glimpse(irbb)
+
+rfid <- read.csv(file.path(file.path(path, "RFID"), "RFID_Box_01_2022_3_31.csv"))
+glimpse(rfid)
+
+video <- read.csv(file.path(file.path(path, "Video"), "Video_Box_01_2022_3_31.csv"))
+glimpse(video)
+
+```
+
+Read in data across the testing period (data saved on hard drive).
+```{r read in data}
+
+# beam breakers
+files <- list.files(file.path(path, "IRBB"), full.names = TRUE)
+files
+
+irbb <- rbindlist(pblapply(1:length(files), function(i){
+  read.csv(files[i])
+}))
+glimpse(irbb)
+
+# RFID
+files <- list.files(file.path(path, "RFID"), full.names = TRUE)
+files
+
+rfid <- rbindlist(pblapply(1:length(files), function(i){
+  read.csv(files[i])
+}))
+glimpse(rfid)
+
+# Video
+files <- list.files(file.path(path, "Video"), pattern = "Video_*", full.names = TRUE)
+files
+
+video <- rbindlist(pblapply(1:length(files), function(i){
+  read.csv(files[i])
+}))
+glimpse(video)
+
+# Temperature
+files <- list.files(file.path(path, "Temp"), full.names = TRUE)
+files
+
+temp <- rbindlist(pblapply(1:length(files), function(i){
+  read.csv(files[i])
+}))
+glimpse(temp)
+
+# Logs
+files <- list.files(file.path(path, "Logs"), full.names = TRUE)
+files
+
+logs <- rbindlist(pblapply(1:length(files), function(i){
+  
+  # Read all lines from the log file
+  tmp <- readLines(files[i])
+  
+  # If motion was detected:
+  if(any(grepl("pixel", tmp))){
+    
+    # Get lines with this pattern
+    tmp2 <- data.frame(lines = tmp[grep("pixel", tmp)])
+    
+    # Get the number of pixels that changed in each motion detection event, plus the timestamp of video recording onset (or motion detection)
+    tmp3 <- tmp2 %>%
+      dplyr::mutate(
+        lines = gsub(" DEBUG Video: sensitivity = 9000 ", "", lines)
+      ) %>% 
+      tidyr::separate(
+        lines, 
+        into = c("video_onset_timestamp", "pixels_changed"),
+        sep = "< "
+      ) %>% 
+      dplyr::mutate(
+        pixels_changed = gsub(" pixels", "", pixels_changed)
+      )
+    
+  } else {
+    
+    tmp3 <- data.frame(
+      video_onset_timestamp = NA,
+      pixels_changed = NA
+    )
+    
+  }
+  
+  return(tmp3)
+  
+}))
+
+glimpse(logs)
+
+
+```
+
+Combine data from parental care tracking. It would be nice if the "sensor_id" column was "device_id" and served to label the type of device as well
+```{r combine data}
+
+options("digits" = 6)
+
+# Eventually this probably shouldn't be a join but rather a row bind
+pct_df <- irbb %>% 
+  dplyr::mutate(
+    data_type = "beam breaker"
+  ) %>% 
+  # Add RFID data
+  full_join(
+    rfid %>% 
+      dplyr::mutate(
+        data_type = "RFID"
+      ),
+    by = c("chamber_id", "year", "month", "day", "timestamp", "data_type")
+  ) %>% 
+  # Add temperature data
+  full_join(
+    temp %>% 
+      dplyr::mutate(
+        data_type = "Temperature"
+      ) %>% 
+      dplyr::rename(
+        `timestamp` = "time"
+      ),
+    by = c("chamber_id", "year", "month", "day", "timestamp", "data_type")
+  ) %>% 
+  # Add video data
+  full_join(
+    video %>%
+      dplyr::mutate(
+        data_type = "Video"
+      ) %>%
+      dplyr::rename(
+        `timestamp` = "time_video_started"
+      ) %>%
+      as_tibble(),
+    by = c("chamber_id", "year", "month", "day", "timestamp", "data_type")
+  ) %>%
+  # Make two timestamp columns, one will be separated below
+  dplyr::mutate(
+    timestamp2 = timestamp
+  ) %>% 
+  separate(
+    timestamp2, c("hour", "minute", "second"), sep = ":"
+  ) %>% 
+  # Get date times, this removes decimals on the second
+  # Also make a column with the ms times
+  dplyr::mutate(
+    event_datetime = lubridate::make_datetime(year, month, day, as.numeric(hour), as.numeric(minute), as.numeric(second), tz = "UTC"),
+    date_time_ms = paste(paste(year, month, day, sep = "-"), timestamp, sep = " "),
+    date_time_ms = format(as.POSIXct(date_time_ms, tz = "America/New York"), "%Y-%m-%d %H:%M:%OS6"),
+    event_datetime_ms = lubridate::ymd_hms(date_time_ms)
+  ) %>% 
+  dplyr::mutate(
+    data_type = ifelse(data_type == "beam breaker", paste(data_type, sensor_id, sep = " : "), data_type),
+    data_type = ifelse(data_type == "RFID", paste(data_type, PIT_tag_ID, sep = " : "), data_type),
+    pre_process_stage = "raw"
+  )
+  # dplyr::select(date_time_ms)
+
+glimpse(pct_df)
+
+head(pct_df$event_datetime)
+head(pct_df$event_datetime_ms)
+second(pct_df$event_datetime_ms)
+
+class(pct_df$event_datetime)
+diff(pct_df$event_datetime)
+
+unique(pct_df$data_type)
+
+# Checking
+# (nrow(irbb) + nrow(rfid)) == nrow(pct_df)
+
+# This testing started on March 28th, but data collection started on March 29th and went until April 4th
+pct_df2 %>% 
+  distinct(month, day)
+
+# Remove the first afternoon of testing, the RFID tag I used for a dry run before placing birds shows up here, and device activity didn't start until the next day
+pct_df2 <- pct_df %>% 
+  dplyr::filter(
+    day != 28
+  )
+
+glimpse(pct_df2)
+
+# Save the raw combined data (note that I did remove March 28th)
+write.csv(pct_df2, file.path(raw_path, "combined_raw_data_firstRunBox01_Spring2022.csv"), row.names = FALSE)
+
+```
+
+TKTK start here until chunks above are improved
+
+Read back in raw combined data.
+```{r}
+
+# Make sure event_datetime is in datetime format
+pct_df2 <- read.csv(file.path(raw_path, "combined_raw_data_firstRunBox01_Spring2022.csv")) %>% 
+  dplyr::mutate(
+    event_datetime = as_datetime(event_datetime, tz = "UTC", format = NULL),
+    event_datetime_ms = as.POSIXct(format(as.POSIXct(date_time_ms, tz = "America/New York"), "%Y-%m-%d %H:%M:%OS6"))
+  )
+
+glimpse(pct_df2)
+
+# YES decimal milliseconds are working
+head(second(pct_df2$event_datetime_ms))
+
+class(pct_df2$event_datetime_ms)
+format(pct_df2$event_datetime_ms)
+
+# A way to check whether the format is correct
+is.na(as.POSIXct(pct_df2$event_datetime_ms[1], format = "%Y-%m-%d %H:%M:%OS6"))
+any(is.na(as.POSIXct(pct_df2$event_datetime_ms, format = "%Y-%m-%d %H:%M:%OS6")))
+
+# Update RFID data type label for pre-processing
+pct_df3 <- pct_df2 %>% 
+    dplyr::mutate(
+      data_type = ifelse(grepl("RFID", data_type), "RFID", data_type)
+    )
+
+glimpse(pct_df3)
+
+```
+
+# Find perching events
+
+Use the raw RFID data to find the periods of time when either parent was sitting in the nest container entrance.
+```{r}
+
+glimpse(pct_df3)
+
+# # Make a histogram of the lags
+# pct_df3 %>% 
+#   dplyr::filter(data_type == "RFID") %>% 
+#   dplyr::mutate(
+#     shift = dplyr::lag(event_datetime_ms, default = first(event_datetime_ms))
+#   ) %>% 
+#   # Convert differences to boolean based on a threshold to be able to remove stretches of detection events very close together
+#   dplyr::mutate(
+#     diff = floor(event_datetime_ms - shift),
+#     diff = as.numeric(diff)
+#   ) %>% 
+#   dplyr::select(event_datetime, diff) %>% 
+#   ggplot(aes(x = diff)) +
+#   geom_histogram(bins = 10) +
+#   # scale_x_continuous(expand = c(0, 0), limits = c(0, 120), breaks = seq(0, 120, 20), labels = seq(0, 120, 20)) +
+#   scale_x_continuous(expand = c(0, 0), limits = c(0, 10), breaks = seq(0, 10, 0.5), labels = seq(0, 10, 0.5)) +
+#   theme_bw()
+
+```
+
+Test the function with real data.
+```{r}
+
+# I'm using map_dfr because it returns a data frame by row binding without having to write a loop. I ended up modifying the function to require a list of data frames made by group_split after grouping by the tag ID column
+
+# Not sure how to otherwise remove the $value $visible list structure 
+find_rfid_perching_events <- source("/home/gsvidaurre/Desktop/GitHub_repos/Abissmal/R/find_rfid_perching_events.R", print = FALSE)$value
+
+unique(pct_df3$PIT_tag_ID)
+
+# What if instead the function is set up to take a list of data frames after grouping by PIT tag ID?
+res <- pct_df3 %>% 
+  dplyr::filter(data_type == "RFID") %>% 
+  group_split(PIT_tag_ID) %>% 
+  map_dfr(
+    ~ find_rfid_perching_events(df = .x, threshold = 1, rfid_col_nm = "event_datetime_ms", tag_id_col_nm = "PIT_tag_ID", run_length = 2)
+  )
+
+# Looks great
+glimpse(res)
+View(res)
+
+```
