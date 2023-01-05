@@ -1,0 +1,18 @@
+---
+title: "Run all testthat tests"
+author: "Grace Smith-Vidaurre"
+date: "2023-01-05"
+output: html_document
+---
+
+```{r}
+
+if (!require(testthat)) install.packages('testthat')
+library(testthat)
+
+# Run the testthat tests for each function
+
+test_file("/home/gsvidaurre/Desktop/GitHub_repos/Abissmal/tests/testthat/test_find_rfid_perching_events.R")
+
+```
+

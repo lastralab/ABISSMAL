@@ -10,6 +10,18 @@
 #' @return A data frame object with all metadata columns in the original data frame, as well as columns indicating the timestamp of the start of the perching period identified, the end of the given perching period, and the temporal threshold used for pre-processing (in seconds). In other words, each row is a perching period
 #' 
 
+
+# threshold <- 1
+# rfid_col_nm = "RFID"
+# #
+# df <- test_df
+# #
+# tag_id_col_nm = "tag_id"
+# run_length = 2
+
+
+
+
 find_rfid_perching_events <- function(df, rfid_col_nm, tag_id_col_nm, threshold, run_length = 2){
   
   # Check that the raw data is a data frame
@@ -22,24 +34,24 @@ find_rfid_perching_events <- function(df, rfid_col_nm, tag_id_col_nm, threshold,
     stop('The temporal threshold needs to be numeric (in seconds)')
   }
   
-  # Check that the input dataset has the column of RFID events, and do not have NAs
-  if(!is.null(rfid_col_nm) & !rfid_col_nm %in% names(df) & !any(is.na(df[[rfid_col_nm]]))){
-    stop('The column name specified in `rfid_col_nm` does not exist')
+  # Check that the input dataset has the column of RFID events
+  if(any(is.null(rfid_col_nm) | !rfid_col_nm %in% names(df))){
+    stop('The column specified in `rfid_col_nm` does not exist')
   }
   
   # Check that the input dataset has the PIT tag ID column, and does not have NAs
-  if(!is.null(tag_id_col_nm) & !tag_id_col_nm %in% names(df) & !any(is.na(df[[tag_id_col_nm]]))){
-  stop('The column name specified in `tag_id_col_nm` does not exist')
+  if(any(is.null(tag_id_col_nm) | !tag_id_col_nm %in% names(df) | any(is.na(df[[tag_id_col_nm]])))){
+  stop('The column specified in `tag_id_col_nm` does not exist or has NA values')
   }
   
   # Check that the year, month, and day columns are also present in the data frame, and do not have NAs
-  if(!any(grepl("year|month|day", names(df))) & !any(is.na(df[["year"]])) & !any(is.na(df[["month"]])) & !any(is.na(df[["day"]]))){
+  if(any(!"year" %in% names(df) | !"month" %in% names(df) | !"day" %in% names(df) | any(is.na(df[["year"]])) | any(is.na(df[["month"]])) | any(is.na(df[["day"]])))){
     stop('The data frame is missing columns `year`, `month`, or `day`, or there are NA values in one of these columns')
   }
   
-  # Check that the timestamps are in the right format
+  # Check that the timestamps are in the right format. This conditional also catches NAs in the RFID timestamps
   if(any(is.na(as.POSIXct(df[[rfid_col_nm]], format = "%Y-%m-%d %H:%M:%OS6")))){
-    stop('One or more timestamps are in the wrong format (need to be in %Y-%m-%d %H:%M:%OS6')
+    stop('One or more timestamps are in the wrong format (need to be in POSIXct or POSIXt format, like %Y-%m-%d %H:%M:%OS6')
   }
   
   # Look for perching events by PIT tag ID and day. Otherwise the logic below ends up including the last event of a day and the first of the next day as the start and end indices, which leads to strangely long perching periods sometimes
@@ -76,13 +88,17 @@ find_rfid_perching_events <- function(df, rfid_col_nm, tag_id_col_nm, threshold,
   # Make a data frame of the first and last indices of each run longer than 2 events that contain values below or equal to the given threshold
   lags_runs <- lags %>% 
     dplyr::summarise(
-      first_indices = cumsum(rle(binary_diff)[["lengths"]]) - (rle(binary_diff)[["lengths"]] - 1),
+      first_indices = cumsum(rle(binary_diff)[["lengths"]]) - (rle(binary_diff)[["lengths"]]),
       last_indices = cumsum(rle(binary_diff)[["lengths"]]),
       run_values = rle(binary_diff)[["values"]],
       run_lengths = rle(binary_diff)[["lengths"]]
     ) %>% 
     dplyr::filter(run_values & run_lengths >= run_length) %>% 
-    ungroup()
+    ungroup() %>% 
+    # If a first index is stored as 0, then add 1 to restore this first index
+    dplyr::mutate(
+      first_indices = ifelse(first_indices == 0, first_indices + 1, first_indices)
+    )
   
   if(nrow(lags_runs) > 0){
     
