@@ -5,6 +5,8 @@ date: "2023-01-05"
 output: html_document
 ---
 
+TKTK put /tests inside /R
+
 ```{r}
 
 if (!require(testthat)) install.packages('testthat')
