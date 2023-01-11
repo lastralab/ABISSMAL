@@ -22,12 +22,16 @@ rfid_command="${python_v} ${location}${rfid_file}"
 monitor_file="/Modules/monitor.py"
 monitor_command="${python_v} ${location}${monitor_file}"
 
+video_file="/Modules/Video.py"
+video_command="${python_v} ${location}${video_file}"
+
 find Modules/ -type f -exec chmod 644 {} \;
 
 screen -ls | grep temp | cut -d. -f1 | awk '{print $1}' | xargs kill
 screen -ls | grep irbb | cut -d. -f1 | awk '{print $1}' | xargs kill
 screen -ls | grep rfid | cut -d. -f1 | awk '{print $1}' | xargs kill
 screen -ls | grep monitor | cut -d. -f1 | awk '{print $1}' | xargs kill
+screen -ls | grep video | cut -d. -f1 | awk '{print $1}' | xargs kill
 sleep 1s
 screen -dmS temp bash -c "${temp_command}"
 sleep 1s
@@ -36,5 +40,7 @@ sleep 1s
 screen -dmS rfid bash -c "${rfid_command}"
 sleep 1s
 screen -dmS monitor bash -c "${monitor_command}"
+sleep 1s
+screen -dmS video bash -c "${video_command}"
 sleep 1s
 echo "$(date): Ran Abissmal cron job as ${user_name}"
