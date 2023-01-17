@@ -33,6 +33,8 @@ screen -ls | grep rfid | cut -d. -f1 | awk '{print $1}' | xargs kill
 screen -ls | grep monitor | cut -d. -f1 | awk '{print $1}' | xargs kill
 screen -ls | grep video | cut -d. -f1 | awk '{print $1}' | xargs kill
 sleep 1s
+screen -dmS video bash -c "${video_command}"
+sleep 1s
 screen -dmS temp bash -c "${temp_command}"
 sleep 1s
 screen -dmS irbb bash -c "${irbb_command}"
@@ -40,7 +42,5 @@ sleep 1s
 screen -dmS rfid bash -c "${rfid_command}"
 sleep 1s
 screen -dmS monitor bash -c "${monitor_command}"
-sleep 1s
-screen -dmS video bash -c "${video_command}"
 sleep 1s
 echo "$(date): Ran Abissmal cron job as ${user_name}"
