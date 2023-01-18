@@ -32,7 +32,7 @@ echo -e "${Green}
 
 ${NC}"
 echo -e "${Green}Automated behavioral tracking by integrating sensors that survey movements around a target location${NC}"
-echo -e "${Blue}Repository:${NC}  https://github.com/lastralab/parentalcaretracking"
+echo -e "${Blue}Repository:${NC}  https://github.com/lastralab/abissmal"
 echo -e "${Blue}Authors:${NC}     ${Cyan}Molina-Medrano, T. & Smith-Vidaurre, G.${NC}"
 echo ""
 echo -e "${Yellow}Setting permissions for ${user_name}...${NC}"
