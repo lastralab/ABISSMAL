@@ -74,7 +74,7 @@ echo -e "To access a screen run:${Green} screen -r ${NC}${Purple}{name}${NC}"
 echo -e "To detach a screen press${Blue} Ctrl + A${NC} then type ${RED}:${NC} to enter command mode and use command ${RED}detach${NC}"
 echo ""
 
-echo -e "${Cyan}Enter first letter of the modules to track, separated by a comma:${NC}"
+echo -e "${Cyan}Enter first letter of the modules to track:${NC}"
 echo -e "${Cyan}[example:virt] ${NC}${Purple}(V/v)ideo/(R/r)fid/(I/i)rbb/(T/t)emp${NC}"
 read -r modules
 
