@@ -18,6 +18,7 @@ Cyan='\033[0;96m'
 user_name=$(whoami)
 location=$(pwd)
 python_v=$(which python)
+cron_path="${location}/cron.sh"
 
 irbb_file="/Modules/IRBB.py"
 irbb_command="${python_v} ${location}${irbb_file}"
@@ -71,12 +72,14 @@ filename="/home/pi/log/abissmal_cron.log"
 [[ -f ${filename} ]] || touch ${filename}
 echo -e "${Yellow}/home/pi/log/abissmal_cron.log ready to log cron jobs as${NC} ${user_name}"
 echo -e "To access a screen run:${Green} screen -r ${NC}${Purple}{name}${NC}"
-echo -e "To detach a screen press${Blue} Ctrl + A${NC} then type ${Blue}:${NC} to enter command mode and use command ${RED}\"detach\"${NC}"
+echo -e "To detach a screen press${Blue} Ctrl + A${NC} then type ${RED}:${NC} to enter command mode and use command ${RED}detach${NC}"
 echo ""
 
 echo -e "${Cyan}Enter first letter of the modules to track:${NC}"
 echo -e "${Cyan}[example:virt] ${NC}${Purple}(V/v)ideo/(R/r)fid/(I/i)rbb/(T/t)emp${NC}"
 read -r modules
+
+sed -i "s#^modules=.*#modules=\"$modules\"#" "${cron_path}"
 
 if [[ $modules == *"V"* || $modules == *"v"* ]];
 then
@@ -143,5 +146,3 @@ else
     echo -e "${RED}No modules were activated, please enter valid letters.${NC}"
     echo ""
 fi
-
-
