@@ -271,15 +271,12 @@ preprocess_detections <- source("/home/gsvidaurre/Desktop/GitHub_repos/Abissmal/
 
 glimpse(pct_df3)
 
-
-# Error in preprocess_detections(df = .x, detection_col_nm, group_col_nm = "PIT_tag_ID", :
-# The input object needs to be a data frame
 pct_df3 %>% 
   dplyr::filter(data_type == "RFID") %>%
+  group_split(PIT_tag_ID) %>% 
   map_dfr(
-    ~ preprocess_detections(df = .x, detection_col_nm, group_col_nm = "PIT_tag_ID", threshold = 2)
+    ~ preprocess_detections(df = .x, detection_col_nm = "event_datetime_ms", group_col_nm = "PIT_tag_ID", threshold = 2)
   )
-
 
 # Pre-process the RFID and beam breaker data
 rfid_irbb_pre_proc <- pct_df3 %>% 
@@ -288,17 +285,18 @@ rfid_irbb_pre_proc <- pct_df3 %>%
   # glimpse()
   # dplyr::select(data_type, event_datetime) %>% 
   # group_split(data_type) %>%
+  group_split(PIT_tag_ID) %>% 
   map_dfr(
-    ~ preprocess_detections(df = .x, detection_col_nm, group_col_nm = "PIT_tag_ID", threshold = 2)
+    ~ preprocess_detections(df = .x, detection_col_nm = "event_datetime_ms", group_col_nm = "PIT_tag_ID", threshold = 2)
   ) %>%
   # The beam breaker data is missing the PIT tag ID column, and this should be filled with NAs after the row bind
   bind_rows(
     pct_df3 %>% 
       dplyr::filter(data_type %in% c("beam breaker : lead", "beam breaker : rear")) %>% 
       # dplyr::select(data_type, event_datetime) %>% 
-      # group_split(data_type) %>%
+      group_split(data_type) %>%
       map_dfr(
-        ~ preprocess_detections(df = .x, detection_col_nm, group_col_nm = "data_type")
+        ~ preprocess_detections(df = .x, detection_col_nm = "event_datetime_ms", group_col_nm = "data_type", threshold = 3)
       )
   )
 
