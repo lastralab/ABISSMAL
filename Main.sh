@@ -83,14 +83,25 @@ sed -i "s#^modules=.*#modules=\"$modules\"#" "${cron_path}"
 
 if [[ $modules == *"V"* || $modules == *"v"* ]];
 then
-    echo -e "${Cyan}Press enter to use default values \"0,23\" or enter new recording time range:${NC}"
+    echo -e "${Cyan}Press enter to use default video time \"0,23\" or enter new recording time range:${NC}"
     echo -e "${Cyan}Example: 8,20 ${NC}${Purple}(Video will start recordings daily at 8:00 and stop at 20:00hrs)${NC}"
     read -r rec
     echo ""
     if [ -n "$rec" ];
     then
         sed -i "s/^video_time_range.*/video_time_range = [${rec}]/" "${location}${video_file}"
-        echo -e "${Purple}Changed time range to [${rec}]${NC}"
+        echo -e "${Purple}Changed recording time range to [${rec}]${NC}"
+        sleep 1s
+        echo ""
+    fi
+    echo -e "${Cyan}Press enter to use default LED indicator time \"6, 18\" or enter new LED indicator time range:${NC}"
+    echo -e "${Cyan}Example: 6,20 ${NC}${Purple}(Red LED will turn ON while recording daily from 6:00 to 20:00hrs)${NC}"
+    read -r led
+    echo ""
+    if [ -n "$led" ];
+    then
+        sed -i "s/^LED_time_range.*/LED_time_range = [${led}]/" "${location}${video_file}"
+        echo -e "${Purple}Changed LED indicator time range to [${rec}]${NC}"
         sleep 1s
         echo ""
     fi
