@@ -18,6 +18,7 @@ Cyan='\033[0;96m'
 user_name=$(whoami)
 location=$(pwd)
 python_v=$(which python)
+cron_path="${location}/cron.sh"
 
 irbb_file="/Modules/IRBB.py"
 irbb_command="${python_v} ${location}${irbb_file}"
@@ -51,13 +52,13 @@ echo -e "${Green}
            ____ _____  _____ _____ __  __          _
      /\   |  _ \_   _|/ ____/ ____|  \/  |   /\   | |
     /  \  | |_) || | | (___| (___ | \  / |  /  \  | |
-   / /\ \ |  _ < | |  \___ \\___ \| |\/| | / /\ \ | |
+   / /\ \ |  _ < | |  \___  \___ \| |\/| | / /\ \ | |
   / ____ \| |_) || |_ ____) |___) | |  | |/ ____ \| |____
  /_/    \_\____/_____|_____/_____/|_|  |_/_/    \_\______|
 
 ${NC}"
 echo -e "${Green}Automated behavioral tracking by integrating sensors that survey movements around a target location${NC}"
-echo -e "${Blue}Repository:${NC}  ${Blue}https://github.com/lastralab/parentalcaretracking"${NC}
+echo -e "${Blue}Repository:${NC}  ${Blue}https://github.com/lastralab/abissmal"${NC}
 echo -e "${Blue}Date:${NC}        ${Blue}November 2021${NC}"
 echo -e "${Blue}Authors:${NC}     ${Cyan}Molina-Medrano, T.${NC} & ${Cyan}Smith-Vidaurre, G.${NC}"
 echo ""
@@ -71,12 +72,14 @@ filename="/home/pi/log/abissmal_cron.log"
 [[ -f ${filename} ]] || touch ${filename}
 echo -e "${Yellow}/home/pi/log/abissmal_cron.log ready to log cron jobs as${NC} ${user_name}"
 echo -e "To access a screen run:${Green} screen -r ${NC}${Purple}{name}${NC}"
-echo -e "To detach a screen press${Blue} Ctrl + A${NC} then type ${Blue}:${NC} to enter command mode and use command ${RED}\"detach\"${NC}"
+echo -e "To detach a screen press${Blue} Ctrl + A${NC} then type ${RED}:${NC} to enter command mode and use command ${RED}detach${NC}"
 echo ""
 
-echo -e "${Cyan}Enter first letter of the modules to track, separated by a comma:${NC}"
+echo -e "${Cyan}Enter first letter of the modules to track:${NC}"
 echo -e "${Cyan}[example:virt] ${NC}${Purple}(V/v)ideo/(R/r)fid/(I/i)rbb/(T/t)emp${NC}"
 read -r modules
+
+sed -i "s#^modules=.*#modules=\"$modules\"#" "${cron_path}"
 
 if [[ $modules == *"V"* || $modules == *"v"* ]];
 then
@@ -143,5 +146,3 @@ else
     echo -e "${RED}No modules were activated, please enter valid letters.${NC}"
     echo ""
 fi
-
-
