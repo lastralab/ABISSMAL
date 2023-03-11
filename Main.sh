@@ -76,13 +76,24 @@ echo -e "To detach a screen press${Blue} Ctrl + A${NC} then type ${RED}:${NC} to
 echo ""
 
 echo -e "${Cyan}Enter first letter of the modules to track:${NC}"
-echo -e "${Cyan}[example:virt] ${NC}${Purple}(V/v)ideo/(R/r)fid/(I/i)rbb/(T/t)emp${NC}"
+echo -e "${Cyan}Example: virt ${NC}${Purple}(V/v)ideo/(R/r)fid/(I/i)rbb/(T/t)emp${NC}"
 read -r modules
 
 sed -i "s#^modules=.*#modules=\"$modules\"#" "${cron_path}"
 
 if [[ $modules == *"V"* || $modules == *"v"* ]];
 then
+    echo -e "${Cyan}Press enter to use default values \"0,23\" or enter new recording time range:${NC}"
+    echo -e "${Cyan}Example: 8,20 ${NC}${Purple}(Video will start recordings daily at 8:00 and stop at 20:00hrs)${NC}"
+    read -r rec
+    echo ""
+    if [ -n "$rec" ];
+    then
+        sed -i "s/^video_time_range.*/video_time_range = [${rec}]/" "${location}${video_file}"
+        echo -e "${Purple}Changed time range to [${rec}]${NC}"
+        sleep 1s
+        echo ""
+    fi
   	modules_string="${modules_string}${v}${comma}"
   	selected=true
     echo -e "${Purple}Enabled Video${NC}"
