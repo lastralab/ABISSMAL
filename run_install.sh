@@ -69,6 +69,7 @@ then
   pip3 install rpi-gpio
   pip3 install picamera
   pip3 install twilio
+  pip3 install moviepy
   apt install -y vim
   apt-get install ntfs-3g
   apt-get install gparted
