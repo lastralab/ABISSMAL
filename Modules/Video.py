@@ -15,7 +15,6 @@ import RPi.GPIO as GPIO
 import io
 import random
 import picamera
-from moviepy.editor import VideoFileClip, concatenate_videoclips
 from helper import dir_setup
 from helper import csv_writer
 from helper import box_id
@@ -26,6 +25,8 @@ from subprocess import call
 from pathlib import Path
 from helper import sms_alert
 from helper import get_logger
+from moviepy.editor import VideoFileClip
+from moviepy.editor import concatenate_videoclips
 
 dir_setup('/home/pi/')
 logging = get_logger(datetime.today())
@@ -115,8 +116,6 @@ def concatenate(v1, v2, name):
         final_clip.write_videofile(name + '.mp4')
         os.remove(v1)
         os.remove(v2)
-        print('Concatenated videos to one file')
-        logging.info("Concatenated videos to one file")
     except Exception as Damn:
         logging.error('Concatenation error: ' + str(Damn))
         sms_alert('Video', 'Concatenation Error: ' + str(Damn))
@@ -160,8 +159,10 @@ with picamera.PiCamera() as camera:
                 post = convert_video(file2_h264, motion[1], dt)
                 print('Converted videos to mp4')
                 logging.info("Converted videos to mp4")
-                if pre and post:
-                    concatenate(path + pre, path + post, path + dt_str)
+                # if pre and post:
+                #     concatenate(pre, post, path + dt_str)
+                #     print('Concatenated videos to one file')
+                #     logging.info("Concatenated videos to one file")
     except Exception as E:
         print('Video error: ' + str(E))
         logging.error('Video: ' + str(E))
