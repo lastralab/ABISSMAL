@@ -113,6 +113,8 @@ def concatenate(v1, v2, name):
         clip2 = VideoFileClip(v2)
         final_clip = concatenate_videoclips([clip1, clip2])
         final_clip.write_videofile(name + '.mp4')
+        os.remove(v1)
+        os.remove(v2)
         print('Concatenated videos to one file')
         logging.info("Concatenated videos to one file")
     except Exception as Damn:
