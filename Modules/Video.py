@@ -110,10 +110,11 @@ def convert_video(filename, pixels, dt):
 
 def concatenate(v1, v2, name):
     try:
+        from moviepy.editor import VideoFileClip
         clip1 = VideoFileClip(v1)
         clip2 = VideoFileClip(v2)
         final_clip = concatenate_videoclips([clip1, clip2])
-        final_clip.write_videofile(name + '.mp4')
+        final_clip.write_videofile(name + '.mp4', codec='libx264', audio_codec='aac', ffmpeg_params=['-hide_banner'])
         os.remove(v1)
         os.remove(v2)
     except Exception as Damn:
@@ -137,9 +138,9 @@ with picamera.PiCamera() as camera:
                 dt = motion[2]
                 print('Motion detected; Recording started')
                 logging.info("Motion detected. Starting video recordings")
-                dt_str = str(f"{dt.year}_{dt.month}_{dt.day}_{dt:%H}_{dt:%M}_{dt:%S}")
-                file1_h264 = path + str(box_id) + "_" + dt_str + "_pre_trigger" + '.h264'
-                file2_h264 = path + str(box_id) + "_" + dt_str + "_post_trigger" + '.h264'
+                dt_str = str(f"{dt.year}-{dt.month}-{dt.day}_{dt:%H}-{dt:%M}-{dt:%S}")
+                file1_h264 = path + str(box_id) + "_" + dt_str + "_pre" + '.h264'
+                file2_h264 = path + str(box_id) + "_" + dt_str + "_post" + '.h264'
                 if int(LED_time_range[0]) <= hour_int <= int(LED_time_range[1]):
                     GPIO.output(REC_LED, GPIO.HIGH)
                 camera.split_recording(file2_h264)
@@ -159,10 +160,10 @@ with picamera.PiCamera() as camera:
                 post = convert_video(file2_h264, motion[1], dt)
                 print('Converted videos to mp4')
                 logging.info("Converted videos to mp4")
-                # if pre and post:
-                #     concatenate(pre, post, path + dt_str)
-                #     print('Concatenated videos to one file')
-                #     logging.info("Concatenated videos to one file")
+                if pre and post:
+                    concatenate(pre, post, path + dt_str)
+                    print('Concatenated videos to one file')
+                    logging.info("Concatenated videos to one file")
     except Exception as E:
         print('Video error: ' + str(E))
         logging.error('Video: ' + str(E))
