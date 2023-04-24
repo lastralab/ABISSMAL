@@ -1,0 +1,16 @@
+l_th <- 1
+u_th <- 3
+rfid_file_nm <- "pre_processed_data_RFID.csv"
+irbb_file_nm <- "labeled_beamBreaker_data.csv"
+sensor_id_col <- "sensor_id"
+timestamps_col <- "timestamp_ms"
+PIT_tag_col <- "PIT_tag_ID"
+outer_irbb_col <- "outer_beamBreaker_timestamp"
+inner_irbb_col <- "inner_beamBreaker_timestamp"
+irbb_event_col <- "type"
+irbb_unique_col <- "unique_beamBreaker_event"
+path <- "/media/gsvidaurre/Anodorhynchus/Data_Testing/Box_02_31Dec2022/Data"
+data_dir <- "pre_processed"
+out_dir <- "integrated"
+tz <- "America/New York"
+POSIXct_format <- "%Y-%m-%d %H:%M:%OS"

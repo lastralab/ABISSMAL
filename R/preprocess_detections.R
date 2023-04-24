@@ -19,15 +19,15 @@
 
 # I need to iterate over sensors again...
 
-sensor <- "Video"
-detection_col_nm <- "timestamp_ms"
-group_col_nm <- NULL
-thin_threshold <- 2
-pixel_threshold <- 10000
-pixel_col_nm <- "total_pixels_motionTrigger"
-path <- "/media/gsvidaurre/Anodorhynchus/Data_Testing/Box_02_31Dec2022/Data"
-data_dir <- "raw_combined"
-out_dir <- "pre_processed"
+# sensor <- "Video"
+# detection_col_nm <- "timestamp_ms"
+# group_col_nm <- NULL
+# thin_threshold <- 2
+# pixel_threshold <- 10000
+# pixel_col_nm <- "total_pixels_motionTrigger"
+# path <- "/media/gsvidaurre/Anodorhynchus/Data_Testing/Box_02_31Dec2022/Data"
+# data_dir <- "raw_combined"
+# out_dir <- "pre_processed"
 
 preprocess_detections <- function(sensor, detection_col_nm, group_col_nm = NULL, pixel_col_nm = NULL, thin_threshold = NULL, pixel_threshold = NULL, path, data_dir, out_dir, tz, POSIXct_format = "%Y-%m-%d %H:%M:%OS"){
   

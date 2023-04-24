@@ -2,147 +2,128 @@
 #' @description Use data from two pairs of beam breakers to label either entrance and exit movements (in or out of a nest container or nesting area).
 #' 
 #' @param threshold A single numeric value representing a temporal threshold in seconds that will be used to assign events across the beam breaker pairs to unique entrance or exit movements
-#' @param col_nm A character argument that represents the column name containing lag times between the pairs of beam breakers
-#' @param type A character argument that specifies which type of movement should be identified (e.g. "entrance" or "exit")
+#' @param sensor_id_col A character value. This is the name of the metadata column that contains information about the data type (e.g. "sensor_id")
+#' @param timestamps_col A character value. The name of the column that contains timestamps in a format that supports calculations in milliseconds (e.g. "event_datetime_ms")
+#' @param path A character string. This should be the path specifying the overall directory where data is saved for a given experimental setup. For instance, "/media/gsvidaurre/Anodorhynchus/Data_Testing/Box_02_31Dec2022/Data".
+#' @param data_dir A character string. This should be the name of directory where the raw data is saved across sensors inside the path above. For instance, "raw_combined".
+#' @param out_dir A character string. This should be the name of a directory specifying where the .csv file of pre-processed data should be saved for each sensor. For instance, "pre-processed". This folder will be appended to the data_path and created as a new directory if it doesn't already exist.
+#' @param tz A character string. This argument should contain the timezone used for converting timestamps to POSIXct format. For instance, "America/New York". See the base function `as.POSIXct` for more information.
+#' @param POSIXct_format A character string. This argument should contain the format used to converting timestamps to POSIXct format. The default is "%Y-%m-%d %H:%M:%OS" to return timestamps with milliseconds in decimal format. See the base function `as.POSIXct` for more information.
 #' 
-#' @return A data frame object with all metadata columns in the original data frame, as well as columns indicating each of the timestamps of the lead and rear beam breaker pairs, and a unique label for the given event (e.g. entrance or exit plus a unique numeric identifier). In other words, each row is a labeled event across the beam breaker pairs
+#' @return A .csv file with the metadata columns from the original pre-processed data used as input, as well as columns indicating each of the timestamps of the lead and rear beam breaker pairs, a unique label for the given event (e.g. entrance or exit), a unique numeric identifier for the given event, and information about the given data processing stage. Each row in the .csv file is a labeled event across the outer and inner beam breaker pairs that was identified using a given temporal threshold
 #' 
-#' TKTK needs a column for the threshold used
 
 # Make a function to label entrances and exits
-label_beamBreaker_events <- function(.x, threshold, col_name, type){
+label_beamBreaker_events <- function(threshold, sensor_id_col, timestamps_col, path, data_dir, out_dir, tz, POSIXct_format = "%Y-%m-%d %H:%M:%OS"){
   
-  tmp_df <- .x %>% 
-    # pct_pp2 %>% # testing
-    # Convert differences to boolean based on a threshold (in seconds)
-    dplyr::mutate(
-      binary_vals = (abs((round(!!sym(col_name), 2))) <= threshold)
-    ) %>% 
-    dplyr::select(`beam breaker : lead`, `beam breaker : rear`, !!sym(col_name), binary_vals) 
+  # Get the current global options
+  orig_opts <- options()
   
-  # Find indices of entrances for lead beam breaker, or indices of exits for the rear beam breaker 
-  e1 <- which(tmp_df$binary_vals)
-  # head(e1)
-  # length(e1)  
+  # Set the number of digits for visualization. Under the hood there is full precision, but this helps for visual confirmation of decimal seconds
+  options("digits.secs" = 6)
   
-  # Find indices of entrances for rear beam breaker, or indices of exits for the lead beam breaker
-  # Make sure to add 1
-  e2 <- e1 + 1
-  # head(e2)
-  
-  # Now use these indices to filter the data frame for entrances or exits
-  if(type == "entrance"){
-    
-    res_df <- data.frame(
-      lead_bb_timestamp = tmp_df %>% 
-        slice(e1) %>% 
-        pull(`beam breaker : lead`),
-      rear_bb_timestamp = tmp_df %>% 
-        slice(e2) %>% 
-        pull(`beam breaker : rear`)
-    ) 
-    # Double-checking. No rounded absolute differences in timestamps greater than 0, looks good!
-    # %>% 
-    #   dplyr::mutate(
-    #     direction = paste(type, seq(1, nrow(.), ), sep = "-")
-    #   ) %>% dplyr::mutate(
-    #   # Check entrances
-    #   diff = abs(round(as.numeric(lead_bb_timestamp - rear_bb_timestamp), 2))
-    # ) %>%
-    #   dplyr::filter(
-    #     diff > 1
-    #   )
-    
-    # head(res_df)
-    
-  } else if(type == "exit"){
-    
-    res_df <- data.frame(
-      lead_bb_timestamp = tmp_df %>% 
-        slice(e2) %>% 
-        pull(`beam breaker : lead`),
-      rear_bb_timestamp = tmp_df %>% 
-        slice(e1) %>% 
-        pull(`beam breaker : rear`)
-    )  
-    # Double-checking. No rounded absolute differences in timestamps greater than 0, looks good!
-    # %>% dplyr::mutate(
-    #   # Check exits
-    #   diff = abs(round(as.numeric(rear_bb_timestamp - lead_bb_timestamp), 2))
-    # ) %>%
-    #   dplyr::filter(
-    #     diff > 1
-    #   )
-    
-    # head(res_df)
-    
+  # Check that the temporal thresholds is numeric
+  if(!is.numeric(threshold)){
+    stop('The temporal threshold needs to be numeric (in seconds)')
   }
   
-  return(
-    res_df %>% 
-      dplyr::mutate(
-        unique_beamBreak_event = paste(type, seq(1, nrow(.), ), sep = "-")
+  # Create the directory for saving the labeled data files (if it doesn't exist)
+  if(!dir.exists(file.path(path, out_dir))){
+    dir.create(file.path(path, out_dir))
+  }
+  
+  # Read in the pre-processed beam breaker data
+  preproc_data <- read.csv(file.path(path, data_dir, "pre_processed_data_IRBB.csv")) %>% 
+    # Make sure that the timestamps are in the right format
+    dplyr::mutate(
+      timestamp_ms = as.POSIXct(format(as.POSIXct(timestamp_ms, tz = "America/New York"), "%Y-%m-%d %H:%M:%OS6"))
+    ) %>% 
+    # Drop columns that aren't needed here
+    dplyr::select(-c("thin_threshold_s", "data_stage", "date_pre_processed"))
+  
+  # Check that the raw data is a data frame
+  if(!is.data.frame(preproc_data)){
+    stop('The pre-processed data needs to be a data frame')
+  }
+  
+  # Ensure the timestamps are ordered, then calculate the time lags between the two beam breaker pairs. Here this is done using the leading differences between the beam breaker pairs to identify possible entrances and exits, respectively
+  preproc_data2 <- preproc_data %>% 
+    dplyr::arrange(timestamp_ms, desc = FALSE) %>%
+    # Add unique row IDs to facilitate widening the data frame
+    rowid_to_column() %>% 
+    pivot_wider(
+      names_from = !!sym(sensor_id_col),
+      values_from = !!sym(timestamps_col)
+    ) 
+  
+  diffs_df <- preproc_data2 %>% 
+    dplyr::select(`Outer Beam Breaker`, `Inner Beam Breaker`) %>% 
+    # The lead() call moves the timestamps for the given column one row index up, so that the difference calculation can be performed with the timestamps for the other column
+    dplyr::mutate(
+      # Here negative differences mean the outer pair triggered first
+      outer_inner_diffs = `Outer Beam Breaker` - lead(`Inner Beam Breaker`, default = first(`Inner Beam Breaker`)),
+      # Here negative differences mean the inner pair triggered first
+      inner_outer_diffs = `Inner Beam Breaker` - lead(`Outer Beam Breaker`, default = first(`Outer Beam Breaker`))
+    ) %>% 
+    # Convert these differences to boolean based on the given threshold (in seconds)
+    dplyr::mutate(
+      binary_outer_inner_diffs = (abs((round(outer_inner_diffs, 2))) <= threshold),
+      binary_inner_outer_diffs = (abs((round(inner_outer_diffs, 2))) <= threshold)
+    ) 
+  
+  # Then make a data frame with the timestamps of the entrances and exits identified using the given temporal threshold
+  
+  # Find indices of entrances for outer beam breaker timestamps, or indices of exits for the inner beam breaker timestamps
+  e1_ent <- which(diffs_df$binary_outer_inner_diffs)
+  e1_exi <- which(diffs_df$binary_inner_outer_diffs)
+  
+  # Find indices of entrances for inner beam breaker timestamps, or indices of exits for the outer beam breaker timestamps by adding 1 to the indices above
+  e2_ent <- e1_ent + 1
+  e2_exi <- e1_exi + 1
+  
+  # Use these indices to filter the original pre-processed data frame so that the outer and inner beam breaker timestamps for entrances or exits are placed in the same row
+  ee_df <- data.frame(
+    outer_beamBreaker_timestamp = preproc_data2 %>% 
+      slice(e1_ent) %>% 
+      pull(`Outer Beam Breaker`),
+    inner_beamBreaker_timestamp = preproc_data2 %>% 
+      slice(e2_ent) %>% 
+      pull(`Inner Beam Breaker`),
+    type = "entrance"
+  ) %>% 
+    bind_rows(
+      exi_df <- data.frame(
+        outer_beamBreaker_timestamp = preproc_data2 %>% 
+          slice(e2_exi) %>% 
+          pull(`Outer Beam Breaker`),
+        inner_beamBreaker_timestamp = preproc_data2 %>% 
+          slice(e1_exi) %>% 
+          pull(`Inner Beam Breaker`),
+        type = "exit"
       )
-  )
+    ) %>%
+    dplyr::arrange(outer_beamBreaker_timestamp, desc = FALSE) %>% 
+    rowid_to_column() %>% 
+    dplyr::rename(
+      `unique_beamBreaker_event` = rowid
+    ) %>% 
+    dplyr::mutate(
+      data_stage = "labeling_events",
+      temporal_threshold_s = threshold,
+      date_labeled = paste(Sys.Date(), Sys.time(), sep = " ")
+    ) %>% 
+    # Add back the original metadata
+    dplyr::inner_join(
+      preproc_data %>%
+        dplyr::select(-c("sensor_id")),
+      by = c("outer_beamBreaker_timestamp" = "timestamp_ms")
+    ) %>%
+    dplyr::select(data_type, chamber_id, year, month, day, outer_beamBreaker_timestamp, inner_beamBreaker_timestamp, type, unique_beamBreaker_event, data_stage, temporal_threshold_s, date_labeled)
+  
+  # Save the labeled data
+  write.csv(ee_df, file.path(path, out_dir, "labeled_beamBreaker_data.csv"), row.names = FALSE)
+  
+  # Reset the current global options
+  options(orig_opts)
   
 }
-
-glimpse(pct_pp2)
-
-# Get the beam breaker entrances 
-irbb_entrances_exits <- pct_pp2 %>% 
-  # Make a fake grouping column to place all rows into the same group for map_dfr works
-  dplyr::mutate(
-    grping = 1
-  ) %>% 
-  group_split(grping) %>%
-  map_dfr(
-    ~ label_beamBreaker_events(.x, col_name = "lead_rear_diffs", type = "entrance", threshold = 3)
-  ) %>% 
-  bind_rows(
-    pct_pp2 %>% 
-      # Make a fake grouping column to place all rows into the same group for map_dfr works
-      dplyr::mutate(
-        grping = 1
-      ) %>% 
-      group_split(grping) %>%
-      map_dfr(
-        ~ label_beamBreaker_events(.x, col_name = "rear_lead_diffs", type = "exit", threshold = 3)
-      )
-  ) %>% 
-  # Make a new column for type
-  # Also make a new column for the differences to triple-check
-  dplyr::mutate(
-    direction = gsub("-([0-9]+)", "", unique_beamBreak_event),
-    diff = as.numeric(lead_bb_timestamp - rear_bb_timestamp)
-  )
-
-glimpse(irbb_entrances_exits)
-
-# Looks great. 2022-03-31 18:23:51 coded as an entrance, and is not also coded as an exit
-irbb_entrances_exits %>% 
-  dplyr::mutate(
-    month = month(lead_bb_timestamp),
-    day = day(lead_bb_timestamp)
-  ) %>% 
-  dplyr::filter(month == "3", day == "31") %>%
-  dplyr::arrange(lead_bb_timestamp, rear_bb_timestamp, desc = FALSE) %>% 
-  View()
-
-# Checking. How many entrances and exits detected?
-irbb_entrances_exits %>% 
-  group_by(direction) %>% 
-  dplyr::summarise(
-    n = n()
-  )
-
-# Do all entrances have a negative difference in timestamps, and exits positive? # Yes, looks good
-irbb_entrances_exits %>% 
-  group_by(direction) %>% 
-  dplyr::summarise(
-    min_dff = min(diff),
-    max_diff = max(diff)
-  )
-
-# Write these out
-irbb_entrances_exits %>% 
