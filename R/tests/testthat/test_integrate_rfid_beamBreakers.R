@@ -1,5 +1,7 @@
-l_th <- 1
-u_th <- 3
+library(tidyverse)
+
+l_th <- 0
+u_th <- 5
 rfid_file_nm <- "pre_processed_data_RFID.csv"
 irbb_file_nm <- "labeled_beamBreaker_data.csv"
 sensor_id_col <- "sensor_id"
@@ -9,6 +11,7 @@ outer_irbb_col <- "outer_beamBreaker_timestamp"
 inner_irbb_col <- "inner_beamBreaker_timestamp"
 irbb_event_col <- "type"
 irbb_unique_col <- "unique_beamBreaker_event"
+method <- "temporal"
 path <- "/media/gsvidaurre/Anodorhynchus/Data_Testing/Box_02_31Dec2022/Data"
 data_dir <- "pre_processed"
 out_dir <- "integrated"
