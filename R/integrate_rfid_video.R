@@ -99,7 +99,7 @@ integrate_rfid_video <- function(rfid_file_nm, video_file_nm, l_th, u_th, p_th, 
     ) %>% 
     dplyr::select(names(rfid_df_tmp$data[[1]]))
   
-  # Get the sensor ID value for the RFID data, which will be a column name below
+  # Get the sensor ID value for the video data, which will be a column name below
   video_col <- preproc_video2 %>% 
     pull(sensor_id) %>% 
     unique()
@@ -133,6 +133,10 @@ integrate_rfid_video <- function(rfid_file_nm, video_file_nm, l_th, u_th, p_th, 
           # Calculate the differences between the relevant pairs of timestamps: RFID compared to each video event
           # The lags are calculated per group in the grouped data frame
           dplyr::mutate(
+            
+            # For the leading calculations, negative differences mean that the camera triggered first, while positive differences mean that the inner beam breaker triggered first. For the lagging calculations, negative differences mean that the inner beam breaker triggered first, while positive differences mean that the camera triggered first...TKTK need to check all other functions for this...
+            
+            
             # Here negative differences mean the RFID antenna triggered first
             rfid_pre_video_diffs = round(as.numeric(lagging_RFID - !!sym(video_col) ), 2),
             # Here positive differences mean the camera triggered first
@@ -144,6 +148,7 @@ integrate_rfid_video <- function(rfid_file_nm, video_file_nm, l_th, u_th, p_th, 
               rfid_pre_video_diffs <= -l_th & 
                 rfid_pre_video_diffs >= -u_th
             ),
+            # TKTK need to update to between u_th and video_rec_dur
             binary_vals_post = (
               rfid_post_video_diffs >= 0 & 
                 rfid_post_video_diffs <= p_th
@@ -151,6 +156,8 @@ integrate_rfid_video <- function(rfid_file_nm, video_file_nm, l_th, u_th, p_th, 
           )
       )
     )
+  
+  # TKTK need to add sign method and method option...
   
   # Do more mapping to perform the integration per PIT tag depending on the given temporal thresholds
   integr8d_df <- lags_grpd %>% 
