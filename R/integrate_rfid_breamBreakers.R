@@ -23,26 +23,6 @@
 #' 
 #' @return A .csv file with the metadata columns from the original pre-processed data used as input, as well as columns indicating each of the timestamps of the RFID antenna, the lead and rear beam breaker pairs, a unique label for the given event (e.g. entrance or exit), a unique numeric identifier for the given event, and information about the given data processing stage. Each row in the .csv file is an RFID detection that was integrated with a labeled event across the outer and inner beam breaker pairs. Information about the temporal thresholds used for the integration and the date that the data was integrated is also contained in this spreadsheet.
 
-library(tidyverse)
-
-l_th <- 0
-u_th <- 2
-rfid_file_nm <- "pre_processed_data_RFID.csv"
-irbb_file_nm <- "labeled_beamBreaker_data.csv"
-sensor_id_col <- "sensor_id"
-timestamps_col <- "timestamp_ms"
-PIT_tag_col <- "PIT_tag_ID"
-outer_irbb_col <- "outer_beamBreaker_timestamp"
-inner_irbb_col <- "inner_beamBreaker_timestamp"
-irbb_event_col <- "type"
-irbb_unique_col <- "unique_beamBreaker_event"
-method <- "sign"
-path <- "/media/gsvidaurre/Anodorhynchus/Data_Testing/Box_02_31Dec2022/Data"
-data_dir <- "pre_processed"
-out_dir <- "integrated"
-tz <- "America/New York"
-POSIXct_format <- "%Y-%m-%d %H:%M:%OS"
-
 integrate_rfid_beamBreakers <- function(rfid_file_nm, irbb_file_nm, method, l_th = NULL, u_th = NULL, sensor_id_col, timestamps_col, PIT_tag_col, outer_irbb_col, inner_irbb_col, irbb_event_col, irbb_unique_col, path, data_dir, out_dir, tz, POSIXct_format = "%Y-%m-%d %H:%M:%OS"){
   
   # Get the current global options
@@ -107,7 +87,6 @@ integrate_rfid_beamBreakers <- function(rfid_file_nm, irbb_file_nm, method, l_th
     unique()
   
   # Lengthen the IRBB data frame. Make sure this has the same columns in the same order as the RFID data for the row binding and calculations below
-  # This code is set up to match RFID detections to either the outer or inner beam breaker timestamp for a given entrance or exit event. Consider an additional option that is more strict, in which the RFID timestamp must be matched to both the outer and inner beam breaker timestamps for any given entrance or exit event
   irbb_df_tmp <- labeled_irbb %>% 
     pivot_longer(
       cols = c(all_of(outer_irbb_col), all_of(inner_irbb_col)),
@@ -148,6 +127,9 @@ integrate_rfid_beamBreakers <- function(rfid_file_nm, irbb_file_nm, method, l_th
           # Calculate the differences between the relevant pairs of timestamps: RFID compared to each beam breaker to find entrances and exits
           # The lags are calculated per group in the grouped data frame
           dplyr::mutate(
+            
+            # For the leading calculations, negative differences mean that the camera triggered first, while positive differences mean that the inner beam breaker triggered first. For the lagging calculations, negative differences mean that the inner beam breaker triggered first, while positive differences mean that the camera triggered first...TKTK need to check all other functions for this...
+            
             # For both the lagging and leading calculations, negative differences mean that the RFID antenna triggered first, while positive differences mean that one of the beam breaker pairs triggered first
             outer_rfid_lag_diffs = round(as.numeric(lagging_RFID - !!sym(outer_irbb_col)), 2),
             inner_rfid_lag_diffs = round(as.numeric(lagging_RFID - !!sym(inner_irbb_col)), 2),
@@ -192,6 +174,7 @@ integrate_rfid_beamBreakers <- function(rfid_file_nm, irbb_file_nm, method, l_th
             )
           ) %>% 
           # Drop all rows with NA values in these binary columns
+          # TKTK this may be dropping too many
           dplyr::filter(
             !is.na(binary_lead_outer_ent) &
               !is.na(binary_lead_inner_ent) &
@@ -220,6 +203,7 @@ integrate_rfid_beamBreakers <- function(rfid_file_nm, irbb_file_nm, method, l_th
     conditnal_lag_ent <- "binary_lag_outer_ent & binary_lag_inner_ent"
     conditnal_lag_exi <- "binary_lag_outer_exi & binary_lag_inner_exi"
     
+    # TKTK this directionality of the conditional may need to be updated...
   } else if(method == "sign"){
     
     # As above:
@@ -255,7 +239,7 @@ integrate_rfid_beamBreakers <- function(rfid_file_nm, irbb_file_nm, method, l_th
         ) %>% 
           # Filter for entrances among the labeled beam breaker events 
           dplyr::filter(
-            type == "entrance"
+            !!sym(irbb_event_col) == "entrance"
           ) %>% 
           # Then filter for RFID detections that match these beam breaker events
           dplyr::filter(
@@ -274,7 +258,7 @@ integrate_rfid_beamBreakers <- function(rfid_file_nm, irbb_file_nm, method, l_th
               ) %>%
               # Filter for entrances among the labeled beam breaker events 
               dplyr::filter(
-                type == "entrance"
+                !!sym(irbb_event_col) == "entrance"
               ) %>% 
               # Then filter for RFID detections that match these beam breaker events
               dplyr::filter(
@@ -293,7 +277,7 @@ integrate_rfid_beamBreakers <- function(rfid_file_nm, irbb_file_nm, method, l_th
               ) %>%
               # Filter for exits among the labeled beam breaker events 
               dplyr::filter(
-                type == "exit"
+                !!sym(irbb_event_col) == "exit"
               ) %>% 
               # Then filter for RFID detections that match these beam breaker events
               dplyr::filter(
@@ -312,7 +296,7 @@ integrate_rfid_beamBreakers <- function(rfid_file_nm, irbb_file_nm, method, l_th
               ) %>%
               # Filter for exits among the labeled beam breaker events 
               dplyr::filter(
-                type == "exit"
+                !!sym(irbb_event_col) == "exit"
               ) %>% 
               # Then filter for RFID detections that match these beam breaker events
               dplyr::filter(
@@ -327,7 +311,7 @@ integrate_rfid_beamBreakers <- function(rfid_file_nm, irbb_file_nm, method, l_th
     ungroup() %>% 
     # Make sure to add metadata columns for this integration step
     dplyr::mutate(
-      # strict_match = ifelse(strict_match, "yes", "no"),
+      integration_method = method,
       data_stage = "integration",
       lower_threshold_s = l_th,
       upper_threshold_s = u_th,
@@ -342,10 +326,9 @@ integrate_rfid_beamBreakers <- function(rfid_file_nm, irbb_file_nm, method, l_th
         dplyr::select(-c("data_type")),
       by = c(all_of(outer_irbb_col), all_of(inner_irbb_col))
     ) %>%
-    dplyr::select(chamber_id, year, month, day, all_of(rfid_col), all_of(outer_irbb_col), all_of(inner_irbb_col), all_of(PIT_tag_col), all_of(irbb_event_col), all_of(irbb_unique_col), outer_rfid_diffs, inner_rfid_diffs, assignmnt_type, data_stage, lower_threshold_s, upper_threshold_s, date_integrated) %>% 
+    dplyr::select(chamber_id, year, month, day, all_of(rfid_col), all_of(outer_irbb_col), all_of(inner_irbb_col), all_of(PIT_tag_col), all_of(irbb_event_col), all_of(irbb_unique_col), outer_rfid_diffs, inner_rfid_diffs, assignmnt_type, integration_method, data_stage, lower_threshold_s, upper_threshold_s, date_integrated) %>% 
     dplyr::arrange(!!sym(rfid_col), desc = FALSE)
   
-  # Save the pre-processed data for each sensor in the given setup
   write.csv(integr8d_df, file.path(path, out_dir, "integrated_rfid_beamBreaker_data.csv"), row.names = FALSE)
   
   # Reset the current global options
