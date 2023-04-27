@@ -20,6 +20,7 @@
 #' @return A .csv file with the metadata columns from the original pre-processed data used as input, as well as columns indicating each of the timestamps of the RFID antenna, the video recording events, and information about the given data processing stage. Each row in the .csv file is an RFID detection that was integrated with a video recording event. Information about the temporal thresholds used for the integration and the date that the data was integrated is also contained in this spreadsheet.
 #' 
 
+# TKTK see the video_rec_dur updates that should be made here....and reconcile this logic with the duplicates search + filter at the very end
 integrate_rfid_video <- function(rfid_file_nm, video_file_nm, l_th, u_th, p_th, sensor_id_col, timestamps_col, PIT_tag_col, path, data_dir, out_dir, tz, POSIXct_format = "%Y-%m-%d %H:%M:%OS"){
   
   # Get the current global options
@@ -157,6 +158,8 @@ integrate_rfid_video <- function(rfid_file_nm, video_file_nm, l_th, u_th, p_th, 
       )
     )
   
+  # TKTK update to add dropping NA filter?
+  
   # TKTK need to add sign method and method option...
   
   # Do more mapping to perform the integration per PIT tag depending on the given temporal thresholds
@@ -218,6 +221,8 @@ integrate_rfid_video <- function(rfid_file_nm, video_file_nm, l_th, u_th, p_th, 
     ) %>% 
     dplyr::select("chamber_id", "year", "month", "day", rfid_col, video_col, PIT_tag_col, "rfid_video_diffs", "type", "data_stage", "lower_preVideo_threshold_s", "upper_preVideo_threshold_s", "postVideo_threshold_s", "date_integrated") %>% 
     dplyr::arrange(!!sym(rfid_col), desc = FALSE)
+  
+  # TKTK consider this logic carefully, see how I handled this in the integrate_beambreaker_video function
   
   # There may be duplicated timestamps if RFID detections were assigned to pre and post video recording events. Given the way the lags were calculated, it isn't possible to find these duplicates using the columns of binary values. Find these duplicates and retain only the pre-video recording event
   dup_inds <- which(duplicated(integr8d_df$RFID))
