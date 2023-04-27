@@ -24,26 +24,6 @@
 #' @return A .csv file with the metadata columns from the original pre-processed data used as input, as well as columns indicating each of the timestamps of the lead and rear beam breaker pairs, the timestamps of the video recording events, a unique label for the given event (e.g. entrance or exit), a unique numeric identifier for the given event, and information about the given data processing stage. Each row in the .csv file is a labeled event across the outer and inner beam breaker pairs that was integrated with video recording events. Information about the temporal thresholds used for the integration and the date that the data was integrated is also contained in this spreadsheet.
 #' 
 
-library(tidyverse)
-
-l_th <- 0
-u_th <- 5
-video_rec_dur <- 9
-video_file_nm <- "pre_processed_data_Video.csv"
-irbb_file_nm <- "integrated_beamBreaker_data.csv"
-sensor_id_col <- "sensor_id"
-timestamps_col <- "timestamp_ms"
-outer_irbb_col <- "Outer_beam_breaker"
-inner_irbb_col <- "Inner_beam_breaker"
-irbb_event_col <- "direction_inferred"
-irbb_unique_col <- "unique_entranceExit"
-method <- "sign"
-path <- "/media/gsvidaurre/Anodorhynchus/Data_Testing/Box_02_31Dec2022/Data"
-data_dir <- "pre_processed"
-out_dir <- "integrated"
-tz <- "America/New York"
-POSIXct_format <- "%Y-%m-%d %H:%M:%OS"
-
 integrate_beamBreakers_video <- function(irbb_file_nm, video_file_nm, method, l_th = NULL, u_th = NULL, video_rec_dur = NULL, sensor_id_col, timestamps_col, PIT_tag_col, outer_irbb_col, inner_irbb_col, irbb_event_col, irbb_unique_col, path, data_dir, out_dir, tz, POSIXct_format = "%Y-%m-%d %H:%M:%OS"){
   
   # Get the current global options
@@ -222,14 +202,15 @@ integrate_beamBreakers_video <- function(irbb_file_nm, video_file_nm, method, l_
     
     # Then catch inner beam breaker timestamps that happened beyond the upper temporal threshold but still within the duration of video recording. Looking for lead and lag positive differences, since these are events in which the camera triggered first
     
-    conditnal_lead_ent <- "inner_video_lead_diffs <= 0"
-    conditnal_lead_exi <- "inner_video_lead_diffs > 0"
+    conditnal_lead_ent <- "inner_video_lead_diffs <= 0 & !is.na(inner_video_lead_diffs)"
+    conditnal_lead_exi <- "inner_video_lead_diffs > 0 & !is.na(inner_video_lead_diffs)"
     
-    conditnal_lag_ent <- "inner_video_lag_diffs <= 0"
-    conditnal_lag_exi <- "inner_video_lag_diffs > 0"
+    conditnal_lag_ent <- "inner_video_lag_diffs <= 0 & !is.na(inner_video_lag_diffs)"
+    conditnal_lag_exi <- "inner_video_lag_diffs > 0 & !is.na(inner_video_lag_diffs)"
     
-    conditnal_lead_withn <- "binary_lead_inner_withinVideo > 0"
-    conditnal_lag_withn <- "binary_lag_inner_withinVideo > 0"
+    # TKTK this will lead to a LOT of assignments...consider dropping this type of matching for the sign method entirely
+    conditnal_lead_withn <- "inner_video_lead_diffs > 0 & !is.na(inner_video_lead_diffs)"
+    conditnal_lag_withn <- "inner_video_lag_diffs > 0 & !is.na(inner_video_lag_diffs)"
     
   }
   
