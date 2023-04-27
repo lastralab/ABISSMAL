@@ -3,7 +3,7 @@
 #' 
 #' @param irbb_file_nm A character string. This should be the name of the file that contains all of the pre-processed and labeled beam breaker detections. Each row is a unique detection event. This spreadsheet must contain all the columns specified for the beam breaker data in the subsequent arguments
 #' @param video_file_nm A character string. This should be the name of the file that contains all of the pre-processed video detections. Each row is a unique detection event. This data frame must contain all the columns specified for the video data in the subsequent arguments
-#' @param method A character string. This argument should be set to "temporal" or "sign", in order to integrate beam breaker and video detections using temporal differences between timestamps that fall within the bounds of lower and upper temporal thresholds, or instead to use the sign of differences between timestamps, respectively.
+#' @param method A character string. This argument should be set to "temporal" or "sign", in order to integrate beam breaker and video detections using temporal differences between timestamps that fall within the bounds of lower and upper temporal thresholds, or instead to use the sign of differences between timestamps, respectively. See `Details` for more information on expected outcomes by either method
 #' @param l_th A numeric argument. This represents a lower or minimum temporal threshold in seconds to identify beam breaker and video events that are close enough together for integration. The default is NULL, but this must be a numeric value when `method` is set to "temporal". This lower temporal threshold is used to infer beam breaker detections and video recording detections that represented the original set of movements that triggered both sensors
 #' @param u_th A numeric argument. This represents an upper or maximum temporal threshold in seconds to identify beam breaker and video events that are close enough together for integration. The default is NULL, but this must be a numeric value when `method` is set to "temporal". This lower temporal threshold is used to infer beam breaker detections and video recording detections that represented the original set of movements that triggered both sensors.
 #' @param video_rec_dur A numeric argument. This represents the duration of video recording (post-motion detection) in seconds. This argument, along with the upper temporal threshold above (u_th) is used to identify beam breaker events that occurred during video recording, but are inferred to not represent the original movements that triggered the movement sensors. This argument facilitates retaining beam breaker events that occurred during the span of video recording and therefore did not trigger a separate video recording event. The default is NULL, but this must be a numeric value when `method` is set to "temporal"
@@ -19,7 +19,7 @@
 #' @param tz A character string. This argument should contain the timezone used for converting timestamps to POSIXct format. For instance, "America/New York". See the base function `as.POSIXct` for more information.
 #' @param POSIXct_format A character string. This argument should contain the format used to converting timestamps to POSIXct format. The default is "%Y-%m-%d %H:%M:%OS" to return timestamps with milliseconds in decimal format. See the base function `as.POSIXct` for more information.
 #' 
-#' @details This beam breaker and video integration is a separate function because the way in which the sensors are set up to detect movement determines how the lag calculations and integration should be performed. In other words, it is difficult to make a general function to integrate data collected across any two types of sensors used in the tracking system. This function was written to integrate data across 2 pairs of beam breakers and 1 camera mounted around the entrance of a nest container that was designed for zebra finches. One beam breaker pair sits in front of an RFID antenna (outside of the container, the "outer" pair), and the other sits behind the RFID antenna (mounted for detections inside of the container, the "inner" pair). The camera records into the center of the nest container from above. This function integrates detections across these 2 sensor types regardless of whether or not these detections occurred during perching events captured by the RFID antenna (see `find_rfid_perching_events`). The reason for this is that some perching events may have started or ended as entrance or exit events, and it's important to retain those events at this stage. If it becomes important later to remove behavioral events that were associated with longer perching events, then this can be done by filtering out detections from the integrated dataset that overlap in time with perching events.
+#' @details This beam breaker and video integration is a separate function because the way in which the sensors are set up to detect movement determines how the lag calculations and integration should be performed. In other words, it is difficult to make a general function to integrate data collected across any two types of sensors used in the tracking system. This function was written to integrate data across 2 pairs of beam breakers and 1 camera mounted around the entrance of a nest container that was designed for zebra finches. This function integrates detections across these 2 sensor types regardless of whether or not these detections occurred during perching events captured by the RFID antenna (see `find_rfid_perching_events`). The reason for this is that some perching events may have started or ended as entrance or exit events, and it's important to retain those events at this stage. If it becomes important later to remove behavioral events that were associated with longer perching events, then this can be done by filtering out detections from the integrated dataset that overlap in time with perching events. Other things to note are that the assignment of beam breaker events to video events will lead to duplicated assignments when using the `temporal` method. This is the expected behavior, and most duplicates should arise from assigning beam breaker events to the remainder of the video recording duration after the "original" movement that triggered video recording (e.g. `post-motion_trigger` in the movement_inference column). When using the `sign` method, expect to see many more duplicated assignments. This method may be more useful for figuring out the distribution of temporal differences between events from both sensor types, which can then be used to inform decisions about temporal thresholds to use for the `temporal` method.
 #' 
 #' @return A .csv file with the metadata columns from the original pre-processed data used as input, as well as columns indicating each of the timestamps of the lead and rear beam breaker pairs, the timestamps of the video recording events, a unique label for the given event (e.g. entrance or exit), a unique numeric identifier for the given event, and information about the given data processing stage. Each row in the .csv file is a labeled event across the outer and inner beam breaker pairs that was integrated with video recording events. Information about the temporal thresholds used for the integration and the date that the data was integrated is also contained in this spreadsheet.
 #' 
@@ -30,13 +30,13 @@ l_th <- 0
 u_th <- 5
 video_rec_dur <- 9
 video_file_nm <- "pre_processed_data_Video.csv"
-irbb_file_nm <- "labeled_beamBreaker_data.csv"
+irbb_file_nm <- "integrated_beamBreaker_data.csv"
 sensor_id_col <- "sensor_id"
 timestamps_col <- "timestamp_ms"
-outer_irbb_col <- "outer_beamBreaker_timestamp"
-inner_irbb_col <- "inner_beamBreaker_timestamp"
-irbb_event_col <- "type"
-irbb_unique_col <- "unique_beamBreaker_event"
+outer_irbb_col <- "Outer_beam_breaker"
+inner_irbb_col <- "Inner_beam_breaker"
+irbb_event_col <- "direction_inferred"
+irbb_unique_col <- "unique_entranceExit"
 method <- "sign"
 path <- "/media/gsvidaurre/Anodorhynchus/Data_Testing/Box_02_31Dec2022/Data"
 data_dir <- "pre_processed"
@@ -61,7 +61,7 @@ integrate_beamBreakers_video <- function(irbb_file_nm, video_file_nm, method, l_
     stop('The pre-video recording upper temporal threshold needs to be numeric (in seconds)')
   }
   
-  if(grepl("temporal", method) & !is.numeric(p_th)){
+  if(grepl("temporal", method) & !is.numeric(video_rec_dur)){
     stop('The post-video recording temporal threshold needs to be numeric (in seconds)')
   }
   
@@ -71,7 +71,7 @@ integrate_beamBreakers_video <- function(irbb_file_nm, video_file_nm, method, l_
   }
   
   # Read in the pre-processed and labeled beam breaker data
-  labeled_irbb <- read.csv(file.path(path, data_dir, irbb_file_nm)) %>% 
+  labeled_irbb <- read.csv(file.path(path, out_dir, irbb_file_nm)) %>% 
     # Make sure that the timestamps are in the right format
     dplyr::mutate(
       !!outer_irbb_col := as.POSIXct(format(as.POSIXct(!!sym(outer_irbb_col), tz = "America/New York"), "%Y-%m-%d %H:%M:%OS6")),
@@ -123,7 +123,7 @@ integrate_beamBreakers_video <- function(irbb_file_nm, video_file_nm, method, l_
     unique()
   
   # Do the timestamp difference calculations
-  # Here I'm interested in aligning to the inner pair of beam breakers only, since the camera sits last/ in the sequence of sensors that should trigger for entrances/exits, and right after/before the inner pair of beam breakers
+  # Here I'm interested in aligning to the inner pair of beam breakers only, since the camera sits last/in the sequence of sensors that should trigger for entrances/exits, and right after/before the inner pair of beam breakers
   lags_df <- video_df_tmp %>% 
     bind_rows(irbb_df_tmp %>%
                 dplyr::filter(!!sym(sensor_id_col) == inner_irbb_col)) %>%
@@ -147,7 +147,8 @@ integrate_beamBreakers_video <- function(irbb_file_nm, video_file_nm, method, l_
     ) %>% 
     # Calculate the temporal differences between the relevant pairs of timestamps: Inner beam breaker timestamps compared to video to find entrances and exits
     dplyr::mutate(
-      # For the leading calculations, negative differences mean that the camera triggered first, while positive differences mean that the inner beam breaker triggered first. For the lagging calculations, negative differences mean that the inner beam breaker triggered first, while positive differences mean that the camera triggered first
+      # TKTK 26 April: For the leading calculations, negative differences mean that the camera triggered first, while positive differences mean that the inner beam breaker triggered first. For the lagging calculations, negative differences mean that the inner beam breaker triggered first, while positive differences mean that the camera triggered first
+      # TKTK 27 April: Not sure why this logic keeps changing..for the leading calculations, positive differences mean that camera triggered first, while negative differences mean that the beam breakers triggered first. For the lagging calculations, positive differences mean that the camera triggered first, and negative differences mean that the inner beam breaker triggered first
       inner_video_lead_diffs = round(as.numeric(leading_inner_irbb - !!sym(video_col)), 2),
       inner_video_lag_diffs = round(as.numeric(lagging_inner_irbb - !!sym(video_col)), 2),
       ## Here positive differences mean the camera triggered first
@@ -157,8 +158,8 @@ integrate_beamBreakers_video <- function(irbb_file_nm, video_file_nm, method, l_
     dplyr::mutate(
       # To search for entrances, look video detections that came within the given l_th or u_th AFTER an inner beam breaker timestamp. Set up these conditionals for both the lead and lag calculations
       binary_lead_inner_ent = (
-        # Video after, so positive lead differences
-        inner_video_lead_diffs >= l_th & inner_video_lead_diffs <= u_th
+        # Video after, so negative lead differences
+        inner_video_lead_diffs <= -l_th & inner_video_lead_diffs <= -u_th
       ),
       binary_lag_inner_ent = (
         # Video after, so negative lag differences
@@ -166,16 +167,16 @@ integrate_beamBreakers_video <- function(irbb_file_nm, video_file_nm, method, l_
       ),
       # Then to search for exits, look for video detections that came within the given l_th or u_th BEFORE an inner beam breaker timestamp. Again, set up these conditionals for both the lead and lag calculations
       binary_lead_inner_exi = (
-        # Video before, so negative lead differences
-        inner_video_lead_diffs <= -l_th & inner_video_lead_diffs >= -u_th
+        # Video before, so positive lead differences
+        inner_video_lead_diffs >= l_th & inner_video_lead_diffs <= u_th
       ),
       binary_lag_inner_exi = (
         # Video before, so positive lag differences
         inner_video_lag_diffs >= l_th & inner_video_lag_diffs <= u_th
       ),
-      # Then catch inner beam breaker timestamps that happened beyond the upper temporal threshold but still within the duration of video recording. Looking for lead negative differences and lag positive differences, since these are events in which the camera triggered first
+      # Then catch inner beam breaker timestamps that happened beyond the upper temporal threshold but still within the duration of video recording. Looking for lead and lag positive differences, since these are events in which the camera triggered first
       binary_lead_inner_withinVideo = (
-        inner_video_lead_diffs <= -u_th & inner_video_lead_diffs >= -video_rec_dur
+        inner_video_lead_diffs >= u_th & inner_video_lead_diffs <= video_rec_dur
       ),
       binary_lag_inner_withinVideo = (
         inner_video_lag_diffs >= u_th & inner_video_lag_diffs <= video_rec_dur
@@ -199,34 +200,35 @@ integrate_beamBreakers_video <- function(irbb_file_nm, video_file_nm, method, l_
   # There should no differences or few differences in the integrated datasets yielded between these methods
   if(method == "temporal"){
     
-    conditnal_lead_ent <- "binary_lead_inner_ent"
-    conditnal_lead_exi <- "binary_lead_inner_exi"
+    conditnal_lead_ent <- "binary_lead_inner_ent & !is.na(binary_lead_inner_ent)"
+    conditnal_lead_exi <- "binary_lead_inner_exi & !is.na(binary_lead_inner_exi)"
     
-    conditnal_lag_ent <- "binary_lag_inner_ent"
-    conditnal_lag_exi <- "binary_lag_inner_exi"
+    conditnal_lag_ent <- "binary_lag_inner_ent & !is.na(binary_lag_inner_ent)"
+    conditnal_lag_exi <- "binary_lag_inner_exi & !is.na(binary_lag_inner_exi)"
     
-    conditnal_lead_withn <- "binary_lead_inner_withinVideo"
-    conditnal_lag_withn <- "binary_lag_inner_withinVideo"
+    conditnal_lead_withn <- "binary_lead_inner_withinVideo & !is.na(binary_lead_inner_withinVideo)"
+    conditnal_lag_withn <- "binary_lag_inner_withinVideo & !is.na(binary_lag_inner_withinVideo)"
     
   } else if(method == "sign"){
     
     # As above:
     
-    # For the leading calculations, negative differences mean that the camera triggered first, while positive differences mean that the inner beam breaker triggered first. For the lagging calculations, negative differences mean that the inner beam breaker triggered first, while positive differences mean that the camera triggered first
+    # TKTK 26 April: For the leading calculations, negative differences mean that the camera triggered first, while positive differences mean that the inner beam breaker triggered first. For the lagging calculations, negative differences mean that the inner beam breaker triggered first, while positive differences mean that the camera triggered first
+    # TKTK 27 April: Not sure why this logic keeps changing..for the leading calculations, positive differences mean that camera triggered first, while negative differences mean that the beam breakers triggered first. For the lagging calculations, positive differences mean that the camera triggered first, and negative differences mean that the inner beam breaker triggered first
     
     # To search for entrances, look video detections that came within the given l_th or u_th AFTER an inner beam breaker timestamp. Set up these conditionals for both the lead and lag calculations
     
     # Then to search for exits, look for video detections that came within the given l_th or u_th BEFORE an inner beam breaker timestamp. Again, set up these conditionals for both the lead and lag calculations
     
-    # Then catch inner beam breaker timestamps that happened beyond the upper temporal threshold but still within the duration of video recording. Looking for lead negative differences and lag positive differences, since these are events in which the camera triggered first
+    # Then catch inner beam breaker timestamps that happened beyond the upper temporal threshold but still within the duration of video recording. Looking for lead and lag positive differences, since these are events in which the camera triggered first
     
-    conditnal_lead_ent <- "inner_video_lead_diffs > 0"
-    conditnal_lead_exi <- "inner_video_lead_diffs <= 0"
+    conditnal_lead_ent <- "inner_video_lead_diffs <= 0"
+    conditnal_lead_exi <- "inner_video_lead_diffs > 0"
     
     conditnal_lag_ent <- "inner_video_lag_diffs <= 0"
     conditnal_lag_exi <- "inner_video_lag_diffs > 0"
     
-    conditnal_lead_withn <- "binary_lead_inner_withinVideo <= 0"
+    conditnal_lead_withn <- "binary_lead_inner_withinVideo > 0"
     conditnal_lag_withn <- "binary_lag_inner_withinVideo > 0"
     
   }
@@ -255,7 +257,7 @@ integrate_beamBreakers_video <- function(irbb_file_nm, video_file_nm, method, l_
     dplyr::filter(
       !!rlang::parse_expr(conditnal_lead_ent)
     ) %>% 
-    dplyr::select(all_of(inner_irbb_col), all_of(video_col), inner_video_diffs, assignmnt_type, movement_inference) %>%
+    dplyr::select(all_of(inner_irbb_col), all_of(video_col), all_of(irbb_event_col), inner_video_diffs, assignmnt_type, movement_inference) %>%
     # Entrances, lag differences
     bind_rows(
       lags_df %>%
@@ -279,7 +281,7 @@ integrate_beamBreakers_video <- function(irbb_file_nm, video_file_nm, method, l_
         dplyr::filter(
           !!rlang::parse_expr(conditnal_lag_ent)
         ) %>%
-        dplyr::select(all_of(inner_irbb_col), all_of(video_col), inner_video_diffs, assignmnt_type, movement_inference)
+        dplyr::select(all_of(inner_irbb_col), all_of(video_col), all_of(irbb_event_col), inner_video_diffs, assignmnt_type, movement_inference)
     ) %>%
     # Exits, lead differences
     bind_rows(
@@ -304,7 +306,7 @@ integrate_beamBreakers_video <- function(irbb_file_nm, video_file_nm, method, l_
         dplyr::filter(
           !!rlang::parse_expr(conditnal_lead_exi)
         ) %>%
-        dplyr::select(all_of(inner_irbb_col), all_of(video_col), inner_video_diffs, assignmnt_type, movement_inference)
+        dplyr::select(all_of(inner_irbb_col), all_of(video_col), all_of(irbb_event_col), inner_video_diffs, assignmnt_type, movement_inference)
     ) %>%
     # Exits, lag differences
     bind_rows(
@@ -329,7 +331,7 @@ integrate_beamBreakers_video <- function(irbb_file_nm, video_file_nm, method, l_
         dplyr::filter(
           !!rlang::parse_expr(conditnal_lag_exi)
         ) %>%
-        dplyr::select(all_of(inner_irbb_col), all_of(video_col), inner_video_diffs, assignmnt_type, movement_inference)
+        dplyr::select(all_of(inner_irbb_col), all_of(video_col), all_of(irbb_event_col), inner_video_diffs, assignmnt_type, movement_inference)
     ) %>% 
     # Within video assignments, lead differences
     bind_rows(
@@ -350,7 +352,7 @@ integrate_beamBreakers_video <- function(irbb_file_nm, video_file_nm, method, l_
         dplyr::filter(
           !!rlang::parse_expr(conditnal_lead_withn)
         ) %>%
-        dplyr::select(all_of(inner_irbb_col), all_of(video_col), inner_video_diffs, assignmnt_type, movement_inference)
+        dplyr::select(all_of(inner_irbb_col), all_of(video_col), all_of(irbb_event_col), inner_video_diffs, assignmnt_type, movement_inference)
     ) %>%
     # Within video assignments, lag differences
     bind_rows(
@@ -371,7 +373,7 @@ integrate_beamBreakers_video <- function(irbb_file_nm, video_file_nm, method, l_
         dplyr::filter(
           !!rlang::parse_expr(conditnal_lead_withn)
         ) %>%
-        dplyr::select(all_of(inner_irbb_col), all_of(video_col), inner_video_diffs, assignmnt_type, movement_inference)
+        dplyr::select(all_of(inner_irbb_col), all_of(video_col), all_of(irbb_event_col), inner_video_diffs, assignmnt_type, movement_inference)
     ) %>% 
     # Make sure to add metadata columns for this integration step
     dplyr::mutate(
@@ -385,20 +387,13 @@ integrate_beamBreakers_video <- function(irbb_file_nm, video_file_nm, method, l_
     # Add back metadata about the beam breaker events and general metadata
     dplyr::inner_join(
       labeled_irbb %>%
-        dplyr::select(-c("data_type")),
+        dplyr::select(-c("data_type", all_of(irbb_event_col))),
       by = c(all_of(inner_irbb_col))
     ) %>%
     dplyr::select(chamber_id, year, month, day, all_of(outer_irbb_col), all_of(inner_irbb_col), all_of(video_col), all_of(irbb_event_col), all_of(irbb_unique_col), inner_video_diffs, assignmnt_type, movement_inference, integration_method, data_stage, lower_threshold_s, upper_threshold_s, video_recording_duration_s, date_integrated) %>% 
     dplyr::arrange(!!sym(inner_irbb_col), desc = FALSE)
   
-  # TKTK right now using the sign method leads to a whole bunch of duplicates, which is actually the expected behavior. Need to make a note of the use case for this particular method
-  # glimpse(integr8d_df)
-  
-  # View(integr8d_df)
-  
-  # unique(integr8d_df$movement_inference)
-  
-  write.csv(integr8d_df, file.path(path, out_dir, "integrated_rfid_beamBreaker_data.csv"), row.names = FALSE)
+  write.csv(integr8d_df, file.path(path, out_dir, "integrated_beamBreaker_video_data.csv"), row.names = FALSE)
   
   # Reset the current global options
   options(orig_opts)
