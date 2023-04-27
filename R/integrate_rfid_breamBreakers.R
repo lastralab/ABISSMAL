@@ -19,9 +19,11 @@
 #' @param tz A character string. This argument should contain the timezone used for converting timestamps to POSIXct format. For instance, "America/New York". See the base function `as.POSIXct` for more information.
 #' @param POSIXct_format A character string. This argument should contain the format used to converting timestamps to POSIXct format. The default is "%Y-%m-%d %H:%M:%OS" to return timestamps with milliseconds in decimal format. See the base function `as.POSIXct` for more information.
 #' 
-#' @details This RFID and beam breaker integration is a separate function because the way in which the sensors are set up to detect movement determines how the lag calculations and integration should be performed. In other words, it is difficult to make a general function to integrate data collected across any two types of sensors used in the tracking system. This function was written to integrate data across 1 RFID antenna and 2 pairs of beam breakers mounted around the entrance of a nest container that was designed for zebra finches. The RFID antenna sits in the middle of a circular entrance. One beam breaker pair sits in front of the RFID antenna (outside of the container, the "outer" pair), and the other sits behind the RFID antenna (mounted for detections inside of the container, the "inner" pair). This function integrates detections across these 2 sensor types regardless of whether or not these detections occurred during perching events captured by the RFID antenna (see `find_rfid_perching_events`). The reason for this is that some perching events may have started or ended as entrance or exit events, and it's important to retain those events at this stage. If it becomes important later to remove behavioral events that were associated with longer perching events, then this can be done by filtering out detections from the integrated dataset that overlap in time with perching events.
+#' @details This RFID and beam breaker integration is a separate function because the way in which the sensors are set up to detect movement determines how the lag calculations and integration should be performed. In other words, it is difficult to make a general function to integrate data collected across any two types of sensors used in the tracking system. This function was written to integrate data across 1 RFID antenna and the outer pair of beam breakers mounted around the entrance of a nest container that was designed for zebra finches. For nest container entrance events, the integration is done by finding RFID timestamps that occurred within the lower to upper thresholds after the outer beam breaker. For nest container exit events, the integration is done by finding RFID timestamps that occurred within the lower to upper thresholds before the outer beam breaker. This matching is less strict than trying to find sequences of events in which the outer beam breakers, RFID antenna, and inner beam breakers triggered in that exact order (given that the way in which birds arrive or perch in the entrance can lead to variation in this expected sequence). In other words, these events will not represent perfect sequences of outer beam breakers, then RFID, then inner beam breakers triggering, but rather, RFID detections that occurred within the expected thresholds and before or after an outer beam breaker event that was already matched to an inner beam breaker event.
+#' This function integrates detections across these 2 sensor types regardless of whether or not these detections occurred during perching events captured by the RFID antenna (see `find_rfid_perching_events`). The reason for this is that some perching events may have started or ended as entrance or exit events, and it's important to retain those events at this stage. If it becomes important later to remove behavioral events that were associated with longer perching events, then this can be done by filtering out detections from the integrated dataset that overlap in time with perching events.
 #' 
 #' @return A .csv file with the metadata columns from the original pre-processed data used as input, as well as columns indicating each of the timestamps of the RFID antenna, the lead and rear beam breaker pairs, a unique label for the given event (e.g. entrance or exit), a unique numeric identifier for the given event, and information about the given data processing stage. Each row in the .csv file is an RFID detection that was integrated with a labeled event across the outer and inner beam breaker pairs. Information about the temporal thresholds used for the integration and the date that the data was integrated is also contained in this spreadsheet.
+#' 
 
 integrate_rfid_beamBreakers <- function(rfid_file_nm, irbb_file_nm, method, l_th = NULL, u_th = NULL, sensor_id_col, timestamps_col, PIT_tag_col, outer_irbb_col, inner_irbb_col, irbb_event_col, irbb_unique_col, path, data_dir, out_dir, tz, POSIXct_format = "%Y-%m-%d %H:%M:%OS"){
   
@@ -55,7 +57,7 @@ integrate_rfid_beamBreakers <- function(rfid_file_nm, irbb_file_nm, method, l_th
     dplyr::select(-c("thin_threshold_s", "data_stage", "date_pre_processed"))
   
   # Read in the pre-processed and labeled beam breaker data
-  labeled_irbb <- read.csv(file.path(path, data_dir, irbb_file_nm)) %>% 
+  labeled_irbb <- read.csv(file.path(path, out_dir, irbb_file_nm)) %>% 
     # Make sure that the timestamps are in the right format
     dplyr::mutate(
       !!outer_irbb_col := as.POSIXct(format(as.POSIXct(!!sym(outer_irbb_col), tz = "America/New York"), "%Y-%m-%d %H:%M:%OS6")),
@@ -104,7 +106,9 @@ integrate_rfid_beamBreakers <- function(rfid_file_nm, irbb_file_nm, method, l_th
       # Here the mapping structure sets up running the following code for each group (PIT taq ID) in the RFID data frame
       lags = map(
         .x = data,
-        .y = irbb_df_tmp,
+        # Here I'm interested in aligning to the outer pair of beam breakers only
+        .y = irbb_df_tmp %>%
+          dplyr::filter(!!sym(sensor_id_col) == outer_irbb_col),
         .f = ~ bind_rows(.x, .y) %>%
           as_tibble() %>%
           # Order timestamps within each data type
@@ -124,105 +128,81 @@ integrate_rfid_beamBreakers <- function(rfid_file_nm, irbb_file_nm, method, l_th
             leading_RFID = lead(!!sym(rfid_col), default = first(!!sym(rfid_col))),
             lagging_RFID = lag(!!sym(rfid_col), default = first(!!sym(rfid_col)))
           ) %>% 
-          # Calculate the differences between the relevant pairs of timestamps: RFID compared to each beam breaker to find entrances and exits
+          # Calculate the differences between the relevant pairs of timestamps: RFID compared to the outer beam breaker pair to find entrances and exits
           # The lags are calculated per group in the grouped data frame
           dplyr::mutate(
-            
-            # For the leading calculations, negative differences mean that the camera triggered first, while positive differences mean that the inner beam breaker triggered first. For the lagging calculations, negative differences mean that the inner beam breaker triggered first, while positive differences mean that the camera triggered first...TKTK need to check all other functions for this...
-            
-            # For both the lagging and leading calculations, negative differences mean that the RFID antenna triggered first, while positive differences mean that one of the beam breaker pairs triggered first
-            outer_rfid_lag_diffs = round(as.numeric(lagging_RFID - !!sym(outer_irbb_col)), 2),
-            inner_rfid_lag_diffs = round(as.numeric(lagging_RFID - !!sym(inner_irbb_col)), 2),
+            # For both the lagging and leading calculations, negative differences mean that the RFID antenna triggered first, while positive differences mean that outer beam breaker pair triggered first
             outer_rfid_lead_diffs = round(as.numeric(leading_RFID - !!sym(outer_irbb_col)), 2),
-            inner_rfid_lead_diffs = round(as.numeric(leading_RFID - !!sym(inner_irbb_col)), 2)
+            outer_rfid_lag_diffs = round(as.numeric(lagging_RFID - !!sym(outer_irbb_col)), 2)
           ) %>%
           # Convert these differences to Boolean values based on a threshold (in seconds). Inverting these conditionals to match the negative differences that should indicate an entrance event
           dplyr::mutate(
-            # To search for entrances, look RFID detections that came within the given l_th or u_th AFTER an OUTER beam breaker timestamp and BEFORE the INNER beam breaker. Set up these conditionals for both the lead and lag calculations
+            # To search for entrances, look for RFID detections that came within the given l_th or u_th AFTER an outer beam breaker timestamp. Set up these conditionals for both the lead and lag calculations
             binary_lead_outer_ent = (
               # RFID after, so positive differences
               outer_rfid_lead_diffs >= l_th & outer_rfid_lead_diffs <= u_th
-            ),
-            binary_lead_inner_ent = (
-              # RFID before, so negative differences
-              inner_rfid_lead_diffs <= -l_th & inner_rfid_lead_diffs >= -u_th
             ),
             binary_lag_outer_ent = (
               # RFID after, so positive differences
               outer_rfid_lag_diffs >= l_th & outer_rfid_lag_diffs <= u_th
             ),
-            binary_lag_inner_ent = (
-              # RFID before, so negative differences
-              inner_rfid_lag_diffs <= -l_th & inner_rfid_lag_diffs >= -u_th
-            ),
-            # Then to search for exits, look for RFID detections that came within the given l_th or u_th AFTER an INNER beam breaker timestamp, and BEFORE the OUTER beam breaker. Again, set up these conditionals for both the lead and lag calculations
+            # Then to search for exits, look for RFID detections that came within the given l_th or u_th BEFORE an outer beam breaker timestamp. Again, set up these conditionals for both the lead and lag calculations
             binary_lead_outer_exi = (
               # RFID before, so negative differences
               outer_rfid_lead_diffs <= -l_th & outer_rfid_lead_diffs >= -u_th
             ),
-            binary_lead_inner_exi = (
-              # RFID after, so positive differences
-              inner_rfid_lead_diffs >= l_th & inner_rfid_lead_diffs <= u_th
-            ),
             binary_lag_outer_exi = (
               # RFID before, so negative differences
               outer_rfid_lag_diffs <= -l_th & outer_rfid_lag_diffs >= -u_th
-            ),
-            binary_lag_inner_exi = (
-              # RFID after, so positive differences
-              inner_rfid_lag_diffs >= l_th & inner_rfid_lag_diffs <= u_th
             )
           ) %>% 
-          # Drop all rows with NA values in these binary columns
-          # TKTK this may be dropping too many
+          # Drop all rows with NA values across these binary columns
           dplyr::filter(
-            !is.na(binary_lead_outer_ent) &
-              !is.na(binary_lead_inner_ent) &
-              !is.na(binary_lag_outer_ent) &
-              !is.na(binary_lag_inner_ent) &
-              !is.na(binary_lead_outer_exi) &
-              !is.na(binary_lead_inner_exi) &
-              !is.na(binary_lag_outer_exi) &
-              !is.na(binary_lag_inner_exi)
+            !dplyr::if_all(
+              c(
+                binary_lead_outer_ent,
+                binary_lag_outer_ent,
+                binary_lead_outer_exi,
+                binary_lag_outer_exi
+              ), 
+              is.na
+            )
           ) %>% 
           # Add back metadata about the beam breaker event labels
           dplyr::inner_join(
             labeled_irbb %>%
-              dplyr::select(all_of(outer_irbb_col), all_of(inner_irbb_col), type),
-            by = c(all_of(outer_irbb_col), all_of(inner_irbb_col))
+              dplyr::select(all_of(outer_irbb_col), all_of(irbb_event_col)),
+            by = c(all_of(outer_irbb_col))
           )
       )
     )
-
-  # There should no differences or few differences in the integrated datasets yielded between these methods
+  
   if(method == "temporal"){
     
-    conditnal_lead_ent <- "binary_lead_outer_ent & binary_lead_inner_ent"
-    conditnal_lead_exi <- "binary_lead_outer_exi & binary_lead_inner_exi"
+    conditnal_lead_ent <- "binary_lead_outer_ent & !is.na(binary_lead_outer_ent)"
+    conditnal_lead_exi <- "binary_lead_outer_exi & !is.na(binary_lead_outer_exi)"
     
-    conditnal_lag_ent <- "binary_lag_outer_ent & binary_lag_inner_ent"
-    conditnal_lag_exi <- "binary_lag_outer_exi & binary_lag_inner_exi"
-    
-    # TKTK this directionality of the conditional may need to be updated...
+    conditnal_lag_ent <- "binary_lag_outer_ent & !is.na(binary_lag_outer_ent)"
+    conditnal_lag_exi <- "binary_lag_outer_exi & !is.na(binary_lag_outer_exi)"
+
   } else if(method == "sign"){
     
     # As above:
     
-    # For both the lagging and leading calculations, negative differences mean that the RFID antenna triggered first, while positive differences mean that one of the beam breaker pairs triggered first
+    # For both the lagging and leading calculations, negative differences mean that the RFID antenna triggered first, while positive differences mean that outer beam breaker pair triggered first
     
-    # To search for entrances, look RFID detections that came within the given l_th or u_th AFTER an OUTER beam breaker timestamp and BEFORE the INNER beam breaker. Set up these conditionals for both the lead and lag calculations
+    # To search for entrances, look for RFID detections that came within the given l_th or u_th AFTER an outer beam breaker timestamp. Set up these conditionals for both the lead and lag calculations
     
-    # Then to search for exits, look for RFID detections that came within the given l_th or u_th AFTER an INNER beam breaker timestamp, and BEFORE the OUTER beam breaker. Again, set up these conditionals for both the lead and lag calculations
+    # Then to search for exits, look for RFID detections that came within the given l_th or u_th BEFORE an outer beam breaker timestamp. Again, set up these conditionals for both the lead and lag calculations
     
-    conditnal_lead_ent <- "outer_rfid_lead_diffs > 0 & inner_rfid_lead_diffs <= 0"
-    conditnal_lead_exi <- "outer_rfid_lead_diffs <= 0 & inner_rfid_lead_diffs > 0"
+    conditnal_lead_ent <- "outer_rfid_lead_diffs > 0 & !is.na(outer_rfid_lead_diffs)"
+    conditnal_lead_exi <- "outer_rfid_lead_diffs <= 0 & !is.na(outer_rfid_lead_diffs)"
     
-    conditnal_lag_ent <- "outer_rfid_lag_diffs > 0 & inner_rfid_lag_diffs <= 0"
-    conditnal_lag_exi <- "outer_rfid_lag_diffs <= 0 & inner_rfid_lag_diffs > 0"
+    conditnal_lag_ent <- "outer_rfid_lag_diffs > 0 & !is.na(outer_rfid_lag_diffs)"
+    conditnal_lag_exi <- "outer_rfid_lag_diffs <= 0 & !is.na(outer_rfid_lag_diffs)"
     
   }
   
-
   # Do more mapping to perform the integration depending on the given lower and upper temporal thresholds
   # This is done per PIT tag, and the integration is done separately for entrances and exits from each of the leading and lagging calculations
   integr8d_df <- lags_grpd %>% 
@@ -234,7 +214,6 @@ integrate_rfid_beamBreakers <- function(rfid_file_nm, irbb_file_nm, method, l_th
           .x,
           !!rfid_col := leading_RFID,
           outer_rfid_diffs = outer_rfid_lead_diffs,
-          inner_rfid_diffs = inner_rfid_lead_diffs,
           assignmnt_type = "lead"
         ) %>% 
           # Filter for entrances among the labeled beam breaker events 
@@ -245,7 +224,7 @@ integrate_rfid_beamBreakers <- function(rfid_file_nm, irbb_file_nm, method, l_th
           dplyr::filter(
             !!rlang::parse_expr(conditnal_lead_ent)
           ) %>% 
-          dplyr::select(all_of(outer_irbb_col), all_of(inner_irbb_col), all_of(rfid_col), outer_rfid_diffs, inner_rfid_diffs, assignmnt_type) 
+          dplyr::select(all_of(outer_irbb_col), all_of(rfid_col), outer_rfid_diffs, assignmnt_type) 
         %>%
           # Entrances, lag differences
           bind_rows(
@@ -253,7 +232,6 @@ integrate_rfid_beamBreakers <- function(rfid_file_nm, irbb_file_nm, method, l_th
               dplyr::mutate(
                 !!rfid_col := lagging_RFID,
                 outer_rfid_diffs = outer_rfid_lag_diffs,
-                inner_rfid_diffs = inner_rfid_lag_diffs,
                 assignmnt_type = "lag"
               ) %>%
               # Filter for entrances among the labeled beam breaker events 
@@ -264,7 +242,7 @@ integrate_rfid_beamBreakers <- function(rfid_file_nm, irbb_file_nm, method, l_th
               dplyr::filter(
                 !!rlang::parse_expr(conditnal_lag_ent)
               ) %>%
-              dplyr::select(all_of(outer_irbb_col), all_of(inner_irbb_col), all_of(rfid_col), outer_rfid_diffs, inner_rfid_diffs, assignmnt_type)
+              dplyr::select(all_of(outer_irbb_col), all_of(rfid_col), outer_rfid_diffs, assignmnt_type)
           ) %>%
           # Exits, lead differences
           bind_rows(
@@ -272,7 +250,6 @@ integrate_rfid_beamBreakers <- function(rfid_file_nm, irbb_file_nm, method, l_th
               dplyr::mutate(
                 !!rfid_col := leading_RFID,
                 outer_rfid_diffs = outer_rfid_lead_diffs,
-                inner_rfid_diffs = inner_rfid_lead_diffs,
                 assignmnt_type = "lead"
               ) %>%
               # Filter for exits among the labeled beam breaker events 
@@ -283,7 +260,7 @@ integrate_rfid_beamBreakers <- function(rfid_file_nm, irbb_file_nm, method, l_th
               dplyr::filter(
                 !!rlang::parse_expr(conditnal_lead_exi)
               ) %>%
-              dplyr::select(all_of(outer_irbb_col), all_of(inner_irbb_col), all_of(rfid_col), outer_rfid_diffs, inner_rfid_diffs, assignmnt_type)
+              dplyr::select(all_of(outer_irbb_col), all_of(rfid_col), outer_rfid_diffs, assignmnt_type)
           ) %>%
           # Exits, lag differences
           bind_rows(
@@ -291,7 +268,6 @@ integrate_rfid_beamBreakers <- function(rfid_file_nm, irbb_file_nm, method, l_th
               dplyr::mutate(
                 !!rfid_col := lagging_RFID,
                 outer_rfid_diffs = outer_rfid_lag_diffs,
-                inner_rfid_diffs = inner_rfid_lag_diffs,
                 assignmnt_type = "lag"
               ) %>%
               # Filter for exits among the labeled beam breaker events 
@@ -302,7 +278,7 @@ integrate_rfid_beamBreakers <- function(rfid_file_nm, irbb_file_nm, method, l_th
               dplyr::filter(
                 !!rlang::parse_expr(conditnal_lag_exi)
               ) %>%
-              dplyr::select(all_of(outer_irbb_col), all_of(inner_irbb_col), all_of(rfid_col), outer_rfid_diffs, inner_rfid_diffs, assignmnt_type)
+              dplyr::select(all_of(outer_irbb_col), all_of(rfid_col), outer_rfid_diffs, assignmnt_type)
           )
       )
     ) %>% 
@@ -324,12 +300,70 @@ integrate_rfid_beamBreakers <- function(rfid_file_nm, irbb_file_nm, method, l_th
     dplyr::inner_join(
       labeled_irbb %>%
         dplyr::select(-c("data_type")),
-      by = c(all_of(outer_irbb_col), all_of(inner_irbb_col))
+      by = c(all_of(outer_irbb_col))
     ) %>%
-    dplyr::select(chamber_id, year, month, day, all_of(rfid_col), all_of(outer_irbb_col), all_of(inner_irbb_col), all_of(PIT_tag_col), all_of(irbb_event_col), all_of(irbb_unique_col), outer_rfid_diffs, inner_rfid_diffs, assignmnt_type, integration_method, data_stage, lower_threshold_s, upper_threshold_s, date_integrated) %>% 
+    dplyr::select(chamber_id, year, month, day, all_of(rfid_col), all_of(outer_irbb_col), all_of(inner_irbb_col), all_of(PIT_tag_col), all_of(irbb_event_col), all_of(irbb_unique_col), outer_rfid_diffs, assignmnt_type, integration_method, data_stage, lower_threshold_s, upper_threshold_s, date_integrated) %>% 
     dplyr::arrange(!!sym(rfid_col), desc = FALSE)
   
-  write.csv(integr8d_df, file.path(path, out_dir, "integrated_rfid_beamBreaker_data.csv"), row.names = FALSE)
+  # There may be duplicated timestamps if RFID detections were assigned to pre and post video recording events. Given the way the lags were calculated, it isn't possible to find these duplicates using the columns of binary values. Find these duplicates and retain only the pre-video recording event
+  dup_inds <- which(duplicated(integr8d_df$RFID))
+  
+  if(length(dup_inds) > 0){
+    
+    # Return the rows to retain
+    tmp_df <- data.table::rbindlist(lapply(1:length(dup_inds), function(i){
+      
+      # For each RFID timestamp that is present more than once, retain the integrated event that represents the closest match (e.g. the smallest temporal difference) between the RFID and outer beam breaker timestamps
+      tmp_dup <- integr8d_df %>% 
+        slice(dup_inds[i]) %>% 
+        pull(RFID)
+      
+      return(
+        integr8d_df %>% 
+          dplyr::filter(
+            RFID == tmp_dup
+          ) %>% 
+          dplyr::arrange(-desc(abs(outer_rfid_diffs))) %>% 
+          slice(1)
+      )
+      
+    }))
+    
+    # Get the indices of all of the duplicated rows
+    all_dup_inds <- unlist(lapply(1:length(dup_inds), function(i){
+      
+      tmp_dup <- integr8d_df %>% 
+        slice(dup_inds[i]) %>% 
+        pull(RFID)
+      
+      return(
+        integr8d_df %>% 
+          rowid_to_column() %>% 
+          dplyr::filter(
+            RFID == tmp_dup
+          ) %>% 
+          pull(rowid)
+      )
+      
+    }))
+    
+    # Remove all of the duplicated rows, then add back the rows to retain
+    integr8d_df_noDups <- integr8d_df %>% 
+      slice(-c(all_dup_inds)) %>% 
+      bind_rows(
+        tmp_df
+      ) %>% 
+      dplyr::arrange(!!sym(rfid_col), desc = FALSE)
+    
+    # Checking, looks good
+    # any(duplicated(integr8d_df_noDups$RFID))
+    # (nrow(integr8d_df) - nrow(integr8d_df_noDups)) == length(dup_inds)
+    
+  } else {
+    integr8d_df_noDups <- integr8d_df
+  }
+  
+  write.csv(integr8d_df_noDups, file.path(path, out_dir, "integrated_rfid_beamBreaker_data.csv"), row.names = FALSE)
   
   # Reset the current global options
   options(orig_opts)
