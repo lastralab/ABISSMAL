@@ -306,7 +306,7 @@ integrate_rfid_beamBreakers <- function(rfid_file_nm, irbb_file_nm, method, l_th
     dplyr::arrange(!!sym(rfid_col), desc = FALSE)
   
   # There may be duplicated timestamps if RFID detections were assigned to pre and post video recording events. Given the way the lags were calculated, it isn't possible to find these duplicates using the columns of binary values. Find these duplicates and retain only the pre-video recording event
-  dup_inds <- which(duplicated(integr8d_df$RFID))
+  dup_inds <- which(duplicated(integr8d_df[[rfid_col]]))
   
   if(length(dup_inds) > 0){
     
@@ -316,12 +316,12 @@ integrate_rfid_beamBreakers <- function(rfid_file_nm, irbb_file_nm, method, l_th
       # For each RFID timestamp that is present more than once, retain the integrated event that represents the closest match (e.g. the smallest temporal difference) between the RFID and outer beam breaker timestamps
       tmp_dup <- integr8d_df %>% 
         slice(dup_inds[i]) %>% 
-        pull(RFID)
+        pull(!!sym(rfid_col))
       
       return(
         integr8d_df %>% 
           dplyr::filter(
-            RFID == tmp_dup
+            !!sym(rfid_col) == tmp_dup
           ) %>% 
           dplyr::arrange(-desc(abs(outer_rfid_diffs))) %>% 
           slice(1)
@@ -334,13 +334,13 @@ integrate_rfid_beamBreakers <- function(rfid_file_nm, irbb_file_nm, method, l_th
       
       tmp_dup <- integr8d_df %>% 
         slice(dup_inds[i]) %>% 
-        pull(RFID)
+        pull(!!sym(rfid_col))
       
       return(
         integr8d_df %>% 
           rowid_to_column() %>% 
           dplyr::filter(
-            RFID == tmp_dup
+            !!sym(rfid_col) == tmp_dup
           ) %>% 
           pull(rowid)
       )

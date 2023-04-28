@@ -13,6 +13,8 @@
 #' @param inner_irbb_col A character value. The column name that contains timestamps for the inner pair of beam breakers (e.g. the second pair of beam breakers that an individual encounters when moving into a nest container or area). The data format must also support calculations in milliseconds
 #' @param irbb_event_col A character value. The name of column that contains the type of beam breaker event (e.g. "entrance" or "exit)
 #' @param irbb_unique_col A character value. The name of column that contains the unique numeric identifier for each beam breaker event
+#' #' @param general_metadata_cols A character vector. This should be a string of the general metadata column names that will be carried through into the resulting data frame representing the integrated data. For instance: c("chamber_id", "year", "month", "day"). These columns will be added as the first columns in the integrated data frame, in the same order in which they are provided
+#' @param video_metadata_cols A character vector. This should be a string of the video metadata column names that will be carried through into the resulting data frame representing the integrated data. For instance: c("total_pixels_motionTrigger", "pixel_threshold", "video_file_name"). These columns will be added as later columns in the integrated data frame, in the same order in which they are provided
 #' @param path A character string. This should be the path specifying the overall directory where data is saved for a given experimental setup. For instance, "/media/gsvidaurre/Anodorhynchus/Data_Testing/Box_02_31Dec2022/Data".
 #' @param data_dir A character string. This should be the name of directory where the raw data is saved across sensors inside the path above. For instance, "raw_combined".
 #' @param out_dir A character string. This should be the name of a directory specifying where the .csv file of pre-processed data should be saved for each sensor. For instance, "pre-processed". This folder will be appended to the data_path and created as a new directory if it doesn't already exist.
@@ -24,7 +26,7 @@
 #' @return A .csv file with the metadata columns from the original pre-processed data used as input, as well as columns indicating each of the timestamps of the lead and rear beam breaker pairs, the timestamps of the video recording events, a unique label for the given event (e.g. entrance or exit), a unique numeric identifier for the given event, and information about the given data processing stage. Each row in the .csv file is a labeled event across the outer and inner beam breaker pairs that was integrated with video recording events. Information about the temporal thresholds used for the integration and the date that the data was integrated is also contained in this spreadsheet.
 #' 
 
-integrate_beamBreakers_video <- function(irbb_file_nm, video_file_nm, method, l_th = NULL, u_th = NULL, video_rec_dur = NULL, sensor_id_col, timestamps_col, PIT_tag_col, outer_irbb_col, inner_irbb_col, irbb_event_col, irbb_unique_col, path, data_dir, out_dir, tz, POSIXct_format = "%Y-%m-%d %H:%M:%OS"){
+integrate_beamBreakers_video <- function(irbb_file_nm, video_file_nm, method, l_th = NULL, u_th = NULL, video_rec_dur = NULL, sensor_id_col, timestamps_col, PIT_tag_col, outer_irbb_col, inner_irbb_col, irbb_event_col, irbb_unique_col, general_metadata_cols, video_metadata_cols, path, data_dir, out_dir, tz, POSIXct_format = "%Y-%m-%d %H:%M:%OS"){
   
   # Get the current global options
   orig_opts <- options()
@@ -73,7 +75,7 @@ integrate_beamBreakers_video <- function(irbb_file_nm, video_file_nm, method, l_
   
   # Drop columns that aren't needed for the integration
   preproc_video2 <- preproc_video %>% 
-    dplyr::select(-c("total_pixels_motionTrigger", "pixel_threshold", "video_file_name", "data_stage", "date_pre_processed"))
+    dplyr::select(-c(all_of(video_metadata_cols), "data_stage", "date_pre_processed"))
   
   # Check that the input data are both data frames
   if(!is.data.frame(labeled_irbb)){
@@ -177,7 +179,6 @@ integrate_beamBreakers_video <- function(irbb_file_nm, video_file_nm, method, l_
       )
     ) 
 
-  # There should no differences or few differences in the integrated datasets yielded between these methods
   if(method == "temporal"){
     
     conditnal_lead_ent <- "binary_lead_inner_ent & !is.na(binary_lead_inner_ent)"
@@ -208,7 +209,7 @@ integrate_beamBreakers_video <- function(irbb_file_nm, video_file_nm, method, l_
     conditnal_lag_ent <- "inner_video_lag_diffs <= 0 & !is.na(inner_video_lag_diffs)"
     conditnal_lag_exi <- "inner_video_lag_diffs > 0 & !is.na(inner_video_lag_diffs)"
     
-    # TKTK this will lead to a LOT of assignments...consider dropping this type of matching for the sign method entirely
+    # TKTK this will lead to a LOT of assignments...consider dropping this type of matching for the sign method entirely?? But see integrate_rfid_video, looks like the output is the same between methods once duplicates are accounted for
     conditnal_lead_withn <- "inner_video_lead_diffs > 0 & !is.na(inner_video_lead_diffs)"
     conditnal_lag_withn <- "inner_video_lag_diffs > 0 & !is.na(inner_video_lag_diffs)"
     
@@ -365,14 +366,86 @@ integrate_beamBreakers_video <- function(irbb_file_nm, video_file_nm, method, l_
       video_recording_duration_s = video_rec_dur,
       date_integrated = paste(Sys.Date(), Sys.time(), sep = " ")
     ) %>% 
-    # Add back metadata about the beam breaker events and general metadata
+    # Add back general metadata from the beam breaker data
     dplyr::inner_join(
       labeled_irbb %>%
-        dplyr::select(-c("data_type", all_of(irbb_event_col))),
+        dplyr::select(all_of(general_metadata_cols), all_of(inner_irbb_col), all_of(outer_irbb_col), all_of(irbb_unique_col)),
       by = c(all_of(inner_irbb_col))
     ) %>%
-    dplyr::select(chamber_id, year, month, day, all_of(outer_irbb_col), all_of(inner_irbb_col), all_of(video_col), all_of(irbb_event_col), all_of(irbb_unique_col), inner_video_diffs, assignmnt_type, movement_inference, integration_method, data_stage, lower_threshold_s, upper_threshold_s, video_recording_duration_s, date_integrated) %>% 
+    dplyr::rename(
+      # Had to rename this column for the join below
+      !!timestamps_col := !!sym(video_col)
+    ) %>%
+    # Add back metadata about the video recording events
+    dplyr::inner_join(
+      preproc_video %>%
+        dplyr::select(all_of(video_metadata_cols), timestamps_col),
+      by = timestamps_col
+    ) %>% 
+    dplyr::rename(
+      !!video_col := !!sym(timestamps_col)
+    ) %>% 
+    dplyr::select(all_of(general_metadata_cols), all_of(outer_irbb_col), all_of(inner_irbb_col), all_of(video_col), all_of(irbb_event_col), all_of(irbb_unique_col), inner_video_diffs, assignmnt_type, movement_inference, integration_method, all_of(video_metadata_cols), data_stage, lower_threshold_s, upper_threshold_s, video_recording_duration_s, date_integrated) %>% 
     dplyr::arrange(!!sym(inner_irbb_col), desc = FALSE)
+  
+  #### Handle duplicates
+  
+  # The same inner beam breaker timestamp should NOT be assigned to multiple video timestamps, regardless of whether this was motion or post-motion assignment
+  # The same video timestamp CAN be assigned to different inner beam breaker timestamps, since some inner beam breaker detections may have happened after the original movement that triggered the video recording
+  # To remove inner beam breaker duplicate assignments, I need to use a temporal rule to retain the inner beam breaker and video timestamps closest together in time. And drop the other matches as duplicates. This should be applied regardless of whether or not the assignment is motion trigger or post-motion trigger. Even for post motion trigger, the inner beam breaker and video timestamps closest together in time should be retained
+  
+  dup_inds <- which(duplicated(integr8d_df[[inner_irbb_col]]))
+  
+  if(length(dup_inds) > 0){
+    
+    # Return the rows to retain
+    tmp_df <- data.table::rbindlist(lapply(1:length(dup_inds), function(i){
+      
+      # For each inner beam breaker timestamp that is present more than once, retain the integrated event that represents the closest match (e.g. the smallest temporal difference) between the inner beam breaker and video timestamps
+      tmp_dup <- integr8d_df %>% 
+        slice(dup_inds[i]) %>% 
+        pull(!!sym(inner_irbb_col))
+      
+      return(
+        integr8d_df %>% 
+          dplyr::filter(
+            !!sym(inner_irbb_col) == tmp_dup
+          ) %>% 
+          dplyr::arrange(-desc(abs(inner_video_diffs))) %>% 
+          slice(1)
+      )
+      
+    }))
+    
+    # Get the indices of all of the duplicated rows
+    all_dup_inds <- unlist(lapply(1:length(dup_inds), function(i){
+      
+      tmp_dup <- integr8d_df %>% 
+        slice(dup_inds[i]) %>% 
+        pull(!!sym(inner_irbb_col))
+      
+      return(
+        integr8d_df %>% 
+          rowid_to_column() %>% 
+          dplyr::filter(
+            !!sym(inner_irbb_col) == tmp_dup
+          ) %>% 
+          pull(rowid)
+      )
+      
+    }))
+    
+    # Remove all of the duplicated rows, then add back the rows to retain
+    integr8d_df_noDups <- integr8d_df %>% 
+      slice(-c(all_dup_inds)) %>% 
+      bind_rows(
+        tmp_df
+      ) %>% 
+      dplyr::arrange(!!sym(inner_irbb_col), desc = FALSE)
+    
+  } else {
+    integr8d_df_noDups <- integr8d_df
+  }
   
   write.csv(integr8d_df, file.path(path, out_dir, "integrated_beamBreaker_video_data.csv"), row.names = FALSE)
   

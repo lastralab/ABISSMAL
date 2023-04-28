@@ -98,6 +98,7 @@ integrate_beamBreakers <- function(irbb_file_nm, threshold, sensor_id_col, times
   # Then find exit events
   exits_df <- diffs_df %>%
     # Make sure to remove any beam breaker events already identified as entrances from the pool of possible candidates
+    # TKTK CONTINUE Am I really doing this right?? Instead, the assignments should be done by which are CLOSEST in time, so consider a duplicates filter at the end like other functions
     dplyr::filter(
       !(leading_outer %in% entrances_df[[outer_irbb_nm]]) &
         !(!!sym(inner_irbb_nm) %in% entrances_df[[inner_irbb_nm]])
