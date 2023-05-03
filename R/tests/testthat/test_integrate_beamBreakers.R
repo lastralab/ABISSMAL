@@ -2,7 +2,8 @@
 library(tidyverse)
 
 irbb_file_nm <- "pre_processed_data_IRBB.csv"
-threshold <- 2
+l_th <- 0
+u_th <- 2
 sensor_id_col <- "sensor_id"
 timestamps_col <- "timestamp_ms"
 outer_irbb_nm <- "Outer Beam Breaker"
@@ -39,5 +40,18 @@ ee_df %>%
     min_dff = min(diff),
     max_diff = max(diff)
   )
+
+nrow(integr8d_df_noDups)
+nrow(integr8d_df)
+
+# Check duplicates....
+length(which(duplicated(integr8d_df_noDups[[bb_ids[1]]])))
+length(which(duplicated(integr8d_df_noDups[[bb_ids[2]]])))
+
+wh <- which(duplicated(integr8d_df_noDups[[bb_ids[1]]]))[101]
+
+integr8d_df_noDups %>% 
+  dplyr::filter(!!sym(bb_ids[1]) == integr8d_df_noDups[[bb_ids[1]]][wh]) %>% 
+  View()
 
 # Check the distribution of temporal differences between adjacent events as well
