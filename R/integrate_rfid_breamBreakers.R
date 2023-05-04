@@ -12,11 +12,12 @@
 #' @param inner_irbb_col A character value. The column name that contains timestamps for the inner pair of beam breakers (e.g. the second pair of beam breakers that an individual encounters when moving into a nest container or area). The data format must also support calculations in milliseconds
 #' @param irbb_event_col A character value. The name of column that contains the type of beam breaker event (e.g. "entrance" or "exit)
 #' @param irbb_unique_col A character value. The name of column that contains the unique numeric identifier for each beam breaker event
-#' @param preproc_metadata_cols A character vector. This should be a string of the metadata column names from pre-processing that should be dropped. For instance, c("thin_threshold_s", "data_stage", "date_pre_processed")
+#' @param preproc_metadata_cols A character vector. This should be a string of the metadata column names from pre-processing that should be dropped from either or both data frames. For instance, c("thin_threshold_s", "data_stage", "date_pre_processed", "lower_threshold_s", "upper_threshold_s", "date_labeled")
 #' @param general_metadata_cols A character vector. This should be a string of the general metadata column names that will be carried through into the resulting data frame representing the integrated data. For instance: c("chamber_id", "year", "month", "day"). These columns will be added as the first columns in the integrated data frame, in the same order in which they are provided
+#' @param integrate_perching Boolean. If TRUE, then the perching events identified using `find_perching_events` will be integrated with this dataset. This integration is done by finding RFID timestamps that occurred within the duration of a perching event. If FALSE, then perching events will not be integrated. 
 #' @param path A character string. This should be the path specifying the overall directory where data is saved for a given experimental setup. For instance, "/media/gsvidaurre/Anodorhynchus/Data_Testing/Box_02_31Dec2022/Data".
 #' @param rfid_dir A character string. This should be the name of directory where the pre-processed RFID data is saved across sensors inside the path above. For instance, "pre-processed"
-#' #' @param irbb_dir A character string. This should be the name of directory where the pre-processed and labeled beam breaker data is saved across sensors inside the path above. For instance, "pre-processed"
+#' @param irbb_dir A character string. This should be the name of directory where the pre-processed and labeled beam breaker data is saved across sensors inside the path above. For instance, "pre-processed"
 #' @param out_dir A character string. This should be the name of a directory specifying where the .csv file of pre-processed data should be saved for each sensor. For instance, "pre-processed". This folder will be appended to the data_path and created as a new directory if it doesn't already exist.
 #' @param out_file_nm A character string. The name (plus extension) of the resulting file that will be written to out_dir. The default is "integrated_rfid_beamBreaker_data.csv"
 #' @param tz A character string. This argument should contain the timezone used for converting timestamps to POSIXct format. For instance, "America/New York". See the base function `as.POSIXct` for more information.
@@ -28,7 +29,28 @@
 #' @return A .csv file with the metadata columns from the original pre-processed data used as input, as well as columns indicating each of the timestamps of the RFID antenna, the lead and rear beam breaker pairs, a unique label for the given event (e.g. entrance or exit), a unique numeric identifier for the given event, and information about the given data processing stage. Each row in the .csv file is an RFID detection that was integrated with a labeled event across the outer and inner beam breaker pairs. Information about the temporal thresholds used for the integration and the date that the data was integrated is also contained in this spreadsheet.
 #' 
 
-integrate_rfid_beamBreakers <- function(rfid_file_nm, irbb_file_nm, l_th = NULL, u_th = NULL, sensor_id_col, timestamps_col, PIT_tag_col, outer_irbb_col, inner_irbb_col, irbb_event_col, irbb_unique_col, preproc_metadata_cols, path, rfid_dir, irbb_dir, out_dir, out_file_nm = "integrated_rfid_beamBreaker_data.csv", tz, POSIXct_format = "%Y-%m-%d %H:%M:%OS"){
+# l_th <- 0
+# u_th <- 5
+# rfid_file_nm <- "pre_processed_data_RFID.csv"
+# irbb_file_nm <- "labeled_beamBreaker_data.csv"
+# sensor_id_col <- "sensor_id"
+# PIT_tag_col <- "PIT_tag_ID"
+# timestamps_col <- "timestamp_ms"
+# outer_irbb_col <- "Outer_beam_breaker"
+# inner_irbb_col <- "Inner_beam_breaker"
+# irbb_event_col <- "irbb_direction_inferred"
+# irbb_unique_col <- "unique_entranceExit"
+# general_metadata_cols <- c("chamber_id", "year", "month", "day")
+# preproc_metadata_cols <- c("thin_threshold_s", "data_stage", "date_pre_processed", "lower_threshold_s", "upper_threshold_s", "date_labeled")
+# integrate_perching <- TRUE
+# path <- "/media/gsvidaurre/Anodorhynchus/Data_Testing/Box_02_31Dec2022/Data"
+# data_dir <- "pre_processed"
+# out_dir <- "integrated"
+# tz <- "America/New York"
+# POSIXct_format <- "%Y-%m-%d %H:%M:%OS"
+
+
+integrate_rfid_beamBreakers <- function(rfid_file_nm, irbb_file_nm, l_th = NULL, u_th = NULL, sensor_id_col, timestamps_col, PIT_tag_col, outer_irbb_col, inner_irbb_col, irbb_event_col, irbb_unique_col, preproc_metadata_cols, integrate_perching, path, rfid_dir, irbb_dir, out_dir, out_file_nm = "integrated_rfid_beamBreaker_data.csv", tz, POSIXct_format = "%Y-%m-%d %H:%M:%OS"){
   
   # Get the current global options
   orig_opts <- options()
@@ -55,9 +77,7 @@ integrate_rfid_beamBreakers <- function(rfid_file_nm, irbb_file_nm, l_th = NULL,
     # Make sure that the timestamps are in the right format
     dplyr::mutate(
       !!timestamps_col := as.POSIXct(format(as.POSIXct(!!sym(timestamps_col), tz = "America/New York"), "%Y-%m-%d %H:%M:%OS6"))
-    ) %>% 
-    # Drop columns that aren't needed here
-    dplyr::select(-c(all_of(preproc_metadata_cols)))
+    ) 
   
   # Read in the pre-processed and labeled beam breaker data
   labeled_irbb <- read.csv(file.path(path, irbb_dir, irbb_file_nm)) %>% 
@@ -65,21 +85,30 @@ integrate_rfid_beamBreakers <- function(rfid_file_nm, irbb_file_nm, l_th = NULL,
     dplyr::mutate(
       !!outer_irbb_col := as.POSIXct(format(as.POSIXct(!!sym(outer_irbb_col), tz = "America/New York"), "%Y-%m-%d %H:%M:%OS6")),
       !!inner_irbb_col := as.POSIXct(format(as.POSIXct(!!sym(inner_irbb_col), tz = "America/New York"), "%Y-%m-%d %H:%M:%OS6"))
-    ) %>% 
-    # Drop columns that aren't needed here
-    dplyr::select(-c("data_stage", "temporal_threshold_s", "date_labeled"))
+    )
+  
+  # Drop columns that aren't needed here for both datasets
+  rfid_cols2drop <- names(preproc_rfid)[grep(paste(paste("^", preproc_metadata_cols, "$", sep = ""), collapse = "|"), names(preproc_rfid))]
+  
+  irbb_cols2drop <- names(labeled_irbb)[grep(paste(paste("^", preproc_metadata_cols, "$", sep = ""), collapse = "|"), names(labeled_irbb))]
+  
+  preproc_rfid2 <- preproc_rfid %>% 
+    dplyr::select(-c(all_of(rfid_cols2drop)))
+  
+  labeled_irbb2 <- labeled_irbb %>% 
+    dplyr::select(-c(all_of(irbb_cols2drop)))
   
   # Check that the input data are both data frames
-  if(!is.data.frame(preproc_rfid)){
+  if(!is.data.frame(preproc_rfid2)){
     stop('The RFID data needs to be a data frame')
   }
   
-  if(!is.data.frame(labeled_irbb)){
+  if(!is.data.frame(labeled_irbb2)){
     stop('The IRBB data needs to be a data frame')
   }
   
   # Group the RFID data frame
-  rfid_df_tmp <- preproc_rfid %>% 
+  rfid_df_tmp <- preproc_rfid2 %>% 
     group_by(!!sym(PIT_tag_col)) %>% 
     dplyr::rename(
       `group_col` = all_of(PIT_tag_col)
@@ -87,12 +116,12 @@ integrate_rfid_beamBreakers <- function(rfid_file_nm, irbb_file_nm, l_th = NULL,
     nest()
   
   # Get the sensor ID value for the RFID data, which will be a column name below
-  rfid_col <- preproc_rfid %>% 
+  rfid_col <- preproc_rfid2 %>% 
     pull(sensor_id) %>% 
     unique()
   
   # Lengthen the IRBB data frame. Make sure this has the same columns in the same order as the RFID data for the row binding and calculations below
-  irbb_df_tmp <- labeled_irbb %>% 
+  irbb_df_tmp <- labeled_irbb2 %>% 
     pivot_longer(
       cols = c(all_of(outer_irbb_col), all_of(inner_irbb_col)),
       names_to = sensor_id_col,
@@ -173,7 +202,7 @@ integrate_rfid_beamBreakers <- function(rfid_file_nm, irbb_file_nm, l_th = NULL,
           ) %>% 
           # Add back metadata about the beam breaker event labels
           dplyr::inner_join(
-            labeled_irbb %>%
+            labeled_irbb2 %>%
               dplyr::select(all_of(outer_irbb_col), all_of(irbb_event_col)),
             by = c(all_of(outer_irbb_col))
           )
@@ -281,10 +310,10 @@ integrate_rfid_beamBreakers <- function(rfid_file_nm, irbb_file_nm, l_th = NULL,
     # Add back metadata about the beam breaker events and general metadata
     dplyr::inner_join(
       labeled_irbb %>%
-        dplyr::select(-c("data_type")),
+        dplyr::select(all_of(general_metadata_cols), all_of(outer_irbb_col), all_of(inner_irbb_col), all_of(irbb_event_col), all_of(irbb_unique_col), all_of(irbb_cols2drop)),
       by = c(all_of(outer_irbb_col))
     ) %>%
-    dplyr::select(chamber_id, year, month, day, all_of(rfid_col), all_of(outer_irbb_col), all_of(inner_irbb_col), all_of(PIT_tag_col), all_of(irbb_event_col), all_of(irbb_unique_col), outer_rfid_diffs, rfid_irbb_assignmnt_type, data_stage, rfid_irbb_lower_threshold_s, rfid_irbb_upper_threshold_s, date_integrated) %>% 
+    dplyr::select(all_of(general_metadata_cols), all_of(rfid_col), all_of(outer_irbb_col), all_of(inner_irbb_col), all_of(PIT_tag_col), all_of(irbb_event_col), all_of(irbb_unique_col), outer_rfid_diffs, rfid_irbb_assignmnt_type, data_stage, rfid_irbb_lower_threshold_s, rfid_irbb_upper_threshold_s, date_integrated) %>% 
     dplyr::arrange(!!sym(rfid_col), desc = FALSE)
   
   # There may be duplicated timestamps if RFID detections were assigned to pre and post video recording events. Given the way the lags were calculated, it isn't possible to find these duplicates using the columns of binary values. Find these duplicates and retain only the pre-video recording event
@@ -337,13 +366,23 @@ integrate_rfid_beamBreakers <- function(rfid_file_nm, irbb_file_nm, l_th = NULL,
       ) %>% 
       dplyr::arrange(!!sym(rfid_col), desc = FALSE)
     
-    # Checking, looks good
-    # any(duplicated(integr8d_df_noDups$RFID))
-    # (nrow(integr8d_df) - nrow(integr8d_df_noDups)) == length(dup_inds)
-    
   } else {
     integr8d_df_noDups <- integr8d_df
   }
+  
+  # Integrate perching events if specified
+  if(integrate_perching){
+    
+    perch_df <- read.csv(file.path(path, data_dir))
+    
+    
+    
+  } else {
+    
+    
+  }
+  
+  
   
   write.csv(integr8d_df_noDups, file.path(path, out_dir, out_file_nm), row.names = FALSE)
   

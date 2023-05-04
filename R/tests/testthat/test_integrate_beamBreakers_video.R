@@ -1,5 +1,6 @@
 l_th <- 0
 u_th <- 5
+video_rec_dur <- 9
 irbb_file_nm <- "integrated_beamBreaker_data.csv"
 video_file_nm <- "pre_processed_data_Video.csv"
 sensor_id_col <- "sensor_id"
