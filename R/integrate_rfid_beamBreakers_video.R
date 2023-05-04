@@ -1,278 +1,184 @@
 #' @title integrate_rfid_beamBreakers_video
-#' @description Use lags between the pre-processed radio frequency identification (RFID) data, the pre-processed and labeled beam breaker data, and the video recording events to integrate these three datasets. Each RFID detection that remains must be accompanied by a labeled beam breaker event (an entrance or an exit), as well as a video recording event (e.g. the RFID detection occurred within a certain time of recording onset or during a video recording)
+#' @description Use lags between the pre-processed radio frequency identification (RFID) data, the pre-processed, labeled beam breaker data, and the pre-processed video data to integrate these three datasets. Each RFID detection that remains must be accompanied by a labeled event from the beam breaker dataset (e.g. an entrance or exit event) and the video dataset
 #' 
-#' @param .x A data frame object that contains all the pre-processed RFID events, and all the video recording events. Each row is therefore a unique event from either the RFIF or beam breaker dataset. This data frame must contain all the columns in the subsequent arguments
-#' @param video_df A data frame object that contains all the video recording events
-#' @param l_th A numeric argument. This represents a lower or minimum temporal threshold in seconds to identify RFID events that occurred just before a video recording and can be integrated with the given video recording event
-#' @param u_th A numeric argument. This represents an upper or maximum temporal threshold in seconds to identify RFID events that occurred just before a video recording and can be integrated with the given video recording event
-#' @param p_th A numeric argument. This represents a temporal threshold in seconds to identify RFID events that occurred just after video recording onset, but still during the duration of the video recording, and can be integrated with the given video recording event
-#' @param group_col TKTK
-#' @param data_type_col A character value. This is the name of the metadata column that contains information about the data type (e.g. "data_type")
-#' @param timestamps A character value. The name of the column that contains timestamps in a format that supports calculations in milliseconds (e.g. "event_datetime_ms")
-#' @param names_from A character value. This is the name of the metadata column that contains information about the data type (e.g. "data_type"). Used for data frame structure manipulations
-#' @param values_from A character value. The name of the column that contains timestamps in a format that supports calculations in milliseconds (e.g. "event_datetime_ms"). Used for data frame structure manipulations
-#' @param rfid_nm A character value. The column name that contains RFID timestamps. The data format must support calculations in milliseconds
-#' @param video_nm A character value. The column name that contains video recording onset timestamps. The data format must support calculations in milliseconds
-#' @param PIT_tag_nm A character value. The name of column that contains the unique PIT tag identifiers detected with each RFID timestamp
-#' @param lead_sensor_nm A character value. The column name that contains timestamps for the "lead" pair of beam breakers (e.g. the first pair of beam breakers an animal encounters when moving into a nest container or area). The data format must also support calculations in milliseconds
-#' @param rear_sensor_nm A character value. The column name that contains timestamps for the "rear" pair of beam breakers (e.g. the second pair of beam breakers an animal encounters when moving into a nest container or area). The data format must also support calculations in milliseconds
-#' @param direction_nm A character argument. The column name that contains information about the direction of movement
+#' @param rfid_file_nm A character string. This should be the name of the file that contains all of the pre-processed RFID detections. Each row is a unique detection event. This spreadsheet must contain all the columns specified for the RFID data in the subsequent arguments
+#' @param irbb_file_nm A character string. This should be the name of the file that contains all of the pre-processed infrared beam breaker (IRBB) detections. Each row is a unique detection event. This data frame must contain all the columns specified for the IRBB data in the subsequent arguments
+#' @param video_file_nm A character string. This should be the name of the file that contains all of the pre-processed video detections. Each row is a unique detection event. This data frame must contain all the columns specified for the video data in the subsequent arguments
+#' @param second_integration A character string. This argument should be set to "rfid-video" or "irbb-video", to denote how the video data will be integrated. If "rfid-video" is specified, then the video data will be integrated by identifying RFID and video detections that occurred within the given temporal thresholds l2_th and u2_th. If "irbb-video" is specified, then the video data will be integrated by identifying inner beam breaker and video detections that occurred within these temporal thresholds
+#' @param l1_th A numeric argument. This represents a lower or minimum temporal threshold in seconds to identify RFID and beam breaker events that are close enough together for integration
+#' @param u1_th A numeric argument. This represents an upper or maximum temporal threshold in seconds to identify RFID and beam breaker events that are close enough together for integration
+#' #' @param l2_th A numeric argument. This represents a lower or minimum temporal threshold in seconds to identify RFID and video events, or inner beam breaker and video, events that are close enough together for integration. This threshold should be specific to how the integration step will be performed (see the argument `second_integration`)
+#' @param u2_th A numeric argument. This represents an upper or maximum temporal threshold in seconds to identify RFID and video events, or inner beam breaker and video, events that are close enough together for integration. This threshold should be specific to how the integration step will be performed (see the argument `second_integration`)
+#' @param video_rec_dur A numeric argument. This represents the duration of video recording (post-motion detection) in seconds. This argument, along with the upper temporal threshold above (u_th) is used to identify beam breaker events that occurred during video recording, but are inferred to not represent the original movements that triggered the movement sensors. This argument facilitates retaining beam breaker events that occurred during the span of video recording and therefore did not trigger a separate video recording event. The default is NULL, but this must be a numeric value when `method` is set to "temporal"
+#' @param sensor_id_col A character value. This is the name of the metadata column that contains information about the data type (e.g. "sensor_id")
+#' @param timestamps_col A character value. The name of the column that contains timestamps in a format that supports calculations in milliseconds (e.g. "event_datetime_ms")
+#' @param PIT_tag_col A character value. This is the name of the metadata column that contains information about the PIT tags detected by the RFID antenna (e.g. "PIT_tag_ID")
+#' @param outer_irbb_col A character value. The column name that contains timestamps for the outer pair of beam breakers (e.g. the first pair of beam breakers that an animal encounters when moving into a nest container or area). The data format must also support calculations in milliseconds
+#' @param inner_irbb_col A character value. The column name that contains timestamps for the inner pair of beam breakers (e.g. the second pair of beam breakers that an individual encounters when moving into a nest container or area). The data format must also support calculations in milliseconds
+#' @param irbb_event_col A character value. The name of column that contains the type of beam breaker event (e.g. "entrance" or "exit)
+#' @param irbb_unique_col A character value. The name of column that contains the unique numeric identifier for each beam breaker event
+#' @param preproc_metadata_cols A chacter vector. This should be a string of the metadata column names from pre-processing that should be dropped. For instance, c("thin_threshold_s", "data_stage", "date_pre_processed")
+#' @param general_metadata_cols A character vector. This should be a string of the general metadata column names that will be carried through into the resulting data frame representing the integrated data. For instance: c("chamber_id", "year", "month", "day"). These columns will be added as the first columns in the integrated data frame, in the same order in which they are provided
+#' @param video_metadata_cols A character vector. This should be a string of the video metadata column names that will be carried through into the resulting data frame representing the integrated data. For instance: c("total_pixels_motionTrigger", "pixel_threshold", "video_file_name"). These columns will be added as later columns in the integrated data frame, in the same order in which they are provided
+#' @param path A character string. This should be the path specifying the overall directory where data is saved for a given experimental setup. For instance, "/media/gsvidaurre/Anodorhynchus/Data_Testing/Box_02_31Dec2022/Data".
+#' @param rfid_dir A character string. This should be the name of directory where the pre-processed RFID data is saved across sensors inside the path above. For instance, "pre-processed"
+#' #' @param irbb_dir A character string. This should be the name of directory where the pre-processed and labeled beam breaker data is saved across sensors inside the path above. For instance, "pre-processed"
+#' @param video_dir A character string. This should be the name of directory where the pre-processed video data is saved across sensors inside the path above. For instance, "pre-processed"
+#' @param out_dir A character string. This should be the name of a directory specifying where the .csv file of pre-processed data should be saved for each sensor. For instance, "pre-processed". This folder will be appended to the data_path and created as a new directory if it doesn't already exist.
+#' @param out_file_nm A character string. The name (plus extension) of the resulting file that will be written to out_dir. The default is "integrated_rfid_beamBreakers_video_data.csv"
+#' @param tz A character string. This argument should contain the timezone used for converting timestamps to POSIXct format. For instance, "America/New York". See the base function `as.POSIXct` for more information.
+#' @param POSIXct_format A character string. This argument should contain the format used to converting timestamps to POSIXct format. The default is "%Y-%m-%d %H:%M:%OS" to return timestamps with milliseconds in decimal format. See the base function `as.POSIXct` for more information.
 #' 
-#' @return A data frame object with all metadata columns in the original data frame, but each row represents a unique RFID detection that was assigned to a beam breaker movement (entrance or exit), as well as a video recording event
+#' @details This RFID, beam breaker, and video integration is a separate function because the way in which the sensors are set up to detect movement determines how the lag calculations and integration should be performed. In other words, it is difficult to make a general function to integrate data collected across any two types of sensors used in the tracking system. This function was written to integrate data across 1 RFID antenna and the outer pair of beam breakers mounted around the entrance of a nest container that was designed for zebra finches. For nest container entrance events, the integration is done by finding RFID timestamps that occurred within the lower to upper thresholds after the outer beam breaker. For nest container exit events, the integration is done by finding RFID timestamps that occurred within the lower to upper thresholds before the outer beam breaker. This matching is less strict than trying to find sequences of events in which the outer beam breakers, RFID antenna, and inner beam breakers triggered in that exact order (given that the way in which birds arrive or perch in the entrance can lead to variation in this expected sequence). In other words, these events will not represent perfect sequences of outer beam breakers, then RFID, then inner beam breakers and video recording triggering, but rather, RFID detections that occurred within the expected thresholds and before or after an outer beam breaker event that was already matched to an inner beam breaker event, and then inner beam breaker events matched to a video recording event.
+#' This function integrates detections across these 2 sensor types regardless of whether or not these detections occurred during perching events captured by the RFID antenna (see `find_rfid_perching_events`). The reason for this is that some perching events may have started or ended as entrance or exit events, and it's important to retain those events at this stage. If it becomes important later to remove behavioral events that were associated with longer perching events, then this can be done by filtering out detections from the integrated dataset that overlap in time with perching events.
+#' 
+#' @return A .csv file with the metadata columns from the original pre-processed data used as input, as well as columns indicating each of the timestamps of the RFID antenna, the lead and rear beam breaker pairs, a unique label for the given event (e.g. entrance or exit), a unique numeric identifier for the given event, and information about the given data processing stage. Each row in the .csv file is an RFID detection that was integrated with a labeled event across the outer and inner beam breaker pairs. Information about the temporal thresholds used for the integration and the date that the data was integrated is also contained in this spreadsheet.
+#' 
 
+l1_th <- 0
+u1_th <- 5
+l2_th <- 0
+u2_th <- 5
+video_rec_dur <- 9
+rfid_file_nm <- "pre_processed_data_RFID.csv"
+irbb_file_nm <- "labeled_beamBreaker_data.csv"
+video_file_nm <- "pre_processed_data_Video.csv"
+second_integration <- "rfid-video" # "irbb-video"
+sensor_id_col <- "sensor_id"
+timestamps_col <- "timestamp_ms"
+PIT_tag_col <- "PIT_tag_ID"
+outer_irbb_col <- "Outer_beam_breaker"
+inner_irbb_col <- "Inner_beam_breaker"
+irbb_event_col <- "irbb_direction_inferred"
+irbb_unique_col <- "unique_entranceExit"
+preproc_metadata_cols <- c("thin_threshold_s", "data_stage", "date_pre_processed")
+general_metadata_cols <- c("chamber_id", "year", "month", "day")
+video_metadata_cols <- c("total_pixels_motionTrigger", "pixel_threshold", "video_file_name")
+path <- "/media/gsvidaurre/Anodorhynchus/Data_Testing/Box_02_31Dec2022/Data"
+rfid_dir <- "pre_processed"
+irbb_dir <- "pre_processed"
+video_dir <- "pre_processed"
+out_dir <- "integrated"
+out_file_nm <- "integrated_rfid_beamBreakers_video_data.csv"
+tz <- "America/New York"
+POSIXct_format <- "%Y-%m-%d %H:%M:%OS"
 
+source(file.path("/home/gsvidaurre/Desktop/GitHub_repos/Abissmal/R", "integrate_rfid_breamBreakers.R"))
 
-# Testing
-# l_th <- 0 # testing
-# u_th <- 10
-# p_th <- 10 # to find videos that triggered right after a RFID detection
-# group_col <- "data_type"
-# timestamps <- "event_datetime_ms"
-# names_from <- "data_type"
-# values_from <- "event_datetime_ms"
-# rfid_nm <- "RFID"
-# video_nm <- "Video"
-# PIT_tag_nm <- "PIT_tag_ID"
-# lead_sensor_nm <- "lead_bb_timestamp"
-# rear_sensor_nm <- "rear_bb_timestamp"
-# direction_nm <- "direction"
+source(file.path("/home/gsvidaurre/Desktop/GitHub_repos/Abissmal/R", "integrate_rfid_video.R"))
 
-integrate_rfid_beamBreakers_video <- function(.x, video_df, l_th, u_th, p_th, group_col, timestamps, names_from, values_from, rfid_nm, video_nm, PIT_tag_nm, lead_sensor_nm, rear_sensor_nm, direction_nm, sensor_event_nm){
+source(file.path("/home/gsvidaurre/Desktop/GitHub_repos/Abissmal/R", "integrate_beamBreakers_video.R"))
+
+integrate_rfid_beamBreakers_video <- function(rfid_file_nm, irbb_file_nm, video_file_nm, second_integration, l1_th, u1_th, l2_th, u2_th, video_rec_dur, sensor_id_col, timestamps_col, PIT_tag_col, outer_irbb_col, inner_irbb_col, irbb_event_col, irbb_unique_col, preproc_metadata_cols, general_metadata_cols, video_metadata_cols, path, data_dir, out_dir, out_file_nm = "integrated_rfid_beamBreakers_video_data.csv", tz, POSIXct_format = "%Y-%m-%d %H:%M:%OS"){
   
-  res_df <- .x %>%
-    # irbb_rfid %>% # testing
-    #   as_tibble() %>% 
-    # Convert to long format 
-    pivot_longer(
-      cols = c("lead_bb_timestamp", "rear_bb_timestamp", "RFID"),
-      names_to = "data_type",
-      values_to = "event_datetime_ms"
-    ) %>% 
-    group_by(!!sym(PIT_tag_nm)) %>% 
-    dplyr::rename(
-      `group_col` = all_of(PIT_tag_nm)
-    ) %>% 
-    nest() %>% 
-    dplyr::mutate(
-      # Do the timestamp difference calculations
-      lags = map(.x = data, .y = video_df, .f = ~ bind_rows(
-        .x,
-        # irbb_rfid %>% 
-        # as_tibble() %>% 
-        # # Convert to long format
-        # pivot_longer(
-        # cols = c("lead_bb_timestamp", "rear_bb_timestamp", "RFID"),
-        # names_to = "data_type",
-        # values_to = "event_datetime_ms"
-        # ), # testing
-        # Add back the beam breaker data to the subset data frame per PIT tag
-        .y %>% 
-          # pct_video_rfid %>% # testing
-          dplyr::filter(grepl("Video", data_type))
+  # Get the current global options
+  orig_opts <- options()
+  
+  # Set the number of digits for visualization. Under the hood there is full precision, but this helps for visual confirmation of decimal seconds
+  options("digits.secs" = 6)
+  
+  # Check that all temporal thresholds are numeric
+  if(!is.numeric(l1_th) | !is.numeric(l2_th)){
+    stop('One or both of the lower temporal thresholds is not numeric')
+  }
+  
+  if(!is.numeric(u1_th) | !is.numeric(u2_th)){
+    stop('One or both of the upper temporal thresholds is not numeric)')
+  }
+  
+  if(!is.numeric(video_rec_dur)){
+    stop('The post-video recording temporal threshold needs to be numeric (in seconds)')
+  }
+
+  # Then feed this RFID beam breaker integration data to either the rfid + video or beam breakers + video functions
+  if(grepl("rfid-video", second_integration)){
+    
+    # First do the RFID to outer beam breaker integration.....I should be calling integrate_rfid_beamBreakers here....and get rid of some of the arguments above as needed...
+    # Try writing this integrated data to a temporary directory. Will need to delete this after
+    integrate_rfid_beamBreakers(rfid_file_nm, irbb_file_nm, l_th = l1_th, u_th = u1_th, sensor_id_col, timestamps_col, PIT_tag_col, outer_irbb_col, inner_irbb_col, irbb_event_col, irbb_unique_col, preproc_metadata_cols, path, rfid_dir, irbb_dir, out_dir = "tmp", out_file_nm = "tmp_rfid_irbb_integration.csv", tz, POSIXct_format = "%Y-%m-%d %H:%M:%OS")
+    
+    # Change the name of the RFID column to timetsamps_col, and add a sensor_id column with "RFID" to this .csv to facilitate the video integration below
+    read.csv(file.path(path, "tmp", "tmp_rfid_irbb_integration.csv"), header = TRUE) %>% 
+      dplyr::mutate(
+        sensor_id = "RFID"
       ) %>% 
-        as_tibble() %>%
-        # Order timestamps within each data type
-        group_by(!!sym(data_type_col)) %>% 
-        dplyr::arrange(!!sym(timestamps), desc = FALSE) %>%
-        # Make unique row indices within groups
-        dplyr::mutate(
-          group_row_id = row_number()
-        ) %>%
-        ungroup() %>% 
-        pivot_wider(
-          names_from = !!sym(names_from),
-          values_from = !!sym(values_from)
-        ) %>% 
-        # Make a leading and lagging RFID column for calculations and filtering below
-        dplyr::mutate(
-          leading_RFID = lead(!!sym(rfid_nm), default = first(!!sym(rfid_nm))),
-          lagging_RFID = lag(!!sym(rfid_nm), default = first(!!sym(rfid_nm))),
-          leading_direction = lead(!!sym(direction_nm), default = first(!!sym(direction_nm))),
-          lagging_direction = lag(!!sym(direction_nm), default = first(!!sym(direction_nm))),
-          leading_unique_event = lead(!!sym(sensor_event_nm), default = first(!!sym(sensor_event_nm))),
-          lagging_unique_event = lag(!!sym(sensor_event_nm), default = first(!!sym(sensor_event_nm)))
-        ) %>% 
-        # Calculate the differences between the relevant pairs of timestamps: RFID compared to each video event
-        # The lags are calculated per group in the grouped data frame
-        dplyr::mutate(
-          # Here positive differences mean the RFID triggered first
-          video_withn_diffs = round(as.numeric(leading_RFID - !!sym(video_nm)), 2),
-          # Here negative differences mean the RFID triggered first
-          post_video_diffs = round(as.numeric(lagging_RFID - !!sym(video_nm)), 2)
-        ) %>% 
-        # Convert differences to boolean based on a threshold (in seconds)
-        dplyr::mutate(
-          binary_vals_wthn = (abs(video_withn_diffs) >= l_th & abs(video_withn_diffs) <= u_th),
-          binary_vals_post = (abs(post_video_diffs) >= l_th & abs(post_video_diffs) <= p_th)
-        ) %>% 
-        dplyr::select(!!sym(video_nm), !!sym(rfid_nm), leading_RFID, lagging_RFID, video_withn_diffs, post_video_diffs, binary_vals_wthn, binary_vals_post, leading_direction, lagging_direction, !!sym(PIT_tag_nm), leading_unique_event, lagging_unique_event) 
-      )
-    ) %>% 
-    dplyr::select(-c(data)) %>% 
-    # Do more mapping to perform the integration depending on the temporal thresholds calculated above
-    # This is done per PIT tag, and the integration is done separately for entrances and exits
-    dplyr::mutate(
+      dplyr::rename(
+        !!timestamps_col := "RFID"
+      ) %>% 
+      write.csv(file.path(path, "tmp", "tmp_rfid_irbb_integration.csv"), row.names = FALSE)
+    
+    integrate_rfid_video(
+      rfid_file_nm = "tmp_rfid_irbb_integration.csv", 
+      video_file_nm,
+      l_th = l2_th, 
+      u_th = u2_th, 
+      video_rec_dur, 
+      sensor_id_col, 
+      timestamps_col, 
+      PIT_tag_col, 
+      preproc_metadata_cols = c("data_stage", "date_integrated"),
+      general_metadata_cols = c("chamber_id", "year", "month", "day"),
+      extra_cols2drop = c("Outer_beam_breaker", "Inner_beam_breaker", "irbb_direction_inferred", "unique_entranceExit", "outer_rfid_diffs", "rfid_irbb_assignmnt_type", "rfid_irbb_lower_threshold_s", "rfid_irbb_upper_threshold_s"), 
+      video_metadata_cols, 
+      path, 
+      rfid_dir = "tmp", 
+      video_dir, 
+      out_dir = "tmp", 
+      out_file_nm = "tmp_rfid_irbb_video_integration.csv",
+      tz, 
+      POSIXct_format = "%Y-%m-%d %H:%M:%OS"
+    )
+    
+  } else if(grepl("irbb-video", second_integration)){
+    
+    # First do the RFID to outer beam breaker integration.....I should be calling integrate_rfid_beamBreakers here....and get rid of some of the arguments above as needed...
+    # Try writing this integrated data to a temporary directory. Will need to delete this after
+    integrate_rfid_beamBreakers(rfid_file_nm, irbb_file_nm, l_th = l1_th, u_th = u1_th, sensor_id_col, timestamps_col, PIT_tag_col, outer_irbb_col, inner_irbb_col, irbb_event_col, irbb_unique_col, preproc_metadata_cols, path, rfid_dir, irbb_dir, out_dir = "tmp", out_file_nm = "tmp_rfid_irbb_integration.csv", tz, POSIXct_format = "%Y-%m-%d %H:%M:%OS")
+    
+    # Change the name of the RFID column to timetsamps_col, and add a sensor_id column with "RFID" to this .csv to facilitate the video integration below
+    read.csv(file.path(path, "tmp", "tmp_rfid_irbb_integration.csv"), header = TRUE) %>% 
+      dplyr::mutate(
+        sensor_id = "Inner_beam_breaker"
+      ) %>% 
+      dplyr::rename(
+        !!timestamps_col := "Inner_beam_breaker"
+      ) %>% 
+      write.csv(file.path(path, "tmp", "tmp_rfid_irbb_integration.csv"), row.names = FALSE)
+    
+    integrate_beamBreakers_video(
       
-      # RFID detections that occurred within a video recording event
-      matched_irbb_rfid_video = map(.x = lags, .f = ~ dplyr::mutate(
-        .x,
-        RFID = leading_RFID,
-        video_rfid_diffs = video_withn_diffs,
-        RFID_type = "within video",
-        direction = leading_direction,
-        unique_event = leading_unique_event
-      ) %>% 
-        dplyr::filter(
-          binary_vals_wthn
-        ) %>% 
-        dplyr::select(RFID, !!sym(video_nm), video_rfid_diffs, direction, unique_event, RFID_type) %>%
-        # RFID detections that occurred before a video recording event
-        bind_rows(
-          .x %>%
-            dplyr::mutate(
-              RFID = lagging_RFID,
-              video_rfid_diffs = post_video_diffs,
-              RFID_type = "pre-video",
-              direction = lagging_direction,
-              unique_event = lagging_unique_event
-            ) %>%
-            dplyr::filter(
-              binary_vals_post
-            ) %>%
-            dplyr::select(RFID, !!sym(video_nm), video_rfid_diffs, direction, unique_event, RFID_type)
-        )
-      )
-    ) %>%
-    dplyr::select(-c(lags)) %>%
-    unnest(`cols` = c(matched_irbb_rfid_video)) %>% 
-    ungroup() %>% 
-    # Make sure to add a column with the temporal threshold used
-    dplyr::mutate(
-      integration_lower_temporal_thresh = l_th,
-      integration_upper_temporal_thresh = u_th
-    ) %>% 
-    # Now join back with the beam breaker timestamps using the unique event names
-    # This was very tricky to do above with leads and lags, I kept getting missing values
-    dplyr::inner_join(
-      irbb_rfid %>% 
-        dplyr::select(c("PIT_tag_ID", "unique_beamBreak_event", "lead_bb_timestamp", "rear_bb_timestamp", "RFID")),
-      by = c("group_col" = "PIT_tag_ID", "unique_event" = "unique_beamBreak_event", "RFID")
-    ) %>% 
-    dplyr::select(group_col, lead_bb_timestamp, rear_bb_timestamp, !!sym(rfid_nm), !!sym(video_nm), video_rfid_diffs, direction, unique_event, integration_lower_temporal_thresh, integration_upper_temporal_thresh) %>% 
-    glimpse()
+      # irbb_file_nm, video_file_nm, l_th = NULL, u_th = NULL, video_rec_dur = NULL, sensor_id_col, timestamps_col, PIT_tag_col, outer_irbb_col, inner_irbb_col, irbb_event_col, irbb_unique_col, general_metadata_cols, video_metadata_cols, path, irbb_dir, video_dir, out_dir, tz, POSIXct_format = "%Y-%m-%d %H:%M:%OS"
+      
+      irbb_file_nm = "tmp_rfid_irbb_integration.csv", 
+      video_file_nm,
+      l_th = l2_th, 
+      u_th = u2_th, 
+      video_rec_dur, 
+      sensor_id_col, 
+      timestamps_col, 
+      PIT_tag_col, 
+      outer_irbb_col, 
+      inner_irbb_col, 
+      irbb_event_col, 
+      irbb_unique_col, 
+      preproc_metadata_cols = c("data_stage", "temporal_threshold_s", "date_labeled"),
+      general_metadata_cols = c("chamber_id", "year", "month", "day"),
+      extra_cols2drop = c("Outer_beam_breaker", "Inner_beam_breaker", "irbb_direction_inferred", "unique_entranceExit", "outer_rfid_diffs", "rfid_irbb_assignmnt_type", "rfid_irbb_lower_threshold_s", "rfid_irbb_upper_threshold_s"), 
+      video_metadata_cols, 
+      path, 
+      rfid_dir = "tmp", 
+      video_dir, 
+      out_dir = "tmp", 
+      out_file_nm = "tmp_rfid_irbb_video_integration.csv",
+      tz, 
+      POSIXct_format = "%Y-%m-%d %H:%M:%OS"
+    )
+    
+  }
+
+  # Then move the final file to the integrated directory and delete the tmp directory
   
-  names(res_df)[grep("group_col", names(res_df))] <- PIT_tag_nm
   
-  # glimpse(res_df)
-  # View(res_df)
-  
-  return(res_df)
   
 }
 
-# Set up the integrated RFID and beam breaker data for additional integration with the raw video data
-pct_video_rfid <- pct_df2 %>% 
-  dplyr::filter(data_type == "Video") %>% 
-  dplyr::select(data_type, event_datetime_ms) %>% 
-  # Get rid of duplicate rows / timestamps (duplicates are the pre- and post-motion detection videos with the same timestamps)
-  distinct(data_type, event_datetime_ms) %>% 
-  dplyr::mutate(
-    direction = NA, 
-    unique_beamBreak_event = NA,
-    PIT_tag_ID = NA
-  ) 
-
-glimpse(pct_video_rfid)
-
-
-matched_irbb_rfid_video <- irbb_rfid %>% 
-  # Make a fake grouping column to place all rows into the same group for map_dfr works
-  dplyr::mutate(
-    grping = 1
-  ) %>% 
-  group_split(grping) %>%
-  map_dfr(
-    ~ integrate_irbb_rfid_video(
-      .x, 
-      video_df = pct_video_rfid,
-      l_th = 0, 
-      u_th = 10, 
-      p_th = 10, 
-      group_col = "data_type", 
-      timestamps = "event_datetime_ms", 
-      names_from = "data_type", 
-      values_from = "event_datetime_ms", 
-      rfid_nm = "RFID", 
-      video_nm = "Video", 
-      PIT_tag_nm = "PIT_tag_ID",
-      lead_sensor_nm = "lead_bb_timestamp",
-      rear_sensor_nm = "rear_bb_timestamp",
-      direction_nm = "direction",
-      sensor_event_nm = "unique_beamBreak_event"
-    )
-  ) 
-
-glimpse(matched_irbb_rfid_video)
-
-matched_irbb_rfid_video %>% 
-  View()
-
-# Get any data that occurred outside of recording hours
-irbb_rfid %>% 
-  glimpse()
-
-# Need to add back RFID events that occurred after 18:00
-# The integrated beam breaker and RFID data also don't have RFOD detections beyond hour 18:00 
-matched_irbb_rfid_video %>% 
-  dplyr::mutate(
-    hours = hour(RFID)
-  ) %>% 
-  dplyr::summarise(
-    max(hours)
-  )
-
-rfid_irbb_pre_proc <- read.csv(file.path(out_path, "pre-processed_RFID_IRBB_data_firstRunBox01_Spring2022.csv")) %>% 
-  dplyr::mutate(
-    # event_datetime_ms = as_datetime(hms(format(as.POSIXct(event_datetime_ms, tz = "America/New York"), "%H:%M:%S")))
-    event_datetime_ms = as.POSIXct(format(as.POSIXct(date_time_ms, tz = "America/New York"), "%Y-%m-%d %H:%M:%OS6"))
-  )
-glimpse(rfid_irbb_pre_proc)
-
-# unique(rfid_irbb_pre_proc$data_type)
-
-matched_irbb_rfid_video2 <- matched_irbb_rfid_video %>% 
-  bind_rows(
-    
-    rfid_irbb_pre_proc %>%
-      as_tibble() %>%
-      dplyr::filter(data_type == "RFID") %>% 
-      dplyr::mutate(
-        hours = as.numeric(hour(event_datetime_ms))
-      ) %>%
-      dplyr::filter(
-        hours > 18
-      ) %>% 
-      pivot_wider(
-        names_from = "data_type",
-        values_from = "event_datetime_ms"
-      ) %>% 
-      dplyr::mutate(
-        lead_bb_timestamp = NA,
-        rear_bb_timestamp = NA,
-        Video = NA,
-        video_rfid_diffs = NA,
-        direction = NA,
-        unique_event = NA,
-        integration_lower_temporal_thresh = NA,
-        integration_upper_temporal_thresh = NA
-      ) %>% 
-      dplyr::select(names(matched_irbb_rfid_video))
-    
-  )
-
-
-glimpse(matched_irbb_rfid_video2)
-
-# Write this out
-matched_irbb_rfid_video2 %>% 
-  write.csv(., file.path(out_path, "integrated_irbb_rfid_video_data.csv"), row.names = FALSE)
