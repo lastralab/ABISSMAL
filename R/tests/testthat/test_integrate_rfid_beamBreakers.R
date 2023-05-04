@@ -3,7 +3,7 @@ library(tidyverse)
 l_th <- 0
 u_th <- 5
 rfid_file_nm <- "pre_processed_data_RFID.csv"
-irbb_file_nm <- "integrated_beamBreaker_data.csv"
+irbb_file_nm <- "integrated_beamBreaker_data.csv" # "labeled_beamBreaker_data.csv"
 sensor_id_col <- "sensor_id"
 timestamps_col <- "timestamp_ms"
 outer_irbb_col <- "Outer_beam_breaker"

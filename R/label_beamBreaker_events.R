@@ -191,7 +191,8 @@ label_beamBreaker_events <- function(irbb_file_nm, l_th, u_th, sensor_id_col, ti
     ) %>% 
     dplyr::mutate(
       data_stage = "integration",
-      temporal_threshold_s = threshold,
+      lower_threshold_s = l_th,
+      upper_threshold_s = u_th,
       date_labeled = paste(Sys.Date(), Sys.time(), sep = " ")
     ) %>% 
     # Rename the outer beam breaker column for the metadata join below
@@ -213,7 +214,7 @@ label_beamBreaker_events <- function(irbb_file_nm, l_th, u_th, sensor_id_col, ti
       `Outer_beam_breaker` = !!sym(outer_irbb_nm),
       `Inner_beam_breaker` = !!sym(inner_irbb_nm)
     ) %>% 
-    dplyr::select(data_type, chamber_id, year, month, day, Outer_beam_breaker, Inner_beam_breaker, diffs, irbb_direction_inferred, irbb_assignmnt_type, data_stage, temporal_threshold_s, date_labeled) %>% 
+    dplyr::select(data_type, chamber_id, year, month, day, Outer_beam_breaker, Inner_beam_breaker, diffs, irbb_direction_inferred, irbb_assignmnt_type, data_stage, lower_threshold_s, upper_threshold_s, date_labeled) %>% 
     dplyr::arrange(all_of(outer_irbb_nm), desc = FALSE)
   
   #### Handle duplicates
@@ -303,7 +304,7 @@ label_beamBreaker_events <- function(irbb_file_nm, l_th, u_th, sensor_id_col, ti
       dplyr::rename(
         `unique_entranceExit` = rowid
       ) %>%
-      dplyr::select(data_type, chamber_id, year, month, day, Outer_beam_breaker, Inner_beam_breaker, diffs, irbb_direction_inferred, unique_entranceExit, irbb_assignmnt_type, data_stage, temporal_threshold_s, date_labeled)
+      dplyr::select(data_type, chamber_id, year, month, day, Outer_beam_breaker, Inner_beam_breaker, diffs, irbb_direction_inferred, unique_entranceExit, irbb_assignmnt_type, data_stage, lower_threshold_s, upper_threshold_s, date_labeled)
     
   } else {
     
@@ -313,7 +314,7 @@ label_beamBreaker_events <- function(irbb_file_nm, l_th, u_th, sensor_id_col, ti
       dplyr::rename(
         `unique_entranceExit` = rowid
       ) %>%
-      dplyr::select(data_type, chamber_id, year, month, day, Outer_beam_breaker, Inner_beam_breaker, diffs, irbb_direction_inferred, unique_entranceExit, irbb_assignmnt_type, data_stage, temporal_threshold_s, date_labeled)
+      dplyr::select(data_type, chamber_id, year, month, day, Outer_beam_breaker, Inner_beam_breaker, diffs, irbb_direction_inferred, unique_entranceExit, irbb_assignmnt_type, data_stage, lower_threshold_s, upper_threshold_s, date_labeled)
     
   }
   
