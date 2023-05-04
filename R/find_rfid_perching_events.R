@@ -7,6 +7,7 @@
 #' @param sensor_id_col A character value. This is the name of the metadata column that contains information about the data type (e.g. "sensor_id")
 #' @param timestamps_col A character value. The name of the column that contains timestamps in a format that supports calculations in milliseconds (e.g. "event_datetime_ms")
 #' @param PIT_tag_col A character value. This is the name of the metadata column that contains information about the PIT tags detected by the RFID antenna (e.g. "PIT_tag_ID")
+#' @param general_metadata_cols A character vector. This should be a string of the general metadata column names that will be carried through into the resulting data frame representing the integrated data. For this particular function, these metadata columns should be generally applicable across PIT tag IDs and dates. For instance: cc("chamber_id", "sensor_id"). These columns will be added as the first columns in the integrated data frame, in the same order in which they are provided
 #' @param path A character string. This should be the path specifying the overall directory where data is saved for a given experimental setup. For instance, "/media/gsvidaurre/Anodorhynchus/Data_Testing/Box_02_31Dec2022/Data".
 #' @param rfid_dir A character string. This should be the name of directory where the pre-processed RFID data is saved across sensors inside the path above. For instance, "pre-processed"
 #' @param out_dir A character string. This should be the name of a directory specifying where the .csv file of pre-processed data should be saved for each sensor. For instance, "pre-processed". This folder will be appended to the data_path and created as a new directory if it doesn't already exist.
@@ -16,20 +17,7 @@
 #'
 #' @return A data frame object with all metadata columns in the original data frame, as well as columns indicating the timestamp of the start of the perching period identified, the end of the given perching period, and the temporal threshold used for pre-processing (in seconds). In other words, each row is a perching period
 
-rfid_file_nm <- "pre_processed_data_RFID.csv"
-threshold <- 2
-run_length <- 2
-sensor_id_col <- "sensor_id"
-timestamps_col <- "timestamp_ms"
-PIT_tag_col <- "PIT_tag_ID"
-path <- "/media/gsvidaurre/Anodorhynchus/Data_Testing/Box_02_31Dec2022/Data"
-rfid_dir <- "pre_processed"
-out_dir <- "pre_processed"
-tz <- "America/New York"
-POSIXct_format <- "%Y-%m-%d %H:%M:%OS"
-
-
-find_rfid_perching_events <- function(rfid_file_nm, threshold, run_length = 2, sensor_id_col, timestamps_col, PIT_tag_col, path, rfid_dir, out_dir, out_file_nm = "perching_events.csv", tz, POSIXct_format = "%Y-%m-%d %H:%M:%OS"){
+find_rfid_perching_events <- function(rfid_file_nm, threshold, run_length = 2, sensor_id_col, timestamps_col, PIT_tag_col, general_metadata_cols, path, rfid_dir, out_dir, out_file_nm = "perching_events.csv", tz, POSIXct_format = "%Y-%m-%d %H:%M:%OS"){
   
   # Get the current global options
   orig_opts <- options()
@@ -75,117 +63,137 @@ find_rfid_perching_events <- function(rfid_file_nm, threshold, run_length = 2, s
       !!timestamps_col := as.POSIXct(format(as.POSIXct(!!sym(timestamps_col), tz = "America/New York"), "%Y-%m-%d %H:%M:%OS6"))
     ) 
   
-  # Look for perching events by PIT tag ID and day. Otherwise the logic below ends up including the last event of a day and the first of the next day as the start and end indices, which leads to strangely long perching periods sometimes
-  # Where is the grouping by PIT tag??? I think not grouping by this and adding the tags back later wasn't done well...
-  tmp_df <- preproc_rfid %>%
+  # Group the RFID data frame by PIT tag ID and day. Otherwise the logic below ends up including the last event of a day and the first of the next day as the start and end indices, which leads to strangely long perching periods sometimes
+  perching_df <- preproc_rfid %>%
     dplyr::mutate(
-      date = paste(year, month, day, sep = " - ")
+      dates = paste(year, month, day, sep = "-")
     ) %>%
-    group_by(date) %>%
+    group_by(!!sym(PIT_tag_col), dates) %>% 
     dplyr::arrange(!!sym(timestamps_col), .by_group = TRUE) %>% 
     # Make unique row indices within groups
     dplyr::mutate(
       group_row_id = row_number()
-    ) 
-
-  # The lags are calculated per group in the grouped data frame
-  lags <- tmp_df %>% 
-    dplyr::mutate(
-      shift = dplyr::lag(!!sym(timestamps_col), default = first(!!sym(timestamps_col)))
     ) %>% 
-    # Convert differences to boolean based on a threshold to be able to remove stretches of detection events very close together
+    nest() %>% 
     dplyr::mutate(
-      diff = floor(!!sym(timestamps_col) - shift),
-      diff = as.numeric(diff),
-      binary_diff = (diff <= threshold) # Taking anything less than or equal to the threshold, see previous RFID pre-processing
-    ) %>% 
-    dplyr::select(date, all_of(timestamps_col), diff, binary_diff) %>% 
-    dplyr::rename(
-      `dates` = "date"
-    )
-  
-  # Make a data frame of the first and last indices of each run longer than 2 events that contain values below or equal to the given threshold
-  lags_runs <- lags %>% 
-    dplyr::summarise(
-      first_indices = cumsum(rle(binary_diff)[["lengths"]]) - (rle(binary_diff)[["lengths"]]),
-      last_indices = cumsum(rle(binary_diff)[["lengths"]]),
-      run_values = rle(binary_diff)[["values"]],
-      run_lengths = rle(binary_diff)[["lengths"]]
-    ) %>% 
-    dplyr::filter(run_values & run_lengths >= run_length) %>% 
-    ungroup() %>% 
-    # If a first index is stored as 0, then add 1 to restore this first index
-    dplyr::mutate(
-      first_indices = ifelse(first_indices == 0, first_indices + 1, first_indices)
-    )
-  
-  if(nrow(lags_runs) > 0){
-    
-    # Per group, retain the first and last indices of RFID detections flagged as perching events
-    # For some reason nesting and subsequent filtering doesn't work with 2 group variables, even when these are pasted together (in an earlier version of the function), so I used pmap_dfr to iterate over rows in lags_runs instead
-    filt_df <- lags_runs %>%
-      dplyr::select(dates, first_indices, last_indices) %>% 
-      pmap_dfr(., function(dates, first_indices, last_indices){
-        
-        starts <- tmp_df %>%
-          ungroup() %>%
-          dplyr::filter(date == dates) %>%
-          slice(c(first_indices)) %>%
-          pull(all_of(timestamps_col))
-        
-        ends <- tmp_df %>%
-          ungroup() %>%
-          dplyr::filter(date == dates) %>%
-          slice(c(last_indices)) %>%
-          pull(all_of(timestamps_col))
-        
-        return(data.frame(
-          dates = dates,
-          start = starts,
-          end = ends,
-          duration_seconds = as.numeric(ends - starts),
-          event_type = "perching",
-          run_length = run_length
-        ))
-        
-      }) %>% 
-      as_tibble() %>% 
-      # Make sure to add a column with the temporal threshold used, and add back the tag ID column
-      dplyr::mutate(
-        temporal_threshold_seconds = threshold,
-        PIT_tag_ID = df %>% 
-          pull(!!sym(tag_id_col_nm)) %>% 
-          unique()
-      ) %>% 
-      dplyr::select(
-        dates,
-        PIT_tag_ID,
-        start,
-        end,
-        duration_seconds,
-        event_type,
-        temporal_threshold_seconds,
-        run_length
+      # Map over the data frames nested by PIT tag IDs
+      lags = map(
+        .x = data,
+        .f = ~ dplyr::mutate(.x,
+                             shift = dplyr::lag(!!sym(timestamps_col), default = first(!!sym(timestamps_col)))
+        ) %>% 
+          # Convert differences to boolean based on the thinning threshold to be able to remove stretches of detection events very close together
+          dplyr::mutate(
+            diff = as.numeric(floor(!!sym(timestamps_col) - shift)),
+            # Taking anything less than or equal to the threshold, see previous RFID pre-processing
+            binary_diff = (diff <= threshold)
+          ) %>% 
+          dplyr::select(all_of(timestamps_col), diff, binary_diff) 
       )
+    ) %>% 
+    # Make a data frame of the first and last indices of each run longer than the given run_length that contain temporal difference values below or equal to the given threshold
+    dplyr::mutate(
+      # Map over the data frames nested by PIT tag IDs
+      lags_runs = map(
+        .x = lags,
+        .f = ~ dplyr::summarise(.x,
+                                first_indices = cumsum(rle(binary_diff)[["lengths"]]) - (rle(binary_diff)[["lengths"]]),
+                                last_indices = cumsum(rle(binary_diff)[["lengths"]]),
+                                run_values = rle(binary_diff)[["values"]],
+                                run_lengths = rle(binary_diff)[["lengths"]],
+                                .groups = "keep"
+        ) %>% 
+          dplyr::filter(run_values & run_lengths >= run_length) %>% 
+          ungroup() %>% 
+          # If a first index is stored as 0, then add 1 to restore this first index
+          dplyr::mutate(
+            first_indices = ifelse(first_indices == 0, first_indices + 1, first_indices)
+          )
+      )
+    ) %>% 
+    # Get the unique perching events
+    dplyr::mutate(
+      # Map over the data frames nested by PIT tag IDs
+      perching = map(
+        .x = lags_runs,
+        .y = data,
+        # For each unique PIT tag and date, retain the first and last indices of RFID detections flagged as perching events
+        # Use pmap_dfr to iterate over rows in each nested data frame, in which each row represents a unique perching event by date
+        .f = ~ dplyr::select(.x, first_indices, last_indices) %>% 
+          pmap_dfr(., function(first_indices, last_indices){
+            
+            tmp_perching <- data.frame(
+              start = .y[[1]] %>%
+                dplyr::filter(group_row_id == first_indices) %>%
+                pull(all_of(timestamps_col)),
+              end = .y[[1]] %>%
+                dplyr::filter(group_row_id == last_indices) %>%
+                pull(all_of(timestamps_col))
+            ) 
+            
+            return(tmp_perching)
+            
+          })
+      ) 
+    ) %>%
+    dplyr::select(-c(data, lags, lags_runs)) %>% 
+    unnest(`cols` = c(perching)) %>%
+    ungroup() %>% 
+    tidyr::separate(
+      col = "dates", into = c("year", "month", "day"), sep = "-"
+    )
+  
+  if(nrow(perching_df) > 0){
+    
+    # Add metadata and arrange columns and rows before writing this out
+    perching_events <- perching_df %>% 
+      dplyr::mutate(
+        duration_seconds = as.numeric(end - start),
+        event_type = "perching",
+        run_length = run_length,
+        threshold = threshold,
+        data_stage = "pre-processing",
+        date_preprocessed = paste(Sys.Date(), Sys.time(), sep = " ")
+      ) %>% 
+      # Add back general metdata columns from the original RFID dataset
+      cbind(
+        preproc_rfid %>%
+          dplyr::select(all_of(general_metadata_cols)) %>% 
+          distinct()
+      ) %>%
+      dplyr::arrange(start, desc = FALSE) %>% 
+      rowid_to_column() %>% 
+      dplyr::rename(
+        `unique_event` = "rowid"
+      ) %>% 
+      dplyr::select(all_of(general_metadata_cols), year, month, day, all_of(PIT_tag_col), start, end, duration_seconds, event_type, unique_event, run_length, threshold, data_stage, date_preprocessed)
     
   } else {
     
-    filt_df <- data.frame(
-      dates = unique(tmp_df$date),
-      PIT_tag_ID = df %>% 
-        pull(!!sym(tag_id_col_nm)) %>% 
-        unique(),
-      start = NA,
-      end = NA,
-      duration_seconds = NA,
-      event_type = NA,
-      temporal_threshold_seconds = threshold,
-      run_length = run_length
-    )
+    perching_events <- preproc_rfid %>%
+      distinct(year, month, day, !!sym(PIT_tag_col)) %>% 
+      dplyr::mutate(
+        start = NA,
+        end = NA,
+        duration_seconds = NA,
+        unique_event = NA,
+        event_type = "perching",
+        run_length = run_length,
+        threshold = threshold,
+        data_stage = "pre-processing",
+        date_preprocessed = paste(Sys.Date(), Sys.time(), sep = " ")
+      ) %>% 
+      # Add back general metdata columns from the original RFID dataset
+      cbind(
+        preproc_rfid %>%
+          dplyr::select(all_of(general_metadata_cols)) %>% 
+          distinct()
+      ) %>%
+      dplyr::select(all_of(general_metadata_cols), year, month, day, all_of(PIT_tag_col), start, end, duration_seconds, event_type, unique_event, run_length, threshold, data_stage, date_preprocessed)
     
   }
   
-  write.csv(filt_df, file.path(path, out_dir, out_file_nm), row.names = FALSE)
+  write.csv(perching_events, file.path(path, out_dir, out_file_nm), row.names = FALSE)
   
   # Reset the current global options
   options(orig_opts)

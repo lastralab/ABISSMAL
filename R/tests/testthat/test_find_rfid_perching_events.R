@@ -3,6 +3,23 @@
 
 # See more info on the testthat package: https://r-pkgs.org/testing-basics.html
 
+
+# TKTK need to test that there are no negative durations and also no duplicate durations indicating assignments within or between PIT tags
+
+rfid_file_nm <- "combined_raw_data_RFID.csv"
+threshold <- 2
+run_length <- 2
+sensor_id_col <- "sensor_id"
+timestamps_col <- "timestamp_ms"
+PIT_tag_col <- "PIT_tag_ID"
+path <- "/media/gsvidaurre/Anodorhynchus/Data_Testing/Box_02_31Dec2022/Data"
+rfid_dir <- "raw_combined"
+out_dir <- "pre_processed"
+out_file_nm = "perching_events.csv"
+tz <- "America/New York"
+POSIXct_format <- "%Y-%m-%d %H:%M:%OS"
+
+
 # See examples on: 
 # https://www.r-bloggers.com/2019/11/automated-testing-with-testthat-in-practice/
 
