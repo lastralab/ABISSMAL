@@ -194,8 +194,6 @@ integrate_rfid_video <- function(rfid_file_nm, video_file_nm, l_th = NULL, u_th 
       )
     )
   
-  # View(lags_grpd$lags[[1]])
-  
   conditnal_lead_ent <- "binary_lead_ent & !is.na(binary_lead_ent)"
   conditnal_lead_exi <- "binary_lead_exi & !is.na(binary_lead_exi)"
   
