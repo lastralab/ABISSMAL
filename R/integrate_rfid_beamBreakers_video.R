@@ -5,6 +5,7 @@
 #' @param irbb_file_nm A character string. This should be the name of the file that contains all of the pre-processed infrared beam breaker (IRBB) detections. Each row is a unique detection event. This data frame must contain all the columns specified for the IRBB data in the subsequent arguments
 #' @param video_file_nm A character string. This should be the name of the file that contains all of the pre-processed video detections. Each row is a unique detection event. This data frame must contain all the columns specified for the video data in the subsequent arguments
 #' @param second_integration A character string. This argument should be set to "rfid-video" or "irbb-video", to denote how the video data will be integrated. If "rfid-video" is specified, then the video data will be integrated by identifying RFID and video detections that occurred within the given temporal thresholds l2_th and u2_th. If "irbb-video" is specified, then the video data will be integrated by identifying inner beam breaker and video detections that occurred within these temporal thresholds
+#' @param integrate_perching Boolean. If TRUE, then the perching events identified using `find_perching_events` will be part of the second integration. When the second integration is set to "rfid-video", then this perching events are integrated by finding RFID timestamps that occurred within the duration of a perching event. When the second integration is set to "irbb-video", then this perching events are integrated by finding inner beam breaker timestamps that occurred within the duration of a perching event. If FALSE, then perching events will not be integrated.
 #' @param l1_th A numeric argument. This represents a lower or minimum temporal threshold in seconds to identify RFID and beam breaker events that are close enough together for integration
 #' @param u1_th A numeric argument. This represents an upper or maximum temporal threshold in seconds to identify RFID and beam breaker events that are close enough together for integration
 #' #' @param l2_th A numeric argument. This represents a lower or minimum temporal threshold in seconds to identify RFID and video events, or inner beam breaker and video, events that are close enough together for integration. This threshold should be specific to how the integration step will be performed (see the argument `second_integration`)
@@ -35,7 +36,7 @@
 #' @return A .csv file with the metadata columns from the original pre-processed data used as input, as well as columns indicating each of the timestamps of the RFID antenna, the lead and rear beam breaker pairs, a unique label for the given event (e.g. entrance or exit), a unique numeric identifier for the given event, and information about the given data processing stage. Each row in the .csv file is an RFID detection that was integrated with a labeled event across the outer and inner beam breaker pairs. Information about the temporal thresholds used for the integration and the date that the data was integrated is also contained in this spreadsheet.
 #' 
 
-integrate_rfid_beamBreakers_video <- function(rfid_file_nm, irbb_file_nm, video_file_nm, second_integration, l1_th, u1_th, l2_th, u2_th, video_rec_dur, sensor_id_col, timestamps_col, PIT_tag_col, outer_irbb_col, inner_irbb_col, irbb_event_col, irbb_unique_col, preproc_metadata_cols, general_metadata_cols, video_metadata_cols, path, data_dir, out_dir, out_file_nm = "integrated_rfid_beamBreakers_video_data.csv", tz, POSIXct_format = "%Y-%m-%d %H:%M:%OS"){
+integrate_rfid_beamBreakers_video <- function(rfid_file_nm, irbb_file_nm, video_file_nm, second_integration, integrate_perching, l1_th, u1_th, l2_th, u2_th, video_rec_dur, sensor_id_col, timestamps_col, PIT_tag_col, outer_irbb_col, inner_irbb_col, irbb_event_col, irbb_unique_col, preproc_metadata_cols, general_metadata_cols, video_metadata_cols, path, data_dir, out_dir, out_file_nm = "integrated_rfid_beamBreakers_video_data.csv", tz, POSIXct_format = "%Y-%m-%d %H:%M:%OS"){
   
   # Get the current global options
   orig_opts <- options()
@@ -72,6 +73,7 @@ integrate_rfid_beamBreakers_video <- function(rfid_file_nm, irbb_file_nm, video_
     irbb_event_col, 
     irbb_unique_col, 
     preproc_metadata_cols, 
+    integrate_perching = FALSE,
     path, 
     rfid_dir, 
     irbb_dir, 
@@ -109,7 +111,8 @@ integrate_rfid_beamBreakers_video <- function(rfid_file_nm, irbb_file_nm, video_
       preproc_metadata_cols = c("data_stage", "date_integrated"),
       general_metadata_cols = c("chamber_id", "year", "month", "day"),
       extra_cols2drop = c("Outer_beam_breaker", "Inner_beam_breaker", "outer_rfid_diffs", "rfid_irbb_assignmnt_type", "rfid_irbb_lower_threshold_s", "rfid_irbb_upper_threshold_s"), 
-      video_metadata_cols, 
+      video_metadata_cols,
+      integrate_perching,
       path, 
       rfid_dir = "tmp", 
       video_dir, 
@@ -166,7 +169,8 @@ integrate_rfid_beamBreakers_video <- function(rfid_file_nm, irbb_file_nm, video_
       preproc_metadata_cols = c("data_stage", "date_integrated"),
       general_metadata_cols = c("chamber_id", "year", "month", "day"),
       extra_cols2drop = c("RFID", "PIT_tag_ID", "outer_rfid_diffs", "rfid_irbb_assignmnt_type", "rfid_irbb_lower_threshold_s", "rfid_irbb_upper_threshold_s"), 
-      video_metadata_cols, 
+      video_metadata_cols,
+      integrate_perching,
       path, 
       irbb_dir = "tmp", 
       video_dir, 

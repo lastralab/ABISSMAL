@@ -29,31 +29,6 @@
 #' @return A .csv file with the metadata columns from the original pre-processed data used as input, as well as columns indicating each of the timestamps of the RFID antenna, the lead and rear beam breaker pairs, a unique label for the given event (e.g. entrance or exit), a unique numeric identifier for the given event, and information about the given data processing stage. Each row in the .csv file is an RFID detection that was integrated with a labeled event across the outer and inner beam breaker pairs. Information about the temporal thresholds used for the integration and the date that the data was integrated is also contained in this spreadsheet.
 #' 
 
-library(tidyverse)
-
-l_th <- 0
-u_th <- 5
-rfid_file_nm <- "pre_processed_data_RFID.csv"
-irbb_file_nm <- "labeled_beamBreaker_data.csv"
-sensor_id_col <- "sensor_id"
-PIT_tag_col <- "PIT_tag_ID"
-timestamps_col <- "timestamp_ms"
-outer_irbb_col <- "Outer_beam_breaker"
-inner_irbb_col <- "Inner_beam_breaker"
-irbb_event_col <- "irbb_direction_inferred"
-irbb_unique_col <- "unique_entranceExit"
-general_metadata_cols <- c("chamber_id", "year", "month", "day")
-preproc_metadata_cols <- c("thin_threshold_s", "data_stage", "date_pre_processed", "lower_threshold_s", "upper_threshold_s", "date_labeled")
-integrate_perching <- TRUE
-path <- "/media/gsvidaurre/Anodorhynchus/Data_Testing/Box_02_31Dec2022/Data"
-rfid_dir <- "pre_processed"
-irbb_dir <- "pre_processed"
-out_dir <- "integrated"
-out_file_nm = "integrated_rfid_beamBreaker_data.csv"
-tz <- "America/New York"
-POSIXct_format <- "%Y-%m-%d %H:%M:%OS"
-
-
 integrate_rfid_beamBreakers <- function(rfid_file_nm, irbb_file_nm, l_th = NULL, u_th = NULL, sensor_id_col, timestamps_col, PIT_tag_col, outer_irbb_col, inner_irbb_col, irbb_event_col, irbb_unique_col, preproc_metadata_cols, integrate_perching, path, rfid_dir, irbb_dir, out_dir, out_file_nm = "integrated_rfid_beamBreaker_data.csv", tz, POSIXct_format = "%Y-%m-%d %H:%M:%OS"){
   
   # Get the current global options
