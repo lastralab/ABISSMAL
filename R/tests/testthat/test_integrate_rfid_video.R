@@ -5,15 +5,19 @@ u_th <- 3
 video_rec_dur <- 9
 rfid_file_nm <- "pre_processed_data_RFID.csv"
 video_file_nm <- "pre_processed_data_Video.csv"
-method <- "sign"
 sensor_id_col <- "sensor_id"
 timestamps_col <- "timestamp_ms"
 PIT_tag_col <- "PIT_tag_ID"
+preproc_metadata_cols <- c("thin_threshold_s", "data_stage", "date_pre_processed", "lower_threshold_s", "upper_threshold_s", "date_labeled")
 general_metadata_cols <- c("chamber_id", "year", "month", "day")
 video_metadata_cols <- c("total_pixels_motionTrigger", "pixel_threshold", "video_file_name")
+extra_cols2drop <- NA
+integrate_perching <- TRUE
 path <- "/media/gsvidaurre/Anodorhynchus/Data_Testing/Box_02_31Dec2022/Data"
-data_dir <- "pre_processed"
+rfid_dir <- "pre_processed"
+video_dir <- "pre_processed"
 out_dir <- "integrated"
+out_file_nm = "integrated_rfid_video_data.csv"
 tz <- "America/New York"
 POSIXct_format <- "%Y-%m-%d %H:%M:%OS"
 

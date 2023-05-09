@@ -15,7 +15,8 @@
 #' @param preproc_metadata_cols A character vector. This should be a string of the metadata column names from pre-processing that should be dropped from either or both data frames. For instance, c("thin_threshold_s", "data_stage", "date_pre_processed", "lower_threshold_s", "upper_threshold_s", "date_labeled")
 #' #' @param general_metadata_cols A character vector. This should be a string of the general metadata column names that will be carried through into the resulting data frame representing the integrated data. For instance: c("chamber_id", "year", "month", "day"). These columns will be added as the first columns in the integrated data frame, in the same order in which they are provided
 #' @param video_metadata_cols A character vector. This should be a string of the video metadata column names that will be carried through into the resulting data frame representing the integrated data. For instance: c("total_pixels_motionTrigger", "pixel_threshold", "video_file_name"). These columns will be added as later columns in the integrated data frame, in the same order in which they are provided
-#' @param extra_cols2drop A character vector. This should be a string of additional metadata column names that should be dropped before the integration but will be added back to the resulting file. This argument is useful when using this function to integrate across all 3 movement sensors
+#' @param extra_cols2drop A character vector. This should be a string of additional metadata column names that should be dropped before the integration but will be added back to the resulting file, such as c("RFID", "PIT_tag_ID", "outer_rfid_diffs", "rfid_irbb_assignmnt_type", "rfid_irbb_lower_threshold_s", "rfid_irbb_upper_threshold_s"). This argument is useful when using this function to integrate across all 3 movement sensors (e.g. when using a dataset of integrated RFID and beam breaker data as input). Set this argument to NA if it is not needed
+#' @param integrate_perching Boolean. If TRUE, then the perching events identified using `find_perching_events` will be integrated with this dataset. This integration is done by finding inner beam breaker timestamps that occurred within the duration of a perching event. If FALSE, then perching events will not be integrated. 
 #' @param path A character string. This should be the path specifying the overall directory where data is saved for a given experimental setup. For instance, "/media/gsvidaurre/Anodorhynchus/Data_Testing/Box_02_31Dec2022/Data"
 #' @param irbb_dir A character string. This should be the name of directory where the pre-processed and labeled beam breaker data is saved across sensors inside the path above. For instance, "pre-processed"
 #' @param video_dir A character string. This should be the name of directory where the pre-processed video data is saved across sensors inside the path above. For instance, "pre-processed"
@@ -29,34 +30,7 @@
 #' @return A .csv file with the metadata columns from the original pre-processed data used as input, as well as columns indicating each of the timestamps of the lead and rear beam breaker pairs, the timestamps of the video recording events, a unique label for the given event (e.g. entrance or exit), a unique numeric identifier for the given event, and information about the given data processing stage. Each row in the .csv file is a labeled event across the outer and inner beam breaker pairs that was integrated with video recording events. Information about the temporal thresholds used for the integration and the date that the data was integrated is also contained in this spreadsheet.
 #' 
 
-# library(tidyverse)
-
-# irbb_file_nm = "tmp_rfid_irbb_integration.csv"
-# video_file_nm
-# l_th = l2_th
-# u_th = u2_th
-# video_rec_dur
-# sensor_id_col
-# timestamps_col
-# PIT_tag_col
-# outer_irbb_col
-# inner_irbb_col
-# irbb_event_col
-# irbb_unique_col
-# preproc_metadata_cols = c("data_stage", "date_integrated")
-# general_metadata_cols = c("chamber_id", "year", "month", "day")
-# extra_cols2drop = c("RFID", "PIT_tag_ID", "outer_rfid_diffs", "rfid_irbb_assignmnt_type", "rfid_irbb_lower_threshold_s", "rfid_irbb_upper_threshold_s")
-# video_metadata_cols
-# path
-# irbb_dir = "tmp"
-# video_dir
-# out_dir = "tmp"
-# out_file_nm = "tmp_rfid_irbb_video_integration.csv"
-# tz
-# POSIXct_format = "%Y-%m-%d %H:%M:%OS"
-
-
-integrate_beamBreakers_video <- function(irbb_file_nm, video_file_nm, l_th = NULL, u_th = NULL, video_rec_dur = NULL, sensor_id_col, timestamps_col, PIT_tag_col, outer_irbb_col, inner_irbb_col, irbb_event_col, irbb_unique_col, preproc_metadata_cols, general_metadata_cols, video_metadata_cols, extra_cols2drop, path, irbb_dir, video_dir, out_dir, out_file_nm = "integrated_beamBreaker_video_data.csv", tz, POSIXct_format = "%Y-%m-%d %H:%M:%OS"){
+integrate_beamBreakers_video <- function(irbb_file_nm, video_file_nm, l_th = NULL, u_th = NULL, video_rec_dur = NULL, sensor_id_col, timestamps_col, outer_irbb_col, inner_irbb_col, irbb_event_col, irbb_unique_col, preproc_metadata_cols, general_metadata_cols, video_metadata_cols, extra_cols2drop, integrate_perching, path, irbb_dir, video_dir, out_dir, out_file_nm = "integrated_beamBreaker_video_data.csv", tz, POSIXct_format = "%Y-%m-%d %H:%M:%OS"){
   
   # Get the current global options
   orig_opts <- options()
@@ -121,11 +95,16 @@ integrate_beamBreakers_video <- function(irbb_file_nm, video_file_nm, l_th = NUL
     stop('The Video data needs to be a data frame')
   }
   
+  # Drop additional metadata columns here
+  if(!is.na(extra_cols2drop)){
+    
+    labeled_irbb2 <- labeled_irbb2 %>%
+      dplyr::select(-c(all_of(extra_cols2drop)))
+    
+  }
+  
   # Lengthen the IRBB data frame 
   irbb_df_tmp <- labeled_irbb2 %>% 
-    # Drop additional metadata columns here
-    dplyr::select(-c(all_of(extra_cols2drop))) %>% 
-    # glimpse()
     pivot_longer(
       cols = c(all_of(outer_irbb_col), all_of(inner_irbb_col)),
       names_to = sensor_id_col,
@@ -376,17 +355,11 @@ integrate_beamBreakers_video <- function(irbb_file_nm, video_file_nm, l_th = NUL
       video_recording_duration_s = video_rec_dur,
       date_integrated = paste(Sys.Date(), Sys.time(), sep = " ")
     ) %>% 
-    # Add back general metadata from the beam breaker data
-    dplyr::inner_join(
-      labeled_irbb %>%
-        dplyr::select(all_of(general_metadata_cols), all_of(inner_irbb_col), all_of(outer_irbb_col), all_of(irbb_unique_col), all_of(extra_cols2drop), all_of(irbb_cols2drop)),
-      by = c(all_of(inner_irbb_col))
-    ) %>%
+    # Add back metadata about the video recording events
     dplyr::rename(
       # Had to rename this column for the join below
       !!timestamps_col := !!sym(video_col)
     ) %>%
-    # Add back metadata about the video recording events
     dplyr::inner_join(
       preproc_video %>%
         dplyr::select(all_of(video_metadata_cols), all_of(timestamps_col)),
@@ -394,9 +367,33 @@ integrate_beamBreakers_video <- function(irbb_file_nm, video_file_nm, l_th = NUL
     ) %>% 
     dplyr::rename(
       !!video_col := !!sym(timestamps_col)
-    ) %>% 
-  dplyr::select(all_of(general_metadata_cols), all_of(outer_irbb_col), all_of(inner_irbb_col), all_of(video_col), all_of(irbb_event_col), all_of(irbb_unique_col), inner_video_diffs, irbb_video_assignmnt_type, rfid_video_movement_inference, all_of(video_metadata_cols), data_stage, irbb_video_lower_threshold_s, irbb_video_upper_threshold_s, all_of(extra_cols2drop), video_recording_duration_s, date_integrated) %>% 
-    dplyr::arrange(!!sym(inner_irbb_col), desc = FALSE)
+    ) 
+  
+  if(!is.na(extra_cols2drop)){
+    
+    integr8d_df <- integr8d_df %>% 
+      # Add back general metadata from the beam breaker data
+      dplyr::inner_join(
+        labeled_irbb %>%
+          dplyr::select(all_of(general_metadata_cols), all_of(inner_irbb_col), all_of(outer_irbb_col), all_of(irbb_unique_col), all_of(extra_cols2drop)),
+        by = c(all_of(inner_irbb_col))
+      ) %>%
+      dplyr::select(all_of(general_metadata_cols), all_of(outer_irbb_col), all_of(inner_irbb_col), all_of(video_col), all_of(irbb_event_col), all_of(irbb_unique_col), inner_video_diffs, irbb_video_assignmnt_type, rfid_video_movement_inference, all_of(video_metadata_cols), data_stage, irbb_video_lower_threshold_s, irbb_video_upper_threshold_s, all_of(extra_cols2drop), video_recording_duration_s, date_integrated) %>% 
+      dplyr::arrange(!!sym(inner_irbb_col), desc = FALSE)
+    
+  } else {
+    
+    integr8d_df <- integr8d_df %>%
+      # Add back general metadata from the beam breaker data
+      dplyr::inner_join(
+        labeled_irbb %>%
+          dplyr::select(all_of(general_metadata_cols), all_of(inner_irbb_col), all_of(outer_irbb_col), all_of(irbb_unique_col)),
+        by = c(all_of(inner_irbb_col))
+      ) %>%
+      dplyr::select(all_of(general_metadata_cols), all_of(outer_irbb_col), all_of(inner_irbb_col), all_of(video_col), all_of(irbb_event_col), all_of(irbb_unique_col), inner_video_diffs, irbb_video_assignmnt_type, rfid_video_movement_inference, all_of(video_metadata_cols), data_stage, irbb_video_lower_threshold_s, irbb_video_upper_threshold_s, video_recording_duration_s, date_integrated) %>% 
+      dplyr::arrange(!!sym(inner_irbb_col), desc = FALSE)
+    
+  }
   
   #### Handle duplicates
   
@@ -457,7 +454,68 @@ integrate_beamBreakers_video <- function(irbb_file_nm, video_file_nm, l_th = NUL
     integr8d_df_noDups <- integr8d_df
   }
   
-  write.csv(integr8d_df, file.path(path, out_dir, out_file_nm), row.names = FALSE)
+  # Integrate perching events if specified
+  if(integrate_perching){
+    
+    perch_df <- read.csv(file.path(path, rfid_dir, "perching_events.csv"))  %>% 
+      # Make sure that the timestamps are in the right format
+      dplyr::mutate(
+        perching_start = as.POSIXct(format(as.POSIXct(perching_start, tz = "America/New York"), "%Y-%m-%d %H:%M:%OS6")),
+        perching_end = as.POSIXct(format(as.POSIXct(perching_end, tz = "America/New York"), "%Y-%m-%d %H:%M:%OS6"))
+      )
+    
+    if(nrow(perch_df) > 0){
+      
+      # For each integrated detection, figure out whether it occurred during a perching event and add that perching event to the integrated dataset
+      # Rename the column of inner beam breaker timestamps in the integrated dataset so that the column name can be passed to the function call in pmap_dfr
+      integr8d_df_noDups <- integr8d_df_noDups %>% 
+        dplyr::rename(
+          `inner_irbb_col` = !!sym(inner_irbb_col)
+        )
+      
+      tmp_df <- integr8d_df_noDups %>% 
+        dplyr::select(inner_irbb_col) %>% 
+        pmap_dfr(., function(inner_irbb_col){
+          
+          tmp_perching <- perch_df %>% 
+            dplyr::filter(
+              inner_irbb_col >= perching_start & inner_irbb_col <= perching_end 
+            ) %>% 
+            dplyr::mutate(
+              inner_irbb_col = inner_irbb_col
+            ) %>% 
+            dplyr::select(inner_irbb_col, all_of(PIT_tag_col), perching_start, perching_end, perching_duration_s, unique_perching_event)
+          
+          return(tmp_perching)
+          
+        })
+      
+      # Then join this data frame of perching event assignments with the integrated dataset
+      integr8d_df_noDups_p <- integr8d_df_noDups %>% 
+        dplyr::full_join(
+          tmp_df,
+          by = c("inner_irbb_col")
+        ) %>% 
+        # Rename the beam breaker timestamps column
+        dplyr::rename(
+          !!inner_irbb_col := "inner_irbb_col"
+        ) %>% 
+        dplyr::select(names(.)[-grep("^data_stage$|^date_integrated$", names(.))], "data_stage", "date_integrated")
+      
+    } else {
+      
+      warning("The perching events dataset was empty; skipping integration of perching events")
+      integr8d_df_noDups_p <- integr8d_df_noDups
+      
+    }
+    
+  } else {
+    
+    integr8d_df_noDups_p <- integr8d_df_noDups
+    
+  }
+  
+  write.csv(integr8d_df_noDups_p, file.path(path, out_dir, out_file_nm), row.names = FALSE)
   
   # Reset the current global options
   options(orig_opts)

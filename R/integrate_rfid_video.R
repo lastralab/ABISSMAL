@@ -12,7 +12,8 @@
 #' @param preproc_metadata_cols A character vector. This should be a string of the metadata column names from pre-processing that should be dropped from either or both data frames. For instance, c("thin_threshold_s", "data_stage", "date_pre_processed", "lower_threshold_s", "upper_threshold_s", "date_labeled")
 #' @param general_metadata_cols A character vector. This should be a string of the general metadata column names that will be carried through into the resulting data frame representing the integrated data. For instance: c("chamber_id", "year", "month", "day"). These columns will be added as the first columns in the integrated data frame, in the same order in which they are provided
 #' @param video_metadata_cols A character vector. This should be a string of the video metadata column names that will be carried through into the resulting data frame representing the integrated data. For instance: c("total_pixels_motionTrigger", "pixel_threshold", "video_file_name"). These columns will be added as later columns in the integrated data frame, in the same order in which they are provided
-#' @param extra_cols2drop A character vector. This should be a string of additional metadata column names that should be dropped before the integration but will be added back to the resulting file. This argument is useful when using this function to integrate across all 3 movement sensors
+#' @param extra_cols2drop A character vector. This should be a string of additional metadata column names that should be dropped before the integration but will be added back to the resulting file, such as c("RFID", "PIT_tag_ID", "outer_rfid_diffs", "rfid_irbb_assignmnt_type", "rfid_irbb_lower_threshold_s", "rfid_irbb_upper_threshold_s"). This argument is useful when using this function to integrate across all 3 movement sensors (e.g. when using a dataset of integrated RFID and beam breaker data as input). Set this argument to NA if it is not needed
+#' @param integrate_perching Boolean. If TRUE, then the perching events identified using `find_perching_events` will be integrated with this dataset. This integration is done by finding RFID timestamps that occurred within the duration of a perching event. If FALSE, then perching events will not be integrated. 
 #' @param path A character string. This should be the path specifying the overall directory where data is saved for a given experimental setup. For instance, "/media/gsvidaurre/Anodorhynchus/Data_Testing/Box_02_31Dec2022/Data".
 #' @param rfid_dir A character string. This should be the name of directory where the pre-processed RFID data is saved across sensors inside the path above. For instance, "pre-processed"
 #' @param video_dir A character string. This should be the name of directory where the pre-processed video data is saved across sensors inside the path above. For instance, "pre-processed"
@@ -28,7 +29,7 @@
 
 # TKTK Across all functions with lead and lag calculations, I need to check whether the sensor that has the first timestamp changes the logic used for pre-processing and integration. If so, then I'll need to generalize all these functions even more to make sure the conditionals used for integration are written correctly
 
-integrate_rfid_video <- function(rfid_file_nm, video_file_nm, l_th = NULL, u_th = NULL, video_rec_dur = NULL, sensor_id_col, timestamps_col, PIT_tag_col, preproc_metadata_cols, general_metadata_cols, video_metadata_cols, extra_cols2drop, path, rfid_dir, video_dir, out_dir, out_file_nm = "integrated_rfid_video_data.csv", tz, POSIXct_format = "%Y-%m-%d %H:%M:%OS"){
+integrate_rfid_video <- function(rfid_file_nm, video_file_nm, l_th = NULL, u_th = NULL, video_rec_dur = NULL, sensor_id_col, timestamps_col, PIT_tag_col, preproc_metadata_cols, general_metadata_cols, video_metadata_cols, extra_cols2drop, integrate_perching, path, rfid_dir, video_dir, out_dir, out_file_nm = "integrated_rfid_video_data.csv", tz, POSIXct_format = "%Y-%m-%d %H:%M:%OS"){
   
   # Get the current global options
   orig_opts <- options()
@@ -92,10 +93,16 @@ integrate_rfid_video <- function(rfid_file_nm, video_file_nm, l_th = NULL, u_th 
     stop('The Video data needs to be a data frame')
   }
   
+  # Drop additional metadata columns here
+  if(!is.na(extra_cols2drop)){
+    
+    preproc_rfid2 <- preproc_rfid2 %>%
+      dplyr::select(-c(all_of(extra_cols2drop)))
+    
+  }
+  
   # Group the RFID data frame
   rfid_df_tmp <- preproc_rfid2 %>%
-    # Drop additional metadata columns here
-    dplyr::select(-c(all_of(extra_cols2drop))) %>% 
     group_by(!!sym(PIT_tag_col)) %>% 
     dplyr::rename(
       `group_col` = all_of(PIT_tag_col)
@@ -341,22 +348,34 @@ integrate_rfid_video <- function(rfid_file_nm, video_file_nm, l_th = NULL, u_th 
     ) %>%
     dplyr::rename(
       !!video_col := !!sym(timestamps_col)
-    ) %>% 
-    # Add back extra metadata columns dropped from the RFID dataset
-    dplyr::rename(
-      # Had to rename this column for the join below
-      !!timestamps_col := !!sym(rfid_col)
-    ) %>%
-    dplyr::inner_join(
-      preproc_rfid %>% 
-        dplyr::select(all_of(all_of(rfid_cols2drop), extra_cols2drop), all_of(timestamps_col)),
-      by = all_of(timestamps_col)
-    ) %>%
-    dplyr::rename(
-      !!rfid_col := !!sym(timestamps_col)
-    ) %>% 
-    dplyr::select(all_of(general_metadata_cols), all_of(rfid_col), all_of(video_col), all_of(PIT_tag_col), rfid_video_direction_inferred, rfid_video_diffs, rfid_video_assignmnt_type, rfid_video_movement_inference, all_of(video_metadata_cols), all_of(extra_cols2drop), data_stage, rfid_video_lower_threshold_s, rfid_video_upper_threshold_s, video_recording_duration_s, date_integrated) %>% 
-    dplyr::arrange(!!sym(rfid_col), desc = FALSE)
+    )
+  
+  if(!is.na(extra_cols2drop)){
+    
+    integr8d_df <- integr8d_df %>% 
+      # Add back extra metadata columns dropped from the RFID dataset
+      dplyr::rename(
+        # Had to rename this column for the join below
+        !!timestamps_col := !!sym(rfid_col)
+      ) %>% 
+      dplyr::inner_join(
+        preproc_rfid %>% 
+          dplyr::select(all_of(extra_cols2drop), all_of(timestamps_col)),
+        by = all_of(timestamps_col)
+      ) %>%
+      dplyr::rename(
+        !!rfid_col := !!sym(timestamps_col)
+      ) %>% 
+      dplyr::select(all_of(general_metadata_cols), all_of(rfid_col), all_of(video_col), all_of(PIT_tag_col), rfid_video_direction_inferred, rfid_video_diffs, rfid_video_assignmnt_type, rfid_video_movement_inference, all_of(video_metadata_cols), all_of(extra_cols2drop), rfid_video_lower_threshold_s, rfid_video_upper_threshold_s, video_recording_duration_s, data_stage, date_integrated) %>% 
+      dplyr::arrange(!!sym(rfid_col), desc = FALSE)
+    
+  } else {
+    
+    integr8d_df <- integr8d_df %>% 
+      dplyr::select(all_of(general_metadata_cols), all_of(rfid_col), all_of(video_col), all_of(PIT_tag_col), rfid_video_direction_inferred, rfid_video_diffs, rfid_video_assignmnt_type, rfid_video_movement_inference, all_of(video_metadata_cols), rfid_video_lower_threshold_s, rfid_video_upper_threshold_s, video_recording_duration_s, data_stage, date_integrated) %>% 
+      dplyr::arrange(!!sym(rfid_col), desc = FALSE)
+    
+  }
   
   #### Handle duplicates
   
@@ -417,8 +436,68 @@ integrate_rfid_video <- function(rfid_file_nm, video_file_nm, l_th = NULL, u_th 
     integr8d_df_noDups <- integr8d_df
   }
   
-  # Save the pre-processed data for each sensor in the given setup
-  write.csv(integr8d_df_noDups, file.path(path, out_dir, out_file_nm), row.names = FALSE)
+  # Integrate perching events if specified
+  if(integrate_perching){
+    
+    perch_df <- read.csv(file.path(path, rfid_dir, "perching_events.csv"))  %>% 
+      # Make sure that the timestamps are in the right format
+      dplyr::mutate(
+        perching_start = as.POSIXct(format(as.POSIXct(perching_start, tz = "America/New York"), "%Y-%m-%d %H:%M:%OS6")),
+        perching_end = as.POSIXct(format(as.POSIXct(perching_end, tz = "America/New York"), "%Y-%m-%d %H:%M:%OS6"))
+      )
+    
+    if(nrow(perch_df) > 0){
+      
+      # For each integrated detection, figure out whether it occurred during a perching event and add that perching event to the integrated dataset
+      # Rename the column of RFID timestamps in the integrated dataset so that the column name can be passed to the function call in pmap_dfr
+      integr8d_df_noDups <- integr8d_df_noDups %>% 
+        dplyr::rename(
+          `rfid_col` = !!sym(rfid_col)
+        )
+      
+      tmp_df <- integr8d_df_noDups %>% 
+        dplyr::select(rfid_col) %>% 
+        pmap_dfr(., function(rfid_col){
+          
+          tmp_perching <- perch_df %>% 
+            dplyr::filter(
+              rfid_col >= perching_start & rfid_col <= perching_end 
+            ) %>% 
+            dplyr::mutate(
+              rfid_col = rfid_col
+            ) %>% 
+            dplyr::select(rfid_col, all_of(PIT_tag_col), perching_start, perching_end, perching_duration_s, unique_perching_event)
+          
+          return(tmp_perching)
+          
+        })
+      
+      # Then join this data frame of perching event assignments with the integrated dataset
+      integr8d_df_noDups_p <- integr8d_df_noDups %>% 
+        dplyr::full_join(
+          tmp_df,
+          by = c("rfid_col", all_of(PIT_tag_col))
+        ) %>% 
+        # Rename the RFID timestamps column
+        dplyr::rename(
+          !!rfid_col := "rfid_col"
+        ) %>% 
+        dplyr::select(names(.)[-grep("^data_stage$|^date_integrated$", names(.))], "data_stage", "date_integrated")
+      
+    } else {
+      
+      warning("The perching events dataset was empty; skipping integration of perching events")
+      integr8d_df_noDups_p <- integr8d_df_noDups
+      
+    }
+    
+  } else {
+    
+    integr8d_df_noDups_p <- integr8d_df_noDups
+    
+  }
+  
+  write.csv(integr8d_df_noDups_p, file.path(path, out_dir, out_file_nm), row.names = FALSE)
   
   # Reset the current global options
   options(orig_opts)
