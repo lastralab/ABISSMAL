@@ -30,6 +30,7 @@
 #' 
 
 library(tidyverse)
+
 l_th <- 0
 u_th <- 5
 rfid_file_nm <- "pre_processed_data_RFID.csv"
@@ -48,6 +49,7 @@ path <- "/media/gsvidaurre/Anodorhynchus/Data_Testing/Box_02_31Dec2022/Data"
 rfid_dir <- "pre_processed"
 irbb_dir <- "pre_processed"
 out_dir <- "integrated"
+out_file_nm = "integrated_rfid_beamBreaker_data.csv"
 tz <- "America/New York"
 POSIXct_format <- "%Y-%m-%d %H:%M:%OS"
 
@@ -375,76 +377,65 @@ integrate_rfid_beamBreakers <- function(rfid_file_nm, irbb_file_nm, l_th = NULL,
   # Integrate perching events if specified
   if(integrate_perching){
     
-    glimpse(integr8d_df_noDups)
-    
-    View(integr8d_df_noDups)
-    View(perch_df)
-    
-    perch_df <- read.csv(file.path(path, rfid_dir, "perching_events.csv")) 
-    glimpse(perch_df)
-    
-    # For each integrated detection, figure out whether it occurred during a perching event and add that perching event to the integrated dataset
-    
-    eval(substitute(name), df)
-    quote(rfid_col)
-    eval(rfid_col, integr8d_df_noDups)
-    
-    # Rename the column of RFID timestamps in the integrated dataset so that the column name can be passed to the function call in pmap_dfr
-    integr8d_df_noDups <- integr8d_df_noDups %>% 
-      dplyr::rename(
-        `rfid_col` = !!sym(rfid_col)
+    perch_df <- read.csv(file.path(path, rfid_dir, "perching_events.csv"))  %>% 
+      # Make sure that the timestamps are in the right format
+      dplyr::mutate(
+        perching_start = as.POSIXct(format(as.POSIXct(perching_start, tz = "America/New York"), "%Y-%m-%d %H:%M:%OS6")),
+        perching_end = as.POSIXct(format(as.POSIXct(perching_end, tz = "America/New York"), "%Y-%m-%d %H:%M:%OS6"))
       )
     
-    glimpse(integr8d_df_noDups)
+    if(nrow(perch_df) > 0){
+      
+      # For each integrated detection, figure out whether it occurred during a perching event and add that perching event to the integrated dataset
+      # Rename the column of RFID timestamps in the integrated dataset so that the column name can be passed to the function call in pmap_dfr
+      integr8d_df_noDups <- integr8d_df_noDups %>% 
+        dplyr::rename(
+          `rfid_col` = !!sym(rfid_col)
+        )
+      
+      tmp_df <- integr8d_df_noDups %>% 
+        dplyr::select(rfid_col) %>% 
+        pmap_dfr(., function(rfid_col){
+          
+          tmp_perching <- perch_df %>% 
+            dplyr::filter(
+              rfid_col >= perching_start & rfid_col <= perching_end 
+            ) %>% 
+            dplyr::mutate(
+              rfid_col = rfid_col
+            ) %>% 
+            dplyr::select(rfid_col, all_of(PIT_tag_col), perching_start, perching_end, perching_duration_s, unique_perching_event)
+          
+          return(tmp_perching)
+          
+        })
+      
+      # Then join this data frame of perching event assignments with the integrated dataset
+      integr8d_df_noDups_p <- integr8d_df_noDups %>% 
+        dplyr::full_join(
+          tmp_df,
+          by = c("rfid_col", all_of(PIT_tag_col))
+        ) %>% 
+        # Rename the RFID timestamps column
+        dplyr::rename(
+          !!rfid_col := "rfid_col"
+        ) %>% 
+        dplyr::select(names(.)[-grep("^data_stage$|^date_integrated$", names(.))], "data_stage", "date_integrated")
     
-    tmp_df <- integr8d_df_noDups %>% 
-      # slice(1:5) %>% 
-      dplyr::select(rfid_col) %>% 
-      pmap_dfr(., function(rfid_col){
-        
-        tmp_perching <- perch_df %>% 
-          dplyr::filter(
-            rfid_col >= start & rfid_col <= end 
-          ) %>% 
-          dplyr::mutate(
-            rfid_col = rfid_col
-          ) %>% 
-          dplyr::select(rfid_col, all_of(PIT_tag_col), start, end, duration_seconds, unique_event, run_length)
-        
-        
-        # perch_df %>% 
-        #   dplyr::filter(
-        #     integr8d_df_noDups[[rfid_col]][2] >= perch_df$start & integr8d_df_noDups[[rfid_col]][2] <= perch_df$end  
-        #   ) %>%
-        #   glimpse()
-        
-        return(tmp_perching)
-        
-      })
-    
-    # Taking a longgg time for the full dataset
-    glimpse(tmp_df)
-    
-    which(duplicated(tmp_df$rfid_col))
-    
-    # Then join back and rename the rfid_col column again
-    integr8d_df_noDups %>% 
-      dplyr::inner_join(
-        tmp_df,
-        by = c("rfid_col", all_of(PIT_tag_col))
-      ) %>% 
-      glimpse()
-    
-    
+    } else {
+      
+      warning("The perching events dataset was empty; skipping integration of perching events")
+      integr8d_df_noDups_p <- integr8d_df_noDups
+      
+    }
     
   } else {
     
+    integr8d_df_noDups_p <- integr8d_df_noDups
     
   }
   
-  
-  
-  write.csv(integr8d_df_noDups, file.path(path, out_dir, out_file_nm), row.names = FALSE)
+  write.csv(integr8d_df_noDups_p, file.path(path, out_dir, out_file_nm), row.names = FALSE)
   
   # Reset the current global options
   options(orig_opts)

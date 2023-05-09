@@ -13,6 +13,7 @@ sensor_id_col <- "sensor_id"
 timestamps_col <- "timestamp_ms"
 PIT_tag_col <- "PIT_tag_ID"
 path <- "/media/gsvidaurre/Anodorhynchus/Data_Testing/Box_02_31Dec2022/Data"
+general_metadata_cols <- c("chamber_id", "sensor_id")
 rfid_dir <- "raw_combined"
 out_dir <- "pre_processed"
 out_file_nm = "perching_events.csv"
