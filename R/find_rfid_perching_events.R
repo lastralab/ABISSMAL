@@ -16,6 +16,7 @@
 #' @param POSIXct_format A character string. This argument should contain the format used to converting timestamps to POSIXct format. The default is "%Y-%m-%d %H:%M:%OS" to return timestamps with milliseconds in decimal format. See the base function `as.POSIXct` for more information
 #'
 #' @return A data frame object with all metadata columns in the original data frame, as well as columns indicating the timestamp of the start of the perching period identified, the end of the given perching period, and the temporal threshold used for pre-processing (in seconds). In other words, each row is a perching period
+#' 
 
 find_rfid_perching_events <- function(rfid_file_nm, threshold, run_length = 2, sensor_id_col, timestamps_col, PIT_tag_col, general_metadata_cols, path, rfid_dir, out_dir, out_file_nm = "perching_events.csv", tz, POSIXct_format = "%Y-%m-%d %H:%M:%OS"){
   
@@ -123,10 +124,10 @@ find_rfid_perching_events <- function(rfid_file_nm, threshold, run_length = 2, s
           pmap_dfr(., function(first_indices, last_indices){
             
             tmp_perching <- data.frame(
-              start = .y[[1]] %>%
+              perching_start = .y[[1]] %>%
                 dplyr::filter(group_row_id == first_indices) %>%
                 pull(all_of(timestamps_col)),
-              end = .y[[1]] %>%
+              perching_end = .y[[1]] %>%
                 dplyr::filter(group_row_id == last_indices) %>%
                 pull(all_of(timestamps_col))
             ) 
@@ -148,48 +149,45 @@ find_rfid_perching_events <- function(rfid_file_nm, threshold, run_length = 2, s
     # Add metadata and arrange columns and rows before writing this out
     perching_events <- perching_df %>% 
       dplyr::mutate(
-        duration_seconds = as.numeric(end - start),
-        event_type = "perching",
-        run_length = run_length,
+        perching_duration_s = as.numeric(perching_end - perching_start),
+        min_perching_run_length = run_length,
         threshold = threshold,
         data_stage = "pre-processing",
         date_preprocessed = paste(Sys.Date(), Sys.time(), sep = " ")
       ) %>% 
-      # Add back general metdata columns from the original RFID dataset
-      cbind(
+      # Add back general metadata columns from the original RFID dataset
+      dplyr::inner_join(
         preproc_rfid %>%
-          dplyr::select(all_of(general_metadata_cols)) %>% 
-          distinct()
+          # Rename the timestamps column for the join with perching_start timestamps immediately below
+          dplyr::rename(
+            `perching_start` = !!sym(timestamps_col)
+          ) %>% 
+          dplyr::select(all_of(general_metadata_cols), perching_start),
+        by = c("perching_start")
       ) %>%
-      dplyr::arrange(start, desc = FALSE) %>% 
+      dplyr::arrange(perching_start, desc = FALSE) %>% 
       rowid_to_column() %>% 
       dplyr::rename(
-        `unique_event` = "rowid"
+        `unique_perching_event` = "rowid"
       ) %>% 
-      dplyr::select(all_of(general_metadata_cols), year, month, day, all_of(PIT_tag_col), start, end, duration_seconds, event_type, unique_event, run_length, threshold, data_stage, date_preprocessed)
+      dplyr::select(all_of(general_metadata_cols), year, month, day, all_of(PIT_tag_col), perching_start, perching_end, perching_duration_s, unique_perching_event, min_perching_run_length, threshold, data_stage, date_preprocessed)
     
   } else {
     
     perching_events <- preproc_rfid %>%
-      distinct(year, month, day, !!sym(PIT_tag_col)) %>% 
+      dplyr::select(all_of(general_metadata_cols), year, month, day, all_of(PIT_tag_col)) %>% 
+      distinct() %>% 
       dplyr::mutate(
-        start = NA,
-        end = NA,
-        duration_seconds = NA,
-        unique_event = NA,
-        event_type = "perching",
-        run_length = run_length,
+        perching_start = NA,
+        perching_end = NA,
+        perching_duration_s = NA,
+        unique_perching_event = NA,
+        min_perching_run_length = run_length,
         threshold = threshold,
         data_stage = "pre-processing",
         date_preprocessed = paste(Sys.Date(), Sys.time(), sep = " ")
       ) %>% 
-      # Add back general metdata columns from the original RFID dataset
-      cbind(
-        preproc_rfid %>%
-          dplyr::select(all_of(general_metadata_cols)) %>% 
-          distinct()
-      ) %>%
-      dplyr::select(all_of(general_metadata_cols), year, month, day, all_of(PIT_tag_col), start, end, duration_seconds, event_type, unique_event, run_length, threshold, data_stage, date_preprocessed)
+      dplyr::select(all_of(general_metadata_cols), year, month, day, all_of(PIT_tag_col), perching_start, perching_end, perching_duration_s, unique_perching_event, min_perching_run_length, threshold, data_stage, date_preprocessed)
     
   }
   
