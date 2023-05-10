@@ -17,21 +17,21 @@
 #' @return A .csv file with the metadata columns from the original pre-processed data used as input, as well as columns indicating each of the timestamps of the lead and rear beam breaker pairs, a unique label for the given event (e.g. entrance or exit), a unique numeric identifier for the given event, and information about the given data processing stage. Each row in the .csv file is a labeled event across the outer and inner beam breaker pairs that was identified using a given temporal threshold
 #' 
 
-library(tidyverse)
-library(pbapply)
-
-irbb_file_nm <- "pre_processed_data_IRBB.csv"
-l_th <- 0
-u_th <- 2
-sensor_id_col <- "sensor_id"
-timestamps_col <- "timestamp_ms"
-outer_irbb_nm <- "Outer Beam Breaker"
-inner_irbb_nm <- "Inner Beam Breaker"
-path <- "/media/gsvidaurre/Anodorhynchus/Data_Testing/Box_02_31Dec2022/Data"
-data_dir <- "pre_processed"
-out_dir <- "pre_processed"
-tz <- "America/New York"
-POSIXct_format <- "%Y-%m-%d %H:%M:%OS"
+# library(tidyverse)
+# library(pbapply)
+# 
+# irbb_file_nm <- "pre_processed_data_IRBB.csv"
+# l_th <- 0
+# u_th <- 2
+# sensor_id_col <- "sensor_id"
+# timestamps_col <- "timestamp_ms"
+# outer_irbb_nm <- "Outer Beam Breaker"
+# inner_irbb_nm <- "Inner Beam Breaker"
+# path <- "/media/gsvidaurre/Anodorhynchus/Data_Testing/Box_02_31Dec2022/Data"
+# data_dir <- "pre_processed"
+# out_dir <- "pre_processed"
+# tz <- "America/New York"
+# POSIXct_format <- "%Y-%m-%d %H:%M:%OS"
 
 # TKTK update this function to write to the preprocessed folder, and probably update he name of the output and the function itself, also the value in the "data_stage" column
 
