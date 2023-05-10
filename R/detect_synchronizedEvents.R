@@ -23,9 +23,12 @@
 
 # TKTK Across all functions with lead and lag calculations, I need to check whether the sensor that has the first timestamp changes the logic used for pre-processing and integration. If so, then I'll need to generalize all these functions even more to make sure the conditionals used for integration are written correctly
 
+library(tidyverse)
+
 integrated_file_nm <- "integrated_rfid_beamBreaker_data.csv"
 l_th <- 0
 u_th <- 5
+run_length <- 1
 timestamps_col <- "RFID"
 PIT_tag_col <- "PIT_tag_ID"
 preproc_metadata_cols <- c("Outer_beam_breaker", "Inner_beam_breaker", "irbb_direction_inferred", "unique_entranceExit", "outer_rfid_diffs", "rfid_irbb_assignmnt_type", "rfid_irbb_lower_threshold_s", "rfid_irbb_upper_threshold_s", "data_stage", "date_integrated")
@@ -38,7 +41,7 @@ tz <- "America/New York"
 POSIXct_format = "%Y-%m-%d %H:%M:%OS"
 
 
-detect_synchronizedEvents <- function(integrated_file_nm, l_th = NULL, u_th = NULL, sensor_id_col, timestamps_col, PIT_tag_col, preproc_metadata_cols, general_metadata_cols, path, data_dir, out_dir, out_file_nm = "inferred_synchonrized_events.csv", tz, POSIXct_format = "%Y-%m-%d %H:%M:%OS"){
+detect_synchronizedEvents <- function(integrated_file_nm, l_th = NULL, u_th = NULL, run_length, sensor_id_col, timestamps_col, PIT_tag_col, preproc_metadata_cols, general_metadata_cols, path, data_dir, out_dir, out_file_nm = "inferred_synchonrized_events.csv", tz, POSIXct_format = "%Y-%m-%d %H:%M:%OS"){
   
   # Get the current global options
   orig_opts <- options()
@@ -101,215 +104,228 @@ detect_synchronizedEvents <- function(integrated_file_nm, l_th = NULL, u_th = NU
       values_from = !!sym(timestamps_col)
     )
   
+  glimpse(integ_df_tmp)
+  
   # Do the timestamp difference calculations
-  lags_grpd <- rfid_df_tmp %>% 
+  lags_df <- integ_df_tmp %>% 
+    # The lead() call moves the timestamps for the given column one row index up, so that the difference calculation can be performed with the timestamps for the other column
+    # Make a leading and lagging version of timestamps for the first PIT tag ID
     dplyr::mutate(
-      # Here the mapping structure sets up running the following code for each group (PIT taq ID) in the RFID data frame
-      lags = map(
-        .x = data,
-        .y = video_df_tmp,
-        .f = ~ bind_rows(.x, .y) %>%
-          as_tibble() %>%
-          # Order timestamps within each data type
-          group_by(!!sym(sensor_id_col)) %>% 
-          dplyr::arrange(!!sym(timestamps_col), desc = FALSE) %>%
-          # Make unique row indices within groups
-          dplyr::mutate(
-            group_row_id = row_number()
-          ) %>%
-          ungroup() %>% 
-          pivot_wider(
-            names_from = all_of(sensor_id_col),
-            values_from = all_of(timestamps_col)
-          ) %>% 
-          # Make a leading and lagging RFID column for calculations and filtering below. Lead() moves the RFID timestamps one row index up, and lag() moves these timestamps one row index down
-          dplyr::mutate(
-            leading_RFID = lead(!!sym(rfid_col), default = first(!!sym(rfid_col))),
-            lagging_RFID = lag(!!sym(rfid_col), default = first(!!sym(rfid_col)))
-          ) %>% 
-          # Calculate the differences between the relevant pairs of timestamps: RFID compared to each video event. These differences are calculated per group in the grouped data frame
-          dplyr::mutate(
-            # For the leading calculations, positive differences mean that the camera triggered first, while negative differences mean that the RFID triggered first
-            # For the lagging calculations, negative differences mean that the RFID triggered first, while positive differences mean the camera triggered first
-            rfid_video_lead_diffs = round(as.numeric(leading_RFID - !!sym(video_col) ), 2),
-            rfid_video_lag_diffs = round(as.numeric(lagging_RFID - !!sym(video_col)), 2)
-          ) %>% 
-          # Convert differences to Boolean based on a threshold (in seconds)
-          # Although I can't account for directionality directly in either of these datasets alone, I still need to be able to capture entrance and exit movements in the integration done here
-          # To search for entrances, look RFID detections that came within the given l_th or u_th BEFORE a video timestamp. Set up these conditionals for both the lead and lag calculations
-          dplyr::mutate(
-            binary_lead_ent = (
-              rfid_video_lead_diffs <= -l_th & rfid_video_lead_diffs >= -u_th
-            ),
-            binary_lag_ent = (
-              rfid_video_lag_diffs <= -l_th & rfid_video_lag_diffs >= -u_th
-            ),
-            # Then to search for exits, look for RFID detections that came within the given l_th or u_th AFTER a video timestamp. Again, set up these conditionals for both the lead and lag calculations
-            binary_lead_exi = (
-              rfid_video_lead_diffs >= l_th & rfid_video_lead_diffs <= u_th
-            ),
-            binary_lag_exi = (
-              rfid_video_lag_diffs >= l_th & rfid_video_lag_diffs <= u_th
-            ),
-            # Then catch RFID timestamps that happened beyond the upper temporal threshold but still within the duration of video recording. Looking for lead and lag positive differences, since these are events in which the camera triggered first
-            binary_lead_withinVideo = (
-              rfid_video_lead_diffs >= u_th & rfid_video_lead_diffs <= video_rec_dur
-            ),
-            binary_lag_withinVideo = (
-              rfid_video_lag_diffs >= u_th & rfid_video_lag_diffs <= video_rec_dur
-            )
-          ) %>% 
-          # Drop all rows with NA values across these binary columns
-          dplyr::filter(
-            !dplyr::if_all(
-              c(
-                binary_lead_ent,
-                binary_lag_ent,
-                binary_lead_exi,
-                binary_lag_exi,
-                binary_lead_withinVideo,
-                binary_lag_withinVideo
-              ), 
-              is.na
-            )
-          )
-      )
-    )
-  
-  conditnal_lead_ent <- "binary_lead_ent & !is.na(binary_lead_ent)"
-  conditnal_lead_exi <- "binary_lead_exi & !is.na(binary_lead_exi)"
-  
-  conditnal_lag_ent <- "binary_lag_ent & !is.na(binary_lag_ent)"
-  conditnal_lag_exi <- "binary_lag_exi & !is.na(binary_lag_exi)"
-  
-  conditnal_lead_withn <- "binary_lead_withinVideo & !is.na(binary_lead_withinVideo)"
-  conditnal_lag_withn <- "binary_lag_withinVideo & !is.na(binary_lag_withinVideo)"
-  
-  # Do more mapping to perform the integration per PIT tag depending on the given temporal thresholds
-  integr8d_df <- lags_grpd %>% 
-    dplyr::mutate(
-      # Entrances, lead differences
-      matched_rfid_video = map(
-        .x = lags, 
-        .f = ~ dplyr::mutate(
-          .x,
-          !!rfid_col := leading_RFID,
-          rfid_video_diffs = rfid_video_lead_diffs,
-          rfid_video_assignmnt_type = "lead",
-          rfid_video_movement_inference = "motion_trigger"
-        ) %>% 
-          # Then filter for video detections that match the RFID detections
-          dplyr::filter(
-            !!rlang::parse_expr(conditnal_lead_ent)
-          ) %>% 
-          dplyr::mutate(
-            rfid_video_direction_inferred = "entrance"
-          ) %>% 
-          dplyr::select(all_of(rfid_col), all_of(video_col), rfid_video_diffs, rfid_video_direction_inferred, rfid_video_assignmnt_type, rfid_video_movement_inference) 
-        %>% 
-          # Entrances, lag differences
-          bind_rows(
-            .x %>% 
-              dplyr::mutate(
-                !!rfid_col := lagging_RFID,
-                rfid_video_diffs = rfid_video_lag_diffs,
-                rfid_video_assignmnt_type = "lag",
-                rfid_video_movement_inference = "motion_trigger"
-              ) %>% 
-              # Then filter for video detections that match the RFID detections
-              dplyr::filter(
-                !!rlang::parse_expr(conditnal_lag_ent)
-              ) %>% 
-              dplyr::mutate(
-                rfid_video_direction_inferred = "entrance"
-              ) %>% 
-              dplyr::select(all_of(rfid_col), all_of(video_col), rfid_video_diffs, rfid_video_direction_inferred, rfid_video_assignmnt_type, rfid_video_movement_inference)
-          ) %>% 
-          # Exits, lead differences
-          bind_rows(
-            .x %>% 
-              dplyr::mutate(
-                !!rfid_col := leading_RFID,
-                rfid_video_diffs = rfid_video_lead_diffs,
-                rfid_video_assignmnt_type = "lead",
-                rfid_video_movement_inference = "motion_trigger"
-              ) %>% 
-              # Then filter for video detections that match the RFID detections
-              dplyr::filter(
-                !!rlang::parse_expr(conditnal_lead_exi)
-              ) %>% 
-              dplyr::mutate(
-                rfid_video_direction_inferred = "exit"
-              ) %>% 
-              dplyr::select(all_of(rfid_col), all_of(video_col), rfid_video_diffs, rfid_video_direction_inferred, rfid_video_assignmnt_type, rfid_video_movement_inference) 
-          ) %>% 
-          # Exits, lag differences
-          bind_rows(
-            .x %>% 
-              dplyr::mutate(
-                !!rfid_col := lagging_RFID,
-                rfid_video_diffs = rfid_video_lag_diffs,
-                rfid_video_assignmnt_type = "lag",
-                rfid_video_movement_inference = "motion_trigger"
-              ) %>% 
-              # Then filter for video detections that match the RFID detections
-              dplyr::filter(
-                !!rlang::parse_expr(conditnal_lag_exi)
-              ) %>% 
-              dplyr::mutate(
-                rfid_video_direction_inferred = "exit"
-              ) %>%
-              dplyr::select(all_of(rfid_col), all_of(video_col), rfid_video_diffs, rfid_video_direction_inferred, rfid_video_assignmnt_type, rfid_video_movement_inference) 
-          ) %>% 
-          # Within video assignments, lead differences
-          bind_rows(
-            .x %>% 
-              dplyr::mutate(
-                !!rfid_col := leading_RFID,
-                rfid_video_diffs = rfid_video_lead_diffs,
-                rfid_video_assignmnt_type = "lead",
-                rfid_video_movement_inference = "post_motion_trigger"
-              ) %>% 
-              # Then filter for video detections that match the RFID detections
-              dplyr::filter(
-                !!rlang::parse_expr(conditnal_lead_withn)
-              ) %>% 
-              dplyr::mutate(
-                rfid_video_direction_inferred = "none"
-              ) %>%
-              dplyr::select(all_of(rfid_col), all_of(video_col), rfid_video_diffs, rfid_video_direction_inferred, rfid_video_assignmnt_type, rfid_video_movement_inference)
-          ) %>% 
-          # Within video assignments, lag differences
-          bind_rows(
-            .x %>% 
-              dplyr::mutate(
-                !!rfid_col := lagging_RFID,
-                rfid_video_diffs = rfid_video_lag_diffs,
-                rfid_video_assignmnt_type = "lag",
-                rfid_video_movement_inference = "post_motion_trigger"
-              ) %>% 
-              # Then filter for video detections that match the RFID detections
-              dplyr::filter(
-                !!rlang::parse_expr(conditnal_lag_withn)
-              ) %>% 
-              dplyr::mutate(
-                rfid_video_direction_inferred = "none"
-              ) %>%
-              dplyr::select(all_of(rfid_col), all_of(video_col), rfid_video_diffs, rfid_video_direction_inferred, rfid_video_assignmnt_type, rfid_video_movement_inference)
-          )
-      )
+      leading_ts = lead(!!sym(rfid_cols[1]), default = first(!!sym(rfid_cols[1]))),
+      lagging_ts = lag(!!sym(rfid_cols[1]), default = first(!!sym(rfid_cols[1])))
     ) %>% 
-    dplyr::select(-c(data, lags)) %>% 
-    unnest(`cols` = c(matched_rfid_video)) %>%
-    ungroup() %>%
-    # Make sure to add metadata columns for this integration step
+    # glimpse()
     dplyr::mutate(
-      data_stage = "integration",
-      rfid_video_lower_threshold_s = l_th,
-      rfid_video_upper_threshold_s = u_th,
-      video_recording_duration_s = video_rec_dur,
-      date_integrated = paste(Sys.Date(), Sys.time(), sep = " ")
+      # For both the lead and lag calculations, positive differences mean that the second PIT tag was detected first, and negative differences mean that the first PIT tag was detected first
+      lead_diffs = round(as.numeric(leading_ts - !!sym(rfid_cols[2])), 2),
+      lag_diffs = round(as.numeric(lagging_ts - !!sym(rfid_cols[2])), 2)
+    ) %>% 
+    # View()
+    # Convert these differences to boolean based on the given threshold (in seconds)
+    dplyr::mutate(
+      # To search for events in which the first PIT tag was detected first, look for detections of the first tag that came within the given threshold BEFORE timestamps for the second tag. Set up these conditionals for both the lead and lag calculations
+      binary_lead_tag1 = (
+        # First PIT tag before, so negative lead differences
+        lead_diffs <= -l_th & lead_diffs >= -u_th
+      ),
+      binary_lag_tag1 = (
+        # First PIT tag before, so negative lag differences
+        lag_diffs <= -l_th & lag_diffs >= -u_th
+      ),
+      # To search for events in which the second PIT tag was detected first, look for detections of the first tag that came within the given threshold AFTER timestamps for the second tag. Set up these conditionals for both the lead and lag calculations
+      binary_lead_tag2 = (
+        # First PIT tag after, so positive lead differences
+        lead_diffs >= l_th & lead_diffs <= u_th
+      ),
+      binary_lag_tag2 = (
+        # First PIT tag after, so positive lag differences
+        lag_diffs >= l_th & lag_diffs <= u_th
+      )
+    ) 
+  
+  runs_df <- lags_df %>% 
+    dplyr::summarise(
+      # First tag, lead diffs
+      first_indices_lead_tag1 = cumsum(rle(binary_lead_tag1)[["lengths"]]) - (rle(binary_lead_tag1)[["lengths"]]),
+      last_indices_lead_tag1 = cumsum(rle(binary_lead_tag1)[["lengths"]]),
+      run_values_lead_tag1 = rle(binary_lead_tag1)[["values"]],
+      run_lengths_lead_tag1 = rle(binary_lead_tag1)[["lengths"]],
+      # First tag, lag diffs
+      first_indices_lag_tag1 = cumsum(rle(binary_lag_tag1)[["lengths"]]) - (rle(binary_lag_tag1)[["lengths"]]),
+      last_indices_lag_tag1 = cumsum(rle(binary_lag_tag1)[["lengths"]]),
+      run_values_lag_tag1 = rle(binary_lag_tag1)[["values"]],
+      run_lengths_lag_tag1 = rle(binary_lag_tag1)[["lengths"]],
+      # Second tag, lead diffs
+      first_indices_lead_tag2 = cumsum(rle(binary_lead_tag2)[["lengths"]]) - (rle(binary_lead_tag2)[["lengths"]]),
+      last_indices_lead_tag2 = cumsum(rle(binary_lead_tag2)[["lengths"]]),
+      run_values_lead_tag2 = rle(binary_lead_tag2)[["values"]],
+      run_lengths_lead_tag2 = rle(binary_lead_tag2)[["lengths"]],
+      # Second tag, lag diffs
+      first_indices_lag_tag2 = cumsum(rle(binary_lag_tag2)[["lengths"]]) - (rle(binary_lag_tag2)[["lengths"]]),
+      last_indices_lag_tag2 = cumsum(rle(binary_lag_tag2)[["lengths"]]),
+      run_values_lag_tag2 = rle(binary_lag_tag2)[["values"]],
+      run_lengths_lag_tag2 = rle(binary_lag_tag2)[["lengths"]]
+    ) 
+  # %>% 
+  # glimpse()
+  
+  
+  
+  conditnal_lead_tag1 <- "run_values_lead_tag1 & run_lengths_lead_tag1 >= run_length"
+  conditnal_lead_tag2 <- "run_values_lead_tag2 & run_lengths_lead_tag2 >= run_length"
+  
+  conditnal_lag_tag1 <- "run_values_lag_tag1 & run_lengths_lag_tag1 >= run_length"
+  conditnal_lag_tag2 <- "run_values_lag_tag2 & run_lengths_lag_tag2 >= run_length"
+  
+  
+  
+  
+  
+  
+  glimpse(lags_df)
+  glimpse(runs_df)
+  
+  lags_df %>% 
+    slice(1280:1281) %>% 
+    View()
+  
+  lags_df %>% 
+    slice(1594:1595) %>% 
+    View()
+  
+  # From lags_df
+  # lead_diffs = round(as.numeric(leading_ts - !!sym(rfid_cols[2])), 2),
+  # lag_diffs = round(as.numeric(lagging_ts - !!sym(rfid_cols[2])), 2)
+  
+  # Filter on all of these columns to identify runs that fit the logic for synchronized events
+  sync_df <- runs_df %>% 
+    # First PIT tag first, lead differences
+    dplyr::filter(
+      !!rlang::parse_expr(conditnal_lead_tag1)
+    ) %>% 
+    # glimpse()
+    # If a first index is stored as 0, then add 1 to restore this first index
+    dplyr::mutate(
+      first_indices_lead_tag1 = ifelse(first_indices_lead_tag1 == 0, first_indices_lead_tag1 + 1, first_indices_lead_tag1)
+    ) %>% 
+    # TKTK need to check this logic...
+  dplyr::mutate(
+    # The start timestamps need to come from !!sym(rfid_cols[1]), since for the 1st PIT tag to be detected first, there should have been a negative difference in timestamps
+    start = lags_df %>% 
+      slice(first_indices_lead_tag1) %>% 
+      pull(!!sym(rfid_cols[1])),
+    # The end timestamps need to come from !!sym(rfid_cols[2]), since for the 1st PIT tag to be detected first, there should have been a negative difference in timestamps
+    end = lags_df %>% 
+      slice(last_indices_lead_tag1) %>% 
+      pull(!!sym(rfid_cols[2])),
+    first_PIT_tag = rfid_cols[1],
+    total_detections = run_lengths_lead_tag1
+  ) %>% 
+    dplyr::select(start, end, first_PIT_tag, total_detections) %>% 
+    # glimpse()
+    # First PIT tag first, lag differences
+    bind_rows(
+      runs_df %>% 
+        dplyr::filter(
+          !!rlang::parse_expr(conditnal_lag_tag1)
+        ) %>% 
+        # If a first index is stored as 0, then add 1 to restore this first index
+        dplyr::mutate(
+          first_indices_lag_tag1 = ifelse(first_indices_lag_tag1 == 0, first_indices_lag_tag1 + 1, first_indices_lag_tag1)
+        ) %>% 
+        dplyr::mutate(
+          # The start timestamps need to come from !!sym(rfid_cols[1]), since for the 1st PIT tag to be detected first, there should have been a negative difference in timestamps
+          start = lags_df %>% 
+            slice(first_indices_lag_tag1) %>% 
+            pull(!!sym(rfid_cols[1])),
+          # The end timestamps need to come from !!sym(rfid_cols[2]), since for the 1st PIT tag to be detected first, there should have been a negative difference in timestamps
+          end = lags_df %>% 
+            slice(last_indices_lag_tag1) %>% 
+            pull(!!sym(rfid_cols[2])),
+          first_PIT_tag = rfid_cols[1],
+          total_detections = run_lengths_lag_tag1
+        ) %>% 
+        dplyr::select(start, end, first_PIT_tag, total_detections)
+    ) %>% 
+    # Second PIT tag first, lead differences
+    bind_rows(
+      runs_df %>% 
+        dplyr::filter(
+          !!rlang::parse_expr(conditnal_lead_tag2)
+        ) %>% 
+        # View()
+        # If a first index is stored as 0, then add 1 to restore this first index
+        dplyr::mutate(
+          first_indices_lead_tag2 = ifelse(first_indices_lead_tag2 == 0, first_indices_lead_tag2 + 1, first_indices_lead_tag2)
+        ) %>% 
+        dplyr::mutate(
+          # The start timestamps need to come from !!sym(rfid_cols[2]), since for the 2nd PIT tag to be detected first, there should have been a positive difference in timestamps
+          start = lags_df %>% 
+            slice(first_indices_lead_tag2) %>% 
+            pull(!!sym(rfid_cols[2])),
+          # The end timestamps need to come from !!sym(rfid_cols[1])
+          end = lags_df %>% 
+            slice(last_indices_lead_tag2) %>% 
+            pull(!!sym(rfid_cols[1])),
+          first_PIT_tag = rfid_cols[2],
+          total_detections = run_lengths_lead_tag2
+        ) %>% 
+        dplyr::select(start, end, first_PIT_tag, total_detections)
+    ) %>% 
+    # Second PIT tag first, lag differences
+    bind_rows(
+      runs_df %>% 
+        dplyr::filter(
+          !!rlang::parse_expr(conditnal_lag_tag2)
+        ) %>% 
+        # If a first index is stored as 0, then add 1 to restore this first index
+        dplyr::mutate(
+          first_indices_lag_tag2 = ifelse(first_indices_lag_tag2 == 0, first_indices_lag_tag2 + 1, first_indices_lag_tag2)
+        ) %>% 
+        dplyr::mutate(
+          # The start timestamps need to come from !!sym(rfid_cols[2]), since for the 2nd PIT tag to be detected first, there should have been a positive difference in timestamps
+          start = lags_df %>% 
+            slice(first_indices_lag_tag2) %>% 
+            pull(!!sym(rfid_cols[2])),
+          # The end timestamps need to come from !!sym(rfid_cols[1])
+          end = lags_df %>% 
+            slice(last_indices_lag_tag2) %>% 
+            pull(!!sym(rfid_cols[1])),
+          first_PIT_tag = rfid_cols[2],
+          total_detections = run_lengths_lag_tag2
+        ) %>% 
+        dplyr::select(start, end, first_PIT_tag, total_detections)
+    ) 
+  
+  # TKTK I need to sort out the logic of which indices are the start versus end timestamps...not sure how to handle runs of length 1 versus potential longer runs. For uns of length 1, it appears I should only be using the last index for the leading/lagging of the first PIT tag, and then the last index for the second PIT tag. But not sure that this same logic applies for longer runs...yep I'm right about this. I think it would be good to have a pmap_dfr with an embedded conditional to use the last index for the first and last when run length is 1, and will need to build a test dataset for run lengths longer than 1
+  sync_df
+  # %>% 
+    # glimpse()
+    
+  # What should the output be? A data frame in which each row is a synchronized event, with the start timestamp, the end timestamp, the ID of the PIT tag detected first, the number of detections
+    
+    
+    # Then filter for beam breaker events that match the logic for entrances
+    dplyr::filter(
+      !!rlang::parse_expr(conditnal_lead_ent)
     ) %>%
+    dplyr::mutate(
+      irbb_direction_inferred = "entrance",
+      irbb_assignmnt_type = "lead"
+    ) %>% 
+    dplyr::select(all_of(outer_irbb_nm), all_of(inner_irbb_nm), diffs, irbb_direction_inferred, irbb_assignmnt_type) 
+  
+ 
+  
+  
+  # Make sure to add metadata columns for this integration step
+  dplyr::mutate(
+    data_stage = "integration",
+    rfid_video_lower_threshold_s = l_th,
+    rfid_video_upper_threshold_s = u_th,
+    video_recording_duration_s = video_rec_dur,
+    date_integrated = paste(Sys.Date(), Sys.time(), sep = " ")
+  ) %>%
     dplyr::rename(
       !!PIT_tag_col := `group_col`,
       # Had to rename this column for the join below
