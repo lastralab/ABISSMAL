@@ -83,11 +83,11 @@ find_rfid_perching_events <- function(rfid_file_nm, threshold, run_length = 2, s
         .f = ~ dplyr::mutate(.x,
                              shift = dplyr::lag(!!sym(timestamps_col), default = first(!!sym(timestamps_col)))
         ) %>% 
-          # Convert differences to boolean based on the thinning threshold to be able to remove stretches of detection events very close together
+          # Convert differences to Boolean based on the thinning threshold to be able to remove stretches of detection events very close together
           dplyr::mutate(
             diff = as.numeric(floor(!!sym(timestamps_col) - shift)),
-            # Taking anything less than or equal to the threshold, see previous RFID pre-processing
-            binary_diff = (diff <= threshold)
+            # Taking anything less than or equal to the threshold, see previous RFID pre-processing. The diff > 0 condition should remove the first timestamp compared to itself, which should in turn make it no longer necessary to correct the timestamp indices
+            binary_diff = (diff <= threshold & diff > 0)
           ) %>% 
           dplyr::select(all_of(timestamps_col), diff, binary_diff) 
       )
@@ -105,11 +105,7 @@ find_rfid_perching_events <- function(rfid_file_nm, threshold, run_length = 2, s
                                 .groups = "keep"
         ) %>% 
           dplyr::filter(run_values & run_lengths >= run_length) %>% 
-          ungroup() %>% 
-          # If a first index is stored as 0, then add 1 to restore this first index
-          dplyr::mutate(
-            first_indices = ifelse(first_indices == 0, first_indices + 1, first_indices)
-          )
+          ungroup()
       )
     ) %>% 
     # Get the unique perching events

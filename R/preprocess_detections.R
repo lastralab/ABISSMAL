@@ -151,7 +151,7 @@ preprocess_detections <- function(sensor, detection_col_nm, group_col_nm = NULL,
       dplyr::mutate(
         diff = floor(!!sym(detection_col_nm) - shift),
         diff = as.numeric(diff),
-        binary_diff = (diff >= thin_threshold)
+        binary_diff = (diff >= thin_threshold & diff > 0)
       ) 
     
     if(!is.null(group_col_nm)){
