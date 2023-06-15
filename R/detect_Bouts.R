@@ -15,7 +15,7 @@
 #' @param tz A character string. This argument should contain the timezone used for converting timestamps to POSIXct format. For instance, "America/New York". See the base function `as.POSIXct` for more information.
 #' @param POSIXct_format A character string. This argument should contain the format used to converting timestamps to POSIXct format. The default is "%Y-%m-%d %H:%M:%OS" to return timestamps with milliseconds in decimal format. See the base function `as.POSIXct` for more information.
 #' 
-#' @details TKTK
+#' @details # This function finds periods of time with RFID detections that occur close together (determined by the temporal threshold), and then uses the PIT tag information to determine whether two PIT tags were detected or not. This function was wrriten to operate on integrated datasets with RFID detections (the RFID detections have already been thinned during pre-processing). This function could be updated to detect bouts of activities in integrated datasets without RFID detections as well, although the output would not contain information about individual identity.
 #' 
 #' @return TKTK
 #' 
@@ -39,8 +39,6 @@ out_dir <- "integrated"
 out_file_nm = "activity_bouts.csv"
 tz <- "America/New York"
 POSIXct_format = "%Y-%m-%d %H:%M:%OS"
-
-# The updates I'm testing now are whether it makes sense to find periods of time with RFID detections close together to each other, and then determine whether two PIT tags were detected or not. Note that this is the integrated dataset, so the RFID detections have already been thinned. The flip of this (detect whether 2 PIT tags are present, then look at gaps between them to detect possible synchrony) doesn't really make sense because I generally expect 2 PIT tags to be detected each day already
 
 detect_synchronizedEvents <- function(integrated_file_nm, threshold, run_length, sensor_id_col, timestamps_col, PIT_tag_col, preproc_metadata_cols, general_metadata_cols, path, data_dir, out_dir, out_file_nm = "inferred_synchonrized_events.csv", tz, POSIXct_format = "%Y-%m-%d %H:%M:%OS"){
   
