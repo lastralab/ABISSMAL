@@ -46,6 +46,17 @@ check_numeric <- function(y){
   
 }
 
+# Check that sensor arguments are written as expected
+check_sensor_spelling <- function(y){
+  
+  err <- paste("The value provided for the sensor argument, ", y, ", is not correct, check your spelling or captialization", sep = "")
+  
+  if(!grepl("^RFID$|^IRBB$|^Video$", y)){
+    stop(err)
+  }
+  
+}
+
 ############################## Directories ####################################
 
 # Check that the each directory in a vector of directories exists
@@ -102,12 +113,6 @@ check_data_cols <- function(y, df){
 }
 
 # Check that a given column from the formal arguments does not have NAs 
-# y <- expected_cols[2]
-# df <- preproc_rfid
-# 
-# y
-# df
-
 check_fArgs_cols_nas <- function(y, df){
   
   tmp_cols <- eval(base::as.symbol(y))

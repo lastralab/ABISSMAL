@@ -27,7 +27,7 @@ find_rfid_perching_events <- function(rfid_file_nm, threshold, run_length = 2, s
   options("digits.secs" = 6)
   
   # Get the formal arguments from the current function
-  # Try substituting the function name with: match.call()[[1]]
+  # TKTK try substituting the function name with: match.call()[[1]]
   f_args <- methods::formalArgs(find_rfid_perching_events)
   
   # Check that the formal arguments were all specified

@@ -17,17 +17,15 @@
 #' 
 #' @return A data frame object with the pre-processed detections per sensor, all metadata columns in the original data frame, as well as a column indicating the temporal threshold used for pre-processing by thinning (in seconds), or a column indicating the threshold used to filter detections by the number of pixels that changed (video data). Each row of this data frame is a pre-processed detection from the raw data collected by the given sensor.
 
-# I need to iterate over sensors again...
-
-# sensor <- "Video"
-# detection_col_nm <- "timestamp_ms"
-# group_col_nm <- NULL
-# thin_threshold <- 2
-# pixel_threshold <- 10000
-# pixel_col_nm <- "total_pixels_motionTrigger"
-# path <- "/media/gsvidaurre/Anodorhynchus/Data_Testing/Box_02_31Dec2022/Data"
-# data_dir <- "raw_combined"
-# out_dir <- "pre_processed"
+sensor <- "Video"
+detection_col_nm <- "timestamp_ms"
+group_col_nm <- NULL
+thin_threshold <- NULL
+pixel_threshold <- 10000
+pixel_col_nm <- "total_pixels_motionTrigger"
+path <- "/media/gsvidaurre/Anodorhynchus/Data_Testing/Box_02_31Dec2022/Data"
+data_dir <- "raw_combined"
+out_dir <- "pre_processed"
 
 preprocess_detections <- function(sensor, detection_col_nm, group_col_nm = NULL, pixel_col_nm = NULL, thin_threshold = NULL, pixel_threshold = NULL, path, data_dir, out_dir, tz, POSIXct_format = "%Y-%m-%d %H:%M:%OS"){
   
@@ -37,28 +35,83 @@ preprocess_detections <- function(sensor, detection_col_nm, group_col_nm = NULL,
   # Set the number of digits for visualization. Under the hood there is full precision, but this helps for visual confirmation of decimal seconds
   options("digits.secs" = 6)
   
-  # Check that the sensor argument is a string and is 1 of the 3 movement sensors
-  if(!grepl("^RFID$|^IRBB$|^Video$", sensor)){
-    stop('The sensor argument is not correct, check your spelling or captialization')
+  # Get the formal arguments from the current function
+  # TKTK try substituting the function name with: match.call()[[1]]
+  f_args <- methods::formalArgs(preprocess_detections)
+  
+  # Check that the formal arguments were all specified
+  invisible(sapply(1:length(f_args), function(i){
+    check_defined(f_args[i])
+  }))
+  
+  # Check that the formal arguments that should not be NULL are not NULL under the right conditions (e.g. when processing RFID data)
+  if(sensor == "RFID"){
+    
+    expect_nonNull <- f_args
+    
+    invisible(sapply(1:length(expect_nonNull), function(i){
+      check_null(expect_nonNull[i])
+    }))
+    
+  } else {
+    
+    if(sensor == "IRBB"){
+      
+      expect_null <- c("group_col_nm")
+      
+    } else if(sensor == "Video"){
+      
+      expect_null <- c("group_col_nm", "thin_threshold")
+      
+    }
+    
+    expect_nonNull <- f_args[-grep(paste(paste("^", expect_null, "$", sep = ""), collapse = "|"), f_args)]
+    
+    invisible(sapply(1:length(expect_nonNull), function(i){
+      check_null(expect_nonNull[i])
+    }))
+    
   }
   
-  # If the thinning temporal threshold should be specified, then check that it is a number
-  if(grepl("RFID|IRBB", sensor) & !is.numeric(thin_threshold)){
-    stop('The thinning temporal threshold needs to be numeric (in seconds)')
+  # Check that the formal arguments that should be strings are strings
+  if(grepl("RFID|IRBB", sensor)){
+    
+    expect_numeric <- c("thin_threshold")
+    
+  } else if(grepl("Video", sensor)){
+    
+    expect_numeric <- c("pixel_threshold")
+    
   }
   
-  # If the pixel temporal threshold should be specified, then check that it is a number
-  if(grepl("Video", sensor) & !is.numeric(pixel_threshold)){
-    stop('The pixel temporal threshold needs to be numeric (the number of pixels)')
+  expect_strings <- f_args[-grep(paste(paste("^", expect_numeric, "$", sep = ""), collapse = "|"), f_args)]
+  
+  # Remove any columns that should be NULL
+  if(length(expect_null) > 0){
+    
+    expect_strings <- expect_strings[-grep(paste(paste("^", expect_null, "$", sep = ""), collapse = "|"), expect_strings)]
+      
   }
+  
+  invisible(sapply(1:length(expect_strings), function(i){
+    check_string(expect_strings[i])
+  }))
+  
+  # Check that the formal arguments that should be numeric are numeric
+  invisible(sapply(1:length(expect_numeric), function(i){
+    check_numeric(expect_numeric[i])
+  }))
+  
+  # Check that the sensor argument was written correctly
+  check_sensor_spelling(sensor)
+  
+  # Check that each input directory exists
+  check_dirs(data_path, data_dir)
   
   # Create the directory for saving the pre-processed data files if it doesn't already exist
   if(!dir.exists(file.path(path, out_dir))){
     dir.create(file.path(path, out_dir))
   }
-  
-  # Iterate over sensors to read in data across files for each sensor, and write out a .csv file of the combined raw data
-  # invisible(lapply(1:length(sensors), function(x){
   
   # Read in the combined raw data for the given sensor type
   raw_data <- read.csv(file.path(path, data_dir, paste("combined_raw_data_", sensor, ".csv", sep = ""))) %>% 
@@ -68,6 +121,44 @@ preprocess_detections <- function(sensor, detection_col_nm, group_col_nm = NULL,
     ) %>% 
     # Drop columns that aren't needed here
     dplyr::select(-c("original_timestamp", "data_stage", "date_combined"))
+  
+  ### TKTK continue integrating checks below
+  
+  # Check that the expected columns from formal arguments are found in the data
+  expected_cols <- f_args[grep("col", f_args)]
+  
+  invisible(sapply(1:length(expected_cols), function(i){
+    check_fArgs_data_cols(expected_cols[i], preproc_rfid)
+  }))
+  
+  # Check that the expected columns from formal arguments do not have NAs
+  invisible(sapply(1:length(expected_cols), function(i){
+    check_fArgs_cols_nas(expected_cols[i], preproc_rfid)
+  }))
+  
+  # Check that date-related columns are found in the data
+  expected_cols <- c("year", "month", "day")
+  
+  invisible(sapply(1:length(expected_cols), function(i){
+    check_data_cols(expected_cols[i], preproc_rfid)
+  }))
+  
+  # Check that the date-related columns do not have NAs
+  invisible(sapply(1:length(expected_cols), function(i){
+    check_cols_nas(expected_cols[i], preproc_rfid)
+  }))
+  
+  # Check that columns with timestamps are in the right format
+  tstmps_cols <- f_args[grep("time", f_args)]
+  
+  invisible(sapply(1:length(tstmps_cols), function(i){
+    check_tstmps_cols(tstmps_cols[i], preproc_rfid, "%Y-%m-%d %H:%M:%OS6")
+  }))
+  
+  
+  
+  
+  
   
   # Check that the raw data is a data frame
   if(!is.data.frame(raw_data)){
