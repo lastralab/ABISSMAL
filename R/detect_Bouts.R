@@ -40,17 +40,6 @@ out_file_nm = "activity_bouts.csv"
 tz <- "America/New York"
 POSIXct_format = "%Y-%m-%d %H:%M:%OS"
 
-# TKTK I think I need to make this type of update to this conditional to remove 0s in all other functions too
-# binary_diff = (diff <= threshold & diff > 0)
-# ) %>% 
-
-# %>% 
-# TKTK I think I need to change the logic and remove lines like this from other functions too...(like add the greater than 0 rule...)
-# If a first index is stored as 0, then add 1 to restore this first index
-# dplyr::mutate(
-# first_indices = ifelse(first_indices == 0, first_indices + 1, first_indices)
-# ) 
-
 # The updates I'm testing now are whether it makes sense to find periods of time with RFID detections close together to each other, and then determine whether two PIT tags were detected or not. Note that this is the integrated dataset, so the RFID detections have already been thinned. The flip of this (detect whether 2 PIT tags are present, then look at gaps between them to detect possible synchrony) doesn't really make sense because I generally expect 2 PIT tags to be detected each day already
 
 detect_synchronizedEvents <- function(integrated_file_nm, threshold, run_length, sensor_id_col, timestamps_col, PIT_tag_col, preproc_metadata_cols, general_metadata_cols, path, data_dir, out_dir, out_file_nm = "inferred_synchonrized_events.csv", tz, POSIXct_format = "%Y-%m-%d %H:%M:%OS"){
