@@ -3,6 +3,16 @@
 
 # See more info on the testthat package: https://r-pkgs.org/testing-basics.html
 
+# TKTK test the general argument / directory error checks
+sensors = c("IRBB", "RFID", "Video", "Temp")
+# tz <- "America/New York"
+tz <- NULL # testing setting one formal argument to NULL
+POSIXct_format = "%Y-%m-%d %H:%M:%OS"
+data_path
+out_dir
+
+# Testing not specifying a formal argument
+# rm(list = "tz")
 
 # TKTK need to test that there are no negative durations and also no duplicate durations indicating assignments within or between PIT tags
 

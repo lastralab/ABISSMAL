@@ -26,31 +26,35 @@ find_rfid_perching_events <- function(rfid_file_nm, threshold, run_length = 2, s
   # Set the number of digits for visualization. Under the hood there is full precision, but this helps for visual confirmation of decimal seconds
   options("digits.secs" = 6)
   
-  # TKTK need to check these carefully and across functions too
-  # Check that the temporal threshold is a number
-  if(!is.numeric(threshold)){
-    stop('The temporal threshold needs to be numeric (in seconds)')
-  }
-  # 
-  # # Check that the input dataset has the column of RFID events
-  # if(any(is.null(timestamps_col) | !timestamps_col %in% names(df))){
-  #   stop('The column specified in `timestamps_col` does not exist')
-  # }
-  # 
-  # # Check that the input dataset has the PIT tag ID column, and does not have NAs
-  # if(any(is.null(tag_id_col_nm) | !tag_id_col_nm %in% names(df) | any(is.na(df[[tag_id_col_nm]])))){
-  # stop('The column specified in `tag_id_col_nm` does not exist or has NA values')
-  # }
-  # 
-  # # Check that the year, month, and day columns are also present in the data frame, and do not have NAs
-  # if(any(!"year" %in% names(df) | !"month" %in% names(df) | !"day" %in% names(df) | any(is.na(df[["year"]])) | any(is.na(df[["month"]])) | any(is.na(df[["day"]])))){
-  #   stop('The data frame is missing columns `year`, `month`, or `day`, or there are NA values in one of these columns')
-  # }
-  # 
-  # # Check that the timestamps are in the right format. This conditional also catches NAs in the RFID timestamps
-  # if(any(is.na(as.POSIXct(df[[timestamps_col]], format = "%Y-%m-%d %H:%M:%OS6")))){
-  #   stop('One or more timestamps are in the wrong format (need to be in POSIXct or POSIXt format, like %Y-%m-%d %H:%M:%OS6')
-  # }
+  # Get the formal arguments from the current function
+  # Try substituting the function name with: match.call()[[1]]
+  f_args <- methods::formalArgs(find_rfid_perching_events)
+  
+  # Check that the formal arguments were all specified
+  invisible(sapply(1:length(f_args), function(i){
+    check_defined(f_args[i])
+  }))
+  
+  # Check that the formal arguments are not NULL
+  invisible(sapply(1:length(f_args), function(i){
+    check_null(f_args[i])
+  }))
+  
+  # Check that the formal arguments that should be strings are strings
+  expect_numeric <- c("threshold", "run_length")
+  expect_strings <- f_args[-grep(paste(paste("^", expect_numeric, "$", sep = ""), collapse = "|"), f_args)]
+  
+  invisible(sapply(1:length(expect_strings), function(i){
+    check_string(expect_strings[i])
+  }))
+  
+  # Check that the formal arguments that should be numeric are numeric
+  invisible(sapply(1:length(expect_numeric), function(i){
+    check_numeric(expect_numeric[i])
+  }))
+  
+  # Check that each input directory exists
+  check_dirs(data_path, rfid_dir)
   
   # Create the directory for saving the data file if it doesn't already exist
   if(!dir.exists(file.path(path, out_dir))){
@@ -63,6 +67,37 @@ find_rfid_perching_events <- function(rfid_file_nm, threshold, run_length = 2, s
     dplyr::mutate(
       !!timestamps_col := as.POSIXct(format(as.POSIXct(!!sym(timestamps_col), tz = "America/New York"), "%Y-%m-%d %H:%M:%OS6"))
     ) 
+  
+  # Check that the expected columns from formal arguments are found in the data
+  expected_cols <- f_args[grep("col", f_args)]
+  
+  invisible(sapply(1:length(expected_cols), function(i){
+    check_fArgs_data_cols(expected_cols[i], preproc_rfid)
+  }))
+  
+  # Check that the expected columns from formal arguments do not have NAs
+  invisible(sapply(1:length(expected_cols), function(i){
+    check_fArgs_cols_nas(expected_cols[i], preproc_rfid)
+  }))
+  
+  # Check that date-related columns are found in the data
+  expected_cols <- c("year", "month", "day")
+  
+  invisible(sapply(1:length(expected_cols), function(i){
+    check_data_cols(expected_cols[i], preproc_rfid)
+  }))
+  
+  # Check that the date-related columns do not have NAs
+  invisible(sapply(1:length(expected_cols), function(i){
+    check_cols_nas(expected_cols[i], preproc_rfid)
+  }))
+  
+  # Check that columns with timestamps are in the right format
+  tstmps_cols <- f_args[grep("time", f_args)]
+  
+  invisible(sapply(1:length(tstmps_cols), function(i){
+    check_tstmps_cols(tstmps_cols[i], preproc_rfid, "%Y-%m-%d %H:%M:%OS6")
+  }))
   
   # Group the RFID data frame by PIT tag ID and day. Otherwise the logic below ends up including the last event of a day and the first of the next day as the start and end indices, which leads to strangely long perching periods sometimes
   perching_df <- preproc_rfid %>%
