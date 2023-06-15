@@ -7,7 +7,7 @@
 #'  
 #' @param POSIXct_format A character string. This argument should contain the format used to converting timestamps to POSIXct format. The default is "%Y-%m-%d %H:%M:%OS" to return timestamps with milliseconds in decimal format. See the base function `as.POSIXct` for more information.
 #' 
-#' @param data_path A character string. This should be the path specifying where the data is saved across sensors. For instance, "/media/gsvidaurre/Box_01/Data".
+#' @param data_path A character string. This should be the path specifying where the data is saved across sensors. For instance, "/media/gsvidaurre/Anodorhynchus/Data_Testing/Box_02_31Dec2022/Data".
 #'
 #' @param out_dir A character string. This should be the name of a directory specifying where the .csv file of combined raw data should be saved for each sensor. For instance, "raw_combined". This folder will be appended to the data_path and created as a new directory if it doesn't already exist.
 #'
@@ -23,11 +23,36 @@ combine_raw_data_per_sensor <- function(sensors = c("IRBB", "RFID", "Video", "Te
   # Set the number of digits for visualization. Under the hood there is full precision, but this helps for visual confirmation of decimal seconds
   options("digits.secs" = 6)
   
-  # Create the directory for saving the combined raw data files if it doesn't already exist
+  # Get the formal arguments from the current function
+  f_args <- methods::formalArgs(combine_raw_data_per_sensor)
+  
+  # Check that the formal arguments were all specified
+  invisible(sapply(1:length(f_args), function(i){
+    check_defined(f_args[i])
+  }))
+  
+  # Check that the formal arguments are not NULL
+  invisible(sapply(1:length(f_args), function(i){
+    check_null(f_args[i])
+  }))
+  
+  # Check that the formal arguments that should be strings are strings
+  expect_strings <- f_args
+  
+  invisible(sapply(1:length(expect_strings), function(i){
+    check_string(expect_strings[i])
+  }))
+  
+  # Check that each input directory exists
+  invisible(sapply(1:length(sensors), function(i){
+    check_dirs(data_path, sensors[i])
+  }))
+  
+  # Create the directory for saving the output files if it doesn't already exist
   if(!dir.exists(file.path(data_path, out_dir))){
     dir.create(file.path(data_path, out_dir))
   }
-  
+
   # Iterate over sensors to read in data across files for each sensor, and write out a .csv file of the combined raw data
   invisible(lapply(1:length(sensors), function(x){
 
@@ -40,7 +65,7 @@ combine_raw_data_per_sensor <- function(sensors = c("IRBB", "RFID", "Video", "Te
     }))
     
     # Video and Temperature data have different names for the timestamp column, so update these column names
-    if(grepl("Video|Temp", sensors[x])){
+    if(names(raw_data)[grep("time", names(raw_data))] != "timestamp"){
       names(raw_data)[grep("time", names(raw_data))] <- "timestamp"
     }
     
