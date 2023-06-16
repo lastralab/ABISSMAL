@@ -1,8 +1,8 @@
 #' @title integrate_rfid_beamBreakers
 #' @description Use lags between the pre-processed radio frequency identification (RFID) data and the pre-processed, labeled beam breaker data to integrate these two datasets. Each RFID detection that remains must be accompanied by a labeled event from the beam breaker dataset (e.g. an entrance or exit event)
 #' 
-#' @param rfid_file_nm A character string. This should be the name of the file that contains all of the pre-processed RFID detections. Each row is a unique detection event. This spreadsheet must contain all the columns specified for the RFID data in the subsequent arguments
-#' @param irbb_file_nm A character string. This should be the name of the file that contains all of the pre-processed infrared beam breaker (IRBB) detections. Each row is a unique detection event. This data frame must contain all the columns specified for the IRBB data in the subsequent arguments
+#' @param rfid_file_nm A character string. This should be the name and extension of the .csv file that contains all of the pre-processed RFID detections. Each row is a unique detection event. This spreadsheet must contain all the columns specified for the RFID data in the subsequent arguments
+#' @param irbb_file_nm A character string. This should be the name and extension of the .csv file that contains all of the pre-processed infrared beam breaker (IRBB) detections. Each row is a unique detection event. This data frame must contain all the columns specified for the IRBB data in the subsequent arguments
 #' @param l_th A numeric argument. This represents a lower or minimum temporal threshold in seconds to identify RFID and beam breaker events that are close enough together for integration.
 #' @param u_th A numeric argument. This represents an upper or maximum temporal threshold in seconds to identify RFID and beam breaker events that are close enough together for integration.
 #' @param sensor_id_col A character value. This is the name of the metadata column that contains information about the data type (e.g. "sensor_id")

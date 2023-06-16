@@ -14,7 +14,7 @@
 #'  
 #' @param POSIXct_format A character string. This argument should contain the format used to converting timestamps to POSIXct format. The default is "%Y-%m-%d %H:%M:%OS" to return timestamps with milliseconds in decimal format. See the base function `as.POSIXct` for more information.
 #' 
-#' #' @details TKTK
+#' @details TKTK
 #' 
 #' @return A data frame object with the pre-processed detections per sensor, all metadata columns in the original data frame, as well as a column indicating the temporal threshold used for pre-processing by thinning (in seconds), or a column indicating the threshold used to filter detections by the number of pixels that changed (video data). Each row of this data frame is a pre-processed detection from the raw data collected by the given sensor.
 
