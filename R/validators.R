@@ -214,17 +214,6 @@ check_tstmps_cols <- function(y, df, format){
 }
 
 # Check that a given column has the expected values
-
-# Check that the sensor ID column has the expected values
-col_nm <- sensor_id_col
-df <- preproc_data %>% 
-  dplyr::filter(a(col_nm) == outer_irbb_nm)
-glimpse(df)
-unique(df[["sensor_id"]])
-vals <- c(outer_irbb_nm, inner_irbb_nm)
-
-# TKTK continue testing!!
-
 check_col_values <- function(col_nm, df, vals){
   
   tmp_col <- col_nm
@@ -232,7 +221,7 @@ check_col_values <- function(col_nm, df, vals){
   
   err <- paste("The column", tmp_col, "does not have one or both of the expected values", paste(tmp_vals, collapse = "; "), sep = " ")
   
-  if(!all(grepl(paste(paste("^", tmp_vals, "$", sep = ""), collapse = "|"), df[[tmp_col]]))){
+  if(!all(unique(df[[tmp_col]]) %in% tmp_vals)){
     stop(err)
   }
   

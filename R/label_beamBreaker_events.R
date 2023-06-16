@@ -127,13 +127,7 @@ label_beamBreaker_events <- function(irbb_file_nm, l_th, u_th, sensor_id_col, ti
   
   # Check that the sensor ID column has the expected values
   check_col_values(sensor_id_col, preproc_data, c(outer_irbb_nm, inner_irbb_nm))
-  
 
-  
-  # TKTK need to check these values too after reading in the data
-  outer_irbb_nm <- "Outer Beam Breaker"
-  inner_irbb_nm <- "Inner Beam Breaker"
-  
   # Ensure the timestamps are ordered, then calculate the time lags between the two beam breaker pairs. Here this is done using the leading differences between the beam breaker pairs to identify possible entrances and exits, respectively
   preproc_data2 <- preproc_data %>% 
     dplyr::arrange(timestamp_ms, desc = FALSE) %>%
