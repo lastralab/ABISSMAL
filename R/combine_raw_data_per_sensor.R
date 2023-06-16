@@ -2,16 +2,16 @@
 #' @description Combine raw data files for each sensor
 #' 
 #' @param sensors A character vector of length 1 or more. This vector should contain the names of the sensors across which raw data files will be combined into a single spreadsheet. The default is all sensors, or c("IRBB", "RFID", "Video", "Temp"). Note that for the beam breakers, the raw data contains data collected from the 2 pairs of beam breakers in the current hardware setup.
-#' @param tz A character string. This argument should contain the timezone used for converting timestamps to POSIXct format. For instance, "America/New York". See the base function `as.POSIXct` for more information.
-#' @param POSIXct_format A character string. This argument should contain the format used to converting timestamps to POSIXct format. The default is "%Y-%m-%d %H:%M:%OS" to return timestamps with milliseconds in decimal format. See the base function `as.POSIXct` for more information.
 #' @param path A character string. This argument should be the path on the local computer or external hard drive specifying where the data is saved across sensors for a given experimental setup. For instance, "/media/gsvidaurre/Anodorhynchus/Data_Testing/Box_02_31Dec2022/Data".
 #' @param out_dir A character string. This argument should be the name of a directory specifying where the .csv file of combined raw data should be saved for each sensor. For instance, "raw_combined". This folder will be appended to the path and created as a new directory if it doesn't already exist.
+#' @param tz A character string. This argument should contain the timezone used for converting timestamps to POSIXct format. For instance, "America/New York". See the base function `as.POSIXct` for more information.
+#' @param POSIXct_format A character string. This argument should contain the format used to converting timestamps to POSIXct format. The default is "%Y-%m-%d %H:%M:%OS6" to return timestamps with milliseconds in decimal format. See the base function `as.POSIXct` for more information.
 #' 
 #' @details This function iterates over sensor types to combine the raw data from one experimental setup into a single spreadsheet in .csv format per sensor type. For each sensor type, all raw data collected using the `Abissmal` tracking system throughout the course of an experiment will be concatenated into a single spreadsheet. The raw data is not modified during this processing aside from changing the timestamp format to be compatible with lag difference calculations. The original raw data is not modified or deleted. This function must be executed across experimental setups if the tracking system was used to collect data for serial or parallel experimental replicates.
 #' 
 #' @return A .csv file with the raw data collected across dates for each sensor type, as well as all metadata collected by each sensor. Each row of each .csv file is a detection in the raw data collected by the given sensor type.
 
-combine_raw_data_per_sensor <- function(sensors = c("IRBB", "RFID", "Video", "Temp"), tz, POSIXct_format = "%Y-%m-%d %H:%M:%OS", path, out_dir){
+combine_raw_data_per_sensor <- function(sensors = c("IRBB", "RFID", "Video", "Temp"), path, out_dir, tz, POSIXct_format = "%Y-%m-%d %H:%M:%OS"){
   
   # Get the current global options
   orig_opts <- options()
