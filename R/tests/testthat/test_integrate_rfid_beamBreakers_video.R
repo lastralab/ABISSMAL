@@ -20,13 +20,13 @@ preproc_metadata_cols <- c("thin_threshold_s", "data_stage", "date_pre_processed
 general_metadata_cols <- c("chamber_id", "year", "month", "day")
 video_metadata_cols <- c("total_pixels_motionTrigger", "pixel_threshold", "video_file_name")
 path <- "/media/gsvidaurre/Anodorhynchus/Data_Testing/Box_02_31Dec2022/Data"
-rfid_dir <- "pre_processed"
-irbb_dir <- "pre_processed"
-video_dir <- "pre_processed"
+data_dir <- "pre_processed"
 out_dir <- "integrated"
 out_file_nm <- "integrated_rfid_beamBreakers_video_data.csv"
 tz <- "America/New York"
 POSIXct_format <- "%Y-%m-%d %H:%M:%OS"
+integrate_perching <- TRUE
+devices_integrated <- "three"
 
 source(file.path("/home/gsvidaurre/Desktop/GitHub_repos/Abissmal/R", "integrate_rfid_breamBreakers.R"))
 
