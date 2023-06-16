@@ -9,7 +9,7 @@ sensor_id_col <- "sensor_id"
 timestamps_col <- "timestamp_ms"
 outer_irbb_col <- "Outer_beam_breaker"
 inner_irbb_col <- "Inner_beam_breaker"
-irbb_event_col <- "irbb_direction_inferred"
+irbb_event_col <- "data_direction_inferred"
 irbb_unique_col <- "unique_entranceExit"
 preproc_metadata_cols <- c("thin_threshold_s", "data_stage", "date_pre_processed", "lower_threshold_s", "upper_threshold_s", "date_labeled", "diffs", "irbb_assignmnt_type")
 general_metadata_cols <- c("chamber_id", "year", "month", "day")
@@ -17,12 +17,12 @@ video_metadata_cols <- c("total_pixels_motionTrigger", "pixel_threshold", "video
 extra_cols2drop <- NA
 integrate_perching <- TRUE
 path <- "/media/gsvidaurre/Anodorhynchus/Data_Testing/Box_02_31Dec2022/Data"
-irbb_dir <- "pre_processed"
-video_dir <- "pre_processed"
+data_dir <- "pre_processed"
 out_dir <- "integrated"
 out_file_nm = "integrated_beamBreaker_video_data.csv"
 tz <- "America/New York"
 POSIXct_format <- "%Y-%m-%d %H:%M:%OS"
+devices_integrated <- "two"
 
 # Lead and lag assignments
 # table(integr8d_df$assignmnt_type)
