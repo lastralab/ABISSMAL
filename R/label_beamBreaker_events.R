@@ -9,34 +9,33 @@
 #' @param outer_irbb_nm A character value. The label used for the outer pair of beam breakers (e.g. the first pair of beam breakers that an animal encounters when moving into a nest container or area). This should be a value in the column named `sensor_id_col`
 #' @param inner_irbb_nm A character value. The label used for the inner pair of beam breakers (e.g. the second pair of beam breakers that an individual encounters when moving into a nest container or area). This should be a value in the column named `sensor_id_col`
 #' @param path A character string. This should be the path specifying the overall directory where data is saved for a given experimental setup. For instance, "/media/gsvidaurre/Anodorhynchus/Data_Testing/Box_02_31Dec2022/Data".
-#' @param data_dir A character string. This should be the name of directory where the raw data is saved across sensors inside the path above. For instance, "raw_combined".
+#' @param data_dir A character string. This should be the name of directory where the raw data is saved across sensors inside the path above. For instance, "pre_processed" for this function in order to label the pre-processed beam breaker detections.
 #' @param out_dir A character string. This should be the name of a directory specifying where the .csv file of pre-processed data should be saved for each sensor. For instance, "pre-processed". This folder will be appended to the data_path and created as a new directory if it doesn't already exist.
+#' @param out_file_nm A character string. The name (plus extension) of the resulting file that will be written to out_dir. The default is "labeled_beamBreaker_data.csv"
 #' @param tz A character string. This argument should contain the timezone used for converting timestamps to POSIXct format. For instance, "America/New York". See the base function `as.POSIXct` for more information.
 #' @param POSIXct_format A character string. This argument should contain the format used to converting timestamps to POSIXct format. The default is "%Y-%m-%d %H:%M:%OS" to return timestamps with milliseconds in decimal format. See the base function `as.POSIXct` for more information.
 #' 
 #' @return A .csv file with the metadata columns from the original pre-processed data used as input, as well as columns indicating each of the timestamps of the lead and rear beam breaker pairs, a unique label for the given event (e.g. entrance or exit), a unique numeric identifier for the given event, and information about the given data processing stage. Each row in the .csv file is a labeled event across the outer and inner beam breaker pairs that was identified using a given temporal threshold
 #' 
 
-# library(tidyverse)
-# library(pbapply)
-# 
-# irbb_file_nm <- "pre_processed_data_IRBB.csv"
-# l_th <- 0
-# u_th <- 2
-# sensor_id_col <- "sensor_id"
-# timestamps_col <- "timestamp_ms"
-# outer_irbb_nm <- "Outer Beam Breaker"
-# inner_irbb_nm <- "Inner Beam Breaker"
-# path <- "/media/gsvidaurre/Anodorhynchus/Data_Testing/Box_02_31Dec2022/Data"
-# data_dir <- "pre_processed"
-# out_dir <- "pre_processed"
-# tz <- "America/New York"
-# POSIXct_format <- "%Y-%m-%d %H:%M:%OS"
+library(tidyverse)
 
-# TKTK update this function to write to the preprocessed folder, and probably update he name of the output and the function itself, also the value in the "data_stage" column
+irbb_file_nm <- "pre_processed_data_IRBB.csv"
+l_th <- 0
+u_th <- 2
+sensor_id_col <- "sensor_id"
+timestamps_col <- "timestamp_ms"
+outer_irbb_nm <- "Outer Beam Breaker"
+inner_irbb_nm <- "Inner Beam Breaker"
+path <- "/media/gsvidaurre/Anodorhynchus/Data_Testing/Box_02_31Dec2022/Data"
+data_dir <- "pre_processed"
+out_dir <- "pre_processed"
+tz <- "America/New York"
+POSIXct_format <- "%Y-%m-%d %H:%M:%OS"
+out_file_nm = "labeled_beamBreaker_data.csv"
 
 # Make a function to integrate between beam breaker pairs to infer entrance and exit movements
-label_beamBreaker_events <- function(irbb_file_nm, l_th, u_th, sensor_id_col, timestamps_col, outer_irbb_nm, inner_irbb_nm, path, data_dir, out_dir, tz, POSIXct_format = "%Y-%m-%d %H:%M:%OS"){
+label_beamBreaker_events <- function(irbb_file_nm, l_th, u_th, sensor_id_col, timestamps_col, outer_irbb_nm, inner_irbb_nm, path, data_dir, out_dir, out_file_nm = "labeled_beamBreaker_data.csv", tz, POSIXct_format = "%Y-%m-%d %H:%M:%OS"){
   
   # Get the current global options
   orig_opts <- options()
@@ -44,14 +43,39 @@ label_beamBreaker_events <- function(irbb_file_nm, l_th, u_th, sensor_id_col, ti
   # Set the number of digits for visualization. Under the hood there is full precision, but this helps for visual confirmation of decimal seconds
   options("digits.secs" = 6)
   
-  # Check that the lower and upper temporal thresholds are each numeric
-  if(!is.numeric(l_th)){
-    stop('The lower temporal threshold needs to be numeric (in seconds)')
-  }
+  # Get the formal arguments from the current function
+  # TKTK try substituting the function name with: match.call()[[1]]
+  f_args <- methods::formalArgs(label_beamBreaker_events)
   
-  if(!is.numeric(u_th)){
-    stop('The upper temporal threshold needs to be numeric (in seconds)')
-  }
+  # Check that the formal arguments were all specified
+  invisible(sapply(1:length(f_args), function(i){
+    check_defined(f_args[i])
+  }))
+  
+  # Check that the formal arguments that should not be NULL
+  invisible(sapply(1:length(f_args), function(i){
+    check_null(f_args[i])
+  }))
+  
+  # Check that the formal arguments that should be strings are strings
+  expect_numeric <- c("l_th", "u_th")
+
+  expect_strings <- f_args[-grep(paste(paste("^", expect_numeric, "$", sep = ""), collapse = "|"), f_args)]
+  
+  invisible(sapply(1:length(expect_strings), function(i){
+    check_string(expect_strings[i])
+  }))
+  
+  # Check that the formal arguments that should be numeric are numeric
+  invisible(sapply(1:length(expect_numeric), function(i){
+    check_numeric(expect_numeric[i])
+  }))
+  
+  # Check that the input directory exists
+  check_dirs(path, data_dir)
+  
+  # Check that the input file exists in the input directory
+  check_file(file.path(path, data_dir), irbb_file_nm)
   
   # Create the directory for saving the labeled data files (if it doesn't exist)
   if(!dir.exists(file.path(path, out_dir))){
@@ -67,10 +91,48 @@ label_beamBreaker_events <- function(irbb_file_nm, l_th, u_th, sensor_id_col, ti
     # Drop columns that aren't needed here
     dplyr::select(-c("thin_threshold_s", "data_stage", "date_pre_processed"))
   
-  # Check that the raw data is a data frame
-  if(!is.data.frame(preproc_data)){
-    stop('The pre-processed data needs to be a data frame')
-  }
+  # Check that this object is a data frame
+  check_df_class(preproc_data)
+  
+  # Check that the expected columns from formal arguments are found in the data
+  expected_cols <- f_args[grep("col", f_args)]
+  
+  invisible(sapply(1:length(expected_cols), function(i){
+    check_fArgs_data_cols(expected_cols[i], preproc_data)
+  }))
+  
+  # Check that the expected columns from formal arguments do not have NAs
+  invisible(sapply(1:length(expected_cols), function(i){
+    check_fArgs_cols_nas(expected_cols[i], preproc_data)
+  }))
+  
+  # Check that date-related columns are found in the data
+  expected_cols <- c("year", "month", "day")
+  
+  invisible(sapply(1:length(expected_cols), function(i){
+    check_data_cols(expected_cols[i], preproc_data)
+  }))
+  
+  # Check that the date-related columns do not have NAs
+  invisible(sapply(1:length(expected_cols), function(i){
+    check_cols_nas(expected_cols[i], preproc_data)
+  }))
+  
+  # Check that columns with timestamps are in the right format
+  tstmps_cols <- f_args[grep("time", f_args)]
+  
+  invisible(sapply(1:length(tstmps_cols), function(i){
+    check_tstmps_cols(tstmps_cols[i], preproc_data, "%Y-%m-%d %H:%M:%OS6")
+  }))
+  
+  # Check that the sensor ID column has the expected values
+  check_col_values(sensor_id_col, preproc_data, c(outer_irbb_nm, inner_irbb_nm))
+  
+
+  
+  # TKTK need to check these values too after reading in the data
+  outer_irbb_nm <- "Outer Beam Breaker"
+  inner_irbb_nm <- "Inner Beam Breaker"
   
   # Ensure the timestamps are ordered, then calculate the time lags between the two beam breaker pairs. Here this is done using the leading differences between the beam breaker pairs to identify possible entrances and exits, respectively
   preproc_data2 <- preproc_data %>% 
@@ -190,7 +252,7 @@ label_beamBreaker_events <- function(irbb_file_nm, l_th, u_th, sensor_id_col, ti
         dplyr::select(all_of(outer_irbb_nm), all_of(inner_irbb_nm), diffs, irbb_direction_inferred, irbb_assignmnt_type) 
     ) %>% 
     dplyr::mutate(
-      data_stage = "integration",
+      data_stage = "pre-processed",
       lower_threshold_s = l_th,
       upper_threshold_s = u_th,
       date_labeled = paste(Sys.Date(), Sys.time(), sep = " ")
@@ -318,7 +380,7 @@ label_beamBreaker_events <- function(irbb_file_nm, l_th, u_th, sensor_id_col, ti
     
   }
   
-  write.csv(integr8d_df_noDups, file.path(path, out_dir, "labeled_beamBreaker_data.csv"), row.names = FALSE)
+  write.csv(integr8d_df_noDups, file.path(path, out_dir, out_file_nm), row.names = FALSE)
   
   # Reset the current global options
   options(orig_opts)

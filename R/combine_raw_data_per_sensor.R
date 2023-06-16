@@ -48,6 +48,14 @@ combine_raw_data_per_sensor <- function(sensors = c("IRBB", "RFID", "Video", "Te
     check_dirs(data_path, sensors[i])
   }))
   
+  # Get all the files per the given sensor type (e.g. 1 file per day)
+  files <- list.files(file.path(data_path, sensors[x]), pattern = paste(sensors[x], "*", sep = "_"), full.names = TRUE)
+  
+  # Check that the input directories have raw data files
+  invisible(sapply(1:length(sensors), function(i){
+    check_dir_notEmpty(file.path(data_path, sensors[i]), paste(paste(sensors[x], "*", sep = "_"), "*.csv$", sep = ""))
+  }))
+  
   # Create the directory for saving the output files if it doesn't already exist
   if(!dir.exists(file.path(data_path, out_dir))){
     dir.create(file.path(data_path, out_dir))
