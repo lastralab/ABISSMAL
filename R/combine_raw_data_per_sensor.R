@@ -64,6 +64,9 @@ combine_raw_data_per_sensor <- function(sensors = c("IRBB", "RFID", "Video", "Te
       read.csv(files[i], header = TRUE, skipNul = TRUE)
     }))
     
+    # Check that this object is a data frame
+    check_df_class(raw_data)
+    
     # Video and Temperature data have different names for the timestamp column, so update these column names
     if(names(raw_data)[grep("time", names(raw_data))] != "timestamp"){
       names(raw_data)[grep("time", names(raw_data))] <- "timestamp"

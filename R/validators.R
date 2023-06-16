@@ -64,7 +64,7 @@ check_dirs <- function(path, y){
   
   err <- paste("The directory", y, "does not exist", sep = " ")
   
-  if(!dir.exists(file.path(data_path, y))){
+  if(!dir.exists(file.path(path, y))){
     stop(err)
   }
   
@@ -72,6 +72,16 @@ check_dirs <- function(path, y){
 
 
 ################################### Data #########################################
+
+# Check that the data frame used for subsequent processing is a data frame
+check_df_class <- function(df){
+  
+  if(!any(grepl("data.frame", class(df)))){
+    stop('This object needs to be a data frame')
+  }
+  
+}
+
 
 # Check that a data frame has each column in a vector of columns specified in the formal arguments
 check_fArgs_data_cols <- function(y, df){
