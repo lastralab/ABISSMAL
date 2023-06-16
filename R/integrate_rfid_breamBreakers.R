@@ -3,8 +3,8 @@
 #' 
 #' @param rfid_file_nm A character string. This should be the name of the file that contains all of the pre-processed RFID detections. Each row is a unique detection event. This spreadsheet must contain all the columns specified for the RFID data in the subsequent arguments
 #' @param irbb_file_nm A character string. This should be the name of the file that contains all of the pre-processed infrared beam breaker (IRBB) detections. Each row is a unique detection event. This data frame must contain all the columns specified for the IRBB data in the subsequent arguments
-#' @param l_th A numeric argument. This represents a lower or minimum temporal threshold in seconds to identify RFID and beam breaker events that are close enough together for integration. The default is NULL, but this must be a numeric value when `method` is set to "temporal"
-#' @param u_th A numeric argument. This represents an upper or maximum temporal threshold in seconds to identify RFID and beam breaker events that are close enough together for integration. The default is NULL, but this must be a numeric value when `method` is set to "temporal"
+#' @param l_th A numeric argument. This represents a lower or minimum temporal threshold in seconds to identify RFID and beam breaker events that are close enough together for integration.
+#' @param u_th A numeric argument. This represents an upper or maximum temporal threshold in seconds to identify RFID and beam breaker events that are close enough together for integration.
 #' @param sensor_id_col A character value. This is the name of the metadata column that contains information about the data type (e.g. "sensor_id")
 #' @param timestamps_col A character value. The name of the column that contains timestamps in a format that supports calculations in milliseconds (e.g. "event_datetime_ms")
 #' @param PIT_tag_col A character value. This is the name of the metadata column that contains information about the PIT tags detected by the RFID antenna (e.g. "PIT_tag_ID")
@@ -16,8 +16,7 @@
 #' @param general_metadata_cols A character vector. This should be a string of the general metadata column names that will be carried through into the resulting data frame representing the integrated data. For instance: c("chamber_id", "year", "month", "day"). These columns will be added as the first columns in the integrated data frame, in the same order in which they are provided
 #' @param integrate_perching Boolean. If TRUE, then the perching events identified using `find_perching_events` will be integrated with this dataset. This integration is done by finding RFID timestamps that occurred within the duration of a perching event. If FALSE, then perching events will not be integrated. 
 #' @param path A character string. This should be the path specifying the overall directory where data is saved for a given experimental setup. For instance, "/media/gsvidaurre/Anodorhynchus/Data_Testing/Box_02_31Dec2022/Data".
-#' @param rfid_dir A character string. This should be the name of directory where the pre-processed RFID data is saved across sensors inside the path above. For instance, "pre-processed"
-#' @param irbb_dir A character string. This should be the name of directory where the pre-processed and labeled beam breaker data is saved across sensors inside the path above. For instance, "pre-processed"
+#' @param data_dir A character string. This should be the name of directory where the pre-processed RFID, and pre-processed and labeled beam breaker data is saved across sensors inside the path above. For instance, "pre-processed"
 #' @param out_dir A character string. This should be the name of a directory specifying where the .csv file of pre-processed data should be saved for each sensor. For instance, "pre-processed". This folder will be appended to the data_path and created as a new directory if it doesn't already exist.
 #' @param out_file_nm A character string. The name (plus extension) of the resulting file that will be written to out_dir. The default is "integrated_rfid_beamBreaker_data.csv"
 #' @param tz A character string. This argument should contain the timezone used for converting timestamps to POSIXct format. For instance, "America/New York". See the base function `as.POSIXct` for more information.
@@ -29,7 +28,7 @@
 #' @return A .csv file with the metadata columns from the original pre-processed data used as input, as well as columns indicating each of the timestamps of the RFID antenna, the lead and rear beam breaker pairs, a unique label for the given event (e.g. entrance or exit), a unique numeric identifier for the given event, and information about the given data processing stage. Each row in the .csv file is an RFID detection that was integrated with a labeled event across the outer and inner beam breaker pairs. Information about the temporal thresholds used for the integration and the date that the data was integrated is also contained in this spreadsheet.
 #' 
 
-integrate_rfid_beamBreakers <- function(rfid_file_nm, irbb_file_nm, l_th = NULL, u_th = NULL, sensor_id_col, timestamps_col, PIT_tag_col, outer_irbb_col, inner_irbb_col, irbb_event_col, irbb_unique_col, preproc_metadata_cols, integrate_perching, path, rfid_dir, irbb_dir, out_dir, out_file_nm = "integrated_rfid_beamBreaker_data.csv", tz, POSIXct_format = "%Y-%m-%d %H:%M:%OS"){
+integrate_rfid_beamBreakers <- function(rfid_file_nm, irbb_file_nm, l_th, u_th, sensor_id_col, timestamps_col, PIT_tag_col, outer_irbb_col, inner_irbb_col, irbb_event_col, irbb_unique_col, preproc_metadata_cols, integrate_perching, path, data_dir, out_dir, out_file_nm = "integrated_rfid_beamBreaker_data.csv", tz, POSIXct_format = "%Y-%m-%d %H:%M:%OS"){
   
   # Get the current global options
   orig_opts <- options()
@@ -37,14 +36,47 @@ integrate_rfid_beamBreakers <- function(rfid_file_nm, irbb_file_nm, l_th = NULL,
   # Set the number of digits for visualization. Under the hood there is full precision, but this helps for visual confirmation of decimal seconds
   options("digits.secs" = 6)
   
-  # Check that the lower and upper temporal thresholds are each numeric when using the temporal method
-  if(!is.numeric(l_th)){
-    stop('The lower temporal threshold needs to be numeric (in seconds)')
-  }
+  # Get the formal arguments from the current function
+  # TKTK try substituting the function name with: match.call()[[1]]
+  f_args <- methods::formalArgs(integrate_rfid_beamBreakers)
   
-  if(!is.numeric(u_th)){
-    stop('The upper temporal threshold needs to be numeric (in seconds)')
-  }
+  # Check that the formal arguments were all specified
+  invisible(sapply(1:length(f_args), function(i){
+    check_defined(f_args[i])
+  }))
+  
+  # Check that the formal arguments that should not be NULL
+  invisible(sapply(1:length(f_args), function(i){
+    check_null(f_args[i])
+  }))
+  
+  # Check that the formal arguments that should be strings are strings
+  expect_numeric <- c("l_th", "u_th")
+  
+  expect_bool <- c("integrate_perching")
+  
+  expect_strings <- f_args[-grep(paste(paste("^", c(expect_numeric, expect_bool), "$", sep = ""), collapse = "|"), f_args)]
+  
+  invisible(sapply(1:length(expect_strings), function(i){
+    check_string(expect_strings[i])
+  }))
+  
+  # Check that the formal arguments that should be numeric are numeric
+  invisible(sapply(1:length(expect_numeric), function(i){
+    check_numeric(expect_numeric[i])
+  }))
+  
+  # Check that the formal arguments that should be Boolean are Boolean
+  invisible(sapply(1:length(expect_bool), function(i){
+    check_boolean(expect_bool[i])
+  }))
+  
+  # Check that the input directory exists
+  check_dirs(path, data_dir)
+  
+  # Check that the input files exist in the input directory
+  check_file(file.path(path, data_dir), rfid_file_nm)
+  check_file(file.path(path, data_dir), irbb_file_nm)
   
   # Create the directory for saving the integrated data files if it doesn't already exist
   if(!dir.exists(file.path(path, out_dir))){
@@ -52,14 +84,14 @@ integrate_rfid_beamBreakers <- function(rfid_file_nm, irbb_file_nm, l_th = NULL,
   }
   
   # Read in the pre-processed RFID data
-  preproc_rfid <- read.csv(file.path(path, rfid_dir, rfid_file_nm)) %>% 
+  preproc_rfid <- read.csv(file.path(path, data_dir, rfid_file_nm)) %>% 
     # Make sure that the timestamps are in the right format
     dplyr::mutate(
       !!timestamps_col := as.POSIXct(format(as.POSIXct(!!sym(timestamps_col), tz = "America/New York"), "%Y-%m-%d %H:%M:%OS6"))
     ) 
   
   # Read in the pre-processed and labeled beam breaker data
-  labeled_irbb <- read.csv(file.path(path, irbb_dir, irbb_file_nm)) %>% 
+  labeled_irbb <- read.csv(file.path(path, data_dir, irbb_file_nm)) %>% 
     # Make sure that the timestamps are in the right format
     dplyr::mutate(
       !!outer_irbb_col := as.POSIXct(format(as.POSIXct(!!sym(outer_irbb_col), tz = "America/New York"), "%Y-%m-%d %H:%M:%OS6")),
@@ -77,14 +109,68 @@ integrate_rfid_beamBreakers <- function(rfid_file_nm, irbb_file_nm, l_th = NULL,
   labeled_irbb2 <- labeled_irbb %>% 
     dplyr::select(-c(all_of(irbb_cols2drop)))
   
-  # Check that the input data are both data frames
-  if(!is.data.frame(preproc_rfid2)){
-    stop('The RFID data needs to be a data frame')
-  }
   
-  if(!is.data.frame(labeled_irbb2)){
-    stop('The IRBB data needs to be a data frame')
-  }
+  # TKTK now checks on BOTH data frames...
+  glimpse(preproc_rfid2)
+  glimpse(labeled_irbb2)
+  
+  
+  # Check that these objects are both data frames
+  check_df_class(preproc_rfid2)
+  check_df_class(labeled_irbb2)
+  
+  # Check that the expected columns from formal arguments are found in each data frame
+  colnames_fArgs <- f_args[grep("col", f_args)][-grep("preproc_metadata_cols", f_args[grep("col", f_args)])]
+  
+  rfid_expected_cols <- colnames_fArgs[grep(paste(c("sensor", "time", "PIT"), collapse = "|"), colnames_fArgs)]
+  
+  irbb_expected_cols <- colnames_fArgs[-grep(paste(rfid_expected_cols, collapse = "|"), colnames_fArgs)]
+  
+  invisible(sapply(1:length(rfid_expected_cols), function(i){
+    check_fArgs_data_cols(rfid_expected_cols[i], preproc_rfid2)
+  }))
+  
+  invisible(sapply(1:length(irbb_expected_cols), function(i){
+    check_fArgs_data_cols(irbb_expected_cols[i], labeled_irbb2)
+  }))
+  
+  # Check that the expected columns from formal arguments do not have NAs
+  invisible(sapply(1:length(rfid_expected_cols), function(i){
+    check_fArgs_cols_nas(rfid_expected_cols[i], preproc_rfid2)
+  }))
+  
+  invisible(sapply(1:length(irbb_expected_cols), function(i){
+    check_fArgs_cols_nas(irbb_expected_cols[i], labeled_irbb2)
+  }))
+  
+  # Check that date-related columns are found in the data
+  expected_cols <- c("year", "month", "day")
+  
+  invisible(sapply(1:length(expected_cols), function(i){
+    check_data_cols(expected_cols[i], preproc_rfid2)
+  }))
+  
+  invisible(sapply(1:length(expected_cols), function(i){
+    check_data_cols(expected_cols[i], labeled_irbb2)
+  }))
+  
+  # Check that the date-related columns do not have NAs
+  invisible(sapply(1:length(expected_cols), function(i){
+    check_cols_nas(expected_cols[i], preproc_rfid2)
+  }))
+  
+  invisible(sapply(1:length(expected_cols), function(i){
+    check_cols_nas(expected_cols[i], labeled_irbb2)
+  }))
+  
+  # Check that columns with timestamps are in the right format
+  check_tstmps_cols("timestamps_col", preproc_rfid2, "%Y-%m-%d %H:%M:%OS6")
+  
+  tstmps_cols <- c("outer_irbb_col", "inner_irbb_col")
+  
+  invisible(sapply(1:length(tstmps_cols), function(i){
+    check_tstmps_cols(tstmps_cols[i], labeled_irbb2, "%Y-%m-%d %H:%M:%OS6")
+  }))
   
   # Group the RFID data frame
   rfid_df_tmp <- preproc_rfid2 %>% 
@@ -352,7 +438,7 @@ integrate_rfid_beamBreakers <- function(rfid_file_nm, irbb_file_nm, l_th = NULL,
   # Integrate perching events if specified
   if(integrate_perching){
     
-    perch_df <- read.csv(file.path(path, rfid_dir, "perching_events.csv"))  %>% 
+    perch_df <- read.csv(file.path(path, data_dir, "perching_events.csv"))  %>% 
       # Make sure that the timestamps are in the right format
       dplyr::mutate(
         perching_start = as.POSIXct(format(as.POSIXct(perching_start, tz = "America/New York"), "%Y-%m-%d %H:%M:%OS6")),

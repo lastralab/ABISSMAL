@@ -29,7 +29,7 @@ check_string <- function(y){
   
   err <- paste("Expected a string but", y, "is not a string", sep = " ")
   
-  if(!class(eval(base::as.symbol(y))) == "character"){
+  if(class(eval(base::as.symbol(y))) != "character"){
     stop(err)
   }
   
@@ -40,7 +40,19 @@ check_numeric <- function(y){
   
   err <- paste("Expected a numeric value but", y, "is not numeric", sep = " ")
   
-  if(!class(eval(base::as.symbol(y))) == "numeric"){
+  if(class(eval(base::as.symbol(y))) != "numeric"){
+    stop(err)
+  }
+  
+}
+
+
+# Check that arguments are Boolean
+check_boolean <- function(y){
+  
+  err <- paste("Expected a Boolean value but", y, "is not Boolean", sep = " ")
+  
+  if(class(eval(base::as.symbol(y))) != "logical"){
     stop(err)
   }
   
