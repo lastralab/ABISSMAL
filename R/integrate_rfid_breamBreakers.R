@@ -109,12 +109,6 @@ integrate_rfid_beamBreakers <- function(rfid_file_nm, irbb_file_nm, l_th, u_th, 
   labeled_irbb2 <- labeled_irbb %>% 
     dplyr::select(-c(all_of(irbb_cols2drop)))
   
-  
-  # TKTK now checks on BOTH data frames...
-  glimpse(preproc_rfid2)
-  glimpse(labeled_irbb2)
-  
-  
   # Check that these objects are both data frames
   check_df_class(preproc_rfid2)
   check_df_class(labeled_irbb2)
@@ -134,6 +128,11 @@ integrate_rfid_beamBreakers <- function(rfid_file_nm, irbb_file_nm, l_th, u_th, 
     check_fArgs_data_cols(irbb_expected_cols[i], labeled_irbb2)
   }))
   
+  # Also do this check for their earlier version of the beam breaker events that will be used for writing out general metadata
+  invisible(sapply(1:length(general_metadata_cols), function(i){
+    check_fArgs_data_cols(general_metadata_cols[i], labeled_irbb)
+  }))
+
   # Check that the expected columns from formal arguments do not have NAs
   invisible(sapply(1:length(rfid_expected_cols), function(i){
     check_fArgs_cols_nas(rfid_expected_cols[i], preproc_rfid2)
