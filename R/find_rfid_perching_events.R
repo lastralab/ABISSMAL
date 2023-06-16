@@ -68,6 +68,9 @@ find_rfid_perching_events <- function(rfid_file_nm, threshold, run_length = 2, s
       !!timestamps_col := as.POSIXct(format(as.POSIXct(!!sym(timestamps_col), tz = "America/New York"), "%Y-%m-%d %H:%M:%OS6"))
     ) 
   
+  # Check that this object is a data frame
+  check_df_class(preproc_rfid)
+  
   # Check that the expected columns from formal arguments are found in the data
   expected_cols <- f_args[grep("col", f_args)]
   

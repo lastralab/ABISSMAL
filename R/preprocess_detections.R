@@ -3,7 +3,7 @@
 #' 
 #' @param sensor A character vector of length 1. This vector should contain the sensor type for which pre-processing will be performed, either "IRBB", "RFID", or "Video". Note that if there are multiple sensors for a given type (e.g. two pairs of beam breakers), this data will travel together in the .csv file of pre-processed data.
 #' 
-#' @param detection_col_nm A string with the column name for the detection timestamps collected by the given sensor. These timestamps must be in POSIXct or POSIXt format with millisecond resolution (e.g. format = "%Y-%m-%d %H:%M:%OS")
+#' @param timestamps_col A string with the column name for the detection timestamps collected by the given sensor. These timestamps must be in POSIXct or POSIXt format with millisecond resolution (e.g. format = "%Y-%m-%d %H:%M:%OS")
 #' @param group_col_nm A string with the column name that contains values used to group the data before pre-processing. For RFID data, this column should contain the PIT tag identifiers, so that pre-processing is performed for each unique PIT tag. For beam breaker data, this column should be the unique beam breaker labels so that pre-processing is carried out separately for each beam breaker pair. The default is NULL, since this argument is not needed to process the video data
 #' @param thin_threshold A single numeric value representing a temporal threshold in seconds that will be used to thin the raw data. The default is NULL, since this argument is not needed to process the video data
 #' @param pixel_threshold A single numeric value representing a temporal threshold in seconds that will be used to filter out video recording events with total pixels that changed below this threshold. The default is NULL, since this argument is not needed to process the RFID or beam breaker data
@@ -17,8 +17,10 @@
 #' 
 #' @return A data frame object with the pre-processed detections per sensor, all metadata columns in the original data frame, as well as a column indicating the temporal threshold used for pre-processing by thinning (in seconds), or a column indicating the threshold used to filter detections by the number of pixels that changed (video data). Each row of this data frame is a pre-processed detection from the raw data collected by the given sensor.
 
+library(tidyverse)
+
 sensor <- "Video"
-detection_col_nm <- "timestamp_ms"
+timestamps_col <- "timestamp_ms"
 group_col_nm <- NULL
 thin_threshold <- NULL
 pixel_threshold <- 10000
@@ -26,8 +28,10 @@ pixel_col_nm <- "total_pixels_motionTrigger"
 path <- "/media/gsvidaurre/Anodorhynchus/Data_Testing/Box_02_31Dec2022/Data"
 data_dir <- "raw_combined"
 out_dir <- "pre_processed"
+tz <- "America/New York"
+POSIXct_format <- "%Y-%m-%d %H:%M:%OS"
 
-preprocess_detections <- function(sensor, detection_col_nm, group_col_nm = NULL, pixel_col_nm = NULL, thin_threshold = NULL, pixel_threshold = NULL, path, data_dir, out_dir, tz, POSIXct_format = "%Y-%m-%d %H:%M:%OS"){
+preprocess_detections <- function(sensor, timestamps_col, group_col_nm = NULL, pixel_col_nm = NULL, thin_threshold = NULL, pixel_threshold = NULL, path, data_dir, out_dir, tz, POSIXct_format = "%Y-%m-%d %H:%M:%OS"){
   
   # Get the current global options
   orig_opts <- options()
@@ -106,7 +110,7 @@ preprocess_detections <- function(sensor, detection_col_nm, group_col_nm = NULL,
   check_sensor_spelling(sensor)
   
   # Check that each input directory exists
-  check_dirs(data_path, data_dir)
+  check_dirs(path, data_dir)
   
   # Create the directory for saving the pre-processed data files if it doesn't already exist
   if(!dir.exists(file.path(path, out_dir))){
@@ -122,98 +126,50 @@ preprocess_detections <- function(sensor, detection_col_nm, group_col_nm = NULL,
     # Drop columns that aren't needed here
     dplyr::select(-c("original_timestamp", "data_stage", "date_combined"))
   
-  ### TKTK continue integrating checks below
+  # Check that this object is a data frame
+  check_df_class(raw_data)
   
   # Check that the expected columns from formal arguments are found in the data
   expected_cols <- f_args[grep("col", f_args)]
   
   invisible(sapply(1:length(expected_cols), function(i){
-    check_fArgs_data_cols(expected_cols[i], preproc_rfid)
+    check_fArgs_data_cols(expected_cols[i], raw_data)
   }))
   
   # Check that the expected columns from formal arguments do not have NAs
   invisible(sapply(1:length(expected_cols), function(i){
-    check_fArgs_cols_nas(expected_cols[i], preproc_rfid)
+    check_fArgs_cols_nas(expected_cols[i], raw_data)
   }))
   
   # Check that date-related columns are found in the data
   expected_cols <- c("year", "month", "day")
   
   invisible(sapply(1:length(expected_cols), function(i){
-    check_data_cols(expected_cols[i], preproc_rfid)
+    check_data_cols(expected_cols[i], raw_data)
   }))
   
   # Check that the date-related columns do not have NAs
   invisible(sapply(1:length(expected_cols), function(i){
-    check_cols_nas(expected_cols[i], preproc_rfid)
+    check_cols_nas(expected_cols[i], raw_data)
   }))
   
   # Check that columns with timestamps are in the right format
   tstmps_cols <- f_args[grep("time", f_args)]
   
   invisible(sapply(1:length(tstmps_cols), function(i){
-    check_tstmps_cols(tstmps_cols[i], preproc_rfid, "%Y-%m-%d %H:%M:%OS6")
+    check_tstmps_cols(tstmps_cols[i], raw_data, "%Y-%m-%d %H:%M:%OS6")
   }))
-  
-  
-  
-  
-  
-  
-  # Check that the raw data is a data frame
-  if(!is.data.frame(raw_data)){
-    stop('The raw data needs to be a data frame')
-  }
-  
-  # Check that the raw data has the column of detections
-  if(any(is.null(detection_col_nm) | !detection_col_nm %in% names(raw_data))){
-    stop('The column specified in `detection_col_nm` does not exist')
-  }
-  
-  # If the grouping column is necessary, then check that the raw data has this column
-  if(grepl("RFID|IRBB", sensor) & any(is.null(group_col_nm) | !group_col_nm %in% names(raw_data))){
-    stop('The column specified in `group_col_nm` does not exist')
-  }
-  
-  # If the grouping column is necessary, then check that this column does not have NAs
-  if(grepl("RFID|IRBB", sensor)){
-    if(any(is.na(raw_data[[group_col_nm]]))){
-      stop('The column specified in `group_col_nm` has NA values') 
-    }
-  }
-  
-  # If the pixel column is necessary, then check that the raw data has this column
-  if(grepl("Video", sensor) & any(is.null(pixel_col_nm) | !pixel_col_nm %in% names(raw_data))){
-    stop('The column specified in `pixel_col_nm` does not exist')
-  }
-  
-  # If the pixel column is necessary, then check that this column does not have NAs
-  if(grepl("Video", sensor)){
-    if(any(is.na(raw_data[[pixel_col_nm]]))){
-      stop('The column specified in `pixel_col_nm` has NA values') 
-    }
-  }
-  
-  # Check that the year, month, and day columns are also present in the data frame, and do not have NAs
-  if(any(!"year" %in% names(raw_data) | !"month" %in% names(raw_data) | !"day" %in% names(raw_data) | any(is.na(raw_data[["year"]])) | any(is.na(raw_data[["month"]])) | any(is.na(raw_data[["day"]])))){
-    stop('The data frame is missing columns `year`, `month`, or `day`, or there are NA values in one of these columns')
-  }
-  
-  # Check that the timestamps are in the right format. This conditional also catches NAs in the RFID timestamps
-  if(any(is.na(as.POSIXct(raw_data[[detection_col_nm]], format = "%Y-%m-%d %H:%M:%OS")))){
-    stop('One or more timestamps are in the wrong format. These need to be in POSIXct or POSIXt format, like %Y-%m-%d %H:%M:%OS')
-  }
   
   if(grepl("RFID|IRBB", sensor)){
     
     # Initialize column names that will be shared across sensors, in the order in which they'll appear in the .csv file 
-    col_nms <- c("data_type", "chamber_id", "year", "month", "day", detection_col_nm, group_col_nm)
+    col_nms <- c("data_type", "chamber_id", "year", "month", "day", timestamps_col, group_col_nm)
     
     if(!is.null(group_col_nm)){
       
       tmp_df <- raw_data %>%
         group_by(!!sym(group_col_nm)) %>%
-        dplyr::arrange(!!sym(detection_col_nm), .by_group = TRUE) %>% 
+        dplyr::arrange(!!sym(timestamps_col), .by_group = TRUE) %>% 
         # Make unique row indices within groups
         dplyr::mutate(
           group_row_id = row_number()
@@ -225,7 +181,7 @@ preprocess_detections <- function(sensor, detection_col_nm, group_col_nm = NULL,
     } else if(is.null(group_col_nm)){
       
       tmp_df <- raw_data %>% 
-        dplyr::arrange(!!sym(detection_col_nm)) %>% 
+        dplyr::arrange(!!sym(timestamps_col)) %>% 
         # Make unique row indices with the same column name as the group indices above
         dplyr::mutate(
           group_row_id = row_number()
@@ -236,21 +192,21 @@ preprocess_detections <- function(sensor, detection_col_nm, group_col_nm = NULL,
     # If the group_col is specified, then the lags are calculated per group in the grouped data frame
     lags <- tmp_df %>% 
       dplyr::mutate(
-        shift = dplyr::lag(!!sym(detection_col_nm), default = first(!!sym(detection_col_nm)))
+        shift = dplyr::lag(!!sym(timestamps_col), default = first(!!sym(timestamps_col)))
       ) %>% 
       # Convert differences to boolean based on the thinning threshold to be able to remove stretches of detection events very close together
       dplyr::mutate(
-        diff = floor(!!sym(detection_col_nm) - shift),
+        diff = floor(!!sym(timestamps_col) - shift),
         diff = as.numeric(diff),
         binary_diff = (diff >= thin_threshold & diff > 0)
       ) 
     
     if(!is.null(group_col_nm)){
       lags <- lags %>% 
-        dplyr::select(!!sym(detection_col_nm), group_col, diff, binary_diff) 
+        dplyr::select(!!sym(timestamps_col), group_col, diff, binary_diff) 
     } else {
       lags <- lags %>% 
-        dplyr::select(!!sym(detection_col_nm), diff, binary_diff) 
+        dplyr::select(!!sym(timestamps_col), diff, binary_diff) 
     }
     
     # Nest by each group, do the rle calculations and removing indices, then recombine
@@ -345,7 +301,7 @@ preprocess_detections <- function(sensor, detection_col_nm, group_col_nm = NULL,
   } else if(grepl("Video", sensor)){
     
     # Initialize column names that will be shared across sensors, in the order in which they'll appear in the .csv file 
-    col_nms <- c("data_type", "chamber_id", "year", "month", "day", detection_col_nm, pixel_col_nm)
+    col_nms <- c("data_type", "chamber_id", "year", "month", "day", timestamps_col, pixel_col_nm)
     
     filt_df <- raw_data %>%
       dplyr::filter(!!sym(pixel_col_nm) >= pixel_threshold) %>% 
