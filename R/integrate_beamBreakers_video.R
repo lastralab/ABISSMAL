@@ -15,7 +15,7 @@
 #' @param preproc_metadata_cols A character vector. This should be a string of the metadata column names from pre-processing that should be dropped from either or both data frames. For instance, c("thin_threshold_s", "data_stage", "date_pre_processed", "lower_threshold_s", "upper_threshold_s", "date_labeled")
 #' #' @param general_metadata_cols A character vector. This should be a string of the general metadata column names that will be carried through into the resulting data frame representing the integrated data. For instance: c("chamber_id", "year", "month", "day"). These columns will be added as the first columns in the integrated data frame, in the same order in which they are provided
 #' @param video_metadata_cols A character vector. This should be a string of the video metadata column names that will be carried through into the resulting data frame representing the integrated data. For instance: c("total_pixels_motionTrigger", "pixel_threshold", "video_file_name"). These columns will be added as later columns in the integrated data frame, in the same order in which they are provided.
-#' #' @param devices_integrated A character string. This argument specifies how many types of sensors or datasets are being integrated, which will determine whether extra columns are dropped during the integration. Set this argument to "two" when datasets for two devices are being integrated, or "three" when this function is called inside aother function that integrates across all 3 movement sensor types.
+#' @param devices_integrated A character string. This argument specifies how many types of sensors or datasets are being integrated, which will determine whether extra columns are dropped during the integration. Set this argument to "two" when datasets for two devices are being integrated, or "three" when this function is called inside aother function that integrates across all 3 movement sensor types.
 #' @param extra_cols2drop A character vector. This should be a string of additional metadata column names that should be dropped before the integration but will be added back to the resulting file, such as c("RFID", "PIT_tag_ID", "outer_rfid_diffs", "rfid_irbb_assignmnt_type", "rfid_irbb_lower_threshold_s", "rfid_irbb_upper_threshold_s"). This argument is useful when using this function to integrate across all 3 movement sensors (e.g. when using a dataset of integrated RFID and beam breaker data as input). Set this argument to NA if it is not needed
 #' @param integrate_perching Boolean. If TRUE, then the perching events identified using `find_perching_events` will be integrated with this dataset. This integration is done by finding inner beam breaker timestamps that occurred within the duration of a perching event. If FALSE, then perching events will not be integrated. 
 #' @param path A character string. This should be the path specifying the overall directory where data is saved for a given experimental setup. For instance, "/media/gsvidaurre/Anodorhynchus/Data_Testing/Box_02_31Dec2022/Data"
@@ -30,32 +30,6 @@
 #' 
 #' @return A .csv file with the metadata columns from the original pre-processed data used as input, as well as columns indicating each of the timestamps of the lead and rear beam breaker pairs, the timestamps of the video recording events, a unique label for the given event (e.g. entrance or exit), a unique numeric identifier for the given event, and information about the given data processing stage. Each row in the .csv file is a labeled event across the outer and inner beam breaker pairs that was integrated with video recording events. Information about the temporal thresholds used for the integration and the date that the data was integrated is also contained in this spreadsheet.
 #' 
-
-library(tidyverse)
-
-l_th <- 0
-u_th <- 5
-video_rec_dur <- 9
-irbb_file_nm <- "labeled_beamBreaker_data.csv"
-video_file_nm <- "pre_processed_data_Video.csv"
-sensor_id_col <- "sensor_id"
-timestamps_col <- "timestamp_ms"
-outer_irbb_col <- "Outer_beam_breaker"
-inner_irbb_col <- "Inner_beam_breaker"
-irbb_event_col <- "data_direction_inferred"
-irbb_unique_col <- "unique_entranceExit"
-preproc_metadata_cols <- c("thin_threshold_s", "data_stage", "date_pre_processed", "lower_threshold_s", "upper_threshold_s", "date_labeled", "diffs", "irbb_assignmnt_type")
-general_metadata_cols <- c("chamber_id", "year", "month", "day")
-video_metadata_cols <- c("total_pixels_motionTrigger", "pixel_threshold", "video_file_name")
-extra_cols2drop <- NA
-integrate_perching <- TRUE
-path <- "/media/gsvidaurre/Anodorhynchus/Data_Testing/Box_02_31Dec2022/Data"
-data_dir <- "pre_processed"
-out_dir <- "integrated"
-out_file_nm = "integrated_beamBreaker_video_data.csv"
-tz <- "America/New York"
-POSIXct_format <- "%Y-%m-%d %H:%M:%OS"
-devices_integrated <- "two"
 
 integrate_beamBreakers_video <- function(irbb_file_nm, video_file_nm, l_th = NULL, u_th = NULL, video_rec_dur = NULL, sensor_id_col, timestamps_col, outer_irbb_col, inner_irbb_col, irbb_event_col, irbb_unique_col, preproc_metadata_cols, general_metadata_cols, video_metadata_cols, devices_integrated, extra_cols2drop, integrate_perching, path, data_dir, out_dir, out_file_nm = "integrated_beamBreaker_video_data.csv", tz, POSIXct_format = "%Y-%m-%d %H:%M:%OS"){
   
