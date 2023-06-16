@@ -14,12 +14,13 @@
 #' @param irbb_unique_col A character value. The name of column that contains the unique numeric identifier for each beam breaker event
 #' @param preproc_metadata_cols A character vector. This should be a string of the metadata column names from pre-processing that should be dropped from either or both data frames. For instance, c("thin_threshold_s", "data_stage", "date_pre_processed", "lower_threshold_s", "upper_threshold_s", "date_labeled")
 #' #' @param general_metadata_cols A character vector. This should be a string of the general metadata column names that will be carried through into the resulting data frame representing the integrated data. For instance: c("chamber_id", "year", "month", "day"). These columns will be added as the first columns in the integrated data frame, in the same order in which they are provided
-#' @param video_metadata_cols A character vector. This should be a string of the video metadata column names that will be carried through into the resulting data frame representing the integrated data. For instance: c("total_pixels_motionTrigger", "pixel_threshold", "video_file_name"). These columns will be added as later columns in the integrated data frame, in the same order in which they are provided
+#' @param video_metadata_cols A character vector. This should be a string of the video metadata column names that will be carried through into the resulting data frame representing the integrated data. For instance: c("total_pixels_motionTrigger", "pixel_threshold", "video_file_name"). These columns will be added as later columns in the integrated data frame, in the same order in which they are provided.
+#' #' @param devices_integrated A character string. This argument specifies how many types of sensors or datasets are being integrated, which will determine whether extra columns are dropped during the integration. Set this argument to "two" when datasets for two devices are being integrated, or "three" when this function is called inside aother function that integrates across all 3 movement sensor types.
 #' @param extra_cols2drop A character vector. This should be a string of additional metadata column names that should be dropped before the integration but will be added back to the resulting file, such as c("RFID", "PIT_tag_ID", "outer_rfid_diffs", "rfid_irbb_assignmnt_type", "rfid_irbb_lower_threshold_s", "rfid_irbb_upper_threshold_s"). This argument is useful when using this function to integrate across all 3 movement sensors (e.g. when using a dataset of integrated RFID and beam breaker data as input). Set this argument to NA if it is not needed
 #' @param integrate_perching Boolean. If TRUE, then the perching events identified using `find_perching_events` will be integrated with this dataset. This integration is done by finding inner beam breaker timestamps that occurred within the duration of a perching event. If FALSE, then perching events will not be integrated. 
 #' @param path A character string. This should be the path specifying the overall directory where data is saved for a given experimental setup. For instance, "/media/gsvidaurre/Anodorhynchus/Data_Testing/Box_02_31Dec2022/Data"
-#' @param irbb_dir A character string. This should be the name of directory where the pre-processed and labeled beam breaker data is saved across sensors inside the path above. For instance, "pre-processed"
-#' @param video_dir A character string. This should be the name of directory where the pre-processed video data is saved across sensors inside the path above. For instance, "pre-processed"
+#' @param data_dir A character string. This should be the name of directory where the pre-processed and labeled beam breaker data is saved across sensors inside the path above. For instance, "pre-processed"
+#' @param data_dir A character string. This should be the name of directory where the pre-processed video data is saved across sensors inside the path above. For instance, "pre-processed"
 #' @param out_dir A character string. This should be the name of a directory specifying where the .csv file of pre-processed data should be saved for each sensor. For instance, "pre-processed". This folder will be appended to the data_path and created as a new directory if it doesn't already exist
 #' #' @param out_file_nm A character string. The name (plus extension) of the resulting file that will be written to out_dir. The default is "integrated_beamBreaker_video_data.csv"
 #' @param tz A character string. This argument should contain the timezone used for converting timestamps to POSIXct format. For instance, "America/New York". See the base function `as.POSIXct` for more information.
@@ -30,7 +31,33 @@
 #' @return A .csv file with the metadata columns from the original pre-processed data used as input, as well as columns indicating each of the timestamps of the lead and rear beam breaker pairs, the timestamps of the video recording events, a unique label for the given event (e.g. entrance or exit), a unique numeric identifier for the given event, and information about the given data processing stage. Each row in the .csv file is a labeled event across the outer and inner beam breaker pairs that was integrated with video recording events. Information about the temporal thresholds used for the integration and the date that the data was integrated is also contained in this spreadsheet.
 #' 
 
-integrate_beamBreakers_video <- function(irbb_file_nm, video_file_nm, l_th = NULL, u_th = NULL, video_rec_dur = NULL, sensor_id_col, timestamps_col, outer_irbb_col, inner_irbb_col, irbb_event_col, irbb_unique_col, preproc_metadata_cols, general_metadata_cols, video_metadata_cols, extra_cols2drop, integrate_perching, path, irbb_dir, video_dir, out_dir, out_file_nm = "integrated_beamBreaker_video_data.csv", tz, POSIXct_format = "%Y-%m-%d %H:%M:%OS"){
+library(tidyverse)
+
+l_th <- 0
+u_th <- 5
+video_rec_dur <- 9
+irbb_file_nm <- "labeled_beamBreaker_data.csv"
+video_file_nm <- "pre_processed_data_Video.csv"
+sensor_id_col <- "sensor_id"
+timestamps_col <- "timestamp_ms"
+outer_irbb_col <- "Outer_beam_breaker"
+inner_irbb_col <- "Inner_beam_breaker"
+irbb_event_col <- "data_direction_inferred"
+irbb_unique_col <- "unique_entranceExit"
+preproc_metadata_cols <- c("thin_threshold_s", "data_stage", "date_pre_processed", "lower_threshold_s", "upper_threshold_s", "date_labeled", "diffs", "irbb_assignmnt_type")
+general_metadata_cols <- c("chamber_id", "year", "month", "day")
+video_metadata_cols <- c("total_pixels_motionTrigger", "pixel_threshold", "video_file_name")
+extra_cols2drop <- NA
+integrate_perching <- TRUE
+path <- "/media/gsvidaurre/Anodorhynchus/Data_Testing/Box_02_31Dec2022/Data"
+data_dir <- "pre_processed"
+out_dir <- "integrated"
+out_file_nm = "integrated_beamBreaker_video_data.csv"
+tz <- "America/New York"
+POSIXct_format <- "%Y-%m-%d %H:%M:%OS"
+devices_integrated <- "two"
+
+integrate_beamBreakers_video <- function(irbb_file_nm, video_file_nm, l_th = NULL, u_th = NULL, video_rec_dur = NULL, sensor_id_col, timestamps_col, outer_irbb_col, inner_irbb_col, irbb_event_col, irbb_unique_col, preproc_metadata_cols, general_metadata_cols, video_metadata_cols, devices_integrated, extra_cols2drop, integrate_perching, path, data_dir, out_dir, out_file_nm = "integrated_beamBreaker_video_data.csv", tz, POSIXct_format = "%Y-%m-%d %H:%M:%OS"){
   
   # Get the current global options
   orig_opts <- options()
@@ -38,18 +65,60 @@ integrate_beamBreakers_video <- function(irbb_file_nm, video_file_nm, l_th = NUL
   # Set the number of digits for visualization. Under the hood there is full precision, but this helps for visual confirmation of decimal seconds
   options("digits.secs" = 6)
   
-  # Check that the lower and upper temporal thresholds are each numeric when using the temporal method
-  if(!is.numeric(l_th)){
-    stop('The pre-video recording lower temporal threshold needs to be numeric (in seconds)')
+  # Get the formal arguments from the current function
+  # TKTK try substituting the function name with: match.call()[[1]]
+  f_args <- methods::formalArgs(integrate_beamBreakers_video)
+  
+  # Check that the formal arguments were all specified
+  invisible(sapply(1:length(f_args), function(i){
+    check_defined(f_args[i])
+  }))
+  
+  # Check that the formal arguments that should not be NULL
+  invisible(sapply(1:length(f_args), function(i){
+    check_null(f_args[i])
+  }))
+  
+  # Check that the formal arguments that should be strings are strings
+  expect_numeric <- c("l_th", "u_th", "video_rec_dur")
+  
+  expect_bool <- c("integrate_perching")
+  
+  if(devices_integrated == "two"){
+    
+    expect_na <- f_args[grep("extra", f_args)]
+    
+    expect_strings <- f_args[-grep(paste(paste("^", c(expect_numeric, expect_bool, expect_na), "$", sep = ""), collapse = "|"), f_args)]
+    
+    # Check that the extracols2drop argument is NA
+    check_NA(expect_na)
+    
+  } else if(devices_integrated == "three"){
+    
+    expect_strings <- f_args[-grep(paste(paste("^", c(expect_numeric, expect_bool), "$", sep = ""), collapse = "|"), f_args)]
+    
   }
   
-  if(!is.numeric(u_th)){
-    stop('The pre-video recording upper temporal threshold needs to be numeric (in seconds)')
-  }
+  invisible(sapply(1:length(expect_strings), function(i){
+    check_string(expect_strings[i])
+  }))
   
-  if(!is.numeric(video_rec_dur)){
-    stop('The post-video recording temporal threshold needs to be numeric (in seconds)')
-  }
+  # Check that the formal arguments that should be numeric are numeric
+  invisible(sapply(1:length(expect_numeric), function(i){
+    check_numeric(expect_numeric[i])
+  }))
+  
+  # Check that the formal arguments that should be Boolean are Boolean
+  invisible(sapply(1:length(expect_bool), function(i){
+    check_boolean(expect_bool[i])
+  }))
+  
+  # Check that the input directory exists
+  check_dirs(path, data_dir)
+  
+  # Check that the input files exist in the input directory
+  check_file(file.path(path, data_dir), irbb_file_nm)
+  check_file(file.path(path, data_dir), video_file_nm)
   
   # Create the directory for saving the integrated data files if it doesn't already exist
   if(!dir.exists(file.path(path, out_dir))){
@@ -57,7 +126,7 @@ integrate_beamBreakers_video <- function(irbb_file_nm, video_file_nm, l_th = NUL
   }
   
   # Read in the pre-processed and labeled beam breaker data
-  labeled_irbb <- read.csv(file.path(path, irbb_dir, irbb_file_nm)) %>% 
+  labeled_irbb <- read.csv(file.path(path, data_dir, irbb_file_nm)) %>% 
     # Make sure that the timestamps are in the right format
     dplyr::mutate(
       !!outer_irbb_col := as.POSIXct(format(as.POSIXct(!!sym(outer_irbb_col), tz = "America/New York"), "%Y-%m-%d %H:%M:%OS6")),
@@ -65,7 +134,7 @@ integrate_beamBreakers_video <- function(irbb_file_nm, video_file_nm, l_th = NUL
     )
   
   # Read in the pre-processed video data
-  preproc_video <- read.csv(file.path(path, video_dir, video_file_nm)) %>% 
+  preproc_video <- read.csv(file.path(path, data_dir, video_file_nm)) %>% 
     # Make sure that the timestamps are in the right format
     dplyr::mutate(
       !!timestamps_col := as.POSIXct(format(as.POSIXct(!!sym(timestamps_col), tz = "America/New York"), "%Y-%m-%d %H:%M:%OS6"))
@@ -86,15 +155,6 @@ integrate_beamBreakers_video <- function(irbb_file_nm, video_file_nm, l_th = NUL
   preproc_video2 <- preproc_video %>% 
     dplyr::select(-c(all_of(video_cols2drop)))
   
-  # Check that the input data are both data frames
-  if(!is.data.frame(labeled_irbb2)){
-    stop('The IRBB data needs to be a data frame')
-  }
-  
-  if(!is.data.frame(preproc_video2)){
-    stop('The Video data needs to be a data frame')
-  }
-  
   # Drop additional metadata columns here
   if(!is.na(extra_cols2drop)){
     
@@ -102,6 +162,70 @@ integrate_beamBreakers_video <- function(irbb_file_nm, video_file_nm, l_th = NUL
       dplyr::select(-c(all_of(extra_cols2drop)))
     
   }
+  
+  # Check that these objects are both data frames
+  check_df_class(labeled_irbb2)
+  check_df_class(preproc_video2)
+  
+  # Check that the expected columns from formal arguments are found in each data frame
+  colnames_fArgs <- f_args[grep("col", f_args)][-grep("preproc|general|extra|metadata", f_args[grep("col", f_args)])]
+  
+  video_expected_cols <- colnames_fArgs[grep(paste(c("sensor", "time"), collapse = "|"), colnames_fArgs)]
+  
+  irbb_expected_cols <- colnames_fArgs[-grep(paste(video_expected_cols, collapse = "|"), colnames_fArgs)]
+  
+  invisible(sapply(1:length(irbb_expected_cols), function(i){
+    check_fArgs_data_cols(irbb_expected_cols[i], labeled_irbb2)
+  }))
+  
+  invisible(sapply(1:length(video_expected_cols), function(i){
+    check_fArgs_data_cols(video_expected_cols[i], preproc_video2)
+  }))
+  
+  # Also do this check for their earlier version of the video data that will be used for writing out general metadata
+  md_cols <- c("video_metadata_cols", "general_metadata_cols")
+  
+  invisible(sapply(1:length(md_cols), function(i){
+    check_fArgs_data_cols(md_cols[i], preproc_video)
+  }))
+  
+  # Check that the expected columns from formal arguments do not have NAs
+  invisible(sapply(1:length(irbb_expected_cols), function(i){
+    check_fArgs_cols_nas(irbb_expected_cols[i], labeled_irbb2)
+  }))
+  
+  invisible(sapply(1:length(video_expected_cols), function(i){
+    check_fArgs_cols_nas(video_expected_cols[i], preproc_video2)
+  }))
+  
+  # Check that date-related columns are found in the data
+  expected_cols <- c("year", "month", "day")
+  
+  invisible(sapply(1:length(expected_cols), function(i){
+    check_data_cols(expected_cols[i], labeled_irbb2)
+  }))
+  
+  invisible(sapply(1:length(expected_cols), function(i){
+    check_data_cols(expected_cols[i], preproc_video2)
+  }))
+  
+  # Check that the date-related columns do not have NAs
+  invisible(sapply(1:length(expected_cols), function(i){
+    check_cols_nas(expected_cols[i], labeled_irbb2)
+  }))
+  
+  invisible(sapply(1:length(expected_cols), function(i){
+    check_cols_nas(expected_cols[i], preproc_video2)
+  }))
+  
+  # Check that columns with timestamps are in the right format
+  check_tstmps_cols("timestamps_col", preproc_video2, "%Y-%m-%d %H:%M:%OS6")
+  
+  tstmps_cols <- c("outer_irbb_col", "inner_irbb_col")
+  
+  invisible(sapply(1:length(tstmps_cols), function(i){
+    check_tstmps_cols(tstmps_cols[i], labeled_irbb2, "%Y-%m-%d %H:%M:%OS6")
+  }))
   
   # Lengthen the IRBB data frame 
   irbb_df_tmp <- labeled_irbb2 %>% 
