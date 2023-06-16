@@ -56,6 +56,9 @@ find_rfid_perching_events <- function(rfid_file_nm, threshold, run_length = 2, s
   # Check that each input directory exists
   check_dirs(data_path, rfid_dir)
   
+  # Check that the input file exists in the input directory
+  check_file(file.path(path, rfid_dir), rfid_file_nm)
+  
   # Create the directory for saving the data file if it doesn't already exist
   if(!dir.exists(file.path(path, out_dir))){
     dir.create(file.path(path, out_dir))

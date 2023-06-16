@@ -109,8 +109,11 @@ preprocess_detections <- function(sensor, timestamps_col, group_col_nm = NULL, p
   # Check that the sensor argument was written correctly
   check_sensor_spelling(sensor)
   
-  # Check that each input directory exists
+  # Check that the input directory exists
   check_dirs(path, data_dir)
+  
+  # Check that the input file exists in the input directory
+  check_file(file.path(path, data_dir), paste("combined_raw_data_", sensor, ".csv", sep = ""))
   
   # Create the directory for saving the pre-processed data files if it doesn't already exist
   if(!dir.exists(file.path(path, out_dir))){
