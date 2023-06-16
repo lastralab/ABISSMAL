@@ -14,12 +14,12 @@ video_metadata_cols <- c("total_pixels_motionTrigger", "pixel_threshold", "video
 extra_cols2drop <- NA
 integrate_perching <- TRUE
 path <- "/media/gsvidaurre/Anodorhynchus/Data_Testing/Box_02_31Dec2022/Data"
-rfid_dir <- "pre_processed"
-video_dir <- "pre_processed"
+data_dir <- "pre_processed"
 out_dir <- "integrated"
 out_file_nm = "integrated_rfid_video_data.csv"
 tz <- "America/New York"
 POSIXct_format <- "%Y-%m-%d %H:%M:%OS"
+devices_integrated <- "two"
 
 
 # Lead and lag assignments
