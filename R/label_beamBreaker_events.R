@@ -8,15 +8,18 @@
 #' @param timestamps_col A character value. The name of the column that contains timestamps in a format that supports calculations in milliseconds (e.g. "event_datetime_ms")
 #' @param outer_irbb_nm A character value. The label used for the outer pair of beam breakers (e.g. the first pair of beam breakers that an animal encounters when moving into a nest container or area). This should be a value in the column named `sensor_id_col`
 #' @param inner_irbb_nm A character value. The label used for the inner pair of beam breakers (e.g. the second pair of beam breakers that an individual encounters when moving into a nest container or area). This should be a value in the column named `sensor_id_col`
-#' @param path A character string. This should be the path specifying the overall directory where data is saved for a given experimental setup. For instance, "/media/gsvidaurre/Anodorhynchus/Data_Testing/Box_02_31Dec2022/Data".
+#' @param path A character string. This should be the path on the local computer or external hard drive specifying where the data is saved across sensors for a given experimental setup. For instance, "/media/gsvidaurre/Anodorhynchus/Data_Testing/Box_02_31Dec2022/Data".
 #' @param data_dir A character string. This should be the name of directory where the raw data is saved across sensors inside the path above. For instance, "pre_processed" for this function in order to label the pre-processed beam breaker detections.
 #' @param out_dir A character string. This should be the name of a directory specifying where the .csv file of pre-processed data should be saved for each sensor. For instance, "pre-processed". This folder will be appended to the data_path and created as a new directory if it doesn't already exist.
 #' @param out_file_nm A character string. The name (plus extension) of the resulting file that will be written to out_dir. The default is "labeled_beamBreaker_data.csv"
 #' @param tz A character string. This argument should contain the timezone used for converting timestamps to POSIXct format. For instance, "America/New York". See the base function `as.POSIXct` for more information.
 #' @param POSIXct_format A character string. This argument should contain the format used to converting timestamps to POSIXct format. The default is "%Y-%m-%d %H:%M:%OS" to return timestamps with milliseconds in decimal format. See the base function `as.POSIXct` for more information.
 #' 
+#' @details TKTK
+#'
 #' @return A .csv file with the metadata columns from the original pre-processed data used as input, as well as columns indicating each of the timestamps of the lead and rear beam breaker pairs, a unique label for the given event (e.g. entrance or exit), a unique numeric identifier for the given event, and information about the given data processing stage. Each row in the .csv file is a labeled event across the outer and inner beam breaker pairs that was identified using a given temporal threshold
 #' 
+
 
 # Make a function to integrate between beam breaker pairs to infer entrance and exit movements
 label_beamBreaker_events <- function(irbb_file_nm, l_th, u_th, sensor_id_col, timestamps_col, outer_irbb_nm, inner_irbb_nm, path, data_dir, out_dir, out_file_nm = "labeled_beamBreaker_data.csv", tz, POSIXct_format = "%Y-%m-%d %H:%M:%OS"){

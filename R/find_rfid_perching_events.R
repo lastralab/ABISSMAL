@@ -15,6 +15,8 @@
 #' @param tz A character string. This argument should contain the timezone used for converting timestamps to POSIXct format. For instance, "America/New York". See the base function `as.POSIXct` for more information
 #' @param POSIXct_format A character string. This argument should contain the format used to converting timestamps to POSIXct format. The default is "%Y-%m-%d %H:%M:%OS" to return timestamps with milliseconds in decimal format. See the base function `as.POSIXct` for more information
 #'
+#' @details TKTK
+#' 
 #' @return A data frame object with all metadata columns in the original data frame, as well as columns indicating the timestamp of the start of the perching period identified, the end of the given perching period, and the temporal threshold used for pre-processing (in seconds). In other words, each row is a perching period
 #' 
 

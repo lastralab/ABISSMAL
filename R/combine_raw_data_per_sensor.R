@@ -1,21 +1,17 @@
-#' @title combine_raw_data_across_sensors
-#' @description Combine raw data across files for each sensor
+#' @title combine_raw_data_per_sensor
+#' @description Combine raw data files for each sensor
 #' 
-#' @param sensors A character vector of length 1 or more. This vector should contain the names of the sensors across which the raw data will be combined into a single data frame. The default is all sensors, or c("IRBB", "RFID", "Video", "Temp"). Note that if there are multiple sensors for a given type (e.g. two pairs of beam breakers), this data has already been collected together and will travel together in the .csv file of combined raw data.
-#' 
+#' @param sensors A character vector of length 1 or more. This vector should contain the names of the sensors across which raw data files will be combined into a single spreadsheet. The default is all sensors, or c("IRBB", "RFID", "Video", "Temp"). Note that for the beam breakers, the raw data contains data collected from the 2 pairs of beam breakers in the current hardware setup.
 #' @param tz A character string. This argument should contain the timezone used for converting timestamps to POSIXct format. For instance, "America/New York". See the base function `as.POSIXct` for more information.
-#'  
 #' @param POSIXct_format A character string. This argument should contain the format used to converting timestamps to POSIXct format. The default is "%Y-%m-%d %H:%M:%OS" to return timestamps with milliseconds in decimal format. See the base function `as.POSIXct` for more information.
+#' @param path A character string. This should be the path on the local computer or external hard drive specifying where the data is saved across sensors for a given experimental setup. For instance, "/media/gsvidaurre/Anodorhynchus/Data_Testing/Box_02_31Dec2022/Data".
+#' @param out_dir A character string. This should be the name of a directory specifying where the .csv file of combined raw data should be saved for each sensor. For instance, "raw_combined". This folder will be appended to the path and created as a new directory if it doesn't already exist.
 #' 
-#' @param data_path A character string. This should be the path specifying where the data is saved across sensors. For instance, "/media/gsvidaurre/Anodorhynchus/Data_Testing/Box_02_31Dec2022/Data".
-#'
-#' @param out_dir A character string. This should be the name of a directory specifying where the .csv file of combined raw data should be saved for each sensor. For instance, "raw_combined". This folder will be appended to the data_path and created as a new directory if it doesn't already exist.
-#'
-#' @details This function iterates over sensors and all files collected by each sensor to combine data into a single data frame. This function combines data from all files saved in the tracking system directory for each sensor. In other words, all raw data throughout the course of an experiment will be concatenated into the resulting data frame.
+#' @details This function iterates over sensor types to combine the raw data from one experimental setup into a single spreadsheet per sensor type. For each sensor type, all raw data collected using the `Abissmal` tracking system throughout the course of an experiment will be concatenated into a single spreadsheet. The raw data is not modified during this processing aside from changing the timestamp format to be compatible with lag difference calculations. The original raw data is not modified or deleted. This function must be executed across experimental setups if the tracking system was used to collect data for serial or parallel experimental replicates.
 #' 
-#' @return A .csv file with the raw data for each sensor, as well as all metadata collected by each sensor. Each row of each .csv file is a detection in the raw data collected by the given sensor
+#' @return A .csv file with the raw data collected across dates for each sensor type, as well as all metadata collected by each sensor. Each row of each .csv file is a detection in the raw data collected by the given sensor type.
 
-combine_raw_data_per_sensor <- function(sensors = c("IRBB", "RFID", "Video", "Temp"), tz, POSIXct_format = "%Y-%m-%d %H:%M:%OS", data_path, out_dir){
+combine_raw_data_per_sensor <- function(sensors = c("IRBB", "RFID", "Video", "Temp"), tz, POSIXct_format = "%Y-%m-%d %H:%M:%OS", path, out_dir){
   
   # Get the current global options
   orig_opts <- options()
@@ -45,27 +41,27 @@ combine_raw_data_per_sensor <- function(sensors = c("IRBB", "RFID", "Video", "Te
   
   # Check that each input directory exists
   invisible(sapply(1:length(sensors), function(i){
-    check_dirs(data_path, sensors[i])
+    check_dirs(path, sensors[i])
   }))
   
   # Get all the files per the given sensor type (e.g. 1 file per day)
-  files <- list.files(file.path(data_path, sensors[x]), pattern = paste(sensors[x], "*", sep = "_"), full.names = TRUE)
+  files <- list.files(file.path(path, sensors[x]), pattern = paste(sensors[x], "*", sep = "_"), full.names = TRUE)
   
   # Check that the input directories have raw data files
   invisible(sapply(1:length(sensors), function(i){
-    check_dir_notEmpty(file.path(data_path, sensors[i]), paste(paste(sensors[x], "*", sep = "_"), "*.csv$", sep = ""))
+    check_dir_notEmpty(file.path(path, sensors[i]), paste(paste(sensors[x], "*", sep = "_"), "*.csv$", sep = ""))
   }))
   
   # Create the directory for saving the output files if it doesn't already exist
-  if(!dir.exists(file.path(data_path, out_dir))){
-    dir.create(file.path(data_path, out_dir))
+  if(!dir.exists(file.path(path, out_dir))){
+    dir.create(file.path(path, out_dir))
   }
 
   # Iterate over sensors to read in data across files for each sensor, and write out a .csv file of the combined raw data
   invisible(lapply(1:length(sensors), function(x){
 
     # Get all the files per the given sensor type (e.g. 1 file per day)
-    files <- list.files(file.path(data_path, sensors[x]), pattern = paste(sensors[x], "*", sep = "_"), full.names = TRUE)
+    files <- list.files(file.path(path, sensors[x]), pattern = paste(sensors[x], "*", sep = "_"), full.names = TRUE)
     
     # Combine data across files into a single data frame
     raw_data <- rbindlist(lapply(1:length(files), function(i){
@@ -109,7 +105,7 @@ combine_raw_data_per_sensor <- function(sensors = c("IRBB", "RFID", "Video", "Te
     }
     
     # Save the raw combined data for each sensor in the given setup
-    write.csv(raw_data2, file.path(file.path(data_path, out_dir), paste("combined_raw_data_", sensors[x], ".csv", sep = "")), row.names = FALSE)
+    write.csv(raw_data2, file.path(file.path(path, out_dir), paste("combined_raw_data_", sensors[x], ".csv", sep = "")), row.names = FALSE)
     
   }))
   
