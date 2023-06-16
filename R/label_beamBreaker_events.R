@@ -1,7 +1,7 @@
 #' @title label_beamBreaker_events
 #' @description Use data from two pairs of beam breakers to label entrance and exit movements (in or out of a nest container or nesting area).
 #' 
-#' @param irbb_file_nm A character string. This should be the name of the file that contains all of the pre-processed and labeled beam breaker detections. Each row is a unique detection event. This spreadsheet must contain all the columns specified for the beam breaker data in the subsequent arguments
+#' @param irbb_file_nm A character string. This should be the name and extension of the .csv file that contains all of the pre-processed and labeled beam breaker detections. Each row is a unique detection event. This spreadsheet must contain all the columns specified for the beam breaker data in the subsequent arguments
 #' @param l_th A numeric argument. This represents a lower or minimum temporal threshold in seconds to identify beam breaker events between the outer and inner pair that are close enough together for integration into entrance or exit events. This must be a numeric value
 #' @param u_th A numeric argument. This represents an upper or maximum temporal threshold in seconds to identify beam breaker events between the outer and inner pair that are close enough together for integration into entrance or exit events. This must be a numeric value
 #' @param sensor_id_col A character value. This is the name of the metadata column that contains information about the data type (e.g. "sensor_id")
