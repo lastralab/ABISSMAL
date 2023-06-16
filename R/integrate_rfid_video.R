@@ -29,30 +29,7 @@
 #' 
 
 # TKTK Across all functions with lead and lag calculations, I need to check whether the sensor that has the first timestamp changes the logic used for pre-processing and integration. If so, then I'll need to generalize all these functions even more to make sure the conditionals used for integration are written correctly
-
-
-library(tidyverse)
-
-l_th <- 1
-u_th <- 3
-video_rec_dur <- 9
-rfid_file_nm <- "pre_processed_data_RFID.csv"
-video_file_nm <- "pre_processed_data_Video.csv"
-sensor_id_col <- "sensor_id"
-timestamps_col <- "timestamp_ms"
-PIT_tag_col <- "PIT_tag_ID"
-preproc_metadata_cols <- c("thin_threshold_s", "data_stage", "date_pre_processed", "lower_threshold_s", "upper_threshold_s", "date_labeled")
-general_metadata_cols <- c("chamber_id", "year", "month", "day")
-video_metadata_cols <- c("total_pixels_motionTrigger", "pixel_threshold", "video_file_name")
-extra_cols2drop <- NA
-integrate_perching <- TRUE
-path <- "/media/gsvidaurre/Anodorhynchus/Data_Testing/Box_02_31Dec2022/Data"
-data_dir <- "pre_processed"
-out_dir <- "integrated"
-out_file_nm = "integrated_rfid_video_data.csv"
-tz <- "America/New York"
-POSIXct_format <- "%Y-%m-%d %H:%M:%OS"
-devices_integrated <- "two"
+#'
 
 integrate_rfid_video <- function(rfid_file_nm, video_file_nm, l_th, u_th, video_rec_dur, sensor_id_col, timestamps_col, PIT_tag_col, preproc_metadata_cols, general_metadata_cols, video_metadata_cols, devices_integrated, extra_cols2drop, integrate_perching, path, data_dir, out_dir, out_file_nm = "integrated_rfid_video_data.csv", tz, POSIXct_format = "%Y-%m-%d %H:%M:%OS"){
   
