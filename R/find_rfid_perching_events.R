@@ -1,26 +1,26 @@
 #' @title find_rfid_perching_events
-#' @description Use the raw radio frequency identification (RFID) data to identify perching events (e.g. periods of time when an individual was perched on the RFID antenna). This function is performed for each unique passive integrated transponder (PIT) tag in the dataset. The function identifies runs of RFID detections separated by the given temporal threshold or less, then takes the first and last detection of each run and returns these timestamps as the start and end of each perching period. Note that unlike the pre-processing function, this function groups the data frame not only by PIT tag ID but also by date to avoid artificially long perching periods.
+#' @description Detect perching events in the raw RFID data
 #' 
-#' @param rfid_file_nm A character string. This should be the name of the file that contains all of the pre-processed RFID detections. Each row is a unique detection event. This spreadsheet must contain all the columns specified for the RFID data in the subsequent arguments
-#' #' @param threshold A single numeric value. This represents a temporal threshold in seconds that will be used to identify RFID detections that occurred in close succession (e.g. within 1 or 2 seconds) as perching events
-#' @param run_length A single numeric value. This argument indicates the minimum number of consecutive RFID detections used to label a perching event. Default is 2 
-#' @param sensor_id_col A character value. This is the name of the metadata column that contains information about the data type (e.g. "sensor_id")
-#' @param timestamps_col A character value. The name of the column that contains timestamps in a format that supports calculations in milliseconds (e.g. "event_datetime_ms")
-#' @param PIT_tag_col A character value. This is the name of the metadata column that contains information about the PIT tags detected by the RFID antenna (e.g. "PIT_tag_ID")
-#' @param general_metadata_cols A character vector. This should be a string of the general metadata column names that will be carried through into the resulting data frame representing the integrated data. For this particular function, these metadata columns should be generally applicable across PIT tag IDs and dates. For instance: cc("chamber_id", "sensor_id"). These columns will be added as the first columns in the integrated data frame, in the same order in which they are provided
-#' @param path A character string. This should be the path specifying the overall directory where data is saved for a given experimental setup. For instance, "/media/gsvidaurre/Anodorhynchus/Data_Testing/Box_02_31Dec2022/Data".
-#' @param rfid_dir A character string. This should be the name of directory where the pre-processed RFID data is saved across sensors inside the path above. For instance, "pre-processed"
-#' @param out_dir A character string. This should be the name of a directory specifying where the .csv file of pre-processed data should be saved for each sensor. For instance, "pre-processed". This folder will be appended to the data_path and created as a new directory if it doesn't already exist.
-#' @param out_file_nm A character string. The name (plus extension) of the resulting file that will be written to out_dir. The default is "perching_events.csv"
-#' @param tz A character string. This argument should contain the timezone used for converting timestamps to POSIXct format. For instance, "America/New York". See the base function `as.POSIXct` for more information
-#' @param POSIXct_format A character string. This argument should contain the format used to converting timestamps to POSIXct format. The default is "%Y-%m-%d %H:%M:%OS" to return timestamps with milliseconds in decimal format. See the base function `as.POSIXct` for more information
+#' @param rfid_file_nm A character string. This argument should be the name and extension of the .csv file that contains all of the pre-processed RFID detections. Each row is a unique detection event. This spreadsheet must contain all the columns specified for the RFID data in the subsequent arguments.
+#' @param threshold A single numeric value. This argument represents a temporal threshold in seconds that will be used to identify RFID detections that occurred in close succession (e.g. within 1 or 2 seconds) as perching events.
+#' @param run_length A single numeric value. This argument indicates the minimum number of consecutive RFID detections used to label a perching event. The default setting is 2. 
+#' @param sensor_id_col A character string. This is the name of the metadata column that contains information about the data type (e.g. "sensor_id").
+#' @param timestamps_col A character string. This argument is the name of the column that contains timestamps in a format that supports calculations in milliseconds (e.g. "event_datetime_ms").
+#' @param PIT_tag_col A character string. This argument is the name of the metadata column that contains information about the PIT tags detected by the RFID antenna (e.g. "PIT_tag_ID").
+#' @param general_metadata_cols A character vector. This should be a string of the general metadata column names that will be carried through into the resulting spreadsheet. For this particular function, these metadata columns should be general to the experiment and not specific to the PIT tag IDs or dates. For instance: `c("chamber_id", "sensor_id")`. These columns will be added as the first columns in the resulting spreadsheet, in the same order in which they are provided.
+#' @param path A character string. This argument should be the path specifying the overall directory where data is saved for a given experimental setup. For instance, "/media/gsvidaurre/Anodorhynchus/Data_Testing/Box_02_31Dec2022/Data".
+#' @param data_dir A character string. This argument should be the name of directory where the pre-processed RFID data should be saved inside the path above. For instance, "pre-processed".
+#' @param out_dir A character string. This argument should be the name of a directory inside the path above specifying where the resulting .csv file of pre-processed data should be saved (e.g. "pre-processed"). This folder will be created as a new directory if it doesn't already exist.
+#' @param out_file_nm A character string. The name (plus extension) of the resulting file that will be written to out_dir. The default file name is "perching_events.csv"
+#' @param tz A character string. This argument should contain the timezone used for converting timestamps to POSIXct format. For instance, "America/New York". See the base function `as.POSIXct` for more information.
+#' @param POSIXct_format A character string. This argument should contain the format used to converting timestamps to POSIXct format. The default is "%Y-%m-%d %H:%M:%OS" to return timestamps with milliseconds in decimal format. See the base function `as.POSIXct` for more information.
 #'
-#' @details TKTK
+#' @details This function parses the raw radio frequency identification (RFID) data to identify perching events (e.g. periods of time when an individual was perched on the RFID antenna). This function is performed for each unique passive integrated transponder (PIT) tag and date in the dataset. The function identifies runs of RFID detections separated by the given temporal threshold or less. The function then takes the first and last detection of each run and returns these timestamps as the start and end of each perching event. Unlike the pre-processing function `preprocess_detections`, this function groups the data frame not only by PIT tag ID but also by date to avoid artificially long perching periods.This function must be executed across experimental setups if the tracking system was used to collect data for serial or parallel experimental replicates.
 #' 
-#' @return A data frame object with all metadata columns in the original data frame, as well as columns indicating the timestamp of the start of the perching period identified, the end of the given perching period, and the temporal threshold used for pre-processing (in seconds). In other words, each row is a perching period
+#' @return The function returns a .csv file with all metadata columns in the original data frame, as well as the start and end timestamps of each perching period identified in the raw RFID data. Each row in the resulting spreadsheet is a perching event. The function also returns information about parameters used for this data processing.
 #' 
 
-find_rfid_perching_events <- function(rfid_file_nm, threshold, run_length = 2, sensor_id_col, timestamps_col, PIT_tag_col, general_metadata_cols, path, rfid_dir, out_dir, out_file_nm = "perching_events.csv", tz, POSIXct_format = "%Y-%m-%d %H:%M:%OS"){
+find_rfid_perching_events <- function(rfid_file_nm, threshold, run_length = 2, sensor_id_col, timestamps_col, PIT_tag_col, general_metadata_cols, path, data_dir, out_dir, out_file_nm = "perching_events.csv", tz, POSIXct_format = "%Y-%m-%d %H:%M:%OS"){
   
   # Get the current global options
   orig_opts <- options()
@@ -56,10 +56,10 @@ find_rfid_perching_events <- function(rfid_file_nm, threshold, run_length = 2, s
   }))
   
   # Check that each input directory exists
-  check_dirs(data_path, rfid_dir)
+  check_dirs(data_path, data_dir)
   
   # Check that the input file exists in the input directory
-  check_file(file.path(path, rfid_dir), rfid_file_nm)
+  check_file(file.path(path, data_dir), rfid_file_nm)
   
   # Create the directory for saving the data file if it doesn't already exist
   if(!dir.exists(file.path(path, out_dir))){
@@ -67,7 +67,7 @@ find_rfid_perching_events <- function(rfid_file_nm, threshold, run_length = 2, s
   }
   
   # Read in the pre-processed RFID data
-  preproc_rfid <- read.csv(file.path(path, rfid_dir, rfid_file_nm)) %>% 
+  preproc_rfid <- read.csv(file.path(path, data_dir, rfid_file_nm)) %>% 
     # Make sure that the timestamps are in the right format
     dplyr::mutate(
       !!timestamps_col := as.POSIXct(format(as.POSIXct(!!sym(timestamps_col), tz = "America/New York"), "%Y-%m-%d %H:%M:%OS6"))
