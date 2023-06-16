@@ -58,6 +58,17 @@ check_boolean <- function(y){
   
 }
 
+# Check that arguments are NA
+check_NA <- function(y){
+  
+  err <- paste("Expected an NA value but", y, "is not NA", sep = " ")
+  
+  if(!is.na(eval(base::as.symbol(y)))){
+    stop(err)
+  }
+  
+}
+
 # Check that sensor arguments are written as expected
 check_sensor_spelling <- function(y){
   

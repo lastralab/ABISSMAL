@@ -3,20 +3,21 @@
 #' 
 #' @param rfid_file_nm A character string. This should be the name of the file that contains all of the pre-processed RFID detections. Each row is a unique detection event. This spreadsheet must contain all the columns specified for the RFID data in the subsequent arguments
 #' @param video_file_nm A character string. This should be the name of the file that contains all of the pre-processed video detections. Each row is a unique detection event. This data frame must contain all the columns specified for the video data in the subsequent arguments
-#' @param l_th A numeric argument. This represents a lower or minimum temporal threshold in seconds to identify beam breaker and video events that are close enough together for integration. The default is NULL, but this must be a numeric value when `method` is set to "temporal". This lower temporal threshold is used to infer beam breaker detections and video recording detections that represented the original set of movements that triggered both sensors
-#' @param u_th A numeric argument. This represents an upper or maximum temporal threshold in seconds to identify beam breaker and video events that are close enough together for integration. The default is NULL, but this must be a numeric value when `method` is set to "temporal". This lower temporal threshold is used to infer beam breaker detections and video recording detections that represented the original set of movements that triggered both sensors.
-#' @param video_rec_dur A numeric argument. This represents the duration of video recording (post-motion detection) in seconds. This argument, along with the upper temporal threshold above (u_th) is used to identify beam breaker events that occurred during video recording, but are inferred to not represent the original movements that triggered the movement sensors. This argument facilitates retaining beam breaker events that occurred during the span of video recording and therefore did not trigger a separate video recording event. The default is NULL, but this must be a numeric value when `method` is set to "temporal"
+#' @param l_th A numeric argument. This represents a lower or minimum temporal threshold in seconds to identify beam breaker and video events that are close enough together for integration. This lower temporal threshold is used to infer beam breaker detections and video recording detections that represented the original set of movements that triggered both sensors
+#' @param u_th A numeric argument. This represents an upper or maximum temporal threshold in seconds to identify beam breaker and video events that are close enough together for integration. This lower temporal threshold is used to infer beam breaker detections and video recording detections that represented the original set of movements that triggered both sensors.
+#' @param video_rec_dur A numeric argument. This represents the duration of video recording (post-motion detection) in seconds. This argument, along with the upper temporal threshold above (u_th) is used to identify beam breaker events that occurred during video recording, but are inferred to not represent the original movements that triggered the movement sensors. This argument facilitates retaining beam breaker events that occurred during the span of video recording and therefore did not trigger a separate video recording event.
 #' @param sensor_id_col A character value. This is the name of the metadata column that contains information about the data type (e.g. "sensor_id")
 #' @param timestamps_col A character value. The name of the column that contains timestamps in a format that supports calculations in milliseconds (e.g. "event_datetime_ms")
 #' @param PIT_tag_col A character value. This is the name of the metadata column that contains information about the PIT tags detected by the RFID antenna (e.g. "PIT_tag_ID")
 #' @param preproc_metadata_cols A character vector. This should be a string of the metadata column names from pre-processing that should be dropped from either or both data frames. For instance, c("thin_threshold_s", "data_stage", "date_pre_processed", "lower_threshold_s", "upper_threshold_s", "date_labeled")
 #' @param general_metadata_cols A character vector. This should be a string of the general metadata column names that will be carried through into the resulting data frame representing the integrated data. For instance: c("chamber_id", "year", "month", "day"). These columns will be added as the first columns in the integrated data frame, in the same order in which they are provided
 #' @param video_metadata_cols A character vector. This should be a string of the video metadata column names that will be carried through into the resulting data frame representing the integrated data. For instance: c("total_pixels_motionTrigger", "pixel_threshold", "video_file_name"). These columns will be added as later columns in the integrated data frame, in the same order in which they are provided
-#' @param extra_cols2drop A character vector. This should be a string of additional metadata column names that should be dropped before the integration but will be added back to the resulting file, such as c("RFID", "PIT_tag_ID", "outer_rfid_diffs", "rfid_irbb_assignmnt_type", "rfid_irbb_lower_threshold_s", "rfid_irbb_upper_threshold_s"). This argument is useful when using this function to integrate across all 3 movement sensors (e.g. when using a dataset of integrated RFID and beam breaker data as input). Set this argument to NA if it is not needed
+#' @param devices_integrated A character string. This argument specifies how many types of sensors or datasets are being integrated, which will determine whether extra columns are dropped during the integration. Set this argument to "two" when datasets for two devices are being integrated, or "three" when this function is called inside aother function that integrates across all 3 movement sensor types.
+#' @param extra_cols2drop A character vector. This should be a string of additional metadata column names that should be dropped before the integration but will be added back to the resulting file, such as c("RFID", "PIT_tag_ID", "outer_rfid_diffs", "rfid_irbb_assignmnt_type", "rfid_irbb_lower_threshold_s", "rfid_irbb_upper_threshold_s"). This argument is useful when using this function to integrate across all 3 movement sensors (e.g. when using a dataset of integrated RFID and beam breaker data as input). Set this argument to NA if it is not needed (e.g. when only 2 devices are being integrated)
 #' @param integrate_perching Boolean. If TRUE, then the perching events identified using `find_perching_events` will be integrated with this dataset. This integration is done by finding RFID timestamps that occurred within the duration of a perching event. If FALSE, then perching events will not be integrated. 
 #' @param path A character string. This should be the path specifying the overall directory where data is saved for a given experimental setup. For instance, "/media/gsvidaurre/Anodorhynchus/Data_Testing/Box_02_31Dec2022/Data".
-#' @param rfid_dir A character string. This should be the name of directory where the pre-processed RFID data is saved across sensors inside the path above. For instance, "pre-processed"
-#' @param video_dir A character string. This should be the name of directory where the pre-processed video data is saved across sensors inside the path above. For instance, "pre-processed"
+#' @param data_dir A character string. This should be the name of directory where the pre-processed RFID data is saved across sensors inside the path above. For instance, "pre-processed"
+#' @param data_dir A character string. This should be the name of directory where the pre-processed video data is saved across sensors inside the path above. For instance, "pre-processed"
 #' @param out_dir A character string. This should be the name of a directory specifying where the .csv file of pre-processed data should be saved for each sensor. For instance, "pre-processed". This folder will be appended to the data_path and created as a new directory if it doesn't already exist
 #' @param out_file_nm A character string. The name (plus extension) of the resulting file that will be written to out_dir. The default is "integrated_rfid_video_data.csv"
 #' @param tz A character string. This argument should contain the timezone used for converting timestamps to POSIXct format. For instance, "America/New York". See the base function `as.POSIXct` for more information.
@@ -29,7 +30,31 @@
 
 # TKTK Across all functions with lead and lag calculations, I need to check whether the sensor that has the first timestamp changes the logic used for pre-processing and integration. If so, then I'll need to generalize all these functions even more to make sure the conditionals used for integration are written correctly
 
-integrate_rfid_video <- function(rfid_file_nm, video_file_nm, l_th = NULL, u_th = NULL, video_rec_dur = NULL, sensor_id_col, timestamps_col, PIT_tag_col, preproc_metadata_cols, general_metadata_cols, video_metadata_cols, extra_cols2drop, integrate_perching, path, rfid_dir, video_dir, out_dir, out_file_nm = "integrated_rfid_video_data.csv", tz, POSIXct_format = "%Y-%m-%d %H:%M:%OS"){
+
+library(tidyverse)
+
+l_th <- 1
+u_th <- 3
+video_rec_dur <- 9
+rfid_file_nm <- "pre_processed_data_RFID.csv"
+video_file_nm <- "pre_processed_data_Video.csv"
+sensor_id_col <- "sensor_id"
+timestamps_col <- "timestamp_ms"
+PIT_tag_col <- "PIT_tag_ID"
+preproc_metadata_cols <- c("thin_threshold_s", "data_stage", "date_pre_processed", "lower_threshold_s", "upper_threshold_s", "date_labeled")
+general_metadata_cols <- c("chamber_id", "year", "month", "day")
+video_metadata_cols <- c("total_pixels_motionTrigger", "pixel_threshold", "video_file_name")
+extra_cols2drop <- NA
+integrate_perching <- TRUE
+path <- "/media/gsvidaurre/Anodorhynchus/Data_Testing/Box_02_31Dec2022/Data"
+data_dir <- "pre_processed"
+out_dir <- "integrated"
+out_file_nm = "integrated_rfid_video_data.csv"
+tz <- "America/New York"
+POSIXct_format <- "%Y-%m-%d %H:%M:%OS"
+devices_integrated <- "two"
+
+integrate_rfid_video <- function(rfid_file_nm, video_file_nm, l_th, u_th, video_rec_dur, sensor_id_col, timestamps_col, PIT_tag_col, preproc_metadata_cols, general_metadata_cols, video_metadata_cols, devices_integrated, extra_cols2drop, integrate_perching, path, data_dir, out_dir, out_file_nm = "integrated_rfid_video_data.csv", tz, POSIXct_format = "%Y-%m-%d %H:%M:%OS"){
   
   # Get the current global options
   orig_opts <- options()
@@ -37,18 +62,60 @@ integrate_rfid_video <- function(rfid_file_nm, video_file_nm, l_th = NULL, u_th 
   # Set the number of digits for visualization. Under the hood there is full precision, but this helps for visual confirmation of decimal seconds
   options("digits.secs" = 6)
   
-  # Check that all temporal thresholds are each numeric
-  if(!is.numeric(l_th)){
-    stop('The lower temporal threshold needs to be numeric')
+  # Get the formal arguments from the current function
+  # TKTK try substituting the function name with: match.call()[[1]]
+  f_args <- methods::formalArgs(integrate_rfid_video)
+  
+  # Check that the formal arguments were all specified
+  invisible(sapply(1:length(f_args), function(i){
+    check_defined(f_args[i])
+  }))
+  
+  # Check that the formal arguments that should not be NULL
+  invisible(sapply(1:length(f_args), function(i){
+    check_null(f_args[i])
+  }))
+  
+  # Check that the formal arguments that should be strings are strings
+  expect_numeric <- c("l_th", "u_th", "video_rec_dur")
+  
+  expect_bool <- c("integrate_perching")
+  
+  if(devices_integrated == "two"){
+    
+    expect_na <- f_args[grep("extra", f_args)]
+    
+    expect_strings <- f_args[-grep(paste(paste("^", c(expect_numeric, expect_bool, expect_na), "$", sep = ""), collapse = "|"), f_args)]
+    
+    # Check that the extracols2drop argument is NA
+    check_NA(expect_na)
+    
+  } else if(devices_integrated == "three"){
+    
+    expect_strings <- f_args[-grep(paste(paste("^", c(expect_numeric, expect_bool), "$", sep = ""), collapse = "|"), f_args)]
+    
   }
   
-  if(!is.numeric(u_th)){
-    stop('The upper temporal threshold needs to be numeric')
-  }
+  invisible(sapply(1:length(expect_strings), function(i){
+    check_string(expect_strings[i])
+  }))
   
-  if(!is.numeric(video_rec_dur)){
-    stop('The video recording duration needs to be numeric (in seconds)')
-  }
+  # Check that the formal arguments that should be numeric are numeric
+  invisible(sapply(1:length(expect_numeric), function(i){
+    check_numeric(expect_numeric[i])
+  }))
+  
+  # Check that the formal arguments that should be Boolean are Boolean
+  invisible(sapply(1:length(expect_bool), function(i){
+    check_boolean(expect_bool[i])
+  }))
+  
+  # Check that the input directory exists
+  check_dirs(path, data_dir)
+  
+  # Check that the input files exist in the input directory
+  check_file(file.path(path, data_dir), rfid_file_nm)
+  check_file(file.path(path, data_dir), video_file_nm)
   
   # Create the directory for saving the integrated data files if it doesn't already exist
   if(!dir.exists(file.path(path, out_dir))){
@@ -56,14 +123,14 @@ integrate_rfid_video <- function(rfid_file_nm, video_file_nm, l_th = NULL, u_th 
   }
   
   # Read in the pre-processed RFID data
-  preproc_rfid <- read.csv(file.path(path, rfid_dir, rfid_file_nm)) %>% 
+  preproc_rfid <- read.csv(file.path(path, data_dir, rfid_file_nm)) %>% 
     # Make sure that the timestamps are in the right format
     dplyr::mutate(
       !!timestamps_col := as.POSIXct(format(as.POSIXct(!!sym(timestamps_col), tz = "America/New York"), "%Y-%m-%d %H:%M:%OS6"))
     )
   
   # Read in the pre-processed video data
-  preproc_video <- read.csv(file.path(path, video_dir, video_file_nm)) %>% 
+  preproc_video <- read.csv(file.path(path, data_dir, video_file_nm)) %>% 
     # Make sure that the timestamps are in the right format
     dplyr::mutate(
       !!timestamps_col := as.POSIXct(format(as.POSIXct(!!sym(timestamps_col), tz = "America/New York"), "%Y-%m-%d %H:%M:%OS6"))
@@ -84,15 +151,6 @@ integrate_rfid_video <- function(rfid_file_nm, video_file_nm, l_th = NULL, u_th 
   preproc_video2 <- preproc_video %>% 
     dplyr::select(-c(all_of(video_cols2drop)))
   
-  # Check that the input data are both data frames
-  if(!is.data.frame(preproc_rfid2)){
-    stop('The RFID data needs to be a data frame')
-  }
-  
-  if(!is.data.frame(preproc_video2)){
-    stop('The Video data needs to be a data frame')
-  }
-  
   # Drop additional metadata columns here
   if(!is.na(extra_cols2drop)){
     
@@ -100,6 +158,66 @@ integrate_rfid_video <- function(rfid_file_nm, video_file_nm, l_th = NULL, u_th 
       dplyr::select(-c(all_of(extra_cols2drop)))
     
   }
+  
+  # Check that these objects are both data frames
+  check_df_class(preproc_rfid2)
+  check_df_class(preproc_video2)
+  
+  # Check that the expected columns from formal arguments are found in each data frame
+  rfid_expected_cols <- c("sensor_id_col", "timestamps_col", "PIT_tag_col")
+  
+  video_expected_cols <- c("sensor_id_col", "timestamps_col")
+  
+  invisible(sapply(1:length(rfid_expected_cols), function(i){
+    check_fArgs_data_cols(rfid_expected_cols[i], preproc_rfid2)
+  }))
+  
+  invisible(sapply(1:length(video_expected_cols), function(i){
+    check_fArgs_data_cols(video_expected_cols[i], preproc_video2)
+  }))
+  
+  # Also do this check for their earlier version of the video data that will be used for writing out general metadata
+  md_cols <- c("video_metadata_cols", "general_metadata_cols")
+  
+  invisible(sapply(1:length(md_cols), function(i){
+    check_fArgs_data_cols(md_cols[i], preproc_video)
+  }))
+  
+  # Check that the expected columns from formal arguments do not have NAs
+  invisible(sapply(1:length(rfid_expected_cols), function(i){
+    check_fArgs_cols_nas(rfid_expected_cols[i], preproc_rfid2)
+  }))
+  
+  invisible(sapply(1:length(video_expected_cols), function(i){
+    check_fArgs_cols_nas(video_expected_cols[i], preproc_video2)
+  }))
+  
+  # Check that date-related columns are found in the data
+  expected_cols <- c("year", "month", "day")
+  
+  invisible(sapply(1:length(expected_cols), function(i){
+    check_data_cols(expected_cols[i], preproc_rfid2)
+  }))
+  
+  invisible(sapply(1:length(expected_cols), function(i){
+    check_data_cols(expected_cols[i], preproc_video2)
+  }))
+  
+  # Check that the date-related columns do not have NAs
+  invisible(sapply(1:length(expected_cols), function(i){
+    check_cols_nas(expected_cols[i], preproc_rfid2)
+  }))
+  
+  invisible(sapply(1:length(expected_cols), function(i){
+    check_cols_nas(expected_cols[i], preproc_video2)
+  }))
+  
+  # Check that columns with timestamps are in the right format
+  tstmps_cols <- f_args[grep("time", f_args)]
+  
+  check_tstmps_cols(tstmps_cols, preproc_rfid2, "%Y-%m-%d %H:%M:%OS6")
+  
+  check_tstmps_cols(tstmps_cols, preproc_video2, "%Y-%m-%d %H:%M:%OS6")
   
   # Group the RFID data frame
   rfid_df_tmp <- preproc_rfid2 %>%
@@ -228,9 +346,9 @@ integrate_rfid_video <- function(rfid_file_nm, video_file_nm, l_th = NULL, u_th 
             !!rlang::parse_expr(conditnal_lead_ent)
           ) %>% 
           dplyr::mutate(
-            rfid_video_direction_inferred = "entrance"
+            rfid_data_direction_inferred = "entrance"
           ) %>% 
-          dplyr::select(all_of(rfid_col), all_of(video_col), rfid_video_diffs, rfid_video_direction_inferred, rfid_video_assignmnt_type, rfid_video_movement_inference) 
+          dplyr::select(all_of(rfid_col), all_of(video_col), rfid_video_diffs, rfid_data_direction_inferred, rfid_video_assignmnt_type, rfid_video_movement_inference) 
         %>% 
           # Entrances, lag differences
           bind_rows(
@@ -246,9 +364,9 @@ integrate_rfid_video <- function(rfid_file_nm, video_file_nm, l_th = NULL, u_th 
                 !!rlang::parse_expr(conditnal_lag_ent)
               ) %>% 
               dplyr::mutate(
-                rfid_video_direction_inferred = "entrance"
+                rfid_data_direction_inferred = "entrance"
               ) %>% 
-              dplyr::select(all_of(rfid_col), all_of(video_col), rfid_video_diffs, rfid_video_direction_inferred, rfid_video_assignmnt_type, rfid_video_movement_inference)
+              dplyr::select(all_of(rfid_col), all_of(video_col), rfid_video_diffs, rfid_data_direction_inferred, rfid_video_assignmnt_type, rfid_video_movement_inference)
           ) %>% 
           # Exits, lead differences
           bind_rows(
@@ -264,9 +382,9 @@ integrate_rfid_video <- function(rfid_file_nm, video_file_nm, l_th = NULL, u_th 
                 !!rlang::parse_expr(conditnal_lead_exi)
               ) %>% 
               dplyr::mutate(
-                rfid_video_direction_inferred = "exit"
+                rfid_data_direction_inferred = "exit"
               ) %>% 
-              dplyr::select(all_of(rfid_col), all_of(video_col), rfid_video_diffs, rfid_video_direction_inferred, rfid_video_assignmnt_type, rfid_video_movement_inference) 
+              dplyr::select(all_of(rfid_col), all_of(video_col), rfid_video_diffs, rfid_data_direction_inferred, rfid_video_assignmnt_type, rfid_video_movement_inference) 
           ) %>% 
           # Exits, lag differences
           bind_rows(
@@ -282,9 +400,9 @@ integrate_rfid_video <- function(rfid_file_nm, video_file_nm, l_th = NULL, u_th 
                 !!rlang::parse_expr(conditnal_lag_exi)
               ) %>% 
               dplyr::mutate(
-                rfid_video_direction_inferred = "exit"
+                rfid_data_direction_inferred = "exit"
               ) %>%
-              dplyr::select(all_of(rfid_col), all_of(video_col), rfid_video_diffs, rfid_video_direction_inferred, rfid_video_assignmnt_type, rfid_video_movement_inference) 
+              dplyr::select(all_of(rfid_col), all_of(video_col), rfid_video_diffs, rfid_data_direction_inferred, rfid_video_assignmnt_type, rfid_video_movement_inference) 
           ) %>% 
           # Within video assignments, lead differences
           bind_rows(
@@ -300,9 +418,9 @@ integrate_rfid_video <- function(rfid_file_nm, video_file_nm, l_th = NULL, u_th 
                 !!rlang::parse_expr(conditnal_lead_withn)
               ) %>% 
               dplyr::mutate(
-                rfid_video_direction_inferred = "none"
+                rfid_data_direction_inferred = "none"
               ) %>%
-              dplyr::select(all_of(rfid_col), all_of(video_col), rfid_video_diffs, rfid_video_direction_inferred, rfid_video_assignmnt_type, rfid_video_movement_inference)
+              dplyr::select(all_of(rfid_col), all_of(video_col), rfid_video_diffs, rfid_data_direction_inferred, rfid_video_assignmnt_type, rfid_video_movement_inference)
           ) %>% 
           # Within video assignments, lag differences
           bind_rows(
@@ -318,9 +436,9 @@ integrate_rfid_video <- function(rfid_file_nm, video_file_nm, l_th = NULL, u_th 
                 !!rlang::parse_expr(conditnal_lag_withn)
               ) %>% 
               dplyr::mutate(
-                rfid_video_direction_inferred = "none"
+                rfid_data_direction_inferred = "none"
               ) %>%
-              dplyr::select(all_of(rfid_col), all_of(video_col), rfid_video_diffs, rfid_video_direction_inferred, rfid_video_assignmnt_type, rfid_video_movement_inference)
+              dplyr::select(all_of(rfid_col), all_of(video_col), rfid_video_diffs, rfid_data_direction_inferred, rfid_video_assignmnt_type, rfid_video_movement_inference)
           )
       )
     ) %>% 
@@ -366,13 +484,13 @@ integrate_rfid_video <- function(rfid_file_nm, video_file_nm, l_th = NULL, u_th 
       dplyr::rename(
         !!rfid_col := !!sym(timestamps_col)
       ) %>% 
-      dplyr::select(all_of(general_metadata_cols), all_of(rfid_col), all_of(video_col), all_of(PIT_tag_col), rfid_video_direction_inferred, rfid_video_diffs, rfid_video_assignmnt_type, rfid_video_movement_inference, all_of(video_metadata_cols), all_of(extra_cols2drop), rfid_video_lower_threshold_s, rfid_video_upper_threshold_s, video_recording_duration_s, data_stage, date_integrated) %>% 
+      dplyr::select(all_of(general_metadata_cols), all_of(rfid_col), all_of(video_col), all_of(PIT_tag_col), rfid_data_direction_inferred, rfid_video_diffs, rfid_video_assignmnt_type, rfid_video_movement_inference, all_of(video_metadata_cols), all_of(extra_cols2drop), rfid_video_lower_threshold_s, rfid_video_upper_threshold_s, video_recording_duration_s, data_stage, date_integrated) %>% 
       dplyr::arrange(!!sym(rfid_col), desc = FALSE)
     
   } else {
     
     integr8d_df <- integr8d_df %>% 
-      dplyr::select(all_of(general_metadata_cols), all_of(rfid_col), all_of(video_col), all_of(PIT_tag_col), rfid_video_direction_inferred, rfid_video_diffs, rfid_video_assignmnt_type, rfid_video_movement_inference, all_of(video_metadata_cols), rfid_video_lower_threshold_s, rfid_video_upper_threshold_s, video_recording_duration_s, data_stage, date_integrated) %>% 
+      dplyr::select(all_of(general_metadata_cols), all_of(rfid_col), all_of(video_col), all_of(PIT_tag_col), rfid_data_direction_inferred, rfid_video_diffs, rfid_video_assignmnt_type, rfid_video_movement_inference, all_of(video_metadata_cols), rfid_video_lower_threshold_s, rfid_video_upper_threshold_s, video_recording_duration_s, data_stage, date_integrated) %>% 
       dplyr::arrange(!!sym(rfid_col), desc = FALSE)
     
   }
@@ -439,7 +557,7 @@ integrate_rfid_video <- function(rfid_file_nm, video_file_nm, l_th = NULL, u_th 
   # Integrate perching events if specified
   if(integrate_perching){
     
-    perch_df <- read.csv(file.path(path, rfid_dir, "perching_events.csv"))  %>% 
+    perch_df <- read.csv(file.path(path, data_dir, "perching_events.csv"))  %>% 
       # Make sure that the timestamps are in the right format
       dplyr::mutate(
         perching_start = as.POSIXct(format(as.POSIXct(perching_start, tz = "America/New York"), "%Y-%m-%d %H:%M:%OS6")),
