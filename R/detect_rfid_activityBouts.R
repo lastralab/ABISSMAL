@@ -4,8 +4,7 @@
 #' @param integrated_file_nm A character string. This argument should be the name of the file that contains all of the pre-processed RFID detections. Each row is a unique detection event. This spreadsheet must contain all the columns specified for the RFID data in the subsequent arguments.
 #' @param threshold A single numeric value. This argument represents a temporal threshold in seconds that will be used to identify RFID detections that occurred in close succession (e.g. within 1 or 2 seconds) as bouts of activities or movement by 1 or 2 individuals.
 #' @param run_length A single numeric value. This argument indicates the minimum number of consecutive RFID detections used to detect bouts of activities by 1 or 2 individuals. The default setting is 2.
-#' @param sensor_id_col A character string. This argument is the name of the metadata column that contains information about the data type (e.g. "sensor_id").
-#' @param timestamps_col A character string. The name of the column that contains timestamps in a format that supports calculations in milliseconds (e.g. "event_datetime_ms").
+#' @param timestamps_col A character string. The name of the column that contains RFID timestamps in a format that supports calculations in milliseconds (e.g. "RFID").
 #' @param PIT_tag_col A character string. This argument is the name of the metadata column that contains information about the PIT tags detected by the RFID antenna (e.g. "PIT_tag_ID").
 #' @param preproc_metadata_cols A character vector. This argument should be a string of the metadata column names from pre-processing that should be dropped from either or both data frames. For instance, c("thin_threshold_s", "data_stage", "date_pre_processed", "lower_threshold_s", "upper_threshold_s", "date_labeled").
 #' @param general_metadata_cols A character vector. This argument should be a string of the general metadata column names that will be carried through into the resulting data frame representing the integrated data. For instance: c("chamber_id", "year", "month", "day"). These columns will be added as the first columns in the integrated data frame, in the same order in which they are provided.
@@ -19,8 +18,8 @@
 #' @details This function uses lags between RFID detections in an integrated dataset to detect bouts of behavioral activities for one or two individuals (including possible synchronized activities between individuals). This function was written to operate on an integrated dataset with RFID detections. This function could be updated to detect bouts of activities in integrated datasets without RFID detections as well, although the output would not contain information about individual identity.
 #' 
 #' @return The function generates a spreadsheet in .csv format with the metadata columns from the original pre-processed data, as well as columns indicating the start and end of each bout of RFID activity detected, summary statistics about the bout (e.g. the number of detections, the number and identity of the individuals involved, the mean, min and max gaps between detections, and the number of perching events included). Each row in the .csv file is a bout of movement activity detected from the RFID timestamps in the given integrated dataset. Information about the parameters used for the bout detection and the date that the data was processed is also contained in this spreadsheet.
-
-detect_rfid_activityBouts <- function(integrated_file_nm, threshold, run_length = 2, sensor_id_col, timestamps_col, PIT_tag_col, preproc_metadata_cols, general_metadata_cols, path, data_dir, out_dir, out_file_nm = "rfid_activity_bouts.csv", tz, POSIXct_format = "%Y-%m-%d %H:%M:%OS"){
+#' 
+detect_rfid_activityBouts <- function(integrated_file_nm, threshold, run_length = 2, timestamps_col, PIT_tag_col, preproc_metadata_cols, general_metadata_cols, path, data_dir, out_dir, out_file_nm = "rfid_activity_bouts.csv", tz, POSIXct_format = "%Y-%m-%d %H:%M:%OS"){
   
   # Get the current global options
   orig_opts <- options()
@@ -28,10 +27,38 @@ detect_rfid_activityBouts <- function(integrated_file_nm, threshold, run_length 
   # Set the number of digits for visualization. Under the hood there is full precision, but this helps for visual confirmation of decimal seconds
   options("digits.secs" = 6)
   
-  # Check that the temporal threshold is numeric
-  if(!is.numeric(threshold)){
-    stop('The temporal threshold needs to be numeric')
-  }
+  # Get the formal arguments from the current function
+  # TKTK try substituting the function name with: match.call()[[1]]
+  f_args <- methods::formalArgs(detect_rfid_activityBouts)
+  
+  # Check that the formal arguments were all specified
+  invisible(sapply(1:length(f_args), function(i){
+    check_defined(f_args[i])
+  }))
+  
+  # Check that the formal arguments are not NULL
+  invisible(sapply(1:length(f_args), function(i){
+    check_null(f_args[i])
+  }))
+  
+  # Check that the formal arguments that should be strings are strings
+  expect_numeric <- c("threshold", "run_length")
+  expect_strings <- f_args[-grep(paste(paste("^", expect_numeric, "$", sep = ""), collapse = "|"), f_args)]
+  
+  invisible(sapply(1:length(expect_strings), function(i){
+    check_string(expect_strings[i])
+  }))
+  
+  # Check that the formal arguments that should be numeric are numeric
+  invisible(sapply(1:length(expect_numeric), function(i){
+    check_numeric(expect_numeric[i])
+  }))
+  
+  # Check that each input directory exists
+  check_dirs(path, data_dir)
+  
+  # Check that the input file exists in the input directory
+  check_file(file.path(path, data_dir), integrated_file_nm)
   
   # Create the directory for saving the integrated data files if it doesn't already exist
   if(!dir.exists(file.path(path, out_dir))){
@@ -51,10 +78,35 @@ detect_rfid_activityBouts <- function(integrated_file_nm, threshold, run_length 
   integ_df2 <- integ_df %>% 
     dplyr::select(-c(all_of(cols2drop)))
   
-  # Check that the input data is a data frame
-  if(!is.data.frame(integ_df2)){
-    stop('The integrated data needs to be a data frame')
-  }
+  # Check that the object is a data frame
+  check_df_class(integ_df2)
+  
+  # Check that the expected columns from formal arguments are found in the data frame
+  colnames_fArgs <- f_args[grep("col", f_args)][-grep("preproc", f_args[grep("col", f_args)])]
+  
+  invisible(sapply(1:length(colnames_fArgs), function(i){
+    check_fArgs_data_cols(colnames_fArgs[i], integ_df2)
+  }))
+  
+  # Check that the expected columns from formal arguments do not have NAs
+  invisible(sapply(1:length(colnames_fArgs), function(i){
+    check_fArgs_cols_nas(colnames_fArgs[i], integ_df2)
+  }))
+  
+  # Check that date-related columns are found in the data
+  expected_cols <- c("year", "month", "day")
+  
+  invisible(sapply(1:length(expected_cols), function(i){
+    check_data_cols(expected_cols[i], integ_df2)
+  }))
+  
+  # Check that the date-related columns do not have NAs
+  invisible(sapply(1:length(expected_cols), function(i){
+    check_cols_nas(expected_cols[i], integ_df2)
+  }))
+  
+  # Check that columns with timestamps are in the right format
+  check_tstmps_cols("timestamps_col", integ_df2, "%Y-%m-%d %H:%M:%OS6")
   
   # Get the unique PIT tag IDs, which will be used below
   tag_ids <- integ_df2 %>%
