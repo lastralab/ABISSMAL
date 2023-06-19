@@ -1,21 +1,74 @@
+## Grace Smith-Vidaurre
+## 19 June 2023
 
+# General documentation for data processing and integration functions"
 
-Need to add information about the hardware setup that these functions were written for
+<style type="text/css">
 
-One beam breaker pair sits in front of an RFID antenna (outside of the container, the "outer" pair), and the other sits behind the RFID antenna (mounted for detections inside of the container, the "inner" pair). The camera records into the center of the nest container from above. 
+h1.title { /* Document title */
+  font-size: 32px;
+  color: black;
+  font-weight: normal;
+  text-align: center;
+}
 
+h1 {
+   color: #0E0E7D;
+   font-size: 26px;
+   font-weight: normal;
+}
 
-Then a description of each function
-Possibly add a function to see how much of the original detections were dropped / retained after each pre-processing and integration step?
+h2 {
+   color: #0E0E7D;
+   font-size: 24px;
+   font-weight: bold;
+}
 
+h3 { /* Document subtitle */
+   color: #0E0E7D;
+   font-size: 28px;
+   font-weight: normal;
+   text-align: center;
+}
 
-This RFID and beam breaker integration is a separate function because the way in which the sensors are set up to detect movement determines how the lag calculations and integration should be performed. In other words, it is difficult to make a general function to integrate data collected across any two types of sensors used in the tracking system. This function was written to integrate data across 1 RFID antenna and the outer pair of beam breakers mounted around the entrance of a nest container that was designed for zebra finches. For nest container entrance events, the integration is done by finding RFID timestamps that occurred within the lower to upper thresholds after the outer beam breaker. For nest container exit events, the integration is done by finding RFID timestamps that occurred within the lower to upper thresholds before the outer beam breaker. This matching is less strict than trying to find sequences of events in which the outer beam breakers, RFID antenna, and inner beam breakers triggered in that exact order (given that the way in which birds arrive or perch in the entrance can lead to variation in this expected sequence). In other words, these events will not represent perfect sequences of outer beam breakers, then RFID, then inner beam breakers triggering, but rather, RFID detections that occurred within the expected thresholds and before or after an outer beam breaker event that was already matched to an inner beam breaker even
+body{ /* Normal */
+      font-size: 20px;
+  }
+  
+code.r{ /* Code block */
+    font-size: 20px;
+}
+</style>
 
+This set of functions were written for a hardware setup in which 3 types of movement sensors are mounted around the entrance of a nest container in the following order:
 
-This function was written to integrate data across 1 RFID antenna and 1 camera mounted on a nest container. The RFID antenna sits in the middle of a circular entrance, and the camera records into the center of the nest container from above. This function integrates detections across these 2 sensor types regardless of whether or not these detections occurred during perching events captured by the RFID antenna (see `find_rfid_perching_events`). The reason for this is that some perching events may have started or ended as entrance or exit events, and it's important to retain those events at this stage. If it becomes important later to remove behavioral events that were associated with longer perching events, then this can be done by filtering out detections from the integrated dataset that overlap in time with perching events. This function uses the direction of temporal differences between the RFID and video timestamps to make inferences about entrances and exits, which can be compared to entrances and exits detected by the beam breakers. The direction of movement is "none" for RFID timestamps that occurred after the onset of video recording but were inferred to not be part of the original movement that triggered video recording
+- Outer pair of beam breakers (captures movement just outside of the nest container entrance)
+- RFID antenna (captures movement that occurs right at the nest container entrance)
+- Inner pair of beam breakers (captures movement inside the nest container, just after the nest container entrance)
+- Camera (mounted on top of the nest container, captures movement inside the nest container from inside the entrance itself to further inside of the nest container)
 
+Given the order in which these sensors are mounted, the outer pair of beam breakers and the camera should be the first and last sensors to trigger when an animal enters the nest container, respectively. When an animal leaves the nest container, this order should be inverted. However, these expectations are complicated by the fact that individuals can sit inside the circular entrance for longer periods of time (triggering not only the RFID antenna but also the beam breakers and camera with fine-scale movements), and individuals can also come in and out of the nest container with individual variation in the speed and angle at which they enter. Multiple individuals can also be inside the container, such that video recording events may be triggered by movements from more than one individual.
 
- This beam breaker and video integration is a separate function because the way in which the sensors are set up to detect movement determines how the lag calculations and integration should be performed. In other words, it is difficult to make a general function to integrate data collected across any two types of sensors used in the tracking system. This function was written to integrate data across 2 pairs of beam breakers and 1 camera mounted around the entrance of a nest container that was designed for zebra finches. This function integrates detections across these 2 sensor types regardless of whether or not these detections occurred during perching events captured by the RFID antenna (see `find_rfid_perching_events`). The reason for this is that some perching events may have started or ended as entrance or exit events, and it's important to retain those events at this stage. If it becomes important later to remove behavioral events that were associated with longer perching events, then this can be done by filtering out detections from the integrated dataset that overlap in time with perching events. Other things to note are that the assignment of beam breaker events to video events will lead to duplicated assignments when using the `temporal` method. This is the expected behavior, and most duplicates should arise from assigning beam breaker events to the remainder of the video recording duration after the "original" movement that triggered video recording (e.g. `post-motion_trigger` in the rfid_video_movement_inference column)
+The functions inside this directory were written to pre-process the raw data from each sensor and integrate data among different sensors while imposing minimal assumptions about the order in which sensors triggered. There are 4 separate data integration functions (between each pair of sensor types, and among all 3 types of sensors) because the way in which the sensors were mounted determines how temporal differences between sensors are calculated for integration. Each function was written to process data for a single experimental setup (e.g. data collected over time for 1 pair of adult birds housed in 1 recording chamber). Therefore, these functions must be implemented across experimental setups if the tracking system was used to collect data for serial or parallel experimental replicates. Note that the majority of the functions are focused on processing and integrating datasets collected by movement sensors. The raw data collected by temperature probes is combined into a single spreadsheet but is not pre-processed nor integrated with other datasets.
 
+Descriptions of each function, roughly in the order in which they should be used:
 
-Applies to all functions: This function must be executed across experimental setups if the tracking system was used to collect data for serial or parallel experimental replicates.
+1. `combine_raw_data_per_sensor`: Combine raw data collected over time into a single spreadsheet per sensor type (RFID, beam breakers, video recording events, temperature).
+
+2. `find_rfid_perching_events`: Identify bouts of perching events in the raw RFID data.
+
+3. `preprocess_detections`: Pre-process the raw data by thinning the detections collected by polling (RFID) or edge detection (beam breakers), or by using the magnitude of movement to filter detections (video).
+
+4. `label_beamBreaker_events`: Use temporal differences between pre-processed detections for the outer and inner pair of beam breakers to infer unique movement events with directionality.
+
+5. `integrate_rfid_breamBreakers`: Integrate RFID and beam breaker datasets by matching pre-processed RFID detections to outer beam breaker timestamps in the pre-processed and labeled beam breaker dataset.
+
+6. `integrate_rfid_video`: Integrate RFID and video datasets by matching pre-processed RFID detections to pre-processed video detections.
+
+7. `integrate_beamBreakers_video`: Integrate beam breaker and video detection datasets by matching inner beam breaker timestamps in the pre-processed, labeled beam breaker dataset to pre-processed video timestamps.
+
+8. `integrate_rfid_beamBreakers_video`: Integrate datasets across the three different types of movement sensors (RFID, beam breakers, video recordings). The RFID and beam breaker integration is done first (by matching the RFID and outer beam breaker timestamps). Then the video integration is performed by matching video timestamps to either the RFID timestamps or to the inner beam breaker beam breaker timestamps.
+
+9. `detect_rfid_activityBouts`: Detect bouts of RFID activity in an integrated dataset with RFID timestamps.
+
+See the documentation of each function for more details. The file `validators.R` contains utility functions that are used to check formal arguments and data in each of the functions above.
