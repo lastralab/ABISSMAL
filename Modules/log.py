@@ -17,7 +17,7 @@ def setup_custom_logger(name):
         logging.basicConfig(
             format=format_log,
             filename='/home/pi/log/' + name,
-            level=logging.DEBUG,
+            level=logging.INFO,
             datefmt="%Y-%m-%d %H:%M:%S"
         )
     else:
@@ -29,7 +29,7 @@ def setup_custom_logger(name):
         logging.basicConfig(
             format=format_log,
             filename='/home/pi/log/' + name,
-            level=logging.DEBUG,
+            level=logging.INFO,
             datefmt="%Y-%m-%d %H:%M:%S"
         )
     return logger
