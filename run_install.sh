@@ -58,7 +58,6 @@ then
 	echo -e "${Yellow}Installing packages:${NC}"
   apt-get update
   apt-get install fish
-  apt-get install libtiff5
   apt-get install build-essential tk-dev libncurses5-dev libncursesw5-dev libreadline6-dev libdb5.3-dev libgdbm-dev libsqlite3-dev libssl-dev libbz2-dev libexpat1-dev liblzma-dev zlib1g-dev libffi-dev -y
   apt-get install python3
   curl -O https://bootstrap.pypa.io/get-pip.py
@@ -78,7 +77,6 @@ then
   apt install nmap
   apt-get install -y gpac
   mv get-pip.py ../
-  pip3 install moviepy
   echo ""
 else
 	echo -e "${Yellow}Skipped.${NC}"

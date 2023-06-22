@@ -76,7 +76,7 @@ echo -e "To detach a screen press${Blue} Ctrl + A${NC} then type ${RED}:${NC} to
 echo ""
 
 echo -e "${Cyan}Enter first letter of the modules to track:${NC}"
-echo -e "${Cyan}[example:virt] ${NC}${Purple}(V/v)ideo/(R/r)fid/(I/i)rbb/(T/t)emp${NC}"
+echo -e "${Cyan}Example: virt ${NC}${Purple}(V/v)ideo/(R/r)fid/(I/i)rbb/(T/t)emp${NC}"
 read -r modules
 
 sed -i "s#^modules=.*#modules=\"$modules\"#" "${cron_path}"
