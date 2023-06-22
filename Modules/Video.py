@@ -146,7 +146,10 @@ with picamera.PiCamera() as camera:
         print('Video error: ' + str(E))
         logging.error('Video: ' + str(E))
         sms_alert('Video', 'Error: ' + str(E))
+        camera.close()
+        logger.info("Camera closed")
     finally:
         camera.stop_recording()
         camera.close()
         GPIO.output(REC_LED, GPIO.LOW)
+        logger.info("Camera closed")
