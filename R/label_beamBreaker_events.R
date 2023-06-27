@@ -20,6 +20,23 @@
 #' @return This function returns a spreadsheet in .csv format with the metadata columns from the original pre-processed data used as input, as well as columns indicating each of the timestamps of the lead and rear beam breaker pairs. The spreadsheet will also contain a unique label for the given event (e.g. entrance or exit), a unique numeric identifier for the given event, and information about the given data processing stage. Each row in the .csv file is a labeled event across the outer and inner beam breaker pairs that was inferred as a unique movement with directionality using the specified temporal thresholds.
 #' 
 
+
+# irbb_file_nm = "test_label_irbb.csv"
+# l_th = 0
+# u_th = 2
+# sensor_id_col = "sensor_id"
+# timestamps_col = "timestamps_ms"
+# outer_irbb_nm = "Outer beam breaker"
+# inner_irbb_nm = "Inner beam breaker"
+# path = "/home/gsvidaurre/Desktop"
+# data_dir = "tmp_tests"
+# out_dir = "tmp_tests"
+# out_file_nm = "labeled_beamBreaker_testData.csv"
+# tz
+# POSIXct_format = "%Y-%m-%d %H:%M:%OS"
+
+
+
 # Make a function to integrate between beam breaker pairs to infer entrance and exit movements
 label_beamBreaker_events <- function(irbb_file_nm, l_th, u_th, sensor_id_col, timestamps_col, outer_irbb_nm, inner_irbb_nm, path, data_dir, out_dir, out_file_nm = "labeled_beamBreaker_data.csv", tz, POSIXct_format = "%Y-%m-%d %H:%M:%OS"){
   
@@ -72,7 +89,7 @@ label_beamBreaker_events <- function(irbb_file_nm, l_th, u_th, sensor_id_col, ti
   preproc_data <- read.csv(file.path(path, data_dir, irbb_file_nm)) %>% 
     # Make sure that the timestamps are in the right format
     dplyr::mutate(
-      timestamp_ms = as.POSIXct(format(as.POSIXct(timestamp_ms, tz = "America/New York"), "%Y-%m-%d %H:%M:%OS6"))
+      !!timestamps_col := as.POSIXct(format(as.POSIXct(!!sym(timestamps_col), tz = "America/New York"), "%Y-%m-%d %H:%M:%OS6"))
     ) %>% 
     # Drop columns that aren't needed here
     dplyr::select(-c("thin_threshold_s", "data_stage", "date_pre_processed"))
@@ -116,7 +133,7 @@ label_beamBreaker_events <- function(irbb_file_nm, l_th, u_th, sensor_id_col, ti
 
   # Ensure the timestamps are ordered, then calculate the time lags between the two beam breaker pairs. Here this is done using the leading differences between the beam breaker pairs to identify possible entrances and exits, respectively
   preproc_data2 <- preproc_data %>% 
-    dplyr::arrange(timestamp_ms, desc = FALSE) %>%
+    dplyr::arrange(!!sym(timestamps_col), desc = FALSE) %>%
     # Add unique row IDs to facilitate widening the data frame
     rowid_to_column() %>% 
     pivot_wider(
@@ -239,17 +256,17 @@ label_beamBreaker_events <- function(irbb_file_nm, l_th, u_th, sensor_id_col, ti
     ) %>% 
     # Rename the outer beam breaker column for the metadata join below
     dplyr::rename(
-      `timestamp_ms` = !!sym(outer_irbb_nm)
+      !!timestamps_col := !!sym(outer_irbb_nm)
     ) %>% 
     # Add back the original metadata (shared between the beam breaker pairs)
     dplyr::inner_join(
       preproc_data %>%
         dplyr::select(-c("sensor_id")),
-      by = "timestamp_ms"
+      by = all_of(timestamps_col)
     ) %>%
     # Redo the renaming the outer beam breaker column
     dplyr::rename(
-      !!outer_irbb_nm := "timestamp_ms"
+      !!outer_irbb_nm := !!sym(timestamps_col)
     ) %>% 
     # Rename the beam breaker columns once more to remove spaces
     dplyr::rename(
@@ -290,10 +307,10 @@ label_beamBreaker_events <- function(irbb_file_nm, l_th, u_th, sensor_id_col, ti
         )
         
       }))
-      
+     
+      return(tmp_df)
+       
     }
-    
-    return(tmp_df)
     
   }))
   

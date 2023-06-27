@@ -29,7 +29,8 @@ check_string <- function(y){
   
   err <- paste("Expected a string but", y, "is not a string", sep = " ")
   
-  if(class(eval(base::as.symbol(y))) != "character"){
+  # if(class(eval(base::as.symbol(y))) != "character"){
+  if(class(eval(y)) != "character"){
     stop(err)
   }
   
