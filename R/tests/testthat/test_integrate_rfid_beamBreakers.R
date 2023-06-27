@@ -1,3 +1,7 @@
+
+# Here I want to test that the output is the same regardless of which sensor triggered first 
+# Then this test needs to be added to all functions that calculate lags between two different sensors (all of the integration functions). See testing label beam breakers for example code for building these tests
+
 library(tidyverse)
 
 l_th <- 0
