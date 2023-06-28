@@ -1,6 +1,6 @@
 # This test should check that entrances and exits are being captured correctly
 
-test_that("The output is the same regardless of which sensor triggered first", {
+test_that("Directional labeling is correct for entrances and exits", {
   
   # Avoid library calls and other changes to the virtual environment
   # See https://r-pkgs.org/testing-design.html
