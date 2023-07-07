@@ -27,6 +27,28 @@
 #' @return A spreadsheet in .csv format with the metadata columns from the original pre-processed data used as input, as well as columns indicating each of the timestamps of the RFID antenna, the lead and rear beam breaker pairs, a unique label for the given event (e.g. entrance or exit), a unique numeric identifier for the given event, and information about the given data processing stage. Each row in the .csv file is an RFID detection that was integrated with a labeled beam breaker event. Information about the temporal thresholds used for the integration and the date of integration is also contained in the resulting spreadsheet.
 #' 
 
+# rfid_file_nm = "test_rfid.csv"
+# irbb_file_nm = "test_irbb.csv"
+# l_th = 0
+# u_th = 2
+# sensor_id_col = "sensor_id"
+# timestamps_col = "timestamps_ms"
+# PIT_tag_col = "PIT_tag_ID"
+# outer_irbb_col = "Outer_beam_breaker"
+# inner_irbb_col = "Inner_beam_breaker"
+# irbb_event_col = "irbb_direction_inferred"
+# irbb_unique_col = "unique_entranceExit"
+# preproc_metadata_cols = c("thin_threshold_s")
+# general_metadata_cols = c("chamber_id", "year", "month", "day")
+# path = "/home/gsvidaurre/Desktop"
+# integrate_perching = FALSE
+# data_dir = "tmp_tests"
+# out_dir = "tmp_tests"
+# out_file_nm = "integ_rfid_beamBreaker_testData.csv"
+# tz = "America/New York"
+# POSIXct_format = "%Y-%m-%d %H:%M:%OS"
+
+
 integrate_rfid_beamBreakers <- function(rfid_file_nm, irbb_file_nm, l_th, u_th, sensor_id_col, timestamps_col, PIT_tag_col, outer_irbb_col, inner_irbb_col, irbb_event_col, irbb_unique_col, preproc_metadata_cols, general_metadata_cols, integrate_perching, path, data_dir, out_dir, out_file_nm = "integrated_rfid_beamBreaker_data.csv", tz, POSIXct_format = "%Y-%m-%d %H:%M:%OS"){
   
   # Get the current global options
@@ -35,18 +57,12 @@ integrate_rfid_beamBreakers <- function(rfid_file_nm, irbb_file_nm, l_th, u_th, 
   # Set the number of digits for visualization. Under the hood there is full precision, but this helps for visual confirmation of decimal seconds
   options("digits.secs" = 6)
   
-  # Get the formal arguments from the current function
-  # TKTK try substituting the function name with: match.call()[[1]]
-  f_args <- methods::formalArgs(integrate_rfid_beamBreakers)
+  # Get the user-specified values for each formal argument of the current function
+  f_args <- getFunctionParameters()
   
-  # Check that the formal arguments were all specified
+  # Check that the formal arguments were all specified, and are not NULL or NA
   invisible(sapply(1:length(f_args), function(i){
     check_defined(f_args[i])
-  }))
-  
-  # Check that the formal arguments that should not be NULL
-  invisible(sapply(1:length(f_args), function(i){
-    check_null(f_args[i])
   }))
   
   # Check that the formal arguments that should be strings are strings
@@ -54,20 +70,20 @@ integrate_rfid_beamBreakers <- function(rfid_file_nm, irbb_file_nm, l_th, u_th, 
   
   expect_bool <- c("integrate_perching")
   
-  expect_strings <- f_args[-grep(paste(paste("^", c(expect_numeric, expect_bool), "$", sep = ""), collapse = "|"), f_args)]
+  expect_strings <- f_args[-grep(paste(paste("^", c(expect_numeric, expect_bool), "$", sep = ""), collapse = "|"), names(f_args))]
   
   invisible(sapply(1:length(expect_strings), function(i){
-    check_string(expect_strings[i])
+    check_string(expect_strings[[i]])
   }))
   
   # Check that the formal arguments that should be numeric are numeric
   invisible(sapply(1:length(expect_numeric), function(i){
-    check_numeric(expect_numeric[i])
+    check_numeric(f_args[[grep(paste(paste("^", expect_numeric[i], "$", sep = ""), collapse = "|"), names(f_args))]])
   }))
   
   # Check that the formal arguments that should be Boolean are Boolean
   invisible(sapply(1:length(expect_bool), function(i){
-    check_boolean(expect_bool[i])
+    check_boolean(f_args[[grep(paste(paste("^", expect_bool[i], "$", sep = ""), collapse = "|"), names(f_args))]])
   }))
   
   # Check that the input directory exists
@@ -113,18 +129,18 @@ integrate_rfid_beamBreakers <- function(rfid_file_nm, irbb_file_nm, l_th, u_th, 
   check_df_class(labeled_irbb2)
   
   # Check that the expected columns from formal arguments are found in each data frame
-  colnames_fArgs <- f_args[grep("col", f_args)][-grep("preproc_metadata_cols", f_args[grep("col", f_args)])]
+  colnames_fArgs <- f_args[grep("col", names(f_args))][-grep("preproc_metadata_cols", names(f_args[grep("col", names(f_args))]))]
   
-  rfid_expected_cols <- colnames_fArgs[grep(paste(c("sensor", "time", "PIT"), collapse = "|"), colnames_fArgs)]
+  rfid_expected_cols <- colnames_fArgs[grep(paste(c("sensor", "time", "PIT"), collapse = "|"), names(colnames_fArgs))]
   
-  irbb_expected_cols <- colnames_fArgs[-grep(paste(rfid_expected_cols, collapse = "|"), colnames_fArgs)]
+  irbb_expected_cols <- colnames_fArgs[-grep(paste(names(rfid_expected_cols), collapse = "|"), names(colnames_fArgs))]
   
   invisible(sapply(1:length(rfid_expected_cols), function(i){
-    check_fArgs_data_cols(rfid_expected_cols[i], preproc_rfid2)
+    check_fArgs_data_cols(rfid_expected_cols[[i]], preproc_rfid2)
   }))
   
   invisible(sapply(1:length(irbb_expected_cols), function(i){
-    check_fArgs_data_cols(irbb_expected_cols[i], labeled_irbb2)
+    check_fArgs_data_cols(irbb_expected_cols[[i]], labeled_irbb2)
   }))
   
   # Also do this check for their earlier version of the beam breaker events that will be used for writing out general metadata
@@ -134,11 +150,11 @@ integrate_rfid_beamBreakers <- function(rfid_file_nm, irbb_file_nm, l_th, u_th, 
 
   # Check that the expected columns from formal arguments do not have NAs
   invisible(sapply(1:length(rfid_expected_cols), function(i){
-    check_fArgs_cols_nas(rfid_expected_cols[i], preproc_rfid2)
+    check_fArgs_cols_nas(rfid_expected_cols[[i]], preproc_rfid2)
   }))
   
   invisible(sapply(1:length(irbb_expected_cols), function(i){
-    check_fArgs_cols_nas(irbb_expected_cols[i], labeled_irbb2)
+    check_fArgs_cols_nas(irbb_expected_cols[[i]], labeled_irbb2)
   }))
   
   # Check that date-related columns are found in the data

@@ -1,36 +1,64 @@
 # General purpose functions to run checks within customized data processing functions
 
+################## Get user-specified values for formal arguments ##################
+
+# Modified from https://stackoverflow.com/questions/66329835/how-to-get-all-parameters-passed-into-a-function-with-their-values
+
+getFunctionParameters <- function() {
+  
+  # Get the environment in which the function was called
+  pf <- parent.frame()      
+  
+  errTest <- try({eval(quote(list(...)), envir = pf)}, silent = TRUE)
+  
+  if(any(grepl("error", attributes(errTest)$class))){
+    
+    # Get the names of arguments
+    nms <- sapply(ls(envir = pf, sorted = FALSE), as.name)
+    
+    # Get all user-specified values for arguments
+    res <- c(lapply(nms, eval, envir = pf))
+    
+  } else {
+    
+    # Get the ... from the call
+    dots <- eval(quote(list(...)), envir = pf)
+    
+    # Get the names of arguments that are not in the ...
+    nms <- sapply(ls(envir = pf, sorted = FALSE), as.name)
+    
+    # Get all user-specified values for arguments
+    res <- c(lapply(nms, eval, envir = pf), dots)
+    
+  }
+  
+  # Then remove any values without names
+  res <- res[names(res) != ""]
+  
+  # Also remove orig_opts arguments, retain arguments for the function only
+  res[-grep("orig_opts", names(res))]
+  
+}
+
+
 ############################## Formal arguments ####################################
 
 check_defined <- function(y){
 
-  err <- paste(y, "must be specified", sep = " ")
+  err <- paste(y, "must be specified, and cannot be NULL or NA", sep = " ")
   
-  if(!exists(noquote(y))){
+  if(is.null(y) | is.na(y) & y != ""){
     stop(err)
   }
   
 }
-
-# Check that the formal arguments are not NULL
-check_null <- function(y){
-  
-  err <- paste(y, "must be specified", sep = " ")
-  
-  if(is.null(eval(base::as.symbol(y)))){
-    stop(err)
-  }
-  
-}
-
 
 # Check that arguments are strings
 check_string <- function(y){
   
   err <- paste("Expected a string but", y, "is not a string", sep = " ")
   
-  # if(class(eval(base::as.symbol(y))) != "character"){
-  if(class(eval(y)) != "character"){
+  if(class(y) != "character"){
     stop(err)
   }
   
@@ -41,7 +69,7 @@ check_numeric <- function(y){
   
   err <- paste("Expected a numeric value but", y, "is not numeric", sep = " ")
   
-  if(class(eval(base::as.symbol(y))) != "numeric"){
+  if(class(y) != "numeric"){
     stop(err)
   }
   
@@ -53,7 +81,7 @@ check_boolean <- function(y){
   
   err <- paste("Expected a Boolean value but", y, "is not Boolean", sep = " ")
   
-  if(class(eval(base::as.symbol(y))) != "logical"){
+  if(class(y) != "logical"){
     stop(err)
   }
   
@@ -64,7 +92,7 @@ check_NA <- function(y){
   
   err <- paste("Expected an NA value but", y, "is not NA", sep = " ")
   
-  if(!is.na(eval(base::as.symbol(y)))){
+  if(!is.na(y)){
     stop(err)
   }
   
@@ -132,23 +160,21 @@ check_df_class <- function(df){
 # Check that a data frame has each column in a vector of columns specified in the formal arguments
 check_fArgs_data_cols <- function(y, df){
   
-  tmp_cols <- eval(base::as.symbol(y))
-  
-  if(length(tmp_cols) == 1){
-    
-    err <- paste("The column", tmp_cols, "was not found in the data frame", sep = " ")
-    
-    if(!tmp_cols %in% names(df)){
+  if(length(y) == 1){
+     
+      err <- paste("The column", y, "was not found in the data frame", sep = " ")
+      
+    if(!y %in% names(df)){
       stop(err)
     }
     
-  } else if(length(tmp_cols) > 1){
+  } else if(length(y) > 1){
     
-    sapply(1:length(tmp_cols), function(z){
+    sapply(1:length(y), function(z){
       
-      err <- paste("The column", tmp_cols[z], "was not found in the data frame", sep = " ")
+      err <- paste("The column", y[z], "was not found in the data frame", sep = " ")
       
-      if(!tmp_cols[z] %in% names(df)){
+      if(!y[z] %in% names(df)){
         stop(err)
       }
       
@@ -171,23 +197,21 @@ check_data_cols <- function(y, df){
 # Check that a given column from the formal arguments does not have NAs 
 check_fArgs_cols_nas <- function(y, df){
   
-  tmp_cols <- eval(base::as.symbol(y))
-  
-  if(length(tmp_cols) == 1){
+  if(length(y) == 1){
     
-    err <- paste("The column", tmp_cols, "has NA (missing) values", sep = " ")
+    err <- paste("The column", y, "has NA (missing) values", sep = " ")
     
-    if(any(is.na(df[[tmp_cols]]))){
+    if(any(is.na(df[[y]]))){
       stop(err)
     }
     
-  } else if(length(tmp_cols) > 1){
+  } else if(length(y) > 1){
     
-    sapply(1:length(tmp_cols), function(z){
+    sapply(1:length(y), function(z){
       
-      err <- paste("The column", tmp_cols[z], "has NA (missing) values", sep = " ")
+      err <- paste("The column", y[z], "has NA (missing) values", sep = " ")
       
-      if(any(is.na(df[[tmp_cols[z]]]))){
+      if(any(is.na(df[[y[z]]]))){
         stop(err)
       }
       
@@ -211,23 +235,21 @@ check_cols_nas <- function(y, df){
 # Check that any timestamps columns from the formal arguments are in the right format. This conditional also catches NAs in timestamps
 check_tstmps_cols <- function(y, df, format){
   
-  tmp_cols <- eval(base::as.symbol(y))
-  
-  if(length(tmp_cols) == 1){
+  if(length(y) == 1){
     
-    err <- paste("The column", tmp_cols, "needs to be in a format compatible with temporal calculations", sep = " ")
+    err <- paste("The column", y, "needs to be in a format compatible with temporal calculations", sep = " ")
     
-    if(any(is.na(as.POSIXct(df[[tmp_cols]], format = format)))){
+    if(any(is.na(as.POSIXct(df[[y]], format = format)))){
       stop(err)
     }
     
-  } else if(length(tmp_cols) > 1){
+  } else if(length(y) > 1){
     
-    sapply(1:length(tmp_cols), function(z){
+    sapply(1:length(y), function(z){
       
-      err <- paste("The column", tmp_cols[z], "needs to be in a format compatible with temporal calculations", sep = " ")
+      err <- paste("The column", y[z], "needs to be in a format compatible with temporal calculations", sep = " ")
       
-      if(any(is.na(as.POSIXct(df[[tmp_cols[z]]], format = format)))){
+      if(any(is.na(as.POSIXct(df[[y[z]]], format = format)))){
         stop(err)
       }
       
