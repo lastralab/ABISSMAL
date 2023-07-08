@@ -38,18 +38,12 @@ integrate_beamBreakers_video <- function(irbb_file_nm, video_file_nm, l_th, u_th
   # Set the number of digits for visualization. Under the hood there is full precision, but this helps for visual confirmation of decimal seconds
   options("digits.secs" = 6)
   
-  # Get the formal arguments from the current function
-  # TKTK try substituting the function name with: match.call()[[1]]
-  f_args <- methods::formalArgs(integrate_beamBreakers_video)
+  # Get the user-specified values for each formal argument of the current function
+  f_args <- getFunctionParameters()
   
-  # Check that the formal arguments were all specified
+  # Check that the formal arguments were all specified, and are not NULL or NA
   invisible(sapply(1:length(f_args), function(i){
     check_defined(f_args[i])
-  }))
-  
-  # Check that the formal arguments that should not be NULL
-  invisible(sapply(1:length(f_args), function(i){
-    check_null(f_args[i])
   }))
   
   # Check that the formal arguments that should be strings are strings
@@ -59,21 +53,21 @@ integrate_beamBreakers_video <- function(irbb_file_nm, video_file_nm, l_th, u_th
   
   if(devices_integrated == "two"){
     
-    expect_na <- f_args[grep("extra", f_args)]
+    expect_na <- f_args[grep("extra", names(f_args))]
     
-    expect_strings <- f_args[-grep(paste(paste("^", c(expect_numeric, expect_bool, expect_na), "$", sep = ""), collapse = "|"), f_args)]
+    expect_strings <- f_args[-grep(paste(paste("^", c(expect_numeric, expect_bool, expect_na), "$", sep = ""), collapse = "|"), names(f_args))]
     
     # Check that the extracols2drop argument is NA
-    check_NA(expect_na)
+    check_NA(unlist(expect_na))
     
   } else if(devices_integrated == "three"){
     
-    expect_strings <- f_args[-grep(paste(paste("^", c(expect_numeric, expect_bool), "$", sep = ""), collapse = "|"), f_args)]
+    expect_strings <- f_args[-grep(paste(paste("^", c(expect_numeric, expect_bool), "$", sep = ""), collapse = "|"), names(f_args))]
     
   }
   
   invisible(sapply(1:length(expect_strings), function(i){
-    check_string(expect_strings[i])
+    check_numeric(f_args[[grep(paste(paste("^", expect_numeric[i], "$", sep = ""), collapse = "|"), names(f_args))]])
   }))
   
   # Check that the formal arguments that should be numeric are numeric
@@ -83,7 +77,7 @@ integrate_beamBreakers_video <- function(irbb_file_nm, video_file_nm, l_th, u_th
   
   # Check that the formal arguments that should be Boolean are Boolean
   invisible(sapply(1:length(expect_bool), function(i){
-    check_boolean(expect_bool[i])
+    check_boolean(f_args[[grep(paste(paste("^", expect_bool[i], "$", sep = ""), collapse = "|"), names(f_args))]])
   }))
   
   # Check that the input directory exists
@@ -141,18 +135,18 @@ integrate_beamBreakers_video <- function(irbb_file_nm, video_file_nm, l_th, u_th
   check_df_class(preproc_video2)
   
   # Check that the expected columns from formal arguments are found in each data frame
-  colnames_fArgs <- f_args[grep("col", f_args)][-grep("preproc|general|extra|metadata", f_args[grep("col", f_args)])]
+  colnames_fArgs <- f_args[grep("col", names(f_args))][-grep("preproc|general|extra|metadata", names(f_args[grep("col", names(f_args))]))]
   
-  video_expected_cols <- colnames_fArgs[grep(paste(c("sensor", "time"), collapse = "|"), colnames_fArgs)]
+  video_expected_cols <- colnames_fArgs[grep(paste(c("sensor", "time"), collapse = "|"), names(colnames_fArgs))]
   
-  irbb_expected_cols <- colnames_fArgs[-grep(paste(video_expected_cols, collapse = "|"), colnames_fArgs)]
+  irbb_expected_cols <- colnames_fArgs[-grep(paste(video_expected_cols, collapse = "|"), names(colnames_fArgs))]
   
   invisible(sapply(1:length(irbb_expected_cols), function(i){
-    check_fArgs_data_cols(irbb_expected_cols[i], labeled_irbb2)
+    check_fArgs_data_cols(irbb_expected_cols[[i]], labeled_irbb2)
   }))
   
   invisible(sapply(1:length(video_expected_cols), function(i){
-    check_fArgs_data_cols(video_expected_cols[i], preproc_video2)
+    check_fArgs_data_cols(video_expected_cols[[i]], preproc_video2)
   }))
   
   # Also do this check for their earlier version of the video data that will be used for writing out general metadata
@@ -164,11 +158,11 @@ integrate_beamBreakers_video <- function(irbb_file_nm, video_file_nm, l_th, u_th
   
   # Check that the expected columns from formal arguments do not have NAs
   invisible(sapply(1:length(irbb_expected_cols), function(i){
-    check_fArgs_cols_nas(irbb_expected_cols[i], labeled_irbb2)
+    check_fArgs_cols_nas(irbb_expected_cols[[i]], labeled_irbb2)
   }))
   
   invisible(sapply(1:length(video_expected_cols), function(i){
-    check_fArgs_cols_nas(video_expected_cols[i], preproc_video2)
+    check_fArgs_cols_nas(video_expected_cols[[i]], preproc_video2)
   }))
   
   # Check that date-related columns are found in the data
