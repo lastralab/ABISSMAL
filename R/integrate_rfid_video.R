@@ -34,18 +34,12 @@ integrate_rfid_video <- function(rfid_file_nm, video_file_nm, l_th, u_th, video_
   # Set the number of digits for visualization. Under the hood there is full precision, but this helps for visual confirmation of decimal seconds
   options("digits.secs" = 6)
   
-  # Get the formal arguments from the current function
-  # TKTK try substituting the function name with: match.call()[[1]]
-  f_args <- methods::formalArgs(integrate_rfid_video)
+  # Get the user-specified values for each formal argument of the current function
+  f_args <- getFunctionParameters()
   
-  # Check that the formal arguments were all specified
+  # Check that the formal arguments were all specified, and are not NULL or NA
   invisible(sapply(1:length(f_args), function(i){
     check_defined(f_args[i])
-  }))
-  
-  # Check that the formal arguments that should not be NULL
-  invisible(sapply(1:length(f_args), function(i){
-    check_null(f_args[i])
   }))
   
   # Check that the formal arguments that should be strings are strings
@@ -55,31 +49,31 @@ integrate_rfid_video <- function(rfid_file_nm, video_file_nm, l_th, u_th, video_
   
   if(devices_integrated == "two"){
     
-    expect_na <- f_args[grep("extra", f_args)]
+    expect_na <- f_args[grep("extra", names(f_args))]
     
-    expect_strings <- f_args[-grep(paste(paste("^", c(expect_numeric, expect_bool, expect_na), "$", sep = ""), collapse = "|"), f_args)]
+    expect_strings <- f_args[-grep(paste(paste("^", c(expect_numeric, expect_bool, expect_na), "$", sep = ""), collapse = "|"), names(f_args))]
     
     # Check that the extracols2drop argument is NA
-    check_NA(expect_na)
+    check_NA(unlist(expect_na))
     
   } else if(devices_integrated == "three"){
     
-    expect_strings <- f_args[-grep(paste(paste("^", c(expect_numeric, expect_bool), "$", sep = ""), collapse = "|"), f_args)]
+    expect_strings <- f_args[-grep(paste(paste("^", c(expect_numeric, expect_bool), "$", sep = ""), collapse = "|"), names(f_args))]
     
   }
   
   invisible(sapply(1:length(expect_strings), function(i){
-    check_string(expect_strings[i])
+    check_string(expect_strings[[i]])
   }))
   
   # Check that the formal arguments that should be numeric are numeric
   invisible(sapply(1:length(expect_numeric), function(i){
-    check_numeric(expect_numeric[i])
+    check_numeric(f_args[[grep(paste(paste("^", expect_numeric[i], "$", sep = ""), collapse = "|"), names(f_args))]])
   }))
   
   # Check that the formal arguments that should be Boolean are Boolean
   invisible(sapply(1:length(expect_bool), function(i){
-    check_boolean(expect_bool[i])
+    check_boolean(f_args[[grep(paste(paste("^", expect_bool[i], "$", sep = ""), collapse = "|"), names(f_args))]])
   }))
   
   # Check that the input directory exists
@@ -185,11 +179,11 @@ integrate_rfid_video <- function(rfid_file_nm, video_file_nm, l_th, u_th, video_
   }))
   
   # Check that columns with timestamps are in the right format
-  tstmps_cols <- f_args[grep("time", f_args)]
+  tstmps_cols <- f_args[grep("time", names(f_args))]
   
-  check_tstmps_cols(tstmps_cols, preproc_rfid2, "%Y-%m-%d %H:%M:%OS6")
+  check_tstmps_cols(unlist(tstmps_cols), preproc_rfid2, "%Y-%m-%d %H:%M:%OS6")
   
-  check_tstmps_cols(tstmps_cols, preproc_video2, "%Y-%m-%d %H:%M:%OS6")
+  check_tstmps_cols(unlist(tstmps_cols), preproc_video2, "%Y-%m-%d %H:%M:%OS6")
   
   # Group the RFID data frame
   rfid_df_tmp <- preproc_rfid2 %>%
