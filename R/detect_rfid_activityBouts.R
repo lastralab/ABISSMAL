@@ -27,31 +27,25 @@ detect_rfid_activityBouts <- function(integrated_file_nm, threshold, run_length 
   # Set the number of digits for visualization. Under the hood there is full precision, but this helps for visual confirmation of decimal seconds
   options("digits.secs" = 6)
   
-  # Get the formal arguments from the current function
-  # TKTK try substituting the function name with: match.call()[[1]]
-  f_args <- methods::formalArgs(detect_rfid_activityBouts)
+  # Get the user-specified values for each formal argument of the current function
+  f_args <- getFunctionParameters()
   
-  # Check that the formal arguments were all specified
+  # Check that the formal arguments were all specified, and are not NULL or NA
   invisible(sapply(1:length(f_args), function(i){
     check_defined(f_args[i])
   }))
   
-  # Check that the formal arguments are not NULL
-  invisible(sapply(1:length(f_args), function(i){
-    check_null(f_args[i])
-  }))
-  
   # Check that the formal arguments that should be strings are strings
   expect_numeric <- c("threshold", "run_length")
-  expect_strings <- f_args[-grep(paste(paste("^", expect_numeric, "$", sep = ""), collapse = "|"), f_args)]
+  expect_strings <- f_args[-grep(paste(paste("^", expect_numeric, "$", sep = ""), collapse = "|"), names(f_args))]
   
   invisible(sapply(1:length(expect_strings), function(i){
-    check_string(expect_strings[i])
+    check_string(expect_strings[[i]])
   }))
   
   # Check that the formal arguments that should be numeric are numeric
   invisible(sapply(1:length(expect_numeric), function(i){
-    check_numeric(expect_numeric[i])
+    check_numeric(f_args[[grep(paste(paste("^", expect_numeric[i], "$", sep = ""), collapse = "|"), names(f_args))]])
   }))
   
   # Check that each input directory exists
@@ -82,15 +76,15 @@ detect_rfid_activityBouts <- function(integrated_file_nm, threshold, run_length 
   check_df_class(integ_df2)
   
   # Check that the expected columns from formal arguments are found in the data frame
-  colnames_fArgs <- f_args[grep("col", f_args)][-grep("preproc", f_args[grep("col", f_args)])]
+  colnames_fArgs <- f_args[grep("col", names(f_args))][-grep("preproc", names(f_args[grep("col", names(f_args))]))]
   
   invisible(sapply(1:length(colnames_fArgs), function(i){
-    check_fArgs_data_cols(colnames_fArgs[i], integ_df2)
+    check_fArgs_data_cols(colnames_fArgs[[i]], integ_df2)
   }))
   
   # Check that the expected columns from formal arguments do not have NAs
   invisible(sapply(1:length(colnames_fArgs), function(i){
-    check_fArgs_cols_nas(colnames_fArgs[i], integ_df2)
+    check_fArgs_cols_nas(colnames_fArgs[[i]], integ_df2)
   }))
   
   # Check that date-related columns are found in the data
