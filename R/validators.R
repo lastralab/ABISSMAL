@@ -98,6 +98,17 @@ check_NA <- function(y){
   
 }
 
+# Check that arguments are not NULL
+check_null <- function(y){
+  
+  err <- paste("Expected a non-NULL value but", y, "is NULL", sep = " ")
+  
+  if(is.null(y)){
+    stop(err)
+  }
+  
+}
+
 # Check that sensor arguments are written as expected
 check_sensor_spelling <- function(y){
   
