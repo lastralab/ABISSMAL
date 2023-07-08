@@ -10,8 +10,14 @@
 #' @details This function iterates over sensor types to combine the raw data from one experimental setup into a single spreadsheet in .csv format per sensor type. For each sensor type, all raw data collected using the `Abissmal` tracking system throughout the course of an experiment will be concatenated into a single spreadsheet. The raw data is not modified during this processing aside from changing the timestamp format to be compatible with lag difference calculations. The original raw data is not modified or deleted.
 #' 
 #' @return A .csv file with the raw data collected across dates for each sensor type, as well as all metadata collected by each sensor. Each row of each .csv file is a detection in the raw data collected by the given sensor type.
+#' 
+# sensors = c("IRBB", "RFID", "Video", "Temp")
+# path = path
+# out_dir = "raw_combined"
+# tz = "America/New York"
+# POSIXct_format = "%Y-%m-%d %H:%M:%OS"
 
-combine_raw_data_per_sensor <- function(sensors = c("IRBB", "RFID", "Video", "Temp"), path, out_dir, tz, POSIXct_format = "%Y-%m-%d %H:%M:%OS"){
+combine_raw_data_per_sensor <- function(sensors = c("IRBB", "RFID", "Video", "Temp"), path, data_dir, out_dir, tz, POSIXct_format = "%Y-%m-%d %H:%M:%OS"){
   
   # Get the current global options
   orig_opts <- options()
@@ -36,15 +42,12 @@ combine_raw_data_per_sensor <- function(sensors = c("IRBB", "RFID", "Video", "Te
   
   # Check that each input directory exists
   invisible(sapply(1:length(sensors), function(i){
-    check_dirs(path, sensors[i])
+    check_dirs(file.path(path, data_dir), sensors[i])
   }))
-  
-  # Get all the files per the given sensor type (e.g. 1 file per day)
-  files <- list.files(file.path(path, sensors[x]), pattern = paste(sensors[x], "*", sep = "_"), full.names = TRUE)
   
   # Check that the input directories have raw data files
   invisible(sapply(1:length(sensors), function(i){
-    check_dir_notEmpty(file.path(path, sensors[i]), paste(paste(sensors[x], "*", sep = "_"), "*.csv$", sep = ""))
+    check_dir_notEmpty(file.path(path, data_dir, sensors[i]), ".csv$")
   }))
   
   # Create the directory for saving the output files if it doesn't already exist
@@ -54,9 +57,9 @@ combine_raw_data_per_sensor <- function(sensors = c("IRBB", "RFID", "Video", "Te
 
   # Iterate over sensors to read in data across files for each sensor, and write out a .csv file of the combined raw data
   invisible(lapply(1:length(sensors), function(x){
-
+    
     # Get all the files per the given sensor type (e.g. 1 file per day)
-    files <- list.files(file.path(path, sensors[x]), pattern = paste(sensors[x], "*", sep = "_"), full.names = TRUE)
+    files <- list.files(file.path(path, data_dir, sensors[x]), pattern = paste(sensors[x], "*", sep = "_"), full.names = TRUE)
     
     # Combine data across files into a single data frame
     raw_data <- rbindlist(lapply(1:length(files), function(i){
