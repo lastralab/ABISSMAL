@@ -139,7 +139,7 @@ check_dir_notEmpty <- function(path, pattern){
   
   err <- paste("The directory", path, "does not have", pattern, "files", sep = " ")
   
-  if(!list.files(path, pattern)){
+  if(length(list.files(path, pattern)) == 0){
     stop(err)
   }
   
