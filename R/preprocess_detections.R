@@ -25,11 +25,10 @@ preprocess_detections <- function(sensor, timestamps_col, group_col_nm = NULL, p
   # Set the number of digits for visualization. Under the hood there is full precision, but this helps for visual confirmation of decimal seconds
   options("digits.secs" = 6)
   
-  # Get the formal arguments from the current function
-  # TKTK try substituting the function name with: match.call()[[1]]
-  f_args <- methods::formalArgs(preprocess_detections)
+  # Get the user-specified values for each formal argument of the current function
+  f_args <- getFunctionParameters()
   
-  # Check that the formal arguments were all specified
+  # Check that the formal arguments were all specified, and are not NULL or NA
   invisible(sapply(1:length(f_args), function(i){
     check_defined(f_args[i])
   }))
@@ -40,7 +39,7 @@ preprocess_detections <- function(sensor, timestamps_col, group_col_nm = NULL, p
     expect_nonNull <- f_args
     
     invisible(sapply(1:length(expect_nonNull), function(i){
-      check_null(expect_nonNull[i])
+      check_null(expect_nonNull[[i]])
     }))
     
   } else {
@@ -55,10 +54,10 @@ preprocess_detections <- function(sensor, timestamps_col, group_col_nm = NULL, p
       
     }
     
-    expect_nonNull <- f_args[-grep(paste(paste("^", expect_null, "$", sep = ""), collapse = "|"), f_args)]
+    expect_nonNull <- f_args[-grep(paste(paste("^", expect_null, "$", sep = ""), collapse = "|"), names(f_args))]
     
     invisible(sapply(1:length(expect_nonNull), function(i){
-      check_null(expect_nonNull[i])
+      check_null(expect_nonNull[[i]])
     }))
     
   }
@@ -74,22 +73,22 @@ preprocess_detections <- function(sensor, timestamps_col, group_col_nm = NULL, p
     
   }
   
-  expect_strings <- f_args[-grep(paste(paste("^", expect_numeric, "$", sep = ""), collapse = "|"), f_args)]
+  expect_strings <- f_args[-grep(paste(paste("^", expect_numeric, "$", sep = ""), collapse = "|"), names(f_args))]
   
   # Remove any columns that should be NULL
   if(length(expect_null) > 0){
     
-    expect_strings <- expect_strings[-grep(paste(paste("^", expect_null, "$", sep = ""), collapse = "|"), expect_strings)]
+    expect_strings <- expect_strings[-grep(paste(paste("^", expect_null, "$", sep = ""), collapse = "|"), names(expect_strings))]
       
   }
   
   invisible(sapply(1:length(expect_strings), function(i){
-    check_string(expect_strings[i])
+    check_string(expect_strings[[i]])
   }))
   
   # Check that the formal arguments that should be numeric are numeric
   invisible(sapply(1:length(expect_numeric), function(i){
-    check_numeric(expect_numeric[i])
+    check_numeric(f_args[[grep(paste(paste("^", expect_numeric[i], "$", sep = ""), collapse = "|"), names(f_args))]])
   }))
   
   # Check that the sensor argument was written correctly
@@ -119,15 +118,15 @@ preprocess_detections <- function(sensor, timestamps_col, group_col_nm = NULL, p
   check_df_class(raw_data)
   
   # Check that the expected columns from formal arguments are found in the data
-  expected_cols <- f_args[grep("col", f_args)]
+  expected_cols <- f_args[grep("col", names(f_args))]
   
   invisible(sapply(1:length(expected_cols), function(i){
-    check_fArgs_data_cols(expected_cols[i], raw_data)
+    check_fArgs_data_cols(expected_cols[[i]], raw_data)
   }))
   
   # Check that the expected columns from formal arguments do not have NAs
   invisible(sapply(1:length(expected_cols), function(i){
-    check_fArgs_cols_nas(expected_cols[i], raw_data)
+    check_fArgs_cols_nas(expected_cols[[i]], raw_data)
   }))
   
   # Check that date-related columns are found in the data
@@ -143,10 +142,10 @@ preprocess_detections <- function(sensor, timestamps_col, group_col_nm = NULL, p
   }))
   
   # Check that columns with timestamps are in the right format
-  tstmps_cols <- f_args[grep("time", f_args)]
+  tstmps_cols <- f_args[grep("time", names(f_args))]
   
   invisible(sapply(1:length(tstmps_cols), function(i){
-    check_tstmps_cols(tstmps_cols[i], raw_data, "%Y-%m-%d %H:%M:%OS6")
+    check_tstmps_cols(tstmps_cols[[i]], raw_data, "%Y-%m-%d %H:%M:%OS6")
   }))
   
   if(grepl("RFID|IRBB", sensor)){
