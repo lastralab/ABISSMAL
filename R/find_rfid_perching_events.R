@@ -28,35 +28,29 @@ find_rfid_perching_events <- function(rfid_file_nm, threshold, run_length = 2, s
   # Set the number of digits for visualization. Under the hood there is full precision, but this helps for visual confirmation of decimal seconds
   options("digits.secs" = 6)
   
-  # Get the formal arguments from the current function
-  # TKTK try substituting the function name with: match.call()[[1]]
-  f_args <- methods::formalArgs(find_rfid_perching_events)
+  # Get the user-specified values for each formal argument of the current function
+  f_args <- getFunctionParameters()
   
-  # Check that the formal arguments were all specified
+  # Check that the formal arguments were all specified, and are not NULL or NA
   invisible(sapply(1:length(f_args), function(i){
     check_defined(f_args[i])
   }))
-  
-  # Check that the formal arguments are not NULL
-  invisible(sapply(1:length(f_args), function(i){
-    check_null(f_args[i])
-  }))
-  
+
   # Check that the formal arguments that should be strings are strings
   expect_numeric <- c("threshold", "run_length")
-  expect_strings <- f_args[-grep(paste(paste("^", expect_numeric, "$", sep = ""), collapse = "|"), f_args)]
+  expect_strings <- f_args[-grep(paste(paste("^", expect_numeric, "$", sep = ""), collapse = "|"), names(f_args))]
   
   invisible(sapply(1:length(expect_strings), function(i){
-    check_string(expect_strings[i])
+    check_string(expect_strings[[i]])
   }))
   
   # Check that the formal arguments that should be numeric are numeric
   invisible(sapply(1:length(expect_numeric), function(i){
-    check_numeric(expect_numeric[i])
+    check_numeric(f_args[[grep(paste(paste("^", expect_numeric[i], "$", sep = ""), collapse = "|"), names(f_args))]])
   }))
   
   # Check that each input directory exists
-  check_dirs(data_path, data_dir)
+  check_dirs(path, data_dir)
   
   # Check that the input file exists in the input directory
   check_file(file.path(path, data_dir), rfid_file_nm)
@@ -77,15 +71,15 @@ find_rfid_perching_events <- function(rfid_file_nm, threshold, run_length = 2, s
   check_df_class(preproc_rfid)
   
   # Check that the expected columns from formal arguments are found in the data
-  expected_cols <- f_args[grep("col", f_args)]
+  expected_cols <- f_args[grep("col", names(f_args))]
   
   invisible(sapply(1:length(expected_cols), function(i){
-    check_fArgs_data_cols(expected_cols[i], preproc_rfid)
+    check_fArgs_data_cols(expected_cols[[i]], preproc_rfid)
   }))
   
   # Check that the expected columns from formal arguments do not have NAs
   invisible(sapply(1:length(expected_cols), function(i){
-    check_fArgs_cols_nas(expected_cols[i], preproc_rfid)
+    check_fArgs_cols_nas(expected_cols[[i]], preproc_rfid)
   }))
   
   # Check that date-related columns are found in the data
@@ -101,10 +95,10 @@ find_rfid_perching_events <- function(rfid_file_nm, threshold, run_length = 2, s
   }))
   
   # Check that columns with timestamps are in the right format
-  tstmps_cols <- f_args[grep("time", f_args)]
+  tstmps_cols <- f_args[grep("time", names(f_args))]
   
   invisible(sapply(1:length(tstmps_cols), function(i){
-    check_tstmps_cols(tstmps_cols[i], preproc_rfid, "%Y-%m-%d %H:%M:%OS6")
+    check_tstmps_cols(tstmps_cols[[i]], preproc_rfid, "%Y-%m-%d %H:%M:%OS6")
   }))
   
   # Group the RFID data frame by PIT tag ID and day. Otherwise the logic below ends up including the last event of a day and the first of the next day as the start and end indices, which leads to strangely long perching periods sometimes
