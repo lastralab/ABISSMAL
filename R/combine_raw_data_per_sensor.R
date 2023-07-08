@@ -19,24 +19,19 @@ combine_raw_data_per_sensor <- function(sensors = c("IRBB", "RFID", "Video", "Te
   # Set the number of digits for visualization. Under the hood there is full precision, but this helps for visual confirmation of decimal seconds
   options("digits.secs" = 6)
   
-  # Get the formal arguments from the current function
-  f_args <- methods::formalArgs(combine_raw_data_per_sensor)
+  # Get the user-specified values for each formal argument of the current function
+  f_args <- getFunctionParameters()
   
   # Check that the formal arguments were all specified
   invisible(sapply(1:length(f_args), function(i){
     check_defined(f_args[i])
   }))
   
-  # Check that the formal arguments are not NULL
-  invisible(sapply(1:length(f_args), function(i){
-    check_null(f_args[i])
-  }))
-  
   # Check that the formal arguments that should be strings are strings
   expect_strings <- f_args
   
   invisible(sapply(1:length(expect_strings), function(i){
-    check_string(expect_strings[i])
+    check_string(expect_strings[[i]])
   }))
   
   # Check that each input directory exists
