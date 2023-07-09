@@ -154,7 +154,9 @@ integrate_rfid_beamBreakers <- function(rfid_file_nm, irbb_file_nm, l_th, u_th, 
   }))
   
   invisible(sapply(1:length(irbb_expected_cols), function(i){
-    check_fArgs_cols_nas(irbb_expected_cols[[i]], labeled_irbb2)
+    if(!names(irbb_expected_cols[i]) %in% c("inner_irbb_col", "irbb_event_col", "irbb_unique_col")){
+      check_fArgs_cols_nas(irbb_expected_cols[[i]], labeled_irbb2)
+    }
   }))
   
   # Check that date-related columns are found in the data
@@ -307,10 +309,10 @@ integrate_rfid_beamBreakers <- function(rfid_file_nm, irbb_file_nm, l_th, u_th, 
           outer_rfid_diffs = outer_rfid_lead_diffs,
           rfid_irbb_assignmnt_type = "lead"
         ) %>% 
-          # Filter for entrances among the labeled beam breaker events 
-          dplyr::filter(
-            !!sym(irbb_event_col) == "entrance"
-          ) %>% 
+          # # Filter for entrances among the labeled beam breaker events 
+          # dplyr::filter(
+          #   !!sym(irbb_event_col) == "entrance"
+          # ) %>% 
           # Then filter for RFID detections that match these beam breaker events
           dplyr::filter(
             !!rlang::parse_expr(conditnal_lead_ent)
@@ -325,10 +327,10 @@ integrate_rfid_beamBreakers <- function(rfid_file_nm, irbb_file_nm, l_th, u_th, 
                 outer_rfid_diffs = outer_rfid_lag_diffs,
                 rfid_irbb_assignmnt_type = "lag"
               ) %>%
-              # Filter for entrances among the labeled beam breaker events 
-              dplyr::filter(
-                !!sym(irbb_event_col) == "entrance"
-              ) %>% 
+              # # Filter for entrances among the labeled beam breaker events 
+              # dplyr::filter(
+              #   !!sym(irbb_event_col) == "entrance"
+              # ) %>% 
               # Then filter for RFID detections that match these beam breaker events
               dplyr::filter(
                 !!rlang::parse_expr(conditnal_lag_ent)
@@ -343,10 +345,10 @@ integrate_rfid_beamBreakers <- function(rfid_file_nm, irbb_file_nm, l_th, u_th, 
                 outer_rfid_diffs = outer_rfid_lead_diffs,
                 rfid_irbb_assignmnt_type = "lead"
               ) %>%
-              # Filter for exits among the labeled beam breaker events 
-              dplyr::filter(
-                !!sym(irbb_event_col) == "exit"
-              ) %>% 
+              # # Filter for exits among the labeled beam breaker events 
+              # dplyr::filter(
+              #   !!sym(irbb_event_col) == "exit"
+              # ) %>% 
               # Then filter for RFID detections that match these beam breaker events
               dplyr::filter(
                 !!rlang::parse_expr(conditnal_lead_exi)
@@ -361,10 +363,10 @@ integrate_rfid_beamBreakers <- function(rfid_file_nm, irbb_file_nm, l_th, u_th, 
                 outer_rfid_diffs = outer_rfid_lag_diffs,
                 rfid_irbb_assignmnt_type = "lag"
               ) %>%
-              # Filter for exits among the labeled beam breaker events 
-              dplyr::filter(
-                !!sym(irbb_event_col) == "exit"
-              ) %>% 
+              # # Filter for exits among the labeled beam breaker events 
+              # dplyr::filter(
+              #   !!sym(irbb_event_col) == "exit"
+              # ) %>% 
               # Then filter for RFID detections that match these beam breaker events
               dplyr::filter(
                 !!rlang::parse_expr(conditnal_lag_exi)
