@@ -46,11 +46,6 @@ integrate_rfid_beamBreakers_video <- function(rfid_file_nm, irbb_file_nm, video_
   # Get the user-specified values for each formal argument of the current function
   f_args <- getFunctionParameters()
   
-  # Check that the formal arguments were all specified, and are not NULL or NA
-  invisible(sapply(1:length(f_args), function(i){
-    check_defined(f_args[i])
-  }))
-  
   # Check that the formal arguments that should be strings are strings
   expect_numeric <- c("l1_th", "u1_th", "l2_th", "u2_th", "video_rec_dur")
   
@@ -62,6 +57,8 @@ integrate_rfid_beamBreakers_video <- function(rfid_file_nm, irbb_file_nm, video_
     
     expect_strings <- f_args[-grep(paste(paste("^", c(expect_numeric, expect_bool, expect_na), "$", sep = ""), collapse = "|"), names(f_args))]
     
+    expected_args <- f_args[-grep(paste(paste("^", c(names(expect_na)), "$", sep = ""), collapse = "|"), names(f_args))]
+    
     # Check that the extracols2drop argument is NA
     check_NA(unlist(expect_na))
     
@@ -69,8 +66,16 @@ integrate_rfid_beamBreakers_video <- function(rfid_file_nm, irbb_file_nm, video_
     
     expect_strings <- f_args[-grep(paste(paste("^", c(expect_numeric, expect_bool), "$", sep = ""), collapse = "|"), names(f_args))]
     
+    expected_args <- f_args
+    
   }
   
+  # Check that the formal arguments that should not be NA were all specified, and are not NULL or NA
+  invisible(sapply(1:length(expected_args), function(i){
+    check_defined(expected_args[i])
+  }))
+  
+  # Check that arguments that should be strings are strings
   invisible(sapply(1:length(expect_strings), function(i){
     check_string(expect_strings[[i]])
   }))
@@ -97,27 +102,32 @@ integrate_rfid_beamBreakers_video <- function(rfid_file_nm, irbb_file_nm, video_
   tmp_file <- "tmp_rfid_irbb_integration.csv"
   
   integrate_rfid_beamBreakers(
-    rfid_file_nm, 
-    irbb_file_nm, 
+    rfid_file_nm = rfid_file_nm, 
+    irbb_file_nm = irbb_file_nm, 
     l_th = l1_th, 
     u_th = u1_th, 
-    sensor_id_col, 
-    timestamps_col, 
-    PIT_tag_col, 
-    outer_irbb_col, 
-    inner_irbb_col, 
-    irbb_event_col, 
-    irbb_unique_col, 
-    preproc_metadata_cols, 
+    sensor_id_col = sensor_id_col, 
+    timestamps_col = timestamps_col, 
+    PIT_tag_col = PIT_tag_col, 
+    outer_irbb_col = outer_irbb_col, 
+    inner_irbb_col = inner_irbb_col, 
+    irbb_event_col = irbb_event_col, 
+    irbb_unique_col = irbb_unique_col, 
+    preproc_metadata_cols = preproc_metadata_cols, 
+    general_metadata_cols,
     integrate_perching = FALSE,
-    path, 
-    rfid_dir, 
-    irbb_dir, 
+    path = path, 
+    data_dir = data_dir, 
     out_dir = "tmp", 
     out_file_nm = tmp_file, 
-    tz, 
+    tz = tz, 
     POSIXct_format = "%Y-%m-%d %H:%M:%OS"
   )
+  
+  # Create a copy of the pre-processed Video data and the preching events data in the temporary folder
+  file.copy(file.path(path, data_dir, video_file_nm), file.path(path, "tmp", video_file_nm))
+  
+  file.copy(file.path(path, data_dir, "perching_events.csv"), file.path(path, "tmp", "perching_events.csv"))
 
   # Then feed this RFID beam breaker integration data to either the rfid + video or beam breakers + video functions
   if(grepl("rfid-video", second_integration)){
@@ -147,12 +157,11 @@ integrate_rfid_beamBreakers_video <- function(rfid_file_nm, irbb_file_nm, video_
       preproc_metadata_cols = c("data_stage", "date_integrated"),
       general_metadata_cols = c("chamber_id", "year", "month", "day"),
       devices_integrated = devices_integrated,
-      extra_cols2drop = c("Outer_beam_breaker", "Inner_beam_breaker", "outer_rfid_diffs", "rfid_irbb_assignmnt_type", "rfid_irbb_lower_threshold_s", "rfid_irbb_upper_threshold_s"), 
+      extra_cols2drop = c("Outer_beam_breaker", "Inner_beam_breaker", "outer_rfid_diffs", "rfid_irbb_assignmnt_type", "rfid_irbb_lower_threshold_s", "rfid_irbb_upper_threshold_s", "irbb_direction_inferred", "unique_entranceExit"), 
       video_metadata_cols,
-      integrate_perching,
+      integrate_perching = integrate_perching,
       path, 
-      rfid_dir = "tmp", 
-      video_dir, 
+      data_dir = "tmp", 
       out_dir = "tmp", 
       out_file_nm = tmp_out_file,
       tz, 
@@ -177,6 +186,10 @@ integrate_rfid_beamBreakers_video <- function(rfid_file_nm, irbb_file_nm, video_
         rfid_video_diffs,
         rfid_irbb_assignmnt_type,
         rfid_video_assignmnt_type,
+        perching_start,
+        perching_end,
+        perching_duration_s,
+        unique_perching_event,
         rfid_irbb_lower_threshold_s,
         rfid_irbb_upper_threshold_s,
         rfid_video_lower_threshold_s,

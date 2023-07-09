@@ -42,6 +42,7 @@ find_rfid_perching_events <- function(rfid_file_nm, threshold, run_length = 2, s
   
   invisible(sapply(1:length(expect_strings), function(i){
     check_string(expect_strings[[i]])
+    
   }))
   
   # Check that the formal arguments that should be numeric are numeric
@@ -134,7 +135,7 @@ find_rfid_perching_events <- function(rfid_file_nm, threshold, run_length = 2, s
       # Map over the data frames nested by PIT tag IDs
       lags_runs = map(
         .x = lags,
-        .f = ~ dplyr::summarise(.x,
+        .f = ~ dplyr::reframe(.x,
                                 first_indices = cumsum(rle(binary_diff)[["lengths"]]) - (rle(binary_diff)[["lengths"]]),
                                 last_indices = cumsum(rle(binary_diff)[["lengths"]]),
                                 run_values = rle(binary_diff)[["values"]],
@@ -173,9 +174,7 @@ find_rfid_perching_events <- function(rfid_file_nm, threshold, run_length = 2, s
     dplyr::select(-c(data, lags, lags_runs)) %>% 
     unnest(`cols` = c(perching)) %>%
     ungroup() %>% 
-    tidyr::separate(
-      col = "dates", into = c("year", "month", "day"), sep = "-"
-    )
+    dplyr::select(-c(dates))
   
   if(nrow(perching_df) > 0){
     
@@ -203,7 +202,7 @@ find_rfid_perching_events <- function(rfid_file_nm, threshold, run_length = 2, s
       dplyr::rename(
         `unique_perching_event` = "rowid"
       ) %>% 
-      dplyr::select(all_of(general_metadata_cols), year, month, day, all_of(PIT_tag_col), perching_start, perching_end, perching_duration_s, unique_perching_event, min_perching_run_length, threshold, data_stage, date_preprocessed)
+      dplyr::select(all_of(general_metadata_cols), all_of(PIT_tag_col), perching_start, perching_end, perching_duration_s, unique_perching_event, min_perching_run_length, threshold, data_stage, date_preprocessed)
     
   } else {
     

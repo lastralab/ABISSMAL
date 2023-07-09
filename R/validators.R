@@ -92,8 +92,15 @@ check_NA <- function(y){
   
   err <- paste("Expected an NA value but", y, "is not NA", sep = " ")
   
-  if(!is.na(y)){
-    stop(err)
+  if(length(y) == 1){
+    if(!is.na(y)){
+      stop(err)
+    }
+    
+  } else if(length(y) > 1){
+    if(!all(is.na(y))){
+      stop(err)
+    }
   }
   
 }
@@ -101,9 +108,9 @@ check_NA <- function(y){
 # Check that arguments are not NULL
 check_null <- function(y){
   
-  err <- paste("Expected a non-NULL value but", y, "is NULL", sep = " ")
+  err <- paste("Expected a NULL value but", y, "is not NULL", sep = " ")
   
-  if(is.null(y)){
+  if(!is.null(y)){
     stop(err)
   }
   
