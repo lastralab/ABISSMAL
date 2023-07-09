@@ -177,77 +177,85 @@ label_beamBreaker_events <- function(irbb_file_nm, l_th, u_th, sensor_id_col, ti
   
   # Get the entrance and exit events identified using the given temporal thresholds
   integr8d_df <- diffs_df %>%
-    # Entrances, lead differences
     dplyr::mutate(
-      !!outer_irbb_nm := leading_outer,
-      diffs = outer_inner_lead_diffs
-    ) %>% 
-    # Then filter for beam breaker events that match the logic for entrances
-    dplyr::filter(
-      !!rlang::parse_expr(conditnal_lead_ent)
-    ) %>%
-    dplyr::mutate(
-      irbb_direction_inferred = "entrance",
-      irbb_assignmnt_type = "lead"
+      diffs = NA,
+      irbb_direction_inferred = NA,
+      irbb_assignmnt_type = NA
     ) %>% 
     dplyr::select(all_of(outer_irbb_nm), all_of(inner_irbb_nm), diffs, irbb_direction_inferred, irbb_assignmnt_type) %>% 
-    # Entrances, lag differences
-    bind_rows(
-      diffs_df %>%
-        dplyr::mutate(
-          !!outer_irbb_nm := lagging_outer,
-          diffs = outer_inner_lag_diffs
-        ) %>% 
-        # Then filter for beam breaker events that match the logic for entrances
-        dplyr::filter(
-          !!rlang::parse_expr(conditnal_lag_ent)
-        ) %>% 
-        dplyr::mutate(
-          irbb_direction_inferred = "entrance",
-          irbb_assignmnt_type = "lag"
-        ) %>% 
-        dplyr::select(all_of(outer_irbb_nm), all_of(inner_irbb_nm), diffs, irbb_direction_inferred, irbb_assignmnt_type) 
-    ) %>% 
-    # Exits, lead differences
-    bind_rows(
-      diffs_df %>%
-        dplyr::mutate(
-          !!outer_irbb_nm := leading_outer,
-          diffs = outer_inner_lead_diffs
-        ) %>% 
-        # Then filter for beam breaker events that match the logic for exits
-        dplyr::filter(
-          !!rlang::parse_expr(conditnal_lead_exi)
-        ) %>% 
-        dplyr::mutate(
-          irbb_direction_inferred = "exit",
-          irbb_assignmnt_type = "lead"
-        ) %>% 
-        dplyr::select(all_of(outer_irbb_nm), all_of(inner_irbb_nm), diffs, irbb_direction_inferred, irbb_assignmnt_type) 
-    ) %>% 
-    # Exits, lag differences
-    bind_rows(
-      diffs_df %>%
-        dplyr::mutate(
-          !!outer_irbb_nm := lagging_outer,
-          diffs = outer_inner_lag_diffs
-        ) %>% 
-        # Then filter for beam breaker events that match the logic for exits
-        dplyr::filter(
-          !!rlang::parse_expr(conditnal_lag_exi)
-        ) %>% 
-        dplyr::mutate(
-          irbb_direction_inferred = "exit",
-          irbb_assignmnt_type = "lag"
-        ) %>% 
-        dplyr::select(all_of(outer_irbb_nm), all_of(inner_irbb_nm), diffs, irbb_direction_inferred, irbb_assignmnt_type) 
-    ) %>% 
+    
+ # ### TKTK commenting this out for now   
+ #    # Entrances, lead differences
+ #    dplyr::mutate(
+ #      !!outer_irbb_nm := leading_outer,
+ #      diffs = outer_inner_lead_diffs
+ #    ) %>% 
+ #    # Then filter for beam breaker events that match the logic for entrances
+ #    dplyr::filter(
+ #      !!rlang::parse_expr(conditnal_lead_ent)
+ #    ) %>%
+ #    dplyr::mutate(
+ #      irbb_direction_inferred = "entrance",
+ #      irbb_assignmnt_type = "lead"
+ #    ) %>% 
+ #    dplyr::select(all_of(outer_irbb_nm), all_of(inner_irbb_nm), diffs, irbb_direction_inferred, irbb_assignmnt_type) %>% 
+ #    # Entrances, lag differences
+ #    bind_rows(
+ #      diffs_df %>%
+ #        dplyr::mutate(
+ #          !!outer_irbb_nm := lagging_outer,
+ #          diffs = outer_inner_lag_diffs
+ #        ) %>% 
+ #        # Then filter for beam breaker events that match the logic for entrances
+ #        dplyr::filter(
+ #          !!rlang::parse_expr(conditnal_lag_ent)
+ #        ) %>% 
+ #        dplyr::mutate(
+ #          irbb_direction_inferred = "entrance",
+ #          irbb_assignmnt_type = "lag"
+ #        ) %>% 
+ #        dplyr::select(all_of(outer_irbb_nm), all_of(inner_irbb_nm), diffs, irbb_direction_inferred, irbb_assignmnt_type) 
+ #    ) %>% 
+ #    # Exits, lead differences
+ #    bind_rows(
+ #      diffs_df %>%
+ #        dplyr::mutate(
+ #          !!outer_irbb_nm := leading_outer,
+ #          diffs = outer_inner_lead_diffs
+ #        ) %>% 
+ #        # Then filter for beam breaker events that match the logic for exits
+ #        dplyr::filter(
+ #          !!rlang::parse_expr(conditnal_lead_exi)
+ #        ) %>% 
+ #        dplyr::mutate(
+ #          irbb_direction_inferred = "exit",
+ #          irbb_assignmnt_type = "lead"
+ #        ) %>% 
+ #        dplyr::select(all_of(outer_irbb_nm), all_of(inner_irbb_nm), diffs, irbb_direction_inferred, irbb_assignmnt_type) 
+ #    ) %>% 
+ #    # Exits, lag differences
+ #    bind_rows(
+ #      diffs_df %>%
+ #        dplyr::mutate(
+ #          !!outer_irbb_nm := lagging_outer,
+ #          diffs = outer_inner_lag_diffs
+ #        ) %>% 
+ #        # Then filter for beam breaker events that match the logic for exits
+ #        dplyr::filter(
+ #          !!rlang::parse_expr(conditnal_lag_exi)
+ #        ) %>% 
+ #        dplyr::mutate(
+ #          irbb_direction_inferred = "exit",
+ #          irbb_assignmnt_type = "lag"
+ #        ) %>% 
+ #        dplyr::select(all_of(outer_irbb_nm), all_of(inner_irbb_nm), diffs, irbb_direction_inferred, irbb_assignmnt_type) 
+ #    ) %>% 
     dplyr::mutate(
       data_stage = "pre-processed",
       lower_threshold_s = l_th,
       upper_threshold_s = u_th,
       date_labeled = paste(Sys.Date(), Sys.time(), sep = " ")
-    ) %>% 
+    ) %>%
     # Rename the outer beam breaker column for the metadata join below
     dplyr::rename(
       !!timestamps_col := !!sym(outer_irbb_nm)

@@ -28,39 +28,33 @@ preprocess_detections <- function(sensor, timestamps_col, group_col_nm = NULL, p
   # Get the user-specified values for each formal argument of the current function
   f_args <- getFunctionParameters()
   
-  # Check that the formal arguments were all specified, and are not NULL or NA
-  invisible(sapply(1:length(f_args), function(i){
-    check_defined(f_args[i])
-  }))
-  
   # Check that the formal arguments that should not be NULL are not NULL under the right conditions (e.g. when processing RFID data)
   if(sensor == "RFID"){
     
-    expect_nonNull <- f_args
+    expect_null <- c("pixel_col_nm", "pixel_threshold")
     
-    invisible(sapply(1:length(expect_nonNull), function(i){
-      check_null(expect_nonNull[[i]])
-    }))
+  } else if(sensor == "IRBB"){
     
-  } else {
+    expect_null <- c("group_col_nm", "pixel_col_nm", "pixel_threshold")
     
-    if(sensor == "IRBB"){
-      
-      expect_null <- c("group_col_nm")
-      
-    } else if(sensor == "Video"){
-      
-      expect_null <- c("group_col_nm", "thin_threshold")
-      
-    }
+  } else if(sensor == "Video"){
     
-    expect_nonNull <- f_args[-grep(paste(paste("^", expect_null, "$", sep = ""), collapse = "|"), names(f_args))]
-    
-    invisible(sapply(1:length(expect_nonNull), function(i){
-      check_null(expect_nonNull[[i]])
-    }))
+    expect_null <- c("group_col_nm", "thin_threshold")
     
   }
+  
+  expect_nulls <- f_args[grep(paste(paste("^", expect_null, "$", sep = ""), collapse = "|"), names(f_args))]
+  
+  invisible(sapply(1:length(expect_nulls), function(i){
+    check_null(expect_nulls[[i]])
+  }))
+  
+  # Check that all formal arguments that should not be NULL were all specified
+  expect_nonNulls <- f_args[-grep(paste(paste("^", expect_null, "$", sep = ""), collapse = "|"), names(f_args))]
+  
+  invisible(sapply(1:length(expect_nonNulls), function(i){
+    check_defined(expect_nonNulls[[i]])
+  }))
   
   # Check that the formal arguments that should be strings are strings
   if(grepl("RFID|IRBB", sensor)){
@@ -172,7 +166,8 @@ preprocess_detections <- function(sensor, timestamps_col, group_col_nm = NULL, p
         dplyr::arrange(!!sym(timestamps_col)) %>% 
         # Make unique row indices with the same column name as the group indices above
         dplyr::mutate(
-          group_row_id = row_number()
+          group_row_id = row_number(),
+          group_col = NA
         )
       
     }
@@ -199,7 +194,7 @@ preprocess_detections <- function(sensor, timestamps_col, group_col_nm = NULL, p
     
     # Nest by each group, do the rle calculations and removing indices, then recombine
     lags_runs <- lags %>% 
-      dplyr::summarise(
+      dplyr::reframe(
         run_indices = cumsum(rle(binary_diff)[["lengths"]]),
         run_values = rle(binary_diff)[["values"]],
         run_lengths = rle(binary_diff)[["lengths"]]
