@@ -49,7 +49,7 @@
 # POSIXct_format = "%Y-%m-%d %H:%M:%OS"
 
 
-integrate_rfid_beamBreakers <- function(rfid_file_nm, irbb_file_nm, l_th, u_th, sensor_id_col, timestamps_col, PIT_tag_col, outer_irbb_col, inner_irbb_col, irbb_event_col, irbb_unique_col, preproc_metadata_cols, general_metadata_cols, integrate_perching, path, data_dir, out_dir, out_file_nm = "integrated_rfid_beamBreaker_data.csv", tz, POSIXct_format = "%Y-%m-%d %H:%M:%OS"){
+integrate_rfid_beamBreakers <- function(rfid_file_nm, irbb_file_nm, l_th, u_th, run_length = 2, sensor_id_col, timestamps_col, PIT_tag_col, outer_irbb_col, inner_irbb_col, irbb_event_col, irbb_unique_col, preproc_metadata_cols, general_metadata_cols, integrate_perching, path, data_dir, out_dir, out_file_nm = "integrated_rfid_beamBreaker_data.csv", tz, POSIXct_format = "%Y-%m-%d %H:%M:%OS"){
   
   # Get the current global options
   orig_opts <- options()
