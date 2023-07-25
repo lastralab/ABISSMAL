@@ -1,12 +1,11 @@
 
 library(tidyverse)
+library(data.table)
 
 l_th <- 0
 u_th <- 2
 run_length <- 2
-rfid_file_nm <- "pre_processed_data_RFID.csv"
-irbb_file_nm <- "pre_processed_data_IRBB.csv"
-video_file_nm <- "pre_processed_data_Video.csv"
+file_nms <- c("pre_processed_data_RFID.csv", "pre_processed_data_IRBB.csv", "pre_processed_data_Video.csv")
 sensor_id_col <- "sensor_id"
 timestamps_col <- "timestamp_ms"
 PIT_tag_col <- "PIT_tag_ID"
@@ -26,7 +25,7 @@ tz <- "America/New York"
 POSIXct_format <- "%Y-%m-%d %H:%M:%OS"
 
 
-integrate_sensors <- function(rfid_file_nm, irbb_file_nm, video_file_nm, l_th, u_th, run_length = 2, sensor_id_col, timestamps_col, PIT_tag_col, outer_irbb_col, inner_irbb_col, irbb_event_col, irbb_unique_col, preproc_metadata_cols, general_metadata_cols, integrate_perching, path, data_dir, out_dir, out_file_nm = "integrated_rfid_beamBreaker_data.csv", tz, POSIXct_format = "%Y-%m-%d %H:%M:%OS"){
+integrate_sensors <- function(file_nms, threshold, run_length = 2, sensor_id_col, timestamps_col, PIT_tag_col, outer_irbb_col, inner_irbb_col, irbb_event_col, irbb_unique_col, preproc_metadata_cols, general_metadata_cols, integrate_perching, path, data_dir, out_dir, out_file_nm = "integrated_rfid_beamBreaker_data.csv", tz, POSIXct_format = "%Y-%m-%d %H:%M:%OS"){
   
   # Get the current global options
   orig_opts <- options()
@@ -34,42 +33,61 @@ integrate_sensors <- function(rfid_file_nm, irbb_file_nm, video_file_nm, l_th, u
   # Set the number of digits for visualization. Under the hood there is full precision, but this helps for visual confirmation of decimal seconds
   options("digits.secs" = 6)
   
-  # Read in the pre-processed RFID data
-  preproc_rfid <- read.csv(file.path(path, data_dir, rfid_file_nm)) %>% 
-    # Make sure that the timestamps are in the right format
-    dplyr::mutate(
-      !!timestamps_col := as.POSIXct(format(as.POSIXct(!!sym(timestamps_col), tz = "America/New York"), "%Y-%m-%d %H:%M:%OS6"))
-    ) 
+  # Read in files and remove columns in a loop before binding together in a single data frame
+  all_sensors <- data.table::rbindlist(lapply(1:length(file_nms), function(x){
+    
+    tmp <- read.csv(file.path(path, data_dir, file_nms[x])) %>% 
+      # Make sure that the timestamps are in the right format
+      dplyr::mutate(
+        !!timestamps_col := as.POSIXct(format(as.POSIXct(!!sym(timestamps_col), tz = "America/New York"), "%Y-%m-%d %H:%M:%OS6"))
+      )
+    
+    cols2drop <- names(tmp)[grep(paste(paste("^", c(preproc_metadata_cols, video_metadata_cols, PIT_tag_col), "$", sep = ""), collapse = "|"), names(tmp))]
+    
+    tmp <- tmp %>% 
+      dplyr::select(-c(all_of(cols2drop)))
+    
+  }))
   
-  # Read in the pre-processed IRBB data (no labeling here)
-  preproc_irbb <- read.csv(file.path(path, data_dir, irbb_file_nm)) %>% 
-    # Make sure that the timestamps are in the right format
-    dplyr::mutate(
-      !!timestamps_col := as.POSIXct(format(as.POSIXct(!!sym(timestamps_col), tz = "America/New York"), "%Y-%m-%d %H:%M:%OS6"))
-    ) 
+  glimpse(all_sensors)
   
-  # Read in the pre-processed video data
-  preproc_video <- read.csv(file.path(path, data_dir, video_file_nm)) %>% 
-    # Make sure that the timestamps are in the right format
-    dplyr::mutate(
-      !!timestamps_col := as.POSIXct(format(as.POSIXct(!!sym(timestamps_col), tz = "America/New York"), "%Y-%m-%d %H:%M:%OS6"))
-    ) 
   
-  # Drop columns that aren't needed here for both datasets
-  rfid_cols2drop <- names(preproc_rfid)[grep(paste(paste("^", preproc_metadata_cols, "$", sep = ""), collapse = "|"), names(preproc_rfid))]
-  
-  irbb_cols2drop <- names(preproc_irbb)[grep(paste(paste("^", preproc_metadata_cols, "$", sep = ""), collapse = "|"), names(preproc_irbb))]
-  
-  video_cols2drop <- names(preproc_video)[grep(paste(paste("^", c(preproc_metadata_cols, video_metadata_cols), "$", sep = ""), collapse = "|"), names(preproc_video))]
-  
-  preproc_rfid2 <- preproc_rfid %>% 
-    dplyr::select(-c(all_of(rfid_cols2drop), all_of(PIT_tag_col)))
-  
-  preproc_irbb2 <- preproc_irbb %>% 
-    dplyr::select(-c(all_of(irbb_cols2drop)))
-  
-  preproc_video2 <- preproc_video %>% 
-    dplyr::select(-c(all_of(video_cols2drop)))
+  # # Read in the pre-processed RFID data
+  # preproc_rfid <- read.csv(file.path(path, data_dir, rfid_file_nm)) %>% 
+  #   # Make sure that the timestamps are in the right format
+  #   dplyr::mutate(
+  #     !!timestamps_col := as.POSIXct(format(as.POSIXct(!!sym(timestamps_col), tz = "America/New York"), "%Y-%m-%d %H:%M:%OS6"))
+  #   ) 
+  # 
+  # # Read in the pre-processed IRBB data (no labeling here)
+  # preproc_irbb <- read.csv(file.path(path, data_dir, irbb_file_nm)) %>% 
+  #   # Make sure that the timestamps are in the right format
+  #   dplyr::mutate(
+  #     !!timestamps_col := as.POSIXct(format(as.POSIXct(!!sym(timestamps_col), tz = "America/New York"), "%Y-%m-%d %H:%M:%OS6"))
+  #   ) 
+  # 
+  # # Read in the pre-processed video data
+  # preproc_video <- read.csv(file.path(path, data_dir, video_file_nm)) %>% 
+  #   # Make sure that the timestamps are in the right format
+  #   dplyr::mutate(
+  #     !!timestamps_col := as.POSIXct(format(as.POSIXct(!!sym(timestamps_col), tz = "America/New York"), "%Y-%m-%d %H:%M:%OS6"))
+  #   ) 
+  # 
+  # # Drop columns that aren't needed here for both datasets
+  # rfid_cols2drop <- names(preproc_rfid)[grep(paste(paste("^", preproc_metadata_cols, "$", sep = ""), collapse = "|"), names(preproc_rfid))]
+  # 
+  # irbb_cols2drop <- names(preproc_irbb)[grep(paste(paste("^", preproc_metadata_cols, "$", sep = ""), collapse = "|"), names(preproc_irbb))]
+  # 
+  # video_cols2drop <- names(preproc_video)[grep(paste(paste("^", c(preproc_metadata_cols, video_metadata_cols), "$", sep = ""), collapse = "|"), names(preproc_video))]
+  # 
+  # preproc_rfid2 <- preproc_rfid %>% 
+  #   dplyr::select(-c(all_of(rfid_cols2drop), all_of(PIT_tag_col)))
+  # 
+  # preproc_irbb2 <- preproc_irbb %>% 
+  #   dplyr::select(-c(all_of(irbb_cols2drop)))
+  # 
+  # preproc_video2 <- preproc_video %>% 
+  #   dplyr::select(-c(all_of(video_cols2drop)))
   
   glimpse(preproc_rfid2)
   glimpse(preproc_irbb2)
@@ -110,7 +128,7 @@ integrate_sensors <- function(rfid_file_nm, irbb_file_nm, video_file_nm, l_th, u
           dplyr::mutate(
             diff = as.numeric(floor(!!sym(timestamps_col) - shift)),
             # Taking anything less than or equal to the threshold, see previous RFID pre-processing. The diff > 0 condition should remove the first timestamp compared to itself, which should in turn make it no longer necessary to correct the timestamp indices
-            binary_diff = (diff <= u_th & diff > l_th)
+            binary_diff = (diff <= threshold & diff > 0)
           ) %>% 
           dplyr::select(all_of(timestamps_col), diff, binary_diff) 
       )
@@ -173,6 +191,10 @@ integrate_sensors <- function(rfid_file_nm, irbb_file_nm, video_file_nm, l_th, u
   length(unique(detectns_df$event_seq))
   
   # Then TKTK the next things to do are use the sequence of sensor events to infer directionality, and assign PIT tags to all movements with RFID
+  
+  # I want this function to return that data frame of output with the sequence of sensor events. I also want this function to automatically read in as many sensors for input data as provided 
+  # Then I want another function that uses the output of this function as input, and returns which sensors were detected in each bout, all of the edges that were detected (e.g. Camera then RFID, etc) in the sequence, the inferred directionality by comparing all possible pairs of sensors if present in the bout, and the PIT tag ID(s) associated with the given bout.
+  # Keep the find perching events and bout detection functions. I also want to keep the option to integrate perching events fromn the raw RFID data in this second function
   
   
 }
