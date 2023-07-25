@@ -2,30 +2,26 @@
 library(tidyverse)
 library(data.table)
 
-l_th <- 0
-u_th <- 2
+threshold <- 2
 run_length <- 2
 file_nms <- c("pre_processed_data_RFID.csv", "pre_processed_data_IRBB.csv", "pre_processed_data_Video.csv")
 sensor_id_col <- "sensor_id"
 timestamps_col <- "timestamp_ms"
 PIT_tag_col <- "PIT_tag_ID"
-outer_irbb_col <- "Outer_beam_breaker"
-inner_irbb_col <- "Inner_beam_breaker"
-irbb_event_col <- "irbb_direction_inferred"
-irbb_unique_col <- "unique_entranceExit"
 preproc_metadata_cols <- c("thin_threshold_s", "data_stage", "date_pre_processed")
 general_metadata_cols <- c("chamber_id", "year", "month", "day")
 video_metadata_cols <- c("total_pixels_motionTrigger", "pixel_threshold", "video_file_name")
 # path <- "/media/gsvidaurre/Anodorhynchus/Data_Testing/Box_02_31Dec2022/Data"
 path <- "/home/gsvidaurre/Desktop/MANUSCRIPTS/Prep/ParentalCareTracking_MethodsPaper/ABS_2023_Talk"
 data_dir <- "processed"
-out_dir <- "integrated"
-out_file_nm <- "integrated_sensors.csv"
+out_dir <- "processed"
+out_file_nm <- "detections_across_sensors.csv"
 tz <- "America/New York"
 POSIXct_format <- "%Y-%m-%d %H:%M:%OS"
 
+# I want this function to return that data frame of output with the sequence of sensor events. I also want this function to automatically read in as many sensors for input data as provided 
 
-integrate_sensors <- function(file_nms, threshold, run_length = 2, sensor_id_col, timestamps_col, PIT_tag_col, outer_irbb_col, inner_irbb_col, irbb_event_col, irbb_unique_col, preproc_metadata_cols, general_metadata_cols, integrate_perching, path, data_dir, out_dir, out_file_nm = "integrated_rfid_beamBreaker_data.csv", tz, POSIXct_format = "%Y-%m-%d %H:%M:%OS"){
+integrate_sensors <- function(file_nms, threshold, run_length = 2, sensor_id_col, timestamps_col, PIT_tag_col, preproc_metadata_cols, general_metadata_cols, video_metadata_cols, path, data_dir, out_dir, out_file_nm = "detections_across_sensors.csv", tz, POSIXct_format = "%Y-%m-%d %H:%M:%OS"){
   
   # Get the current global options
   orig_opts <- options()
@@ -42,6 +38,7 @@ integrate_sensors <- function(file_nms, threshold, run_length = 2, sensor_id_col
         !!timestamps_col := as.POSIXct(format(as.POSIXct(!!sym(timestamps_col), tz = "America/New York"), "%Y-%m-%d %H:%M:%OS6"))
       )
     
+    # Drop extra columns in order to bind together data frames in the list
     cols2drop <- names(tmp)[grep(paste(paste("^", c(preproc_metadata_cols, video_metadata_cols, PIT_tag_col), "$", sep = ""), collapse = "|"), names(tmp))]
     
     tmp <- tmp %>% 
@@ -49,64 +46,8 @@ integrate_sensors <- function(file_nms, threshold, run_length = 2, sensor_id_col
     
   }))
   
-  glimpse(all_sensors)
-  
-  
-  # # Read in the pre-processed RFID data
-  # preproc_rfid <- read.csv(file.path(path, data_dir, rfid_file_nm)) %>% 
-  #   # Make sure that the timestamps are in the right format
-  #   dplyr::mutate(
-  #     !!timestamps_col := as.POSIXct(format(as.POSIXct(!!sym(timestamps_col), tz = "America/New York"), "%Y-%m-%d %H:%M:%OS6"))
-  #   ) 
-  # 
-  # # Read in the pre-processed IRBB data (no labeling here)
-  # preproc_irbb <- read.csv(file.path(path, data_dir, irbb_file_nm)) %>% 
-  #   # Make sure that the timestamps are in the right format
-  #   dplyr::mutate(
-  #     !!timestamps_col := as.POSIXct(format(as.POSIXct(!!sym(timestamps_col), tz = "America/New York"), "%Y-%m-%d %H:%M:%OS6"))
-  #   ) 
-  # 
-  # # Read in the pre-processed video data
-  # preproc_video <- read.csv(file.path(path, data_dir, video_file_nm)) %>% 
-  #   # Make sure that the timestamps are in the right format
-  #   dplyr::mutate(
-  #     !!timestamps_col := as.POSIXct(format(as.POSIXct(!!sym(timestamps_col), tz = "America/New York"), "%Y-%m-%d %H:%M:%OS6"))
-  #   ) 
-  # 
-  # # Drop columns that aren't needed here for both datasets
-  # rfid_cols2drop <- names(preproc_rfid)[grep(paste(paste("^", preproc_metadata_cols, "$", sep = ""), collapse = "|"), names(preproc_rfid))]
-  # 
-  # irbb_cols2drop <- names(preproc_irbb)[grep(paste(paste("^", preproc_metadata_cols, "$", sep = ""), collapse = "|"), names(preproc_irbb))]
-  # 
-  # video_cols2drop <- names(preproc_video)[grep(paste(paste("^", c(preproc_metadata_cols, video_metadata_cols), "$", sep = ""), collapse = "|"), names(preproc_video))]
-  # 
-  # preproc_rfid2 <- preproc_rfid %>% 
-  #   dplyr::select(-c(all_of(rfid_cols2drop), all_of(PIT_tag_col)))
-  # 
-  # preproc_irbb2 <- preproc_irbb %>% 
-  #   dplyr::select(-c(all_of(irbb_cols2drop)))
-  # 
-  # preproc_video2 <- preproc_video %>% 
-  #   dplyr::select(-c(all_of(video_cols2drop)))
-  
-  glimpse(preproc_rfid2)
-  glimpse(preproc_irbb2)
-  glimpse(preproc_video2)
-  
-  # Bind the data frames together
-  all_sensors <- preproc_rfid2 %>% 
-    bind_rows(
-      preproc_irbb2
-    ) %>% 
-    bind_rows(
-      preproc_video2
-    )
-  
-  glimpse(all_sensors)
-  
-  
   # Group the data frame by day, then search for bursts of activity
-  detectns_df <- all_sensors %>%
+  detectns <- all_sensors %>%
     dplyr::mutate(
       dates = paste(year, month, day, sep = "-")
     ) %>%
@@ -185,16 +126,18 @@ integrate_sensors <- function(file_nms, threshold, run_length = 2, sensor_id_col
     ungroup() %>% 
     dplyr::select(-c(dates))
   
-  glimpse(detectns_df)
-  View(detectns_df)
+  detectns2 <- detectns %>% 
+    dplyr::inner_join(
+      all_sensors %>% 
+        dplyr::select(all_of(general_metadata_cols), all_of(timestamps_col)) %>% 
+        distinct(),
+      by = c("start" = timestamps_col)
+    ) %>% 
+    dplyr::select(all_of(general_metadata_cols), names(.)[-grep(paste(general_metadata_cols, collapse = "|"), names(.))])
   
-  length(unique(detectns_df$event_seq))
+  write.csv(detectns2, file.path(path, out_dir, out_file_nm), row.names = FALSE)
   
-  # Then TKTK the next things to do are use the sequence of sensor events to infer directionality, and assign PIT tags to all movements with RFID
-  
-  # I want this function to return that data frame of output with the sequence of sensor events. I also want this function to automatically read in as many sensors for input data as provided 
-  # Then I want another function that uses the output of this function as input, and returns which sensors were detected in each bout, all of the edges that were detected (e.g. Camera then RFID, etc) in the sequence, the inferred directionality by comparing all possible pairs of sensors if present in the bout, and the PIT tag ID(s) associated with the given bout.
-  # Keep the find perching events and bout detection functions. I also want to keep the option to integrate perching events fromn the raw RFID data in this second function
-  
+  # Reset the current global options
+  options(orig_opts)
   
 }
