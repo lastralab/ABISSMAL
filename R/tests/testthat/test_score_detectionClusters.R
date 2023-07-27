@@ -5,17 +5,22 @@ rm(list = ls())
 library(tidyverse)
 library(data.table)
 
-file_nm <- "detections_across_sensors.csv"
+file_nm <- "detection_clusters.csv"
 sensor_id_col <- "sensor_id"
 timestamps_col <- "timestamp_ms"
 PIT_tag_col <- "PIT_tag_ID"
 general_metadata_cols <- c("chamber_id", "year", "month", "day")
+video_metadata_cols <- c("total_pixels_motionTrigger", "pixel_threshold", "video_file_name")
+rfid_label <- "RFID"
+camera_label <- "Camera"
+outer_irbb_label <- "Outer Beam Breaker"
+inner_irbb_label <- "Inner Beam Breaker"
 integrate_perching <- TRUE
 # path <- "/media/gsvidaurre/Anodorhynchus/Data_Testing/Box_02_31Dec2022/Data"
 path <- "/home/gsvidaurre/Desktop/MANUSCRIPTS/Prep/ParentalCareTracking_MethodsPaper/ABS_2023_Talk"
 data_dir <- "processed"
 out_dir <- "processed"
-out_file_nm <- "scored_detectionBursts.csv"
+out_file_nm <- "scored_detectionClusters.csv"
 tz <- "America/New York"
 POSIXct_format <- "%Y-%m-%d %H:%M:%OS"
 
