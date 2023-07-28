@@ -16,13 +16,16 @@ camera_label <- "Camera"
 outer_irbb_label <- "Outer Beam Breaker"
 inner_irbb_label <- "Inner Beam Breaker"
 integrate_perching <- TRUE
+# perching_dataset <- "RFID"
+perching_dataset <- "RFID-IRBB"
+perching_prefix <- "perching_events_"
 # path <- "/media/gsvidaurre/Anodorhynchus/Data_Testing/Box_02_31Dec2022/Data"
 path <- "/home/gsvidaurre/Desktop/MANUSCRIPTS/Prep/ParentalCareTracking_MethodsPaper/ABS_2023_Talk"
 data_dir <- "processed"
 out_dir <- "processed"
 out_file_nm <- "scored_detectionClusters.csv"
 tz <- "America/New York"
-POSIXct_format <- "%Y-%m-%d %H:%M:%OS"
+POSIXct_format <- "%Y-%m-%d %H:%M:%OS" 
 
 
 # Here I want to test that the output is the same regardless of which sensor triggered first 
