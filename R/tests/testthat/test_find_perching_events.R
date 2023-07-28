@@ -16,20 +16,29 @@ out_dir
 
 # TKTK need to test that there are no negative durations and also no duplicate durations indicating assignments within or between PIT tags
 
-rfid_file_nm <- "combined_raw_data_RFID.csv"
+library(tidyverse)
+# library(data.table)
+
+# file_nm <- "combined_raw_data_RFID.csv"
+file_nm <- "combined_raw_data_IRBB.csv"
 threshold <- 2
 run_length <- 2
 sensor_id_col <- "sensor_id"
 timestamps_col <- "timestamp_ms"
-PIT_tag_col <- "PIT_tag_ID"
-path <- "/media/gsvidaurre/Anodorhynchus/Data_Testing/Box_02_31Dec2022/Data"
+# PIT_tag_col <- "PIT_tag_ID"
+PIT_tag_col <- NULL
+# rfid_label <- "RFID"
+rfid_label <- NULL
+outer_irbb_label <- "Outer Beam Breaker"
+inner_irbb_label <- "Inner Beam Breaker"
+path <- "/home/gsvidaurre/Desktop/MANUSCRIPTS/Prep/ParentalCareTracking_MethodsPaper/ABS_2023_Talk"
+# path <- "/media/gsvidaurre/Anodorhynchus/Data_Testing/Box_02_31Dec2022/Data"
 general_metadata_cols <- c("chamber_id", "sensor_id")
-rfid_dir <- "raw_combined"
-out_dir <- "pre_processed"
-out_file_nm = "perching_events.csv"
+data_dir <- "raw_combined"
+out_dir <- "processed"
+out_file_nm <- "perching_events.csv"
 tz <- "America/New York"
 POSIXct_format <- "%Y-%m-%d %H:%M:%OS"
-
 
 # See examples on: 
 # https://www.r-bloggers.com/2019/11/automated-testing-with-testthat-in-practice/
@@ -37,7 +46,7 @@ POSIXct_format <- "%Y-%m-%d %H:%M:%OS"
 if (!require(testthat)) install.packages('testthat')
 library(testthat)
 
-find_rfid_perching_events <- source("/home/gsvidaurre/Desktop/GitHub_repos/Abissmal/R/find_rfid_perching_events.R")$value
+find_perching_events <- source("/home/gsvidaurre/Desktop/GitHub_repos/Abissmal/R/find_perching_events.R")$value
 
 # This testing file can be run by calling test_file("./path/to/this/file)
 
