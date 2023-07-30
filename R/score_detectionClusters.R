@@ -78,7 +78,7 @@ score_detectionClusters <- function(file_nm, sensor_id_col, timestamps_col, PIT_
   # Check that the perching file(s) also exist in the input directory
   if(integrate_perching){
     
-    check_file(file.path(path, data_dir, paste(perching_prefix, perching_dataset, ".csv", sep = "")))
+    check_file(file.path(path, data_dir), paste(perching_prefix, perching_dataset, ".csv", sep = ""))
     
   }
   
