@@ -339,6 +339,116 @@ test_that("The function detects the expected number of clusters using data from 
 })
 
 
+# Test that the function detects the expected clusters of detections across different combinations of `threshold` and `run_length` when data from one sensor is used as input
+test_that("The function detects the expected number of clusters using data from one sensor across different thresholds and run_lengths", {
+  
+  # Avoid library calls and other changes to the virtual environment
+  # See https://r-pkgs.org/testing-design.html
+  withr::local_package("tidyverse")
+  withr::local_package("plyr")
+  withr::local_package("dplyr")
+  withr::local_package("lubridate")
+  withr::local_package("pbapply")
+  
+  # Just for code development
+  # library(tidyverse)
+  # library(lubridate)
+  # library(pbapply)
+  # library(testthat)
+  
+  # Create a temporary directory for testing. Files will be written and read here
+  path <- "/home/gsvidaurre/Desktop"
+  data_dir <- "tmp_tests"
+  tmp_path <- file.path(path, data_dir)
+  
+  if(!dir.exists(tmp_path)){ 
+    dir.create(tmp_path)
+  }
+  
+  # Generate a file with pre-processed timestamps for one sensor
+  # Create 4 clusters of detections: each cluster consists of a different number of detections (testing `run_length`) spaced different numbers of seconds apart (testing `threshold`)
+  ths <- seq(0.5, 5, by = 0.5)
+  
+  # Since run lengths are calculated from the difference in timestamps, each run_length value should be applied to a clusters of detections of length rls + 1
+  rls <- seq(1, 10, by = 1)
+  
+  starts <- as.POSIXct(c(
+    "2023-01-01 01:00:00 EST",
+    "2023-01-01 02:00:00 EST",
+    "2023-01-01 01:05:00 EST",
+    "2023-01-01 02:05:00 EST"
+  ))
+  
+  invisible(mapply(function(x, y){
+    
+    tmp <- data.table::rbindlist(lapply(1:length(starts), function(i){
+      
+      sim_ts <- seq(starts[i], starts[i] + max(seq_len(y*y)), by = x)[1:(y + 1)]
+      # sim_ts
+      
+      return(data.frame(tstmps = sim_ts, cluster = i))
+      
+    }))
+    
+    # Write out a spreadsheet with these timestamps that will be used as input data for the function
+    sim_ts <- data.frame(timestamp_ms = tmp$tstmps) %>% 
+      dplyr::mutate(
+        chamber_id = "Box_01",
+        year = year(timestamp_ms),
+        month = month(timestamp_ms),
+        day = day(timestamp_ms),
+        sensor_id = "RFID",
+        PIT_tag_ID = "test",
+        thin_threshold_s = 1,
+        data_stage = "pre-processing",
+        date_pre_processed = Sys.Date()
+      )
+    
+    tmp_nm <- paste(paste("simulated_single_sensor", paste("th", x, sep = ""), paste("rl", y, sep = ""), sep = "_"), ".csv", sep = "")
+    
+    write.csv(sim_ts, file.path(tmp_path, tmp_nm), row.names = FALSE)
+    
+    find_detectionClusters(file_nms = tmp_nm, threshold = x, run_length = y, sensor_id_col = "sensor_id", timestamps_col = "timestamp_ms", PIT_tag_col = "PIT_tag_ID", rfid_label = "RFID", camera_label = NULL, drop_tag = NULL, preproc_metadata_cols = c("thin_threshold_s", "data_stage", "date_pre_processed"), general_metadata_cols = c("chamber_id", "year", "month", "day"), video_metadata_cols = NULL, path = path, data_dir = data_dir, out_dir = data_dir, out_file_nm = "detection_clusters.csv", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS")
+    
+    # Read in the output, check the output, then delete all files
+    test_res <- read.csv(file.path(tmp_path, "detection_clusters.csv"))
+    
+    # Test that the number of detection clusters in the results is the same as the length of the start timestamps created above
+    expect_equal(nrow(test_res), length(starts))
+    
+    # Test that the sequence of sensor triggering events is correct
+    invisible(lapply(1:nrow(test_res), function(i){
+      
+      test_seq <- paste(c(
+        rep("RFID", length(tmp$tstmps[tmp$cluster == i]))
+      ), collapse = "; ")
+      
+      expect_equal(test_res$event_seq[i], test_seq)
+      
+    }))
+    
+    # Test that the results have the correct number of detections per individual (since RFID data was used as input)
+    invisible(lapply(1:nrow(test_res), function(i){
+      
+      expect_equal(test_res$total_indiv1_detections[i], length(tmp$tstmps[tmp$cluster == i]))
+      
+    }))      
+    
+  }, ths, rls, SIMPLIFY = FALSE))
+  
+  # Remove the temporary directory and all files within it
+  if(tmp_path == file.path(path, data_dir)){
+    unlink(tmp_path, recursive = TRUE)
+  }
+  
+})
+
+# next: do the same test as immediately above but with 2 and then 3 sensor types
+
+
+
+
+
 ########## Testing error messages ########## 
 
 
