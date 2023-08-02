@@ -2,7 +2,7 @@
 # See examples on: 
 # https://www.r-bloggers.com/2019/11/automated-testing-with-testthat-in-practice/
 
-# rm(list = ls())
+rm(list = ls())
 
 if (!require(testthat)) install.packages('testthat')
 library(testthat)
@@ -15,7 +15,9 @@ source("/home/gsvidaurre/Desktop/GitHub_repos/Abissmal/R/utilities.R")
 
 ########## Testing output ########## 
 
-# I want to test that the function detects the expected clusters of detections when data from one sensor is used as input
+# Each of these test_that expressions contains several expect_equal statements
+
+# Test that the function detects the expected clusters of detections when data from one sensor is used as input
 test_that("The function detects the expected number of clusters using data from one sensor", {
   
   # Avoid library calls and other changes to the virtual environment
@@ -101,8 +103,7 @@ test_that("The function detects the expected number of clusters using data from 
   
 })
 
-
-# I want to test that the function detects the expected clusters of detections when data from 2 sensor types is used as input (RFID and 2 pairs of beam breakers here)
+# Test that the function detects the expected clusters of detections when data from 2 sensor types is used as input (RFID and 2 pairs of beam breakers here)
 test_that("The function detects the expected number of clusters using data from one sensor", {
   
   # Avoid library calls and other changes to the virtual environment
@@ -209,8 +210,7 @@ test_that("The function detects the expected number of clusters using data from 
   
 })
 
-
-# I want to test that the function detects the expected clusters of detections when data from multiple sensors is used as input (RFID, 2 pairs of beam breakers, and video recording events)
+# Test that the function detects the expected clusters of detections when data from multiple sensors is used as input (RFID, 2 pairs of beam breakers, and video recording events)
 test_that("The function detects the expected number of clusters using data from three sensor types", {
   
   # Avoid library calls and other changes to the virtual environment
@@ -284,7 +284,7 @@ test_that("The function detects the expected number of clusters using data from 
     )
   
   # Each video recording timestamp is repeated twice to simulate our current setup of a pre-motion trigger and post-motion trigger video per timestamp representing the movement detection event
-  camera_ts <- data.frame(timestamp_ms = rep(c(starts_camera, ends_camera)), each = 2) %>%
+  camera_ts <- data.frame(timestamp_ms = rep(starts_camera, each = 2)) %>%
     dplyr::mutate(
       chamber_id = "Box_01",
       year = year(timestamp_ms),
@@ -293,17 +293,11 @@ test_that("The function detects the expected number of clusters using data from 
       sensor_id = "Camera",
       total_pixels_motionTrigger = 60000, 
       pixel_threshold = 100, 
-      video_file_name = paste(paste(rep(paste("Box_01_2023_8_1", paste(hour(starts_camera), minute(starts_camera), second(starts_camera), sep = "_"), sep = "_"), 2), c("pre_trigger", "post.trigger"), sep = "_"), ".mp4", sep = ""),
+      video_file_name = paste(paste(rep(paste("Box_01_2023_8_1", paste(hour(starts_camera), minute(starts_camera), second(starts_camera), sep = "_"), sep = "_"), 2), c("pre_trigger", "post_trigger"), sep = "_"), ".mp4", sep = ""),
       thin_threshold_s = 1,
       data_stage = "pre-processing",
       date_pre_processed = Sys.Date()
     )
-  
-  glimpse(rfid_ts)
-  glimpse(irbb_ts)
-  glimpse(camera_ts)
-  
-  
   
   write.csv(rfid_ts, file.path(tmp_path, "simulated_rfid.csv"), row.names = FALSE)
   write.csv(irbb_ts, file.path(tmp_path, "simulated_irbb.csv"), row.names = FALSE)
@@ -314,7 +308,6 @@ test_that("The function detects the expected number of clusters using data from 
   
   # Read in the output, check the output, then delete all files
   test_res <- read.csv(file.path(tmp_path, "detection_clusters.csv"))
-  # glimpse(test_res)
   
   # Test that the results are 4 detection clusters, or the length of the start timestamps for 1 sensor created above
   expect_equal(nrow(test_res), length(starts_rfid))
@@ -323,7 +316,8 @@ test_that("The function detects the expected number of clusters using data from 
   test_seq <- paste(c(
     rep("RFID", length(c(starts_rfid[1], ends_rfid[1]))),
     rep("Outer Beam Breaker", length(c(starts_irbb_o[1], ends_irbb_o[1]))),
-    rep("Inner Beam Breaker", length(c(starts_irbb_i[1], ends_irbb_i[1])))
+    rep("Inner Beam Breaker", length(c(starts_irbb_i[1], ends_irbb_i[1]))),
+    rep("Camera", length(c(starts_camera[1])))
   ), collapse = "; ")
   
   invisible(lapply(1:nrow(test_res), function(i){
