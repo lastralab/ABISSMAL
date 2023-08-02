@@ -26,18 +26,18 @@
 #' 
 #' 
 
-# file_nms = tmp_nm
+# file_nms = c(tmp_nm_rfid, tmp_nm_irbb, tmp_nm_camera)
 # threshold = x
 # run_length = y
 # sensor_id_col = "sensor_id"
 # timestamps_col = "timestamp_ms"
 # PIT_tag_col = "PIT_tag_ID"
 # rfid_label = "RFID"
-# camera_label = NULL
+# camera_label = "Camera"
 # drop_tag = NULL
-# preproc_metadata_cols = c("thin_threshold_s", "data_stage", "date_pre_processed") 
+# preproc_metadata_cols = c("thin_threshold_s", "data_stage", "date_pre_processed")
 # general_metadata_cols = c("chamber_id", "year", "month", "day")
-# video_metadata_cols = NULL
+# video_metadata_cols = c("total_pixels_motionTrigger", "pixel_threshold", "video_file_name")
 # path = path
 # data_dir = data_dir
 # out_dir = data_dir
@@ -242,8 +242,6 @@ find_detectionClusters <- function(file_nms, threshold, run_length = 2, sensor_i
       )
     ) %>% 
     
-    # detectns[["lags"]][[1]]
-    
     # Make a data frame of the first and last indices of each run longer than the given run_length that contain temporal difference values below or equal to the given threshold
     dplyr::mutate(
       lags_runs = map(
@@ -259,6 +257,7 @@ find_detectionClusters <- function(file_nms, threshold, run_length = 2, sensor_i
           ungroup()
       )
     ) %>% 
+    
     # Get the unique clusters of detections
     dplyr::mutate(
       bouts = map(
@@ -330,6 +329,24 @@ find_detectionClusters <- function(file_nms, threshold, run_length = 2, sensor_i
                   # Drop rows that have NAs in these columns
                   dplyr::filter(complete.cases(.))
                 
+                # If multiple videos occurred within a detection cluster, then concatenate these file names together
+                if(nrow(vid_cols_tmp) > 1){
+                  
+                  tmp_col_nm <- video_metadata_cols[grep("file", video_metadata_cols)]
+                  
+                  vid_file_nms <- vid_cols_tmp %>% 
+                    dplyr::reframe(
+                      !!tmp_col_nm := str_c(!!sym(tmp_col_nm), collapse = "; ")
+                    ) %>% 
+                    pull(tmp_col_nm)
+                  
+                  vid_cols_tmp[[tmp_col_nm]] <- vid_file_nms
+                  
+                  vid_cols_tmp <- vid_cols_tmp %>% 
+                    distinct()
+                  
+                }
+                
                 tmp <- tmp %>%
                   bind_cols(
                     vid_cols_tmp
@@ -393,14 +410,14 @@ find_detectionClusters <- function(file_nms, threshold, run_length = 2, sensor_i
   }
   
   # Order the data and add back important metadata before writing it out
-  if(!is.null(video_metadata_cols) & any(grepl(paste(video_metadata_cols, collapse = "|"), names(detectns)))){
+  if(!is.null(video_metadata_cols) & any(grepl(paste(video_metadata_cols, collapse = "|"), names(detectns2)))){
     
-    detectsn2 <- detectns2 %>% 
+    detectns2 <- detectns2 %>% 
       dplyr::select(all_of(general_metadata_cols), names(.)[-grep(paste(c(general_metadata_cols, video_metadata_cols, "threshold_seconds", "run_length", "data_stage", "date_processed"), collapse = "|"), names(.))], all_of(video_metadata_cols), threshold_seconds, run_length, data_stage, date_processed)
     
   } else {
     
-    detectsn2 <- detectns2 %>% 
+    detectns2 <- detectns2 %>% 
       dplyr::select(all_of(general_metadata_cols), names(.)[-grep(paste(c(general_metadata_cols, "threshold_seconds", "run_length", "data_stage", "date_processed"), collapse = "|"), names(.))], threshold_seconds, run_length, data_stage, date_processed)
     
   }
