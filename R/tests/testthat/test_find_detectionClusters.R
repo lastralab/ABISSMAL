@@ -18,7 +18,7 @@ source("/home/gsvidaurre/Desktop/GitHub_repos/Abissmal/R/utilities.R")
 # Each of these test_that expressions contains several expect_equal statements
 
 # Test that the function detects the expected clusters of detections when data from one sensor is used as input
-test_that("The function detects the expected number of clusters using data from one sensor", {
+test_that("The function detects the expected number of clusters using RFID data", {
   
   # Avoid library calls and other changes to the virtual environment
   # See https://r-pkgs.org/testing-design.html
@@ -104,7 +104,7 @@ test_that("The function detects the expected number of clusters using data from 
 })
 
 # Test that the function detects the expected clusters of detections when data from 2 sensor types is used as input (RFID and 2 pairs of beam breakers here)
-test_that("The function detects the expected number of clusters using data from one sensor", {
+test_that("The function detects the expected number of clusters using data from RFID and 2 beam breaker pairs", {
   
   # Avoid library calls and other changes to the virtual environment
   # See https://r-pkgs.org/testing-design.html
@@ -211,7 +211,7 @@ test_that("The function detects the expected number of clusters using data from 
 })
 
 # Test that the function detects the expected clusters of detections when data from multiple sensors is used as input (RFID, 2 pairs of beam breakers, and video recording events)
-test_that("The function detects the expected number of clusters using data from three sensor types", {
+test_that("The function detects the expected number of clusters using data from RFID, 2 beam breaker pairs, and the camera", {
   
   # Avoid library calls and other changes to the virtual environment
   # See https://r-pkgs.org/testing-design.html
@@ -338,9 +338,8 @@ test_that("The function detects the expected number of clusters using data from 
   
 })
 
-
 # Test that the function detects the expected clusters of detections across different combinations of `threshold` and `run_length` when data from one sensor is used as input
-test_that("The function detects the expected number of clusters using data from one sensor across different thresholds and run_lengths", {
+test_that("The function detects the expected number of clusters using RFID data across different thresholds and run_lengths", {
   
   # Avoid library calls and other changes to the virtual environment
   # See https://r-pkgs.org/testing-design.html
@@ -443,8 +442,148 @@ test_that("The function detects the expected number of clusters using data from 
   
 })
 
-# next: do the same test as immediately above but with 2 and then 3 sensor types
+# Test that the function detects the expected clusters of detections across different combinations of `threshold` and `run_length` when data from two sensor types are used as input
+test_that("The function detects the expected number of clusters using data from RFID and 2 pairs of beam breakers across different thresholds and run_lengths", {
+  
+  # Avoid library calls and other changes to the virtual environment
+  # See https://r-pkgs.org/testing-design.html
+  withr::local_package("tidyverse")
+  withr::local_package("plyr")
+  withr::local_package("dplyr")
+  withr::local_package("lubridate")
+  withr::local_package("pbapply")
+  
+  # Just for code development
+  # library(tidyverse)
+  # library(lubridate)
+  # library(pbapply)
+  # library(testthat)
+  
+  # Create a temporary directory for testing. Files will be written and read here
+  path <- "/home/gsvidaurre/Desktop"
+  data_dir <- "tmp_tests"
+  tmp_path <- file.path(path, data_dir)
+  
+  if(!dir.exists(tmp_path)){ 
+    dir.create(tmp_path)
+  }
+  
+  # Generate a file with pre-processed timestamps for two sensor types (RFID and 2 pairs of beam breakers)
+  # Create 4 clusters of detections: each cluster consists of a different number of detections (testing `run_length`) spaced different numbers of seconds apart (testing `threshold`)
+  ths <- seq(0.5, 5, by = 0.5)
+  
+  # Since run lengths are calculated from the difference in timestamps, each run_length value should be applied to a clusters of detections of length rls + 1
+  rls <- seq(1, 10, by = 1)
+  
+  starts_rfid <- as.POSIXct(c(
+    "2023-01-01 01:00:00 EST",
+    "2023-01-01 02:00:00 EST",
+    "2023-01-01 01:05:00 EST",
+    "2023-01-01 02:05:00 EST"
+  ))
+          
+  invisible(mapply(function(x, y){
+    
+    # Create the RFID timestamps
+    tmp_rfid <- data.table::rbindlist(lapply(1:length(starts), function(i){
+      
+      sim_ts <- seq(starts_rfid[i], starts_rfid[i] + max(seq_len(y*y)), by = x)[1:(y + 1)]
+      
+      return(data.frame(tstmps = sim_ts, cluster = i))
+      
+    }))
+    
+    # Create the outer beam breaker timestamps. For each simulated detection cluster, the first timestamp for the outer beam breaker pair is offset by x seconds more than the last RFID timestamp
+    tmp_irbb_o <- data.table::rbindlist(lapply(1:length(starts), function(i){
+      
+      start_irbb_o <- max(tmp_rfid$tstmps[tmp_rfid$cluster == i]) + x
+      
+      sim_ts <- seq(start_irbb_o, start_irbb_o + max(seq_len(y*y)), by = x)[1:(y + 1)]
+      
+      return(data.frame(tstmps = sim_ts, cluster = i))
+      
+    }))
 
+    # Create the inner beam breaker timestamps. For each simulated detection cluster, the first timestamp for the outer beam breaker pair is offset by x seconds more than the last timestamp of the cluster for the outer beam breaker pair
+    tmp_irbb_i <- data.table::rbindlist(lapply(1:length(starts), function(i){
+      
+      start_irbb_i <- max(tmp_irbb_o$tstmps[tmp_irbb_o$cluster == i]) + x
+      
+      sim_ts <- seq(start_irbb_i, start_irbb_i + max(seq_len(y*y)), by = x)[1:(y + 1)]
+      
+      return(data.frame(tstmps = sim_ts, cluster = i))
+      
+    }))
+    
+    # Create separate spreadsheets for the simulated RFID and IRBB data
+    rfid_ts <- data.frame(timestamp_ms = tmp_rfid$tstmps) %>% 
+      dplyr::mutate(
+        chamber_id = "Box_01",
+        year = year(timestamp_ms),
+        month = month(timestamp_ms),
+        day = day(timestamp_ms),
+        sensor_id = "RFID",
+        PIT_tag_ID = "test",
+        thin_threshold_s = 1,
+        data_stage = "pre-processing",
+        date_pre_processed = Sys.Date()
+      )
+    
+    irbb_ts <- data.frame(timestamp_ms = c(tmp_irbb_o$tstmps, tmp_irbb_i$tstmps)) %>% 
+      dplyr::mutate(
+        chamber_id = "Box_01",
+        year = year(timestamp_ms),
+        month = month(timestamp_ms),
+        day = day(timestamp_ms),
+        sensor_id = c(rep("Outer Beam Breaker", nrow(tmp_irbb_o)), rep("Inner Beam Breaker", nrow(tmp_irbb_i))),
+        thin_threshold_s = 1,
+        data_stage = "pre-processing",
+        date_pre_processed = Sys.Date()
+      )
+    
+    tmp_nm_rfid <- paste(paste("simulated_RFID", paste("th", x, sep = ""), paste("rl", y, sep = ""), sep = "_"), ".csv", sep = "")
+    
+    tmp_nm_irbb <- paste(paste("simulated_IRBB", paste("th", x, sep = ""), paste("rl", y, sep = ""), sep = "_"), ".csv", sep = "")
+    
+    write.csv(rfid_ts, file.path(tmp_path, tmp_nm_rfid), row.names = FALSE)
+    write.csv(irbb_ts, file.path(tmp_path, tmp_nm_irbb), row.names = FALSE)
+    
+    find_detectionClusters(file_nms = c(tmp_nm_rfid, tmp_nm_irbb), threshold = x, run_length = y, sensor_id_col = "sensor_id", timestamps_col = "timestamp_ms", PIT_tag_col = "PIT_tag_ID", rfid_label = "RFID", camera_label = NULL, drop_tag = NULL, preproc_metadata_cols = c("thin_threshold_s", "data_stage", "date_pre_processed"), general_metadata_cols = c("chamber_id", "year", "month", "day"), video_metadata_cols = NULL, path = path, data_dir = data_dir, out_dir = data_dir, out_file_nm = "detection_clusters.csv", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS")
+    
+    # Read in the output, check the output, then delete all files
+    test_res <- read.csv(file.path(tmp_path, "detection_clusters.csv"))
+
+    # Test that the number of detection clusters in the results is the same as the length of the RFID start timestamps created above
+    expect_equal(nrow(test_res), length(starts_rfid))
+    
+    # Test that the sequence of sensor triggering events is correct
+    invisible(lapply(1:nrow(test_res), function(i){
+      
+      test_seq <- paste(c(
+        rep("RFID", length(tmp_rfid$tstmps[tmp_rfid$cluster == i])),
+        rep("Outer Beam Breaker", length(tmp_irbb_o$tstmps[tmp_irbb_o$cluster == i])),
+        rep("Inner Beam Breaker", length(tmp_irbb_i$tstmps[tmp_irbb_i$cluster == i]))
+      ), collapse = "; ")
+      
+      expect_equal(test_res$event_seq[i], test_seq)
+      
+    }))
+    
+    # Test that the results have the correct number of detections per individual (since RFID data was used as input)
+    invisible(lapply(1:nrow(test_res), function(i){
+      
+      expect_equal(test_res$total_indiv1_detections[i], length(tmp_rfid$tstmps[tmp_rfid$cluster == i]))
+      
+    }))      
+    
+  }, ths, rls, SIMPLIFY = FALSE))
+  
+  # Remove the temporary directory and all files within it
+  if(tmp_path == file.path(path, data_dir)){
+    unlink(tmp_path, recursive = TRUE)
+  }
+  
+})
 
 
 
