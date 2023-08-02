@@ -26,25 +26,24 @@
 #' 
 #' 
 
-file_nms = c("simulated_rfid.csv", "simulated_irbb.csv", "simulated_camera.csv")
-threshold = 2
-run_length = 1
-sensor_id_col = "sensor_id"
-timestamps_col = "timestamp_ms"
-PIT_tag_col = "PIT_tag_ID"
-rfid_label = "RFID"
-camera_label = "Camera"
-drop_tag = NULL
-preproc_metadata_cols = c("thin_threshold_s", "data_stage", "date_pre_processed") general_metadata_cols = c("chamber_id", "year", "month", "day")
-video_metadata_cols = c("total_pixels_motionTrigger", "pixel_threshold", "video_file_name")
-
-
-path = path
-data_dir = data_dir
-out_dir = data_dir
-out_file_nm = "detection_clusters.csv"
-tz = "America/New York"
-POSIXct_format = "%Y-%m-%d %H:%M:%OS"
+# file_nms = c("simulated_rfid.csv", "simulated_irbb.csv", "simulated_camera.csv")
+# threshold = 2
+# run_length = 1
+# sensor_id_col = "sensor_id"
+# timestamps_col = "timestamp_ms"
+# PIT_tag_col = "PIT_tag_ID"
+# rfid_label = "RFID"
+# camera_label = "Camera"
+# drop_tag = NULL
+# preproc_metadata_cols = c("thin_threshold_s", "data_stage", "date_pre_processed")
+# general_metadata_cols = c("chamber_id", "year", "month", "day")
+# video_metadata_cols = c("total_pixels_motionTrigger", "pixel_threshold", "video_file_name")
+# path = path
+# data_dir = data_dir
+# out_dir = data_dir
+# out_file_nm = "detection_clusters.csv"
+# tz = "America/New York"
+# POSIXct_format = "%Y-%m-%d %H:%M:%OS"
 
 
 find_detectionClusters <- function(file_nms, threshold, run_length = 2, sensor_id_col, timestamps_col, PIT_tag_col, rfid_label = NULL, camera_label = NULL, drop_tag = NULL, preproc_metadata_cols, general_metadata_cols, video_metadata_cols = NULL, path, data_dir, out_dir, out_file_nm = "detection_clusters.csv", tz, POSIXct_format = "%Y-%m-%d %H:%M:%OS"){
