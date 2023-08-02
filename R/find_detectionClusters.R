@@ -26,18 +26,18 @@
 #' 
 #' 
 
-# file_nms = c("simulated_rfid.csv", "simulated_irbb.csv", "simulated_camera.csv")
-# threshold = 2
-# run_length = 1
+# file_nms = tmp_nm
+# threshold = x
+# run_length = y
 # sensor_id_col = "sensor_id"
 # timestamps_col = "timestamp_ms"
 # PIT_tag_col = "PIT_tag_ID"
 # rfid_label = "RFID"
-# camera_label = "Camera"
+# camera_label = NULL
 # drop_tag = NULL
-# preproc_metadata_cols = c("thin_threshold_s", "data_stage", "date_pre_processed")
+# preproc_metadata_cols = c("thin_threshold_s", "data_stage", "date_pre_processed") 
 # general_metadata_cols = c("chamber_id", "year", "month", "day")
-# video_metadata_cols = c("total_pixels_motionTrigger", "pixel_threshold", "video_file_name")
+# video_metadata_cols = NULL
 # path = path
 # data_dir = data_dir
 # out_dir = data_dir
@@ -233,7 +233,8 @@ find_detectionClusters <- function(file_nms, threshold, run_length = 2, sensor_i
         ) %>% 
           # Convert differences to Boolean based on the thinning threshold to find stretches of detection events very close together
           dplyr::mutate(
-            diff = as.numeric(floor(!!sym(timestamps_col) - shift)),
+            # diff = as.numeric(floor(!!sym(timestamps_col) - shift)),
+            diff = as.numeric(!!sym(timestamps_col) - shift),
             # Taking anything less than or equal to the threshold, see previous RFID pre-processing. The diff > 0 condition should remove the first timestamp compared to itself, which should in turn make it no longer necessary to correct the timestamp indices
             binary_diff = (diff <= threshold & diff > 0)
           ) %>% 
