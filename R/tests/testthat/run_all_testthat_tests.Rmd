@@ -5,7 +5,8 @@ date: "2023-01-05"
 output: html_document
 ---
 
-TKTK put /tests inside /R
+# See examples on: 
+# https://www.r-bloggers.com/2019/11/automated-testing-with-testthat-in-practice/
 
 ```{r}
 
