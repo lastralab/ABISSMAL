@@ -744,5 +744,7 @@ test_that("The function labels entrances and exits as expected using data from R
 })
 
 
+# TKTK: next steps are to perform the same tests across numbers of sensors but with IRBB perching event integration, then RFID + IRBB perching event integration
+
 ########## Testing error messages ########## 
 
