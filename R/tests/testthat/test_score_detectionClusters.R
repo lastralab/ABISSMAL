@@ -49,10 +49,10 @@ test_that("The function labels entrances and exits as expected using data from R
   withr::local_package("pbapply")
   
   # Just for code development
-  library(tidyverse)
-  library(lubridate)
-  library(pbapply)
-  library(testthat)
+  # library(tidyverse)
+  # library(lubridate)
+  # library(pbapply)
+  # library(testthat)
   
   # Create a temporary directory for testing. Files will be written and read here
   path <- "/home/gsvidaurre/Desktop"
@@ -71,10 +71,7 @@ test_that("The function labels entrances and exits as expected using data from R
   )) + seq(1, 300, 50)
   
   ends <- starts + rep(c(5, 10, 15), 2)
-  
-  starts
-  ends
-  
+
   # Create a spreadsheet of the simulated directional movement events
   sim_dats <- data.frame(start = starts) %>% 
     dplyr::mutate(
@@ -104,29 +101,19 @@ test_that("The function labels entrances and exits as expected using data from R
       date_pre_processed = Sys.Date()
     )
   
-  # glimpse(sim_dats)
-  # View(sim_dats)
-  
   write.csv(sim_dats, file.path(tmp_path, "simulated_detectionClusters.csv"), row.names = FALSE)
-
-  
-  # Right now the NULL in camera_label is causing problems in the labeling conditional statements
-  source("/home/gsvidaurre/Desktop/GitHub_repos/Abissmal/R/score_detectionClusters.R")
   
   score_detectionClusters(file_nm = "simulated_detectionClusters.csv", sensor_id_col = NULL, PIT_tag_col = NULL, rfid_label = "RFID", camera_label = NULL, outer_irbb_label = "Outer Beam Breaker", inner_irbb_label = "Inner Beam Breaker", general_metadata_cols = c("chamber_id", "year", "month", "day"), video_metadata_cols = NULL, integrate_perching = FALSE, perching_dataset = NULL, perching_prefix = NULL, path = path, data_dir = data_dir, out_dir = data_dir, out_file_nm = "scored_detectionClusters.csv", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS")
   
   # Read in the output, check the output, then delete all files
   test_res <- read.csv(file.path(tmp_path, "scored_detectionClusters.csv"))
   
-  View(test_res)
-  
   # Test that the results are 3 entrance events and 3 exit events, in that order
   event_labels <- sapply(1:nrow(test_res), function(i){
     
     wh <- which(!is.na(test_res[i, grep("direction", names(test_res))]))
     test_res[i, grep("direction", names(test_res))][[wh]]
-                
-    
+
   })
   
   expect_equal(event_labels, rep(c("entrance", "exit"), each = 3))
@@ -145,13 +132,9 @@ test_that("The function labels entrances and exits as expected using data from R
     expect_equal(test_res$Edge_1[i], sensor_seq[i])
   }))
   
-  # TKTK CONTINUE: the RFID indiv ID columns in the input are not carried through to the output 
-  
   # Test that the results have the correct number of detections per individual (since RFID data was used as input)
-  test_detectns <- length(c(starts_rfid[1], ends_rfid[1]))
-  
   invisible(lapply(1:nrow(test_res), function(i){
-    expect_equal(test_res$total_indiv1_detections[i], test_detectns)
+    expect_equal(test_res$total_indiv1_detections[i], sim_dats$total_indiv1_detections[i])
   }))
   
   # Remove the temporary directory and all files within it
