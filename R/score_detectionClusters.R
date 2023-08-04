@@ -193,41 +193,49 @@ score_detectionClusters <- function(file_nm, sensor_id_col = NULL, PIT_tag_col =
             # Use the first edge to label directionality
             if(!is.na(edges[1])){
               
-              if(!is.null(camera_label)){
+              if(!is.null(rfid_label)){
                 
-                if(grepl(rfid_label, edges[1]) & grepl(camera_label, edges[1])){
+                if(!is.null(camera_label)){
                   
-                  if(edges[1] == paste(rfid_label, camera_label, sep = " - ")){
-                    rfid_camera_direction <- "entrance"
-                  } else if(edges[1] == paste(camera_label, rfid_label, sep = " - ")){
-                    rfid_camera_direction <- "exit"
-                  }
+                  if(grepl(rfid_label, edges[1]) & grepl(camera_label, edges[1])){
+                    
+                    if(edges[1] == paste(rfid_label, camera_label, sep = " - ")){
+                      rfid_camera_direction <- "entrance"
+                    } else if(edges[1] == paste(camera_label, rfid_label, sep = " - ")){
+                      rfid_camera_direction <- "exit"
+                    }
+                    
+                    rfid_outer_irbb_direction <- rfid_inner_irbb_direction <- outer_irbb_camera_direction <- inner_irbb_camera_direction <- outer_inner_irbb_direction <- NA
+                    
+                  } 
                   
-                  rfid_outer_irbb_direction <- rfid_inner_irbb_direction <- outer_irbb_camera_direction <- inner_irbb_camera_direction <- outer_inner_irbb_direction <- NA
-                  
-                } 
+                }
                 
               }
               
-              if(grepl(rfid_label, edges[1]) & grepl(paste(c(outer_irbb_label, inner_irbb_label), collapse = "|"), edges[1])){
+              if(!is.null(rfid_label)){
                 
-                if(edges[1] == paste(outer_irbb_label, rfid_label, sep = " - ")){
-                  rfid_outer_irbb_direction <- "entrance"
-                  rfid_inner_irbb_direction <- NA
-                } else if(edges[1] == paste(rfid_label, outer_irbb_label, sep = " - ")){
-                  rfid_outer_irbb_direction <- "exit"
-                  rfid_inner_irbb_direction <- NA
-                } else if(edges[1] == paste(rfid_label, inner_irbb_label, sep = " - ")){
-                  rfid_inner_irbb_direction <- "entrance"
-                  rfid_outer_irbb_direction <- NA
-                } else if(edges[1] == paste(inner_irbb_label, rfid_label, sep = " - ")){
-                  rfid_inner_irbb_direction <- "exit"
-                  rfid_outer_irbb_direction <- NA
+                if(grepl(rfid_label, edges[1]) & grepl(paste(c(outer_irbb_label, inner_irbb_label), collapse = "|"), edges[1])){
+                  
+                  if(edges[1] == paste(outer_irbb_label, rfid_label, sep = " - ")){
+                    rfid_outer_irbb_direction <- "entrance"
+                    rfid_inner_irbb_direction <- NA
+                  } else if(edges[1] == paste(rfid_label, outer_irbb_label, sep = " - ")){
+                    rfid_outer_irbb_direction <- "exit"
+                    rfid_inner_irbb_direction <- NA
+                  } else if(edges[1] == paste(rfid_label, inner_irbb_label, sep = " - ")){
+                    rfid_inner_irbb_direction <- "entrance"
+                    rfid_outer_irbb_direction <- NA
+                  } else if(edges[1] == paste(inner_irbb_label, rfid_label, sep = " - ")){
+                    rfid_inner_irbb_direction <- "exit"
+                    rfid_outer_irbb_direction <- NA
+                  }
+                  
+                  rfid_camera_direction <- outer_irbb_camera_direction <- inner_irbb_camera_direction <- outer_inner_irbb_direction <- NA
+                  
                 }
                 
-                rfid_camera_direction <- outer_irbb_camera_direction <- inner_irbb_camera_direction <- outer_inner_irbb_direction <- NA
-                
-              } 
+              }
               
               if(!is.null(camera_label)){
                 
@@ -253,15 +261,19 @@ score_detectionClusters <- function(file_nm, sensor_id_col = NULL, PIT_tag_col =
                 
               }
               
-              if(!grepl("Camera|RFID", edges[1]) & grepl(paste(c(outer_irbb_label, inner_irbb_label), collapse = "|"), edges[1])){
+              if(is.null(rfid_label) & is.null(camera_label)){
                 
-                if(edges[1] == paste(outer_irbb_label, inner_irbb_label, sep = " - ")){
-                  outer_inner_irbb_direction <- "entrance"
-                } else if(edges[1] == paste(inner_irbb_label, outer_irbb_label, sep = " - ")){
-                  outer_inner_irbb_direction <- "exit"
+                if(!grepl("Camera|RFID", edges[1]) & grepl(paste(c(outer_irbb_label, inner_irbb_label), collapse = "|"), edges[1])){
+                  
+                  if(edges[1] == paste(outer_irbb_label, inner_irbb_label, sep = " - ")){
+                    outer_inner_irbb_direction <- "entrance"
+                  } else if(edges[1] == paste(inner_irbb_label, outer_irbb_label, sep = " - ")){
+                    outer_inner_irbb_direction <- "exit"
+                  }
+                  
+                  rfid_camera_direction <- rfid_outer_irbb_direction <- rfid_inner_irbb_direction <- inner_irbb_camera_direction <- outer_irbb_camera_direction <- NA
+                  
                 }
-                
-                rfid_camera_direction <- rfid_outer_irbb_direction <- rfid_inner_irbb_direction <- inner_irbb_camera_direction <- outer_irbb_camera_direction <- NA
                 
               }
               
@@ -362,12 +374,20 @@ score_detectionClusters <- function(file_nm, sensor_id_col = NULL, PIT_tag_col =
         ) %>% 
         dplyr::select(rowid, start, end, sensor_ids, names(.)[grep("Edge", names(.))], names(.)[grep("direction", names(.))], names(.)[grep("indiv", names(.))], names(.)[grep(paste(video_metadata_cols, collapse = "|"), names(.))])
       
-    } else if(!any(grepl(paste(c(rfid_label, camera_label), collapse = "|"), detectns$event_seq))){
+    } else {
       
       detectns_edges2 <- detectns_edges %>% 
         dplyr::select(rowid, start, end, sensor_ids, names(.)[grep("Edge", names(.))], names(.)[grep("direction", names(.))])
       
     }
+    
+  }
+  
+  # If only beam breaker data is present, then return the current columns in order
+  if(is.null(rfid_label) & is.null(camera_label)){
+    
+    detectns_edges2 <- detectns_edges %>% 
+      dplyr::select(rowid, start, end, sensor_ids, names(.)[grep("Edge", names(.))], names(.)[grep("direction", names(.))])
     
   }
   
@@ -520,6 +540,8 @@ score_detectionClusters <- function(file_nm, sensor_id_col = NULL, PIT_tag_col =
       date_processed = paste(Sys.Date(), Sys.time(), sep = " ")
     ) %>% 
     dplyr::select(-c("rowid"))
+  
+  
   
   write.csv(detectns_edges_p, file.path(path, out_dir, out_file_nm), row.names = FALSE)
   
