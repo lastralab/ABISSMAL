@@ -134,18 +134,35 @@ score_detectionClusters <- function(file_nm, sensor_id_col = NULL, PIT_tag_col =
   check_df_class(detectns)
   
   # Check that the expected columns from formal arguments are found in each data frame
-  colnames_fArgs <- f_args[grep("col", names(f_args))][-grep("general_metadata_cols", names(f_args[grep("col", names(f_args))]))]
+  if(!is.null(rfid_label)){
+    
+    colnames_fArgs <- f_args[grep("col", names(f_args))][-grep("general_metadata_cols", names(f_args[grep("col", names(f_args))]))]
+    
+    # Do not include the RFID related columns in the tests below of columns in the main input data
+  } else if(is.null(rfid_label) & integrate_perching){
+    
+    colnames_fArgs <- f_args[grep("col", names(f_args))][-grep("general_metadata_cols|sensor_id_col|PIT_tag_col", names(f_args[grep("col", names(f_args))]))]
+    
+  }
   
-  invisible(sapply(1:length(colnames_fArgs), function(i){
-    check_fArgs_data_cols(colnames_fArgs[[i]], detectns)
-  }))
-  
-  # Check that the expected columns from formal arguments do not have NAs
-  colnames_fArgs2 <- colnames_fArgs[-grep("PIT_tag", names(colnames_fArgs))]
-  
-  invisible(sapply(1:length(colnames_fArgs2), function(i){
-    check_fArgs_cols_nas(colnames_fArgs2[[i]], detectns)
-  }))
+  if(length(colnames_fArgs) > 0){
+    
+    invisible(sapply(1:length(colnames_fArgs), function(i){
+      check_fArgs_data_cols(colnames_fArgs[[i]], detectns)
+    }))
+    
+    # Check that the expected columns from formal arguments do not have NAs
+    colnames_fArgs2 <- colnames_fArgs[-grep("PIT_tag", names(colnames_fArgs))]
+    
+    if(length(colnames_fArgs2) > 0){
+      
+      invisible(sapply(1:length(colnames_fArgs2), function(i){
+        check_fArgs_cols_nas(colnames_fArgs2[[i]], detectns)
+      }))
+      
+    }
+    
+  }
   
   # Check that date-related columns are found in the data
   expected_cols <- c("year", "month", "day")
