@@ -70,7 +70,15 @@ score_detectionClusters <- function(file_nm, sensor_id_col = NULL, PIT_tag_col =
     
     expect_null <- ""
     
-    expect_nonNull <- c("sensor_id_col", "PIT_tag_col", "perching_dataset", "perching_prefix")
+    if(grepl("RFID", perching_dataset)){
+      
+      expect_nonNull <- c("sensor_id_col", "PIT_tag_col", "perching_dataset", "perching_prefix")
+      
+    } else if(grepl("IRBB", perching_dataset)){
+      
+      expect_nonNull <- c("sensor_id_col", "perching_dataset", "perching_prefix")
+      
+    }
     
     invisible(sapply(1:length(expect_nonNull), function(i){
       check_not_null(f_args[[grep(paste(paste("^", expect_nonNull[i], "$", sep = ""), collapse = "|"), names(f_args))]])
@@ -119,7 +127,21 @@ score_detectionClusters <- function(file_nm, sensor_id_col = NULL, PIT_tag_col =
   # Check that the perching file(s) also exist in the input directory
   if(integrate_perching){
     
-    check_file(file.path(path, data_dir), paste(perching_prefix, perching_dataset, ".csv", sep = ""))
+    if(perching_dataset %in% c("RFID", "IRBB")){
+      
+      check_file(file.path(path, data_dir), paste(perching_prefix, perching_dataset, ".csv", sep = ""))
+      
+    } else if(perching_dataset %in% c("RFID", "IRBB")){
+      
+      ps <- strsplit(perching_dataset, split = "-")[[1]]
+      
+      sapply(1:length(ps), function(i){
+        
+        check_file(file.path(path, data_dir), paste(perching_prefix, ps[i], ".csv", sep = ""))
+        
+      })
+      
+    }
     
   }
   
