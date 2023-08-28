@@ -6,6 +6,7 @@
 #' @param group_col_nm A character string. This argument is the column name for the column that contains values used to group the data before pre-processing. For RFID data, this column should contain the PIT tag identifiers, so that pre-processing is performed for each unique PIT tag. For beam breaker data, this column should be the unique beam breaker labels so that pre-processing is carried out separately for each beam breaker pair. The default is `NULL`, since this argument is not needed to process the video data
 #' @param pixel_col_nm A character string. This argument is the column name for the column that contains the number of pixels that triggered each unique video recording event. The default is `NULL`, since this argument is not needed to process the RFID or beam breaker data.
 #' @param thin_threshold A single numeric value. This argument is the temporal threshold in seconds that will be used to thin the raw data. The default is `NULL`, since this argument is not needed to pre-process the video data.
+#' @param mode A character string. This argument determines how raw detections will be filtered during pre-processing. If set to `retain_first`, then only the first detection per cluster (in which a cluster is a run of detections separated by gaps less than or equal to the temporal threshold) will be retained and all other detections will be dropped. If set to `thin`, then every other detection will be dropped in a thinning approach, which yields a longer sequence of detections per cluster separated by more than the given temporal threshold.
 #' @param pixel_threshold A single numeric value. This argument is a numeric threshold (number of pixels) that will be used to filter out video recording events with total pixels that changed below this threshold. The default is `NULL`, since this argument is not needed to process the RFID or beam breaker data.
 #' @param path A character string. This should be the path on the local computer or external hard drive specifying where the data is saved across sensors for a given experimental setup. For instance, "/media/gsvidaurre/Anodorhynchus/Data_Testing/Box_02_31Dec2022/Data".
 #' @param data_dir A character string. This should be the name of directory where the raw data is saved across sensors inside the path above. For instance, "raw_combined".
@@ -15,9 +16,23 @@
 #' 
 #' @details Pre-process the raw radio frequency identification (RFID) and beam breaker data by thinning, and pre-process the raw video data by the magnitude of movement detected. For the pre-processing by thinning, events detected by a single sensor are compared to each other (using a temporal offset), and adjacent events that occurred within a specified temporal threshold are filtered out. For RFID data, this data thinning is performed for each unique passive integrated transponder (PIT) tag in the dataset. For infrared beam breakers, the data thinning is carried out for each pair of beam breakers. For video data, this function filters out video recording timestamps with numbers of pixels that changed (e.g. the magnitude of movement) below a given threshold.
 #' 
-#' @return This function returns a spreadsheet in .csv format with the pre-processed detections per sensor and all metadata columns in the original data frame. Each spreadsheet also contains a column indicating the temporal threshold used for pre-processing by thinning (in seconds) for the RFID and beam breaker data, or a column indicating the threshold used to filter detections by the number of pixels that changed for the video data. Each row of this data frame is a pre-processed detection or movement event from the raw data collected by the given sensor.
+#' @return This function returns a spreadsheet in .csv format with the pre-processed detections per sensor and all metadata columns in the original data frame. Each spreadsheet also contains a column indicating the temporal threshold used for pre-processing by thinning (in seconds) for the RFID and beam breaker data, or a column indicating the threshold used to filter detections by the number of pixels that changed for the video data. Each row of this data frame is a pre-processed detection or movement event from the raw data collected by the given sensor. This function performs pre-processing in 1 of 2 ways: by either retaining only the first detection from a cluster of detections that occurred close in time, or thinning the cluster to return a sequence of detections per cluster separated by more than the given temporal threshold.
 
-preprocess_detections <- function(sensor, timestamps_col, group_col_nm = NULL, pixel_col_nm = NULL, thin_threshold = NULL, pixel_threshold = NULL, path, data_dir, out_dir, tz, POSIXct_format = "%Y-%m-%d %H:%M:%OS"){
+
+# sensor = "RFID"
+# timestamps_col = "timestamp_ms"
+# group_col_nm = "PIT_tag_ID"
+# pixel_col_nm = NULL
+# thin_threshold = 1
+# pixel_threshold = NULL
+# path = path
+# data_dir = file.path(data_dir, "raw_combined")
+# out_dir = file.path(data_dir, "processed")
+# tz = "America/New York"
+# POSIXct_format = "%Y-%m-%d %H:%M:%OS"
+# mode = "thin"
+
+preprocess_detections <- function(sensor, timestamps_col, group_col_nm = NULL, pixel_col_nm = NULL, mode, thin_threshold = NULL, pixel_threshold = NULL, path, data_dir, out_dir, tz, POSIXct_format = "%Y-%m-%d %H:%M:%OS"){
   
   # Get the current global options
   orig_opts <- options()
@@ -183,13 +198,17 @@ preprocess_detections <- function(sensor, timestamps_col, group_col_nm = NULL, p
         diff = as.numeric(diff),
         binary_diff = (diff >= thin_threshold & diff > 0)
       ) 
-    
+
     if(!is.null(group_col_nm)){
+      
       lags <- lags %>% 
         dplyr::select(!!sym(timestamps_col), group_col, diff, binary_diff) 
+      
     } else {
+      
       lags <- lags %>% 
         dplyr::select(!!sym(timestamps_col), diff, binary_diff) 
+      
     }
     
     # Nest by each group, do the rle calculations and removing indices, then recombine
@@ -203,21 +222,41 @@ preprocess_detections <- function(sensor, timestamps_col, group_col_nm = NULL, p
     
     if(!is.null(group_col_nm)){
       
-      lags_runs2 <- lags_runs %>% 
-        dplyr::select(group_col, run_values, run_lengths, run_indices) %>% 
-        pmap_dfr(., function(group_col, run_values, run_lengths, run_indices){
-          # In the runs of FALSE values, remove all including the first index. Should work for all runs with length == 1 or > 1
-          return(
-            data.frame(
-              group_col = group_col,
-              rem_indices = seq((run_indices - (run_lengths - 1)), run_indices, 1)
+      if(mode == "retain_first"){
+       
+        lags_runs2 <- lags_runs %>% 
+          dplyr::select(group_col, run_values, run_lengths, run_indices) %>% 
+          pmap_dfr(., function(group_col, run_values, run_lengths, run_indices){
+            # In the runs of FALSE values (e.g. cluster), remove all including the first index. Should work for all runs with length == 1 or > 1
+            return(
+              data.frame(
+                group_col = group_col,
+                rem_indices = seq((run_indices - (run_lengths - 1)), run_indices, 1)
+              )
             )
-          )
-        }) %>% 
-        # Make sure to drop the first index per group, since these first observations should be retained
-        dplyr::filter(rem_indices != 1)
+          }) %>% 
+          # Make sure to drop the first index per group, since these first observations should be retained
+          dplyr::filter(rem_indices != 1)
       
-      # Per group, remove the indices that represent the RFID detections which are too close together
+      } else if(mode == "thin"){
+        
+        lags_runs2 <- lags_runs %>% 
+          dplyr::select(group_col, run_values, run_lengths, run_indices) %>% 
+          pmap_dfr(., function(group_col, run_values, run_lengths, run_indices){
+            # For each run of FALSE values (e.g. cluster), retain every other detection (starting with the first detection) in order to thin the cluster
+            return(
+              data.frame(
+                group_col = group_col,
+                rem_indices = seq((run_indices - (run_lengths - 2)), run_indices - 1, 2)
+              )
+            )
+          }) %>% 
+          # Make sure to drop the first index per group, since these first observations should be retained
+          dplyr::filter(rem_indices != 1)
+        
+      }
+
+      # Per group, remove the indices that represent the detections that are too close together
       filt_df <- tmp_df %>% 
         nest() %>%
         # Filter each nested data frame by the correct row indices per group
@@ -298,7 +337,7 @@ preprocess_detections <- function(sensor, timestamps_col, group_col_nm = NULL, p
     # Return the shared columns in the order specified above, and any additional metadata columns per sensor afterwards
     filt_df2 <- filt_df %>% 
       dplyr::select(
-        col_nms, names(.)[-grep(paste(paste("^", col_nms, "$", sep = ""), collapse = "|"), names(.))], "data_stage", "date_pre_processed"
+        all_of(col_nms), names(.)[-grep(paste(paste("^", col_nms, "$", sep = ""), collapse = "|"), names(.))], "data_stage", "date_pre_processed"
       )
     
   }
