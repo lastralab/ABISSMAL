@@ -19,8 +19,8 @@ source("/home/gsvidaurre/Desktop/GitHub_repos/Abissmal/R/utilities.R")
 
 # As of right now, this function retains only 1 detection per cluster. Is this the behavior I want? Because if not, then I need to update the function to retain all detections per cluster separated by more than the threshold. This needs to be a sequence starting from the first detection. Maybe these are 2 modes of pre-processing
 
-# This test will depend on the threshold used
-test_that("The correct number and timing of discrete movement events are retained per pre-processing mode for a single temporal threshold and run length", {
+# A single temporal threshold
+test_that("The correct number and timing of discrete movement events are retained per pre-processing mode", {
   
   # Avoid library calls and other changes to the virtual environment
   # See https://r-pkgs.org/testing-design.html
@@ -83,141 +83,74 @@ test_that("The correct number and timing of discrete movement events are retaine
   
   write.csv(sim_ts, file.path(tmp_path, "raw_combined", "combined_raw_data_RFID.csv"), row.names = FALSE)
   
-  source("/home/gsvidaurre/Desktop/GitHub_repos/Abissmal/R/preprocess_detections.R", print = FALSE)
-  
   th <- 1
   
-  # `retain_first` mode
+  ####### `retain_first` mode #######
   preprocess_detections(sensor = "RFID", timestamps_col = "timestamp_ms", group_col_nm = "PIT_tag_ID", pixel_col_nm = NULL, thin_threshold = th, mode = "retain_first", pixel_threshold = NULL, path = path, data_dir = file.path(data_dir, "raw_combined"), out_dir = file.path(data_dir, "processed"), tz = "%Y-%m-%d %H:%M:%OS", POSIXct_format = "%Y-%m-%d %H:%M:%OS")
-
+  
   # Read in the output, check the output, then delete all files
   test_res <- read.csv(file.path(tmp_path, "processed", "pre_processed_data_RFID.csv")) %>% 
-  # Make sure the timestamps are in the right format
+    # Make sure the timestamps are in the right format
     dplyr::mutate(
       !!timestamps_col := as.POSIXct(format(as.POSIXct(!!sym(timestamps_col), tz = "America/New York"), "%Y-%m-%d %H:%M:%OS6"))
     )
   
-  glimpse(test_res)
-  class(test_res[[timestamps_col]])
-  
-  # Test that the results contain the expected number of detection clusters
+  # Check that the results contain the expected number of detection clusters
   expect_equal(nrow(test_res), length(starts))
   
-  # TKTK Test that each detection cluster is separated by more than the given temporal threshold
+  # Check that each detection cluster is separated by more than the given temporal threshold
   diffs <- test_res$timestamp_ms - lag(test_res$timestamp_ms)
   diffs <- diffs[!is.na(diffs)]
   
-  expect_true(all(diffs > th))
+  expect_true(all(diffs >= th))
   
-  # TKTK Test that the first timestamp from the raw data is returned as the timestamp per detection cluster
-  expect_equal(nrow(test_res), length(starts))
+  # Check that the first timestamp from the raw data is returned as the timestamp per detection cluster
+  tmp_starts <- starts[order(starts)]
   
-  # TKTK Pre-processing was performed within a single group specified inside the grouping column
-  # TKTK
+  invisible(lapply(1:nrow(test_res), function(x){
+    
+    expect_equal(test_res$timestamp_ms[x], tmp_starts[x])
+    
+  }))
   
-  # `thin` mode
-  preprocess_detections(sensor = "RFID", timestamps_col = "timestamp_ms", group_col_nm = "PIT_tag_ID", pixel_col_nm = NULL, thin_threshold = 1, mode = "thin", pixel_threshold = NULL, path = path, data_dir = file.path(data_dir, "raw_combined"), out_dir = file.path(data_dir, "processed"), tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS")
+  ####### `thin` mode #######
+  preprocess_detections(sensor = "RFID", timestamps_col = "timestamp_ms", group_col_nm = "PIT_tag_ID", pixel_col_nm = NULL, thin_threshold = th, mode = "thin", pixel_threshold = NULL, path = path, data_dir = file.path(data_dir, "raw_combined"), out_dir = file.path(data_dir, "processed"), tz = "%Y-%m-%d %H:%M:%OS", POSIXct_format = "%Y-%m-%d %H:%M:%OS")
   
   # Read in the output, check the output, then delete all files
-  test_res <- read.csv(file.path(tmp_path, "processed", "pre_processed_data_RFID.csv"))
+  test_res <- read.csv(file.path(tmp_path, "processed", "pre_processed_data_RFID.csv")) %>% 
+    # Make sure the timestamps are in the right format
+    dplyr::mutate(
+      !!timestamps_col := as.POSIXct(format(as.POSIXct(!!sym(timestamps_col), tz = "America/New York"), "%Y-%m-%d %H:%M:%OS6"))
+    )
   
-  # Test that the results contain the expected number of detection clusters
-  expect_equal(nrow(test_res), length(starts))
+  # Check that the results contain the expected number of detections. This should be the number of total clusters by the number of detections expected per cluster using mode = 'thin'
+  expect_equal(nrow(test_res), length(starts) * length(seq(1, length(event_ts[[1]]), 2)))
   
-  # TKTK Test that each detection cluster is separated by more than the given temporal threshold, as well as timestamps within each cluster
-  expect_equal(nrow(test_res), length(starts))
+  # Test detections are separated by more than the given temporal threshold
+  diffs <- test_res$timestamp_ms - lag(test_res$timestamp_ms)
+  diffs <- diffs[!is.na(diffs)]
   
-  # TKTK Test that the every other timestamp from the raw data is returned as the timestamp per detection cluster
-  expect_equal(nrow(test_res), length(starts))
+  expect_true(all(diffs >= th))
   
-  # TKTK Pre-processing was performed within a single group specified inside the grouping column
-  # TKTK
+  # Test that the every other timestamp from the raw data is returned as the timestamp per detection cluster
+  tstmps <- c(
+    event_ts[[1]][-seq(2, length(event_ts[[1]]) - 1, 2)], 
+    event_ts[[3]][-seq(2, length(event_ts[[3]]) - 1, 2)], 
+    event_ts[[2]][-seq(2, length(event_ts[[2]]) - 1, 2)], 
+    event_ts[[4]][-seq(2, length(event_ts[[4]]) - 1, 2)]
+  )
+  
+  expect_equal(test_res$timestamp_ms, tstmps)
+  
+  # Remove the temporary directory and all files within it
+  if(tmp_path == file.path(path, data_dir)){
+    unlink(tmp_path, recursive = TRUE)
+  }
   
 })
 
-
-# TKTK
-test_that("An empty data frame is returned when the given threshold drops all events after pre-processing", {
-  
-  # Avoid library calls and other changes to the virtual environment
-  # See https://r-pkgs.org/testing-design.html
-  withr::local_package("tidyverse")
-  withr::local_package("plyr")
-  withr::local_package("dplyr")
-  withr::local_package("lubridate")
-  withr::local_package("tidyquant")
-  withr::local_package("Rmisc")
-  
-  ### A single PIT tag ID
-  start <- as.POSIXct("2023-01-01 01:00:00 EST")
-  interval <- 1
-  end <- start + 240
-  
-  # 3 separate perching events (e.g. stretches of detections 1 second apart) separated by gaps of 1 minute 
-  tstmps_1 <- seq(from = start, by = interval, to = end)
-  tstmps_2 <- seq(from = (end + 60), by = interval, to = end + 120)
-  tstmps_3 <- seq(from = (end + 120 + 60), by = interval, to = end + 240)
-  
-  test_df <- data.frame(RFID = c(tstmps_1, tstmps_2, tstmps_3)) %>% 
-    dplyr::mutate(
-      year = year(start),
-      month = month(start),
-      day = day(start),
-      tag_id = "01-02-03-AA-BB-CC"
-    ) 
-  
-  threshold <- 0.1
-  
-  res_df <- test_df %>%
-    group_split(tag_id) %>%
-    map_dfr(
-      ~ find_rfid_perching_events(df = .x, threshold = threshold, rfid_col_nm = "RFID", tag_id_col_nm = "tag_id", run_length = 2)
-    )
-  
-  expect_equal(res_df$start, NA)
-  expect_equal(res_df$end, NA)
-  expect_equal(res_df$duration_seconds, NA)
-  expect_equal(res_df$event_type, NA)
-  
-  ### Multiple PIT tag IDs
-  start <- as.POSIXct("2023-01-01 01:00:00 EST")
-  interval <- 1
-  end <- start + 240
-  
-  # 3 separate perching events (e.g. stretches of detections 1 second apart) separated by gaps of 1 minute 
-  tstmps_1 <- seq(from = start, by = interval, to = end)
-  tstmps_2 <- seq(from = (end + 60), by = interval, to = end + 120)
-  tstmps_3 <- seq(from = (end + 120 + 60), by = interval, to = end + 240)
-  
-  test_df <- data.frame(RFID = c(tstmps_1, tstmps_2, tstmps_3)) %>% 
-    dplyr::mutate(
-      year = year(start),
-      month = month(start),
-      day = day(start),
-      tag_id = c(
-        rep("01-02-03-AA-BB-CC", length(tstmps_1)),
-        rep("01-02-03-XX-YY-ZZ", length(tstmps_2)),
-        rep("33-55-99-XX-YY-ZZ", length(tstmps_3))
-      )
-    ) 
-  
-  threshold <- 0.1
-  
-  res_df <- test_df %>%
-    group_split(tag_id) %>%
-    map_dfr(
-      ~ find_rfid_perching_events(df = .x, threshold = threshold, rfid_col_nm = "RFID", tag_id_col_nm = "tag_id", run_length = 2)
-    )
-  
-  expect_equal(unique(res_df$start), NA)
-  expect_equal(unique(res_df$end), NA)
-  expect_equal(unique(res_df$duration_seconds), NA)
-  expect_equal(unique(res_df$event_type), NA)
-  
-})
-
-# TKTK repeat these tests over different thresholds and run lengths
-test_that("The function detects the expected number of clusters using RFID data across different thresholds and run_lengths", {
+# Multiple temporal thresholds
+test_that("The correct number and timing of discrete movement events are retained per pre-processing mode", {
   
   # Avoid library calls and other changes to the virtual environment
   # See https://r-pkgs.org/testing-design.html
@@ -242,13 +175,10 @@ test_that("The function detects the expected number of clusters using RFID data 
     dir.create(tmp_path)
   }
   
-  # Generate a file with pre-processed timestamps for one sensor
+  # Create the input data directory that the function expects
+  dir.create(file.path(tmp_path, "raw_combined"))
+  
   # Create 4 clusters of detections: each cluster consists of a different number of detections (testing `run_length`) spaced different numbers of seconds apart (testing `threshold`)
-  ths <- seq(0.5, 5, by = 0.5)
-  
-  # Since run lengths are calculated from the difference in timestamps, each run_length value should be applied to a clusters of detections of length rls + 1
-  rls <- seq(1, 10, by = 1)
-  
   starts <- as.POSIXct(c(
     "2023-01-01 01:00:00 EST",
     "2023-01-01 02:00:00 EST",
@@ -256,62 +186,114 @@ test_that("The function detects the expected number of clusters using RFID data 
     "2023-01-01 02:05:00 EST"
   ))
   
-  invisible(mapply(function(x, y){
+  ends <- starts + 10
+  
+  ths <- seq(0.5, 5, by = 0.5) 
+
+  
+  x <- 4
+  invisible(lapply(1:length(ths), function(x){
     
-    tmp <- data.table::rbindlist(lapply(1:length(starts), function(i){
+    # Create the timestamps
+    tmp_tstmps <- data.table::rbindlist(lapply(1:length(starts), function(i){
       
-      sim_ts <- seq(starts[i], starts[i] + max(seq_len(y*y)), by = x)[1:(y + 1)]
-      # sim_ts
+      sim_ts <- seq(starts[i], ends[i], by = ths[x])
       
       return(data.frame(tstmps = sim_ts, cluster = i))
       
     }))
     
     # Write out a spreadsheet with these timestamps that will be used as input data for the function
-    sim_ts <- data.frame(timestamp_ms = tmp$tstmps) %>% 
+    sim_ts <- data.frame(timestamp_ms = tmp_tstmps$tstmps) %>% 
       dplyr::mutate(
         chamber_id = "Box_01",
         year = year(timestamp_ms),
         month = month(timestamp_ms),
         day = day(timestamp_ms),
+        original_timestamp = gsub(" EST", "" , gsub("2023-01-01 ", "", timestamp_ms)),
         sensor_id = "RFID",
-        PIT_tag_ID = "test",
-        thin_threshold_s = 1,
-        data_stage = "pre-processing",
-        date_pre_processed = Sys.Date()
+        data_type = "RFID",
+        data_stage = "raw_combined",
+        date_combined = Sys.Date(),
+        PIT_tag_ID = "test"
       )
     
-    tmp_nm <- paste(paste("simulated_single_sensor", paste("th", x, sep = ""), paste("rl", y, sep = ""), sep = "_"), ".csv", sep = "")
+    write.csv(sim_ts, file.path(tmp_path, "raw_combined", "combined_raw_data_RFID.csv"), row.names = FALSE)
     
-    write.csv(sim_ts, file.path(tmp_path, tmp_nm), row.names = FALSE)
+    ####### `retain_first` mode #######
     
-    find_detectionClusters(file_nms = tmp_nm, threshold = x, run_length = y, sensor_id_col = "sensor_id", timestamps_col = "timestamp_ms", PIT_tag_col = "PIT_tag_ID", rfid_label = "RFID", camera_label = NULL, drop_tag = NULL, preproc_metadata_cols = c("thin_threshold_s", "data_stage", "date_pre_processed"), general_metadata_cols = c("chamber_id", "year", "month", "day"), video_metadata_cols = NULL, path = path, data_dir = data_dir, out_dir = data_dir, out_file_nm = "detection_clusters.csv", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS")
+    preprocess_detections(sensor = "RFID", timestamps_col = "timestamp_ms", group_col_nm = "PIT_tag_ID", pixel_col_nm = NULL, thin_threshold = ths[x], mode = "retain_first", pixel_threshold = NULL, path = path, data_dir = file.path(data_dir, "raw_combined"), out_dir = file.path(data_dir, "processed"), tz = "%Y-%m-%d %H:%M:%OS", POSIXct_format = "%Y-%m-%d %H:%M:%OS")
     
     # Read in the output, check the output, then delete all files
-    test_res <- read.csv(file.path(tmp_path, "detection_clusters.csv"))
-    
-    # Test that the number of detection clusters in the results is the same as the length of the start timestamps created above
+    test_res <- read.csv(file.path(tmp_path, "processed", "pre_processed_data_RFID.csv")) %>% 
+      # Make sure the timestamps are in the right format
+      dplyr::mutate(
+        !!timestamps_col := as.POSIXct(format(as.POSIXct(!!sym(timestamps_col), tz = "America/New York"), "%Y-%m-%d %H:%M:%OS6"))
+      )
+
+    # Check that the results contain the expected number of detection clusters
     expect_equal(nrow(test_res), length(starts))
     
-    # Test that the sequence of sensor triggering events is correct
-    invisible(lapply(1:nrow(test_res), function(i){
+    # Check that each detection cluster is separated by more than the given temporal threshold
+    diffs <- test_res$timestamp_ms - lag(test_res$timestamp_ms)
+    diffs <- diffs[!is.na(diffs)]
+    
+    expect_true(all(diffs >= ths[x]))
+    
+    # Check that the first timestamp from the raw data is returned as the timestamp per detection cluster
+    tmp_starts <- starts[order(starts)]
+    
+    invisible(lapply(1:nrow(test_res), function(x){
       
-      test_seq <- paste(c(
-        rep("RFID", length(tmp$tstmps[tmp$cluster == i]))
-      ), collapse = "; ")
-      
-      expect_equal(test_res$event_seq[i], test_seq)
+      expect_equal(test_res$timestamp_ms[x], tmp_starts[x])
       
     }))
     
-    # Test that the results have the correct number of detections per individual (since RFID data was used as input)
-    invisible(lapply(1:nrow(test_res), function(i){
-      
-      expect_equal(test_res$total_indiv1_detections[i], length(tmp$tstmps[tmp$cluster == i]))
-      
-    }))      
+    ####### `thin` mode #######
+    preprocess_detections(sensor = "RFID", timestamps_col = "timestamp_ms", group_col_nm = "PIT_tag_ID", pixel_col_nm = NULL, thin_threshold = ths[x], mode = "thin", pixel_threshold = NULL, path = path, data_dir = file.path(data_dir, "raw_combined"), out_dir = file.path(data_dir, "processed"), tz = "%Y-%m-%d %H:%M:%OS", POSIXct_format = "%Y-%m-%d %H:%M:%OS")
     
-  }, ths, rls, SIMPLIFY = FALSE))
+    # Read in the output, check the output, then delete all files
+    test_res <- read.csv(file.path(tmp_path, "processed", "pre_processed_data_RFID.csv")) %>% 
+      # Make sure the timestamps are in the right format
+      dplyr::mutate(
+        !!timestamps_col := as.POSIXct(format(as.POSIXct(!!sym(timestamps_col), tz = "America/New York"), "%Y-%m-%d %H:%M:%OS6"))
+      )
+
+    glimpse(test_res)
+    
+    # Check that the results contain the expected number of detections. This should be the number of total clusters by the number of detections expected per cluster using mode = 'thin'
+    cat("th = ", ths[x], "\n")
+    
+  # TKTK something strange is happening when x = 4 and th = 2. Seems like some timestamps are being not skipped in a way that doesn't make sense. Actually the very last timestamp is being retained when it should be skipped. Go back to the function to troubleshoot this
+    
+    sim_ts <- seq(starts[i], ends[i], by = ths[x])
+    
+    View(test_res)
+    
+    expect_equal(nrow(test_res), length(starts) * length(seq(1, length(sim_ts), 2)))
+    
+    # Test detections are separated by more than the given temporal threshold
+    diffs <- test_res$timestamp_ms - lag(test_res$timestamp_ms)
+    diffs <- diffs[!is.na(diffs)]
+    
+    expect_true(all(diffs >= ths[x]))
+    
+    # Test that the every other timestamp from the raw data is returned as the timestamp per detection cluster
+    tmp_tstmps <- data.table::rbindlist(lapply(1:length(starts), function(i){
+      
+      sim_ts <- seq(starts[i], ends[i], by = ths[x])
+      
+      sim_ts <- sim_ts[-seq(2, length(sim_ts) - 1, 2)]
+      
+      return(data.frame(tstmps = sim_ts, cluster = i))
+      
+    }))
+    
+    tmp_tstmps$tstmps <- tmp_tstmps$tstmps[order(tmp_tstmps$tstmps)]
+    
+    expect_equal(test_res$timestamp_ms, tmp_tstmps$tstmps)
+    
+  }))
   
   # Remove the temporary directory and all files within it
   if(tmp_path == file.path(path, data_dir)){

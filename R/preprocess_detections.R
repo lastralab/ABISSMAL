@@ -196,7 +196,7 @@ preprocess_detections <- function(sensor, timestamps_col, group_col_nm = NULL, p
       dplyr::mutate(
         diff = floor(!!sym(timestamps_col) - shift),
         diff = as.numeric(diff),
-        binary_diff = (diff >= thin_threshold & diff > 0)
+        binary_diff = (diff > thin_threshold & diff > 0)
       ) 
 
     if(!is.null(group_col_nm)){
@@ -244,10 +244,21 @@ preprocess_detections <- function(sensor, timestamps_col, group_col_nm = NULL, p
           dplyr::select(group_col, run_values, run_lengths, run_indices) %>% 
           pmap_dfr(., function(group_col, run_values, run_lengths, run_indices){
             # For each run of FALSE values (e.g. cluster), retain every other detection (starting with the first detection) in order to thin the cluster
+            
+            if(run_indices == run_lengths){
+              
+              rem_indices <- seq((run_indices - (run_lengths - 2)), run_indices - 1, 2)
+              
+            } else {
+              
+              rem_indices <- seq((run_indices - (run_lengths - 1)), run_indices - 1, 2)
+              
+            }
+            
             return(
               data.frame(
                 group_col = group_col,
-                rem_indices = seq((run_indices - (run_lengths - 2)), run_indices - 1, 2)
+                rem_indices = rem_indices
               )
             )
           }) %>% 
