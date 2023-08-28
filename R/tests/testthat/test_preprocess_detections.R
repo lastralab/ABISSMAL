@@ -11,12 +11,16 @@ library(testthat)
 
 preprocess_detections <- source("/home/gsvidaurre/Desktop/GitHub_repos/Abissmal/R/preprocess_detections.R", print = FALSE)$value
 
+source("/home/gsvidaurre/Desktop/GitHub_repos/Abissmal/R/utilities.R")
+
 # This testing file can be run by calling test_file("./path/to/this/file)
 
 ########## Testing output ########## 
 
+# As of right now, this function retains only 1 detection per cluster. Is this the behavior I want? Because if not, then I need to update the function to retain all detections per cluster separated by more than the threshold. This needs to be a sequence starting from the first detection. Maybe these are 2 modes of pre-processing
+
 # This test will depend on the threshold used
-test_that("The correct number of discrete RFID events are retained after pre-processing", {
+test_that("The correct number and timing of discrete movement events are retained per pre-processing mode for a single temporal threshold and run length", {
   
   # Avoid library calls and other changes to the virtual environment
   # See https://r-pkgs.org/testing-design.html
@@ -79,156 +83,58 @@ test_that("The correct number of discrete RFID events are retained after pre-pro
   
   write.csv(sim_ts, file.path(tmp_path, "raw_combined", "combined_raw_data_RFID.csv"), row.names = FALSE)
   
-  # The function returns 1 timestamp per cluster. Is this the filtering that I want, or should there be less strict filtering here??
-  preprocess_detections(sensor = "RFID", timestamps_col = "timestamp_ms", group_col_nm = "PIT_tag_ID", pixel_col_nm = NULL, thin_threshold = 1, pixel_threshold = NULL, path = path, data_dir = file.path(data_dir, "raw_combined"), out_dir = file.path(data_dir, "processed"), tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS")
+  source("/home/gsvidaurre/Desktop/GitHub_repos/Abissmal/R/preprocess_detections.R", print = FALSE)
   
+  th <- 1
   
+  # `retain_first` mode
+  preprocess_detections(sensor = "RFID", timestamps_col = "timestamp_ms", group_col_nm = "PIT_tag_ID", pixel_col_nm = NULL, thin_threshold = th, mode = "retain_first", pixel_threshold = NULL, path = path, data_dir = file.path(data_dir, "raw_combined"), out_dir = file.path(data_dir, "processed"), tz = "%Y-%m-%d %H:%M:%OS", POSIXct_format = "%Y-%m-%d %H:%M:%OS")
+
+  # Read in the output, check the output, then delete all files
+  test_res <- read.csv(file.path(tmp_path, "processed", "pre_processed_data_RFID.csv")) %>% 
+  # Make sure the timestamps are in the right format
+    dplyr::mutate(
+      !!timestamps_col := as.POSIXct(format(as.POSIXct(!!sym(timestamps_col), tz = "America/New York"), "%Y-%m-%d %H:%M:%OS6"))
+    )
+  
+  glimpse(test_res)
+  class(test_res[[timestamps_col]])
+  
+  # Test that the results contain the expected number of detection clusters
+  expect_equal(nrow(test_res), length(starts))
+  
+  # TKTK Test that each detection cluster is separated by more than the given temporal threshold
+  diffs <- test_res$timestamp_ms - lag(test_res$timestamp_ms)
+  diffs <- diffs[!is.na(diffs)]
+  
+  expect_true(all(diffs > th))
+  
+  # TKTK Test that the first timestamp from the raw data is returned as the timestamp per detection cluster
+  expect_equal(nrow(test_res), length(starts))
+  
+  # TKTK Pre-processing was performed within a single group specified inside the grouping column
+  # TKTK
+  
+  # `thin` mode
+  preprocess_detections(sensor = "RFID", timestamps_col = "timestamp_ms", group_col_nm = "PIT_tag_ID", pixel_col_nm = NULL, thin_threshold = 1, mode = "thin", pixel_threshold = NULL, path = path, data_dir = file.path(data_dir, "raw_combined"), out_dir = file.path(data_dir, "processed"), tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS")
+  
+  # Read in the output, check the output, then delete all files
+  test_res <- read.csv(file.path(tmp_path, "processed", "pre_processed_data_RFID.csv"))
+  
+  # Test that the results contain the expected number of detection clusters
+  expect_equal(nrow(test_res), length(starts))
+  
+  # TKTK Test that each detection cluster is separated by more than the given temporal threshold, as well as timestamps within each cluster
+  expect_equal(nrow(test_res), length(starts))
+  
+  # TKTK Test that the every other timestamp from the raw data is returned as the timestamp per detection cluster
+  expect_equal(nrow(test_res), length(starts))
+  
+  # TKTK Pre-processing was performed within a single group specified inside the grouping column
+  # TKTK
   
 })
 
-# TKTK
-test_that("The pre-processed events are not closer together than the temporal threshold", {
-  
-  # Avoid library calls and other changes to the virtual environment
-  # See https://r-pkgs.org/testing-design.html
-  withr::local_package("tidyverse")
-  withr::local_package("plyr")
-  withr::local_package("dplyr")
-  withr::local_package("lubridate")
-  withr::local_package("tidyquant")
-  withr::local_package("Rmisc")
-  
-  ### A single PIT tag ID
-  start <- as.POSIXct("2023-01-01 01:00:00 EST")
-  interval <- 1
-  end <- start + 240
-  
-  # 3 separate perching events (e.g. stretches of detections 1 second apart) separated by gaps of 1 minute 
-  tstmps_1 <- seq(from = start, by = interval, to = end)
-  tstmps_2 <- seq(from = (end + 60), by = interval, to = end + 120)
-  tstmps_3 <- seq(from = (end + 120 + 60), by = interval, to = end + 240)
-  
-  test_df <- data.frame(RFID = c(tstmps_1, tstmps_2, tstmps_3)) %>% 
-    dplyr::mutate(
-      year = year(start),
-      month = month(start),
-      day = day(start),
-      tag_id = "01-02-03-AA-BB-CC"
-    ) 
-  
-  threshold <- 1
-  
-  res_df <- test_df %>%
-    group_split(tag_id) %>%
-    map_dfr(
-      ~ find_rfid_perching_events(df = .x, threshold = threshold, rfid_col_nm = "RFID", tag_id_col_nm = "tag_id", run_length = 2)
-    )
-  
-  # glimpse(res_df)
-  
-  # Filter the original timestamps for each perching event and calculate the gaps between consecutive timestamps within each perching event
-  gaps <- res_df %>% 
-    rowid_to_column() %>% 
-    dplyr::rename(
-      `uniq_event_id` = "rowid" 
-    ) %>% 
-    dplyr::select(uniq_event_id, start, end) %>% 
-    pmap_dfr(., function(uniq_event_id, start, end){
-      tmp <- test_df %>%
-        dplyr::filter(RFID >= start & RFID <= end) %>%
-        dplyr::mutate(
-          uniq_event_id = uniq_event_id,
-        ) 
-      
-      return(tmp)
-      
-    }) %>% 
-    group_by(uniq_event_id) %>% 
-    # This should be the same lag calculation as in the function itself
-    dplyr::mutate(
-      shift = dplyr::lag(RFID, default = first(RFID))
-    ) %>% 
-    dplyr::mutate(
-      diff = floor(RFID - shift),
-      diff = as.numeric(diff)
-    ) %>% 
-    dplyr::summarise(
-      max = max(diff)
-    ) %>% 
-    pull(max)
-  
-  sapply(1:length(gaps), function(i){
-    expect_lte(gaps[i], threshold)
-  })
-  
-  ### Multiple PIT tag IDs
-  start <- as.POSIXct("2023-01-01 01:00:00 EST")
-  interval <- 1
-  end <- start + 240
-  
-  # 3 separate perching events (e.g. stretches of detections 1 second apart) separated by gaps of 1 minute 
-  tstmps_1 <- seq(from = start, by = interval, to = end)
-  tstmps_2 <- seq(from = (end + 60), by = interval, to = end + 120)
-  tstmps_3 <- seq(from = (end + 120 + 60), by = interval, to = end + 240)
-  
-  test_df <- data.frame(RFID = c(tstmps_1, tstmps_2, tstmps_3)) %>% 
-    dplyr::mutate(
-      year = year(start),
-      month = month(start),
-      day = day(start),
-      tag_id = c(
-        rep("01-02-03-AA-BB-CC", length(tstmps_1)),
-        rep("01-02-03-XX-YY-ZZ", length(tstmps_2)),
-        rep("33-55-99-XX-YY-ZZ", length(tstmps_3))
-      )
-    ) 
-  
-  threshold <- 1
-  
-  res_df <- test_df %>%
-    group_split(tag_id) %>%
-    map_dfr(
-      ~ find_rfid_perching_events(df = .x, threshold = threshold, rfid_col_nm = "RFID", tag_id_col_nm = "tag_id", run_length = 2)
-    )
-  
-  # glimpse(res_df)
-  
-  # Filter the original timestamps for each perching event and calculate the gaps between consecutive timestamps within each perching event
-  gaps <- res_df %>% 
-    rowid_to_column() %>% 
-    dplyr::rename(
-      `uniq_event_id` = "rowid" 
-    ) %>% 
-    dplyr::select(uniq_event_id, start, end) %>% 
-    pmap_dfr(., function(uniq_event_id, start, end){
-      tmp <- test_df %>%
-        dplyr::filter(RFID >= start & RFID <= end) %>%
-        dplyr::mutate(
-          uniq_event_id = uniq_event_id,
-        ) 
-      
-      return(tmp)
-      
-    }) %>% 
-    group_by(uniq_event_id) %>% 
-    # This should be the same lag calculation as in the function itself
-    dplyr::mutate(
-      shift = dplyr::lag(RFID, default = first(RFID))
-    ) %>% 
-    dplyr::mutate(
-      diff = floor(RFID - shift),
-      diff = as.numeric(diff)
-    ) %>% 
-    dplyr::summarise(
-      max = max(diff)
-    ) %>% 
-    pull(max)
-  
-  sapply(1:length(gaps), function(i){
-    expect_lte(gaps[i], threshold)
-  })
-  
-})
 
 # TKTK
 test_that("An empty data frame is returned when the given threshold drops all events after pre-processing", {
@@ -307,349 +213,6 @@ test_that("An empty data frame is returned when the given threshold drops all ev
   expect_equal(unique(res_df$end), NA)
   expect_equal(unique(res_df$duration_seconds), NA)
   expect_equal(unique(res_df$event_type), NA)
-  
-})
-
-# TKTK
-test_that("The first timestamp of each run of consecutive raw detections is returned as the timestamp for a given pre-processed event", {
-  
-  # Avoid library calls and other changes to the virtual environment
-  # See https://r-pkgs.org/testing-design.html
-  withr::local_package("tidyverse")
-  withr::local_package("plyr")
-  withr::local_package("dplyr")
-  withr::local_package("lubridate")
-  withr::local_package("tidyquant")
-  withr::local_package("Rmisc")
-  
-  ### A single PIT tag ID
-  start <- as.POSIXct("2023-01-01 01:00:00 EST")
-  interval <- 1
-  end <- start + 240
-  
-  # 3 separate perching events (e.g. stretches of detections 1 second apart) separated by gaps of 1 minute 
-  tstmps_1 <- seq(from = start, by = interval, to = end)
-  tstmps_2 <- seq(from = (end + 60), by = interval, to = end + 120)
-  tstmps_3 <- seq(from = (end + 120 + 60), by = interval, to = end + 240)
-  
-  test_df <- data.frame(RFID = c(tstmps_1, tstmps_2, tstmps_3)) %>% 
-    dplyr::mutate(
-      year = year(start),
-      month = month(start),
-      day = day(start),
-      tag_id = "01-02-03-AA-BB-CC",
-      uniq_event_id = c(
-        rep("1", length(tstmps_1)),
-        rep("2", length(tstmps_2)),
-        rep("3", length(tstmps_3))
-      )
-    ) %>% 
-    group_by(uniq_event_id) %>% 
-    dplyr::mutate(
-      group_row_id = row_number()
-    ) %>%
-    ungroup()
-  
-  # glimpse(test_df)
-  
-  # Make a data frame of the min and max index of timestamps for each dummy perching event
-  index_df <- test_df %>% 
-    group_by(uniq_event_id) %>% 
-    dplyr::summarise(
-      min = min(group_row_id),
-      max = max(group_row_id)
-    )
-  
-  # glimpse(index_df)
-  
-  threshold <- 1
-  
-  res_df <- test_df %>%
-    group_split(tag_id) %>%
-    map_dfr(
-      ~ find_rfid_perching_events(df = .x, threshold = threshold, rfid_col_nm = "RFID", tag_id_col_nm = "tag_id", run_length = 2)
-    )
-  
-  # glimpse(res_df)
-  
-  # Find the group row indices for the start and end timestamps for each perching event
-  comp_df <- res_df %>% 
-    rowid_to_column() %>% 
-    dplyr::rename(
-      `uniq_event_id` = "rowid" 
-    ) %>% 
-    dplyr::select(uniq_event_id, start, end) %>% 
-    pmap_dfr(., function(uniq_event_id, start, end){
-      tmp <- test_df %>%
-        dplyr::filter(RFID == start | RFID == end) %>%
-        dplyr::mutate(
-          uniq_event_id = uniq_event_id,
-        ) 
-      
-      return(tmp)
-      
-    }) %>% 
-    group_by(uniq_event_id) %>% 
-    dplyr::arrange(-desc(RFID), .by_group = TRUE) %>% 
-    dplyr::mutate(
-      type = c("min", "max")
-    ) %>% 
-    ungroup() %>% 
-    dplyr::select(uniq_event_id, RFID, group_row_id, type) %>% 
-    pivot_wider(
-      id_cols = "uniq_event_id",
-      names_from = "type",
-      values_from = "group_row_id"
-    )
-  
-  expect_equal(index_df[["min"]], comp_df[["min"]])
-  expect_equal(index_df[["max"]], comp_df[["max"]])
-  
-  ### Multiple PIT tag IDs
-  start <- as.POSIXct("2023-01-01 01:00:00 EST")
-  interval <- 1
-  end <- start + 240
-  
-  # 3 separate perching events (e.g. stretches of detections 1 second apart) separated by gaps of 1 minute 
-  tstmps_1 <- seq(from = start, by = interval, to = end)
-  tstmps_2 <- seq(from = (end + 60), by = interval, to = end + 120)
-  tstmps_3 <- seq(from = (end + 120 + 60), by = interval, to = end + 240)
-  
-  test_df <- data.frame(RFID = c(tstmps_1, tstmps_2, tstmps_3)) %>% 
-    dplyr::mutate(
-      year = year(start),
-      month = month(start),
-      day = day(start),
-      tag_id = c(
-        rep("01-02-03-AA-BB-CC", length(tstmps_1)),
-        rep("01-02-03-XX-YY-ZZ", length(tstmps_2)),
-        rep("33-55-99-XX-YY-ZZ", length(tstmps_3))
-      ),
-      uniq_event_id = c(
-        rep("1", length(tstmps_1)),
-        rep("2", length(tstmps_2)),
-        rep("3", length(tstmps_3))
-      )
-    ) %>% 
-    group_by(uniq_event_id) %>% 
-    dplyr::mutate(
-      group_row_id = row_number()
-    ) %>%
-    ungroup()
-  
-  # glimpse(test_df)
-  
-  # Make a data frame of the min and max index of timestamps for each dummy perching event
-  index_df <- test_df %>% 
-    group_by(uniq_event_id) %>% 
-    dplyr::summarise(
-      min = min(group_row_id),
-      max = max(group_row_id)
-    )
-  
-  # glimpse(index_df)
-  
-  threshold <- 1
-  
-  res_df <- test_df %>%
-    group_split(tag_id) %>%
-    map_dfr(
-      ~ find_rfid_perching_events(df = .x, threshold = threshold, rfid_col_nm = "RFID", tag_id_col_nm = "tag_id", run_length = 2)
-    )
-  
-  # glimpse(res_df)
-  
-  # Find the group row indices for the start and end timestamps for each perching event
-  comp_df <- res_df %>% 
-    rowid_to_column() %>% 
-    dplyr::rename(
-      `uniq_event_id` = "rowid" 
-    ) %>% 
-    dplyr::select(uniq_event_id, start, end) %>% 
-    pmap_dfr(., function(uniq_event_id, start, end){
-      tmp <- test_df %>%
-        dplyr::filter(RFID == start | RFID == end) %>%
-        dplyr::mutate(
-          uniq_event_id = uniq_event_id,
-        ) 
-      
-      return(tmp)
-      
-    }) %>% 
-    group_by(uniq_event_id) %>% 
-    dplyr::arrange(-desc(RFID), .by_group = TRUE) %>% 
-    dplyr::mutate(
-      type = c("min", "max")
-    ) %>% 
-    ungroup() %>% 
-    dplyr::select(uniq_event_id, RFID, group_row_id, type) %>% 
-    pivot_wider(
-      id_cols = "uniq_event_id",
-      names_from = "type",
-      values_from = "group_row_id"
-    )
-  
-  expect_equal(index_df[["min"]], comp_df[["min"]])
-  expect_equal(index_df[["max"]], comp_df[["max"]])
-  
-})
-
-# TKTK
-test_that("Pre-processing was performed within a single group specified inside he grouping column", {
-  
-  # Avoid library calls and other changes to the virtual environment
-  # See https://r-pkgs.org/testing-design.html
-  withr::local_package("tidyverse")
-  withr::local_package("plyr")
-  withr::local_package("dplyr")
-  withr::local_package("lubridate")
-  withr::local_package("tidyquant")
-  withr::local_package("Rmisc")
-  
-  # Just for code development
-  # library(tidyverse)
-  # library(lubridate)
-  
-  ### A single PIT tag ID
-  
-  # 3 separate perching events on 3 different days
-  # All of these perching events should occur on their single respective day
-  start1 <- as.POSIXct("2023-01-01 01:00:00 EST")
-  interval <- 1
-  end1 <- start + 240
-  tstmps_1 <- seq(from = start1, by = interval, to = end1)
-  
-  start2 <- as.POSIXct("2023-01-02 10:00:00 EST")
-  interval <- 1
-  end2 <- start2 + 200
-  tstmps_2 <- seq(from = start2, by = interval, to = end2)
-  
-  start3 <- as.POSIXct("2023-01-05 15:00:00 EST")
-  interval <- 1
-  end3 <- start3 + 1000
-  tstmps_3 <- seq(from = start3, by = interval, to = end3)
-  
-  # A fourth perching event that bleeds into another day
-  # Given how the function is written (which is based on our data collection and transfer logic in the tracking system), this perching event should be split into 2 days
-  start4 <- as.POSIXct("2023-01-08 23:30:30 EST")
-  interval <- 1
-  end4 <- start4 + 7000
-  tstmps_4 <- seq(from = start4, by = interval, to = end4)
-  
-  # head(tstmps_4)
-  # tail(tstmps_4)
-  
-  test_df <- data.frame(RFID = c(tstmps_1, tstmps_2, tstmps_3, tstmps_4)) %>% 
-    dplyr::mutate(
-      year = c(year(tstmps_1), year(tstmps_2), year(tstmps_3), year(tstmps_4)),
-      month = c(month(tstmps_1), month(tstmps_2), month(tstmps_3), month(tstmps_4)),
-      day = c(day(tstmps_1), day(tstmps_2), day(tstmps_3), day(tstmps_4)),
-      tag_id = "01-02-03-AA-BB-CC",
-      uniq_event_id = c(
-        rep("1", length(tstmps_1)),
-        rep("2", length(tstmps_2)),
-        rep("3", length(tstmps_3)),
-        rep("4", length(tstmps_4))
-      )
-    ) %>% 
-    group_by(uniq_event_id) %>% 
-    dplyr::mutate(
-      group_row_id = row_number()
-    ) %>%
-    ungroup()
-  
-  # glimpse(test_df)
-
-  threshold <- 1
-  
-  res_df <- test_df %>%
-    group_split(tag_id) %>%
-    map_dfr(
-      ~ find_rfid_perching_events(df = .x, threshold = threshold, rfid_col_nm = "RFID", tag_id_col_nm = "tag_id", run_length = 2)
-    ) %>% 
-    dplyr::mutate(
-      start_date = paste(year(start), month(start), day(start), sep = "-"),
-      end_date = paste(year(end), month(end), day(end), sep = "-")
-    )
-  
-  # looks great - the last perching event is split up into 2 separate events just before and just after midnight
-  # View(res_df)
-  # glimpse(res_df)
-  
-  expect_equal(res_df$start_date, res_df$end_date)
-  
-  ### Multiple PIT tag IDs
-  
-  # 3 separate perching events on 3 different days
-  # All of these perching events should occur on their single respective day
-  start1 <- as.POSIXct("2023-01-01 01:00:00 EST")
-  interval <- 1
-  end1 <- start + 240
-  tstmps_1 <- seq(from = start1, by = interval, to = end1)
-  
-  start2 <- as.POSIXct("2023-01-02 10:00:00 EST")
-  interval <- 1
-  end2 <- start2 + 200
-  tstmps_2 <- seq(from = start2, by = interval, to = end2)
-  
-  start3 <- as.POSIXct("2023-01-05 15:00:00 EST")
-  interval <- 1
-  end3 <- start3 + 1000
-  tstmps_3 <- seq(from = start3, by = interval, to = end3)
-  
-  # A fourth perching event that bleeds into another day
-  # Given how the function is written (which is based on our data collection and transfer logic in the tracking system), this perching event should be split into 2 days
-  start4 <- as.POSIXct("2023-01-08 23:30:30 EST")
-  interval <- 1
-  end4 <- start4 + 7000
-  tstmps_4 <- seq(from = start4, by = interval, to = end4)
-  
-  # head(tstmps_4)
-  # tail(tstmps_4)
-  
-  test_df <- data.frame(RFID = c(tstmps_1, tstmps_2, tstmps_3, tstmps_4)) %>% 
-    dplyr::mutate(
-      year = c(year(tstmps_1), year(tstmps_2), year(tstmps_3), year(tstmps_4)),
-      month = c(month(tstmps_1), month(tstmps_2), month(tstmps_3), month(tstmps_4)),
-      day = c(day(tstmps_1), day(tstmps_2), day(tstmps_3), day(tstmps_4)),
-      tag_id = c(
-        rep("01-02-03-AA-BB-CC", length(tstmps_1)),
-        rep("01-02-03-XX-YY-ZZ", length(tstmps_2)),
-        rep("33-55-99-XX-YY-ZZ", length(tstmps_3)),
-        rep("TT-QQ-R6-KK-89-34", length(tstmps_4))
-      ),
-      uniq_event_id = c(
-        rep("1", length(tstmps_1)),
-        rep("2", length(tstmps_2)),
-        rep("3", length(tstmps_3)),
-        rep("4", length(tstmps_4))
-      )
-    ) %>% 
-    group_by(uniq_event_id) %>% 
-    dplyr::mutate(
-      group_row_id = row_number()
-    ) %>%
-    ungroup()
-  
-  # glimpse(test_df)
-  
-  threshold <- 1
-  
-  res_df <- test_df %>%
-    group_split(tag_id) %>%
-    map_dfr(
-      ~ find_rfid_perching_events(df = .x, threshold = threshold, rfid_col_nm = "RFID", tag_id_col_nm = "tag_id", run_length = 2)
-    ) %>% 
-    dplyr::mutate(
-      start_date = paste(year(start), month(start), day(start), sep = "-"),
-      end_date = paste(year(end), month(end), day(end), sep = "-")
-    )
-  
-  # The last perching event is also split up into 2 separate events just before and just after midnight
-  # View(res_df)
-  # glimpse(res_df)
-  
-  expect_equal(res_df$start_date, res_df$end_date)
   
 })
 
