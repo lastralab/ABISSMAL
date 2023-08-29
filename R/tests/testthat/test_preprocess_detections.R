@@ -304,458 +304,413 @@ test_that("The correct number and timing of discrete movement events are retaine
 
 ########## Testing error messages ########## 
 
-test_that("the raw data is a data frame", {
-  
-  # Avoid library calls and other changes to the virtual environment
-  # See https://r-pkgs.org/testing-design.html
-  withr::local_package("tidyverse")
-  withr::local_package("plyr")
-  withr::local_package("dplyr")
-  withr::local_package("lubridate")
-  withr::local_package("tidyquant")
-  withr::local_package("Rmisc")
-  
-  # Just for code development
-  # library(tidyverse)
-  # library(lubridate)
-  
-  start <- as.POSIXct("2023-01-01 01:00:00 EST")
-  interval <- 1
-  end <- start + 240
-  
-  # 3 separate perching events (e.g. stretches of detections 1 second apart) separated by gaps of 1 minute 
-  tstmps_1 <- seq(from = start, by = interval, to = end)
-  tstmps_2 <- seq(from = (end + 60), by = interval, to = end + 120)
-  tstmps_3 <- seq(from = (end + 120 + 60), by = interval, to = end + 240)
-  
-  test_df <- data.frame(timestamps = c(tstmps_1, tstmps_2, tstmps_3)) %>% 
-    dplyr::mutate(
-      year = year(start),
-      month = month(start),
-      day = day(start),
-      tag_id = "01-02-03-AA-BB-CC"
-    ) 
-  
-  df <- list(test_df)
-  # glimpse(df)
-  # class(df)
-  
-  expect_error(
-    preprocess_detections(df = df, detection_col_nm = "timestamps", group_col_nm = "tag_id", threshold = 2),
-    regexp = 'The input object needs to be a data frame'
-  )
-  
-})
-
-
 test_that("the temporal threshold is a number", {
   
   # Avoid library calls and other changes to the virtual environment
   # See https://r-pkgs.org/testing-design.html
   withr::local_package("tidyverse")
-  withr::local_package("plyr")
   withr::local_package("dplyr")
   withr::local_package("lubridate")
   withr::local_package("tidyquant")
-  withr::local_package("Rmisc")
   
   # Just for code development
   # library(tidyverse)
   # library(lubridate)
+  # library(testthat)
   
-  start <- as.POSIXct("2023-01-01 01:00:00 EST")
-  interval <- 1
-  end <- start + 240
+  # Create a temporary directory for testing. Files will be written and read here
+  path <- "/home/gsvidaurre/Desktop"
+  data_dir <- "tmp_tests"
+  tmp_path <- file.path(path, data_dir)
   
-  # 3 separate perching events (e.g. stretches of detections 1 second apart) separated by gaps of 1 minute 
-  tstmps_1 <- seq(from = start, by = interval, to = end)
-  tstmps_2 <- seq(from = (end + 60), by = interval, to = end + 120)
-  tstmps_3 <- seq(from = (end + 120 + 60), by = interval, to = end + 240)
+  if(!dir.exists(tmp_path)){ 
+    dir.create(tmp_path)
+  }
   
-  test_df <- data.frame(timestamps = c(tstmps_1, tstmps_2, tstmps_3)) %>% 
+  # Create the input data directory that the function expects
+  dir.create(file.path(tmp_path, "raw_combined"))
+  
+  # Generate a file with pre-processed timestamps for one sensor
+  # Create 4 clusters of detections: each cluster consists of 21 detections spaced 0.5 seconds apart
+  starts <- as.POSIXct(c(
+    "2023-01-01 01:00:00 EST",
+    "2023-01-01 02:00:00 EST",
+    "2023-01-01 01:05:00 EST",
+    "2023-01-01 02:05:00 EST"
+  ))
+  
+  ends <- starts + 10
+  
+  event_ts <- sapply(1:length(starts), function(x){
+    
+    return(seq(starts[x], ends[x], 0.5))
+    
+  }, simplify = FALSE)
+  
+  # Write out a spreadsheet with these timestamps that will be used as input data for the function
+  sim_ts <- data.frame(timestamp_ms = c(event_ts[[1]], event_ts[[2]], event_ts[[3]], event_ts[[4]])) %>% 
     dplyr::mutate(
-      year = year(start),
-      month = month(start),
-      day = day(start),
-      tag_id = "01-02-03-AA-BB-CC"
-    ) 
+      chamber_id = "Box_01",
+      year = year(timestamp_ms),
+      month = month(timestamp_ms),
+      day = day(timestamp_ms),
+      original_timestamp = gsub(" EST", "" , gsub("2023-01-01 ", "", timestamp_ms)),
+      sensor_id = "RFID",
+      data_type = "RFID",
+      data_stage = "raw_combined",
+      date_combined = Sys.Date(),
+      PIT_tag_ID = "test"
+    )
+  
+  write.csv(sim_ts, file.path(tmp_path, "raw_combined", "combined_raw_data_RFID.csv"), row.names = FALSE)
+  
+  th <- 1
   
   expect_error(
-    test_df %>%
-      group_split(tag_id) %>%
-      map_dfr(
-        ~ preprocess_detections(df = .x, detection_col_nm = "timestamps", group_col_nm = "tag_id", threshold = "2")
-      ),
-    regexp = 'The temporal threshold needs to be numeric'
+    preprocess_detections(sensor = "RFID", timestamps_col = "timestamp_ms", group_col_nm = "PIT_tag_ID", pixel_col_nm = NULL, thin_threshold = as.character(th), mode = "retain_first", pixel_threshold = NULL, path = path, data_dir = file.path(data_dir, "raw_combined"), out_dir = file.path(data_dir, "processed"), tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
+    regexp = paste("Expected a numeric value but", th, "is not numeric", sep = " ")
   )
+  
+  # Remove the temporary directory and all files within it
+  if(tmp_path == file.path(path, data_dir)){
+    unlink(tmp_path, recursive = TRUE)
+  }
   
 })
 
-
-test_that("the input dataset has the detections column", {
+test_that("the input dataset has the PIT_tag_ID column", {
   
   # Avoid library calls and other changes to the virtual environment
   # See https://r-pkgs.org/testing-design.html
   withr::local_package("tidyverse")
-  withr::local_package("plyr")
   withr::local_package("dplyr")
   withr::local_package("lubridate")
   withr::local_package("tidyquant")
-  withr::local_package("Rmisc")
   
   # Just for code development
   # library(tidyverse)
   # library(lubridate)
+  # library(testthat)
   
-  start <- as.POSIXct("2023-01-01 01:00:00 EST")
-  interval <- 1
-  end <- start + 240
+  # Create a temporary directory for testing. Files will be written and read here
+  path <- "/home/gsvidaurre/Desktop"
+  data_dir <- "tmp_tests"
+  tmp_path <- file.path(path, data_dir)
   
-  # 3 separate perching events (e.g. stretches of detections 1 second apart) separated by gaps of 1 minute 
-  tstmps_1 <- seq(from = start, by = interval, to = end)
-  tstmps_2 <- seq(from = (end + 60), by = interval, to = end + 120)
-  tstmps_3 <- seq(from = (end + 120 + 60), by = interval, to = end + 240)
+  if(!dir.exists(tmp_path)){ 
+    dir.create(tmp_path)
+  }
   
-  test_df <- data.frame(timestamps = c(tstmps_1, tstmps_2, tstmps_3)) %>% 
+  # Create the input data directory that the function expects
+  dir.create(file.path(tmp_path, "raw_combined"))
+  
+  # Generate a file with pre-processed timestamps for one sensor
+  # Create 4 clusters of detections: each cluster consists of 21 detections spaced 0.5 seconds apart
+  starts <- as.POSIXct(c(
+    "2023-01-01 01:00:00 EST",
+    "2023-01-01 02:00:00 EST",
+    "2023-01-01 01:05:00 EST",
+    "2023-01-01 02:05:00 EST"
+  ))
+  
+  ends <- starts + 10
+  
+  event_ts <- sapply(1:length(starts), function(x){
+    
+    return(seq(starts[x], ends[x], 0.5))
+    
+  }, simplify = FALSE)
+  
+  # Write out a spreadsheet with these timestamps that will be used as input data for the function
+  sim_ts <- data.frame(timestamp_ms = c(event_ts[[1]], event_ts[[2]], event_ts[[3]], event_ts[[4]])) %>% 
     dplyr::mutate(
-      year = year(start),
-      month = month(start),
-      day = day(start),
-      tag_id = "01-02-03-AA-BB-CC"
-    ) 
+      chamber_id = "Box_01",
+      year = year(timestamp_ms),
+      month = month(timestamp_ms),
+      day = day(timestamp_ms),
+      original_timestamp = gsub(" EST", "" , gsub("2023-01-01 ", "", timestamp_ms)),
+      sensor_id = "RFID",
+      data_type = "RFID",
+      data_stage = "raw_combined",
+      date_combined = Sys.Date(),
+      PIT_tag_ID = "test"
+    ) %>% 
+    # Drop the PIT_tag_ID column
+    dplyr::select(-c(PIT_tag_ID))
+
+  write.csv(sim_ts, file.path(tmp_path, "raw_combined", "combined_raw_data_RFID.csv"), row.names = FALSE)
   
-  # Drop the detections column
-  test_df2 <- test_df[, -grep("timestamps", names(test_df))]
-  # glimpse(test_df2)
+  th <- 1
   
   expect_error(
-    test_df2 %>%
-      group_split(tag_id) %>%
-      map_dfr(
-        ~ preprocess_detections(df = .x, detection_col_nm = "timestamps", group_col_nm = "tag_id", threshold = 2)
-      ),
-    regexp = 'The column specified in `detection_col_nm` does not exist'
+    preprocess_detections(sensor = "RFID", timestamps_col = "timestamp_ms", group_col_nm = "PIT_tag_ID", pixel_col_nm = NULL, thin_threshold = th, mode = "retain_first", pixel_threshold = NULL, path = path, data_dir = file.path(data_dir, "raw_combined"), out_dir = file.path(data_dir, "processed"), tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
+    regexp = paste("The column PIT_tag_ID was not found in the data frame")
   )
+  
+  # Remove the temporary directory and all files within it
+  if(tmp_path == file.path(path, data_dir)){
+    unlink(tmp_path, recursive = TRUE)
+  }
   
 })
 
-
-test_that("the input dataset has no NAs in the detections column", {
+test_that("the input dataset has no NAs in the timestamps column", {
   
   # Avoid library calls and other changes to the virtual environment
   # See https://r-pkgs.org/testing-design.html
   withr::local_package("tidyverse")
-  withr::local_package("plyr")
   withr::local_package("dplyr")
   withr::local_package("lubridate")
   withr::local_package("tidyquant")
-  withr::local_package("Rmisc")
   
   # Just for code development
   # library(tidyverse)
   # library(lubridate)
-  # library(tidyquant)
-  # library(Rmisc)
+  # library(testthat)
   
-  start <- as.POSIXct("2023-01-01 01:00:00 EST")
-  interval <- 1
-  end <- start + 240
+  # Create a temporary directory for testing. Files will be written and read here
+  path <- "/home/gsvidaurre/Desktop"
+  data_dir <- "tmp_tests"
+  tmp_path <- file.path(path, data_dir)
   
-  # 3 separate perching events (e.g. stretches of detections 1 second apart) separated by gaps of 1 minute 
-  tstmps_1 <- seq(from = start, by = interval, to = end)
-  tstmps_2 <- seq(from = (end + 60), by = interval, to = end + 120)
-  tstmps_3 <- seq(from = (end + 120 + 60), by = interval, to = end + 240)
+  if(!dir.exists(tmp_path)){ 
+    dir.create(tmp_path)
+  }
   
-  test_df <- data.frame(timestamps = c(tstmps_1, tstmps_2, tstmps_3)) %>% 
+  # Create the input data directory that the function expects
+  dir.create(file.path(tmp_path, "raw_combined"))
+  
+  # Generate a file with pre-processed timestamps for one sensor
+  # Create 4 clusters of detections: each cluster consists of 21 detections spaced 0.5 seconds apart
+  starts <- as.POSIXct(c(
+    "2023-01-01 01:00:00 EST",
+    "2023-01-01 02:00:00 EST",
+    "2023-01-01 01:05:00 EST",
+    "2023-01-01 02:05:00 EST"
+  ))
+  
+  ends <- starts + 10
+  
+  event_ts <- sapply(1:length(starts), function(x){
+    
+    return(seq(starts[x], ends[x], 0.5))
+    
+  }, simplify = FALSE)
+  
+  # Write out a spreadsheet with these timestamps that will be used as input data for the function
+  sim_ts <- data.frame(timestamp_ms = c(event_ts[[1]], event_ts[[2]], event_ts[[3]], event_ts[[4]])) %>% 
     dplyr::mutate(
-      year = year(start),
-      month = month(start),
-      day = day(start),
-      tag_id = "01-02-03-AA-BB-CC"
-    ) 
+      chamber_id = "Box_01",
+      year = year(timestamp_ms),
+      month = month(timestamp_ms),
+      day = day(timestamp_ms),
+      original_timestamp = gsub(" EST", "" , gsub("2023-01-01 ", "", timestamp_ms)),
+      sensor_id = "RFID",
+      data_type = "RFID",
+      data_stage = "raw_combined",
+      date_combined = Sys.Date(),
+      PIT_tag_ID = "test"
+    )
   
   # Replace one value in the detections column with an NA value
-  test_df$timestamps[1] <- NA
-  # head(test_df)
+  sim_ts$original_timestamp[1] <- NA
+  # head(sim_ts)
   
+  write.csv(sim_ts, file.path(tmp_path, "raw_combined", "combined_raw_data_RFID.csv"), row.names = FALSE)
+  
+  th <- 1
+
   expect_error(
-    test_df %>%
-      group_split(tag_id) %>%
-      map_dfr(
-        ~ preprocess_detections(df = .x, detection_col_nm = "timestamps", group_col_nm = "tag_id", threshold = 2)
-      ),
-    regexp = 'One or more timestamps are in the wrong format. These need to be in POSIXct or POSIXt format, like %Y-%m-%d %H:%M:%OS6'
+    preprocess_detections(sensor = "RFID", timestamps_col = "timestamp_ms", group_col_nm = "PIT_tag_ID", pixel_col_nm = NULL, thin_threshold = th, mode = "retain_first", pixel_threshold = NULL, path = path, data_dir = file.path(data_dir, "raw_combined"), out_dir = file.path(data_dir, "processed"), tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
+    regexp = "The column timestamp_ms needs to be in a format compatible with temporal calculations"
   )
   
-})
-
-
-test_that("the input dataset has the grouping column", {
-  
-  # Avoid library calls and other changes to the virtual environment
-  # See https://r-pkgs.org/testing-design.html
-  withr::local_package("tidyverse")
-  withr::local_package("plyr")
-  withr::local_package("dplyr")
-  withr::local_package("lubridate")
-  withr::local_package("tidyquant")
-  withr::local_package("Rmisc")
-  
-  # Just for code development
-  # library(tidyverse)
-  # library(lubridate)
-  
-  start <- as.POSIXct("2023-01-01 01:00:00 EST")
-  interval <- 1
-  end <- start + 240
-  
-  # 3 separate perching events (e.g. stretches of detections 1 second apart) separated by gaps of 1 minute 
-  tstmps_1 <- seq(from = start, by = interval, to = end)
-  tstmps_2 <- seq(from = (end + 60), by = interval, to = end + 120)
-  tstmps_3 <- seq(from = (end + 120 + 60), by = interval, to = end + 240)
-  
-  test_df <- data.frame(timestamps = c(tstmps_1, tstmps_2, tstmps_3)) %>% 
-    dplyr::mutate(
-      year = year(start),
-      month = month(start),
-      day = day(start),
-      tag_id = "01-02-03-AA-BB-CC"
-    ) 
-  
-  # Drop the grouping column
-  test_df2 <- test_df[, -grep("tag_id", names(test_df))]
-  # glimpse(test_df2)
-  
-  expect_error(
-    test_df2 %>%
-      group_split(month) %>%
-      map_dfr(
-        ~ preprocess_detections(df = .x, detection_col_nm = "timestamps", group_col_nm = "tag_id", threshold = 2)
-      ),
-    regexp = 'The column specified in `group_col_nm` does not exist'
-  )
+  # Remove the temporary directory and all files within it
+  if(tmp_path == file.path(path, data_dir)){
+    unlink(tmp_path, recursive = TRUE)
+  }
   
 })
-
 
 test_that("the input dataset has no NAs in the grouping column", {
   
   # Avoid library calls and other changes to the virtual environment
   # See https://r-pkgs.org/testing-design.html
   withr::local_package("tidyverse")
-  withr::local_package("plyr")
   withr::local_package("dplyr")
   withr::local_package("lubridate")
   withr::local_package("tidyquant")
-  withr::local_package("Rmisc")
   
   # Just for code development
   # library(tidyverse)
   # library(lubridate)
-  # library(tidyquant)
-  # library(Rmisc)
+  # library(testthat)
   
-  start <- as.POSIXct("2023-01-01 01:00:00 EST")
-  interval <- 1
-  end <- start + 240
+  # Create a temporary directory for testing. Files will be written and read here
+  path <- "/home/gsvidaurre/Desktop"
+  data_dir <- "tmp_tests"
+  tmp_path <- file.path(path, data_dir)
   
-  # 3 separate perching events (e.g. stretches of detections 1 second apart) separated by gaps of 1 minute 
-  tstmps_1 <- seq(from = start, by = interval, to = end)
-  tstmps_2 <- seq(from = (end + 60), by = interval, to = end + 120)
-  tstmps_3 <- seq(from = (end + 120 + 60), by = interval, to = end + 240)
+  if(!dir.exists(tmp_path)){ 
+    dir.create(tmp_path)
+  }
   
-  test_df <- data.frame(timestamps = c(tstmps_1, tstmps_2, tstmps_3)) %>% 
+  # Create the input data directory that the function expects
+  dir.create(file.path(tmp_path, "raw_combined"))
+  
+  # Generate a file with pre-processed timestamps for one sensor
+  # Create 4 clusters of detections: each cluster consists of 21 detections spaced 0.5 seconds apart
+  starts <- as.POSIXct(c(
+    "2023-01-01 01:00:00 EST",
+    "2023-01-01 02:00:00 EST",
+    "2023-01-01 01:05:00 EST",
+    "2023-01-01 02:05:00 EST"
+  ))
+  
+  ends <- starts + 10
+  
+  event_ts <- sapply(1:length(starts), function(x){
+    
+    return(seq(starts[x], ends[x], 0.5))
+    
+  }, simplify = FALSE)
+  
+  # Write out a spreadsheet with these timestamps that will be used as input data for the function
+  sim_ts <- data.frame(timestamp_ms = c(event_ts[[1]], event_ts[[2]], event_ts[[3]], event_ts[[4]])) %>% 
     dplyr::mutate(
-      year = year(start),
-      month = month(start),
-      day = day(start),
-      tag_id = "01-02-03-AA-BB-CC"
-    ) 
+      chamber_id = "Box_01",
+      year = year(timestamp_ms),
+      month = month(timestamp_ms),
+      day = day(timestamp_ms),
+      original_timestamp = gsub(" EST", "" , gsub("2023-01-01 ", "", timestamp_ms)),
+      sensor_id = "RFID",
+      data_type = "RFID",
+      data_stage = "raw_combined",
+      date_combined = Sys.Date(),
+      PIT_tag_ID = "test"
+    )
   
-  # Replace one value in the PIT tag ID column with an NA value
-  test_df$tag_id[1] <- NA
-  # head(test_df)
+  # Replace one value in the detections column with an NA value
+  sim_ts$PIT_tag_ID[1] <- NA
+  # head(sim_ts)
   
+  write.csv(sim_ts, file.path(tmp_path, "raw_combined", "combined_raw_data_RFID.csv"), row.names = FALSE)
+  
+  th <- 1
+  
+  # The function uses original_timestamp to create timestamp_ms before the NA values check
   expect_error(
-    test_df %>%
-      group_split(tag_id) %>%
-      map_dfr(
-        ~ preprocess_detections(df = .x, detection_col_nm = "timestamps", group_col_nm = "tag_id", threshold = 2)
-      ),
-    regexp = 'The column specified in `group_col_nm` has NA values'
+    preprocess_detections(sensor = "RFID", timestamps_col = "timestamp_ms", group_col_nm = "PIT_tag_ID", pixel_col_nm = NULL, thin_threshold = th, mode = "retain_first", pixel_threshold = NULL, path = path, data_dir = file.path(data_dir, "raw_combined"), out_dir = file.path(data_dir, "processed"), tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
+    regexp = "The column PIT_tag_ID has NA values"
   )
   
+  # Remove the temporary directory and all files within it
+  if(tmp_path == file.path(path, data_dir)){
+    unlink(tmp_path, recursive = TRUE)
+  }
+  
 })
-
 
 test_that("the input dataset has the year, month, and day columns, and that these columns do not have NAs", {
   
   # Avoid library calls and other changes to the virtual environment
   # See https://r-pkgs.org/testing-design.html
   withr::local_package("tidyverse")
-  withr::local_package("plyr")
   withr::local_package("dplyr")
   withr::local_package("lubridate")
   withr::local_package("tidyquant")
-  withr::local_package("Rmisc")
-  
-  # Just for code development
-  library(tidyverse)
-  library(lubridate)
-  
-  start <- as.POSIXct("2023-01-01 01:00:00 EST")
-  interval <- 1
-  end <- start + 240
-  
-  # 3 separate perching events (e.g. stretches of detections 1 second apart) separated by gaps of 1 minute 
-  tstmps_1 <- seq(from = start, by = interval, to = end)
-  tstmps_2 <- seq(from = (end + 60), by = interval, to = end + 120)
-  tstmps_3 <- seq(from = (end + 120 + 60), by = interval, to = end + 240)
-  
-  test_df <- data.frame(timestamps = c(tstmps_1, tstmps_2, tstmps_3)) %>% 
-    dplyr::mutate(
-      year = year(start),
-      month = month(start),
-      day = day(start),
-      tag_id = "01-02-03-AA-BB-CC"
-    ) 
-  
-  # Drop the year, month, and day columns one by one
-  test_df2 <- test_df[, -grep("year", names(test_df))]
-  # glimpse(test_df2)
-  
-  test_df3 <- test_df[, -grep("month", names(test_df))]
-  # glimpse(test_df2)
-  
-  test_df4 <- test_df[, -grep("day", names(test_df))]
-  # glimpse(test_df2)
-  
-  expect_error(
-    test_df2 %>%
-      group_split(tag_id) %>%
-      map_dfr(
-        ~ preprocess_detections(df = .x, detection_col_nm = "timestamps", group_col_nm = "tag_id", threshold = 2)
-      ),
-    regexp = 'The data frame is missing columns `year`, `month`, or `day`, or there are NA values'
-  )
-  
-  expect_error(
-    test_df3 %>%
-      group_split(tag_id) %>%
-      map_dfr(
-        ~ preprocess_detections(df = .x, detection_col_nm = "timestamps", group_col_nm = "tag_id", threshold = 2)
-      ),
-    regexp = 'The data frame is missing columns `year`, `month`, or `day`, or there are NA values'
-  )
-  
-  expect_error(
-    test_df4 %>%
-      group_split(tag_id) %>%
-      map_dfr(
-        ~ preprocess_detections(df = .x, detection_col_nm = "timestamps", group_col_nm = "tag_id", threshold = 2)
-      ),
-    regexp = 'The data frame is missing columns `year`, `month`, or `day`, or there are NA values'
-  )
-  
-  # Replace one value in each of the year, month, and day columns with an NA value
-  test_df$year[1] <- NA
-  
-  expect_error(
-    test_df %>%
-      group_split(tag_id) %>%
-      map_dfr(
-        ~ preprocess_detections(df = .x, detection_col_nm = "timestamps", group_col_nm = "tag_id", threshold = 2)
-      ),
-    regexp = 'The data frame is missing columns `year`, `month`, or `day`, or there are NA values'
-  )
-  
-  test_df$year[1] <- "2023"
-  test_df$month[1] <- NA
-  
-  expect_error(
-    test_df %>%
-      group_split(tag_id) %>%
-      map_dfr(
-        ~ preprocess_detections(df = .x, detection_col_nm = "timestamps", group_col_nm = "tag_id", threshold = 2)
-      ),
-    regexp = 'The data frame is missing columns `year`, `month`, or `day`, or there are NA values'
-  )
-  
-  test_df$month[1] <- "01"
-  test_df$day[1] <- NA
-  
-  expect_error(
-    test_df %>%
-      group_split(tag_id) %>%
-      map_dfr(
-        ~ preprocess_detections(df = .x, detection_col_nm = "timestamps", group_col_nm = "tag_id", threshold = 2)
-      ),
-    regexp = 'The data frame is missing columns `year`, `month`, or `day`, or there are NA values'
-  )
-  
-})
-
-
-test_that("the timestamps are in the right format", {
-  
-  # Avoid library calls and other changes to the virtual environment
-  # See https://r-pkgs.org/testing-design.html
-  withr::local_package("tidyverse")
-  withr::local_package("plyr")
-  withr::local_package("dplyr")
-  withr::local_package("lubridate")
-  withr::local_package("tidyquant")
-  withr::local_package("Rmisc")
   
   # Just for code development
   # library(tidyverse)
   # library(lubridate)
+  # library(testthat)
   
-  start <- as.POSIXct("2023-01-01 01:00:00 EST")
-  interval <- 1
-  end <- start + 240
+  # Create a temporary directory for testing. Files will be written and read here
+  path <- "/home/gsvidaurre/Desktop"
+  data_dir <- "tmp_tests"
+  tmp_path <- file.path(path, data_dir)
   
-  # 3 separate perching events (e.g. stretches of detections 1 second apart) separated by gaps of 1 minute 
-  tstmps_1 <- seq(from = start, by = interval, to = end)
-  tstmps_2 <- seq(from = (end + 60), by = interval, to = end + 120)
-  tstmps_3 <- seq(from = (end + 120 + 60), by = interval, to = end + 240)
+  if(!dir.exists(tmp_path)){ 
+    dir.create(tmp_path)
+  }
   
-  test_df <- data.frame(timestamps = c(tstmps_1, tstmps_2, tstmps_3)) %>% 
+  # Create the input data directory that the function expects
+  dir.create(file.path(tmp_path, "raw_combined"))
+  
+  # Generate a file with pre-processed timestamps for one sensor
+  # Create 4 clusters of detections: each cluster consists of 21 detections spaced 0.5 seconds apart
+  starts <- as.POSIXct(c(
+    "2023-01-01 01:00:00 EST",
+    "2023-01-01 02:00:00 EST",
+    "2023-01-01 01:05:00 EST",
+    "2023-01-01 02:05:00 EST"
+  ))
+  
+  ends <- starts + 10
+  
+  event_ts <- sapply(1:length(starts), function(x){
+    
+    return(seq(starts[x], ends[x], 0.5))
+    
+  }, simplify = FALSE)
+  
+  # Write out a spreadsheet with these timestamps that will be used as input data for the function
+  sim_ts <- data.frame(timestamp_ms = c(event_ts[[1]], event_ts[[2]], event_ts[[3]], event_ts[[4]])) %>% 
     dplyr::mutate(
-      year = year(start),
-      month = month(start),
-      day = day(start),
-      tag_id = "01-02-03-AA-BB-CC"
-    ) 
-  
-  # Convert timestamps to character format
-  test_df2 <- test_df %>% 
-    dplyr::mutate(
-      timestamps = as.character(timestamps)
+      chamber_id = "Box_01",
+      year = year(timestamp_ms),
+      month = month(timestamp_ms),
+      day = day(timestamp_ms),
+      original_timestamp = gsub(" EST", "" , gsub("2023-01-01 ", "", timestamp_ms)),
+      sensor_id = "RFID",
+      data_type = "RFID",
+      data_stage = "raw_combined",
+      date_combined = Sys.Date(),
+      PIT_tag_ID = "test"
     )
-  # glimpse(test_df2)
+  
+  # Drop the year column
+  sim_ts2 <- sim_ts[, -grep("year", names(sim_ts))]
+  # glimpse(sim_ts2)
+  
+  write.csv(sim_ts2, file.path(tmp_path, "raw_combined", "combined_raw_data_RFID.csv"), row.names = FALSE)
+  
+  th <- 1
   
   expect_error(
-    test_df2 %>%
-      group_split(tag_id) %>%
-      map_dfr(
-        ~ preprocess_detections(df = .x, detection_col_nm = "timestamps", group_col_nm = "tag_id", threshold = 2)
-      ),
-    regexp = 'One or more timestamps are in the wrong format'
+    preprocess_detections(sensor = "RFID", timestamps_col = "timestamp_ms", group_col_nm = "PIT_tag_ID", pixel_col_nm = NULL, thin_threshold = th, mode = "retain_first", pixel_threshold = NULL, path = path, data_dir = file.path(data_dir, "raw_combined"), out_dir = file.path(data_dir, "processed"), tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
+    regexp = "The column year was not found in the data frame"
   )
   
-  # Replace one value in the timestamps column with an NA value
-  test_df$timestamps[1] <- NA
-  # head(test_df)
+  # Drop the month column
+  sim_ts2 <- sim_ts[, -grep("month", names(sim_ts))]
+  # glimpse(sim_ts2)
+  
+  write.csv(sim_ts2, file.path(tmp_path, "raw_combined", "combined_raw_data_RFID.csv"), row.names = FALSE)
+  
+  th <- 1
   
   expect_error(
-    test_df %>%
-      group_split(tag_id) %>%
-      map_dfr(
-        ~ preprocess_detections(df = .x, detection_col_nm = "timestamps", group_col_nm = "tag_id", threshold = 2)
-      ),
-    regexp = 'One or more timestamps are in the wrong format'
+    preprocess_detections(sensor = "RFID", timestamps_col = "timestamp_ms", group_col_nm = "PIT_tag_ID", pixel_col_nm = NULL, thin_threshold = th, mode = "retain_first", pixel_threshold = NULL, path = path, data_dir = file.path(data_dir, "raw_combined"), out_dir = file.path(data_dir, "processed"), tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
+    regexp = "The column month was not found in the data frame"
   )
   
+  # Drop the day column
+  sim_ts2 <- sim_ts[, -grep("day", names(sim_ts))]
+  # glimpse(sim_ts2)
+  
+  write.csv(sim_ts2, file.path(tmp_path, "raw_combined", "combined_raw_data_RFID.csv"), row.names = FALSE)
+  
+  th <- 1
+  
+  expect_error(
+    preprocess_detections(sensor = "RFID", timestamps_col = "timestamp_ms", group_col_nm = "PIT_tag_ID", pixel_col_nm = NULL, thin_threshold = th, mode = "retain_first", pixel_threshold = NULL, path = path, data_dir = file.path(data_dir, "raw_combined"), out_dir = file.path(data_dir, "processed"), tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
+    regexp = "The column day was not found in the data frame"
+  )
+  
+  # Remove the temporary directory and all files within it
+  if(tmp_path == file.path(path, data_dir)){
+    unlink(tmp_path, recursive = TRUE)
+  }
   
 })
