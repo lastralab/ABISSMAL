@@ -3,43 +3,6 @@
 
 # See more info on the testthat package: https://r-pkgs.org/testing-basics.html
 
-# TKTK test the general argument / directory error checks
-sensors = c("IRBB", "RFID", "Video", "Temp")
-# tz <- "America/New York"
-tz <- NULL # testing setting one formal argument to NULL
-POSIXct_format = "%Y-%m-%d %H:%M:%OS"
-data_path
-out_dir
-
-# Testing not specifying a formal argument
-# rm(list = "tz")
-
-# TKTK need to test that there are no negative durations and also no duplicate durations indicating assignments within or between PIT tags
-
-library(tidyverse)
-# library(data.table)
-
-# file_nm <- "combined_raw_data_RFID.csv"
-file_nm <- "combined_raw_data_IRBB.csv"
-threshold <- 2
-run_length <- 2
-sensor_id_col <- "sensor_id"
-timestamps_col <- "timestamp_ms"
-# PIT_tag_col <- "PIT_tag_ID"
-PIT_tag_col <- NULL
-# rfid_label <- "RFID"
-rfid_label <- NULL
-outer_irbb_label <- "Outer Beam Breaker"
-inner_irbb_label <- "Inner Beam Breaker"
-path <- "/home/gsvidaurre/Desktop/MANUSCRIPTS/Prep/ParentalCareTracking_MethodsPaper/ABS_2023_Talk"
-# path <- "/media/gsvidaurre/Anodorhynchus/Data_Testing/Box_02_31Dec2022/Data"
-general_metadata_cols <- c("chamber_id", "sensor_id")
-data_dir <- "raw_combined"
-out_dir <- "processed"
-out_file_nm <- "perching_events.csv"
-tz <- "America/New York"
-POSIXct_format <- "%Y-%m-%d %H:%M:%OS"
-
 # See examples on: 
 # https://www.r-bloggers.com/2019/11/automated-testing-with-testthat-in-practice/
 
@@ -48,9 +11,912 @@ library(testthat)
 
 find_perching_events <- source("/home/gsvidaurre/Desktop/GitHub_repos/Abissmal/R/find_perching_events.R")$value
 
+source("/home/gsvidaurre/Desktop/GitHub_repos/Abissmal/R/utilities.R")
+
 # This testing file can be run by calling test_file("./path/to/this/file)
 
-########## Testing error messages ########## 
+########## Testing output ########## 
+
+# A single temporal threshold and run length, RFID data
+test_that("The correct number and timing of perching events are identified for RFID data", {
+  
+  # Avoid library calls and other changes to the virtual environment
+  # See https://r-pkgs.org/testing-design.html
+  withr::local_package("tidyverse")
+  withr::local_package("plyr")
+  withr::local_package("dplyr")
+  withr::local_package("lubridate")
+  withr::local_package("pbapply")
+  
+  # Just for code development
+  # library(tidyverse)
+  # library(lubridate)
+  # library(pbapply)
+  # library(testthat)
+  
+  # Create a temporary directory for testing. Files will be written and read here
+  path <- "/home/gsvidaurre/Desktop"
+  data_dir <- "tmp_tests"
+  tmp_path <- file.path(path, data_dir)
+  
+  if(!dir.exists(tmp_path)){ 
+    dir.create(tmp_path)
+  }
+  
+  # Create the input data directory that the function expects
+  dir.create(file.path(tmp_path, "raw_combined"))
+  
+  # Generate a file with raw timestamps for one sensor
+  
+  # Create 4 clusters of detections: each cluster consists of a given number of detections (1 `run_length` value) spaced a given number of seconds apart (1 `threshold` value)
+  starts <- as.POSIXct(c(
+    "2023-01-01 01:00:00 EST",
+    "2023-01-01 02:00:00 EST",
+    "2023-01-01 01:05:00 EST",
+    "2023-01-01 02:05:00 EST"
+  ))
+  
+  ends <- starts + 10
+  
+  # Set a single value each for the temporal threshold and run_length  
+  th <- 1
+  run_length <- 2
+  
+  # Each cluster will contain detections spaced by less than the temporal threshold
+  event_ts <- sapply(1:length(starts), function(x){
+    
+    return(seq(starts[x], ends[x], 0.5))
+    
+  }, simplify = FALSE)
+  
+  # Write out a spreadsheet with these timestamps that will be used as input data for the function
+  sim_ts <- data.frame(timestamp_ms = c(event_ts[[1]], event_ts[[2]], event_ts[[3]], event_ts[[4]])) %>% 
+    dplyr::mutate(
+      chamber_id = "Box_01",
+      year = year(timestamp_ms),
+      month = month(timestamp_ms),
+      day = day(timestamp_ms),
+      original_timestamp = gsub(" EST", "" , gsub("2023-01-01 ", "", timestamp_ms)),
+      sensor_id = "RFID",
+      data_type = "RFID",
+      data_stage = "raw_combined",
+      date_combined = Sys.Date(),
+      PIT_tag_ID = "test"
+    )
+  
+  write.csv(sim_ts, file.path(tmp_path, "raw_combined", "combined_raw_data_RFID.csv"), row.names = FALSE)
+  
+  find_perching_events(file_nm = "combined_raw_data_RFID.csv", threshold = th, run_length = run_length, sensor_id_col = "sensor_id", timestamps_col = "timestamp_ms", PIT_tag_col = "PIT_tag_ID", rfid_label = "RFID", outer_irbb_label = NULL, inner_irbb_label = NULL, general_metadata_cols = c("chamber_id", "sensor_id"), path = path, data_dir = file.path(data_dir, "raw_combined"), out_dir = file.path(data_dir, "processed"), out_file_nm = "perching_events.csv", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS")
+  
+  # Read in the output, check the output, then delete all files
+  test_res <- read.csv(file.path(tmp_path, "processed", "perching_events_RFID.csv")) %>% 
+    # Make sure the timestamps are in the right format
+    dplyr::mutate(
+      perching_start = as.POSIXct(format(as.POSIXct(perching_start, tz = "America/New York"), "%Y-%m-%d %H:%M:%OS6")),
+      perching_end = as.POSIXct(format(as.POSIXct(perching_end, tz = "America/New York"), "%Y-%m-%d %H:%M:%OS6"))
+    )
+  
+  # Check that the results contain the expected number of detection clusters
+  expect_equal(nrow(test_res), length(starts))
+  
+  # Check that the start and end timestamps of each perching event are correct
+  tmp_starts <- starts[order(starts)]
+  tmp_ends <- ends[order(ends)]
+  
+  invisible(lapply(1:nrow(test_res), function(x){
+    
+    expect_equal(test_res$perching_start[x], tmp_starts[x])
+    expect_equal(test_res$perching_end[x], tmp_ends[x])
+    
+  }))
+  
+  # Check that the duration of each perching event is correct
+  invisible(lapply(1:nrow(test_res), function(x){
+    
+    expect_equal(test_res$perching_duration_s[x], as.numeric(tmp_ends[x] - tmp_starts[x]))
+    
+  }))
+  
+  # Remove the temporary directory and all files within it
+  if(tmp_path == file.path(path, data_dir)){
+    unlink(tmp_path, recursive = TRUE)
+  }
+  
+})
+
+# Multiple temporal thresholds and run lengths, RFID data
+test_that("The correct number and timing of discrete perching events are identified for RFID data", {
+  
+  # Avoid library calls and other changes to the virtual environment
+  # See https://r-pkgs.org/testing-design.html
+  withr::local_package("tidyverse")
+  withr::local_package("plyr")
+  withr::local_package("dplyr")
+  withr::local_package("lubridate")
+  withr::local_package("pbapply")
+  
+  # Just for code development
+  # library(tidyverse)
+  # library(lubridate)
+  # library(pbapply)
+  # library(testthat)
+  
+  # Create a temporary directory for testing. Files will be written and read here
+  path <- "/home/gsvidaurre/Desktop"
+  data_dir <- "tmp_tests"
+  tmp_path <- file.path(path, data_dir)
+  
+  if(!dir.exists(tmp_path)){ 
+    dir.create(tmp_path)
+  }
+  
+  # Create the input data directory that the function expects
+  dir.create(file.path(tmp_path, "raw_combined"))
+  
+  # Create 4 clusters of detections: each cluster consists of a different number of detections (testing `run_length`) spaced different numbers of seconds apart (testing `threshold`)
+  starts <- as.POSIXct(c(
+    "2023-01-01 01:00:00 EST",
+    "2023-01-01 01:05:00 EST",
+    "2023-01-01 02:00:00 EST",
+    "2023-01-01 02:05:00 EST"
+  ))
+  
+  # Create 4 clusters of detections: each cluster consists of a different number of detections (testing `run_length`) spaced different numbers of seconds apart (testing `threshold`)
+  ths <- seq(0.5, 5, by = 0.5)
+  
+  # Since run lengths are calculated from the difference in timestamps, each run_length value should be applied to a clusters of detections of length rls + 1
+  rls <- seq(1, 10, by = 1)
+  
+  # threshold values are x, run length values are y
+  invisible(mapply(function(x, y){
+
+    # Create the timestamps
+    tmp_tstmps <- data.table::rbindlist(lapply(1:length(starts), function(i){
+      
+      sim_ts <- seq(starts[i], starts[i] + max(seq_len(y*y)), by = x)[1:(y + 1)]
+      
+      return(data.frame(tstmps = sim_ts, cluster = i))
+      
+    }))
+    
+    # Write out a spreadsheet with these timestamps that will be used as input data for the function
+    sim_ts <- data.frame(timestamp_ms = tmp_tstmps$tstmps) %>% 
+      dplyr::mutate(
+        chamber_id = "Box_01",
+        year = year(timestamp_ms),
+        month = month(timestamp_ms),
+        day = day(timestamp_ms),
+        original_timestamp = gsub(" EST", "" , gsub("2023-01-01 ", "", timestamp_ms)),
+        sensor_id = "RFID",
+        data_type = "RFID",
+        data_stage = "raw_combined",
+        date_combined = Sys.Date(),
+        PIT_tag_ID = "test"
+      )
+    
+    write.csv(sim_ts, file.path(tmp_path, "raw_combined", "combined_raw_data_RFID.csv"), row.names = FALSE)
+    
+    find_perching_events(file_nm = "combined_raw_data_RFID.csv", threshold = x, run_length = y, sensor_id_col = "sensor_id", timestamps_col = "timestamp_ms", PIT_tag_col = "PIT_tag_ID", rfid_label = "RFID", outer_irbb_label = NULL, inner_irbb_label = NULL, general_metadata_cols = c("chamber_id", "sensor_id"), path = path, data_dir = file.path(data_dir, "raw_combined"), out_dir = file.path(data_dir, "processed"), out_file_nm = "perching_events.csv", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS")
+    
+    # Read in the output, check the output, then delete all files
+    test_res <- read.csv(file.path(tmp_path, "processed", "perching_events_RFID.csv")) %>% 
+      # Make sure the timestamps are in the right format
+      dplyr::mutate(
+        perching_start = as.POSIXct(format(as.POSIXct(perching_start, tz = "America/New York"), "%Y-%m-%d %H:%M:%OS6")),
+        perching_end = as.POSIXct(format(as.POSIXct(perching_end, tz = "America/New York"), "%Y-%m-%d %H:%M:%OS6"))
+      )
+    
+    # Check that the results contain the expected number of detection clusters
+    expect_equal(nrow(test_res), length(starts))
+    
+    # Check that the start and end timestamps of each perching event are correct
+    invisible(lapply(1:nrow(test_res), function(i){
+      
+      # Get the expected end timestamp per simulated perching event cluster
+      tmp_end <- max(tmp_tstmps$tstmps[tmp_tstmps$cluster == i])
+      
+      expect_equal(test_res$perching_start[i], tmp_starts[i])
+      expect_equal(test_res$perching_end[i], tmp_end)
+      
+    }))
+    
+    # Check that the duration of each perching event is correct
+    invisible(lapply(1:nrow(test_res), function(i){
+      
+      # Get the expected end timestamp per simulated perching event cluster
+      tmp_end <- max(tmp_tstmps$tstmps[tmp_tstmps$cluster == i])
+      
+      expect_equal(test_res$perching_duration_s[i], as.numeric(tmp_end - tmp_starts[i]))
+      
+    }))
+    
+  }))
+  
+  # Remove the temporary directory and all files within it
+  if(tmp_path == file.path(path, data_dir)){
+    unlink(tmp_path, recursive = TRUE)
+  }
+  
+})
+
+# A single temporal threshold and run length, outer beam breaker data
+test_that("The correct number and timing of perching events are identified for the outer beam breaker pair", {
+  
+  # Avoid library calls and other changes to the virtual environment
+  # See https://r-pkgs.org/testing-design.html
+  withr::local_package("tidyverse")
+  withr::local_package("plyr")
+  withr::local_package("dplyr")
+  withr::local_package("lubridate")
+  withr::local_package("pbapply")
+  
+  # Just for code development
+  # library(tidyverse)
+  # library(lubridate)
+  # library(pbapply)
+  # library(testthat)
+  
+  # Create a temporary directory for testing. Files will be written and read here
+  path <- "/home/gsvidaurre/Desktop"
+  data_dir <- "tmp_tests"
+  tmp_path <- file.path(path, data_dir)
+  
+  if(!dir.exists(tmp_path)){ 
+    dir.create(tmp_path)
+  }
+  
+  # Create the input data directory that the function expects
+  dir.create(file.path(tmp_path, "raw_combined"))
+  
+  # Generate a file with raw timestamps for 1 beam breaker sensor
+  
+  # Create 4 clusters of detections: each cluster consists of a given number of detections (1 `run_length` value) spaced a given number of seconds apart (1 `threshold` value). Here this will be 2 perching events for each sensor
+  starts <- as.POSIXct(c(
+    "2023-01-01 01:00:00 EST",
+    "2023-01-01 01:05:00 EST",
+    "2023-01-01 02:00:00 EST",
+    "2023-01-01 02:05:00 EST"
+  ))
+  
+  ends <- starts + 10
+  
+  # Set a single value each for the temporal threshold and run_length  
+  th <- 1
+  run_length <- 2
+  
+  # Each cluster will contain detections spaced by less than the temporal threshold
+  event_ts <- sapply(1:length(starts), function(x){
+    
+    return(seq(starts[x], ends[x], 0.5))
+    
+  }, simplify = FALSE)
+  
+  # Write out a spreadsheet with these timestamps that will be used as input data for the function
+  sim_ts <- data.frame(timestamp_ms = c(event_ts[[1]], event_ts[[2]], event_ts[[3]], event_ts[[4]])) %>% 
+    dplyr::mutate(
+      chamber_id = "Box_01",
+      year = year(timestamp_ms),
+      month = month(timestamp_ms),
+      day = day(timestamp_ms),
+      original_timestamp = gsub(" EST", "" , gsub("2023-01-01 ", "", timestamp_ms)),
+      sensor_id = "Outer Beam Breaker",
+      data_type = "IRBB",
+      data_stage = "raw_combined",
+      date_combined = Sys.Date()
+    )
+  
+  write.csv(sim_ts, file.path(tmp_path, "raw_combined", "combined_raw_data_IRBB.csv"), row.names = FALSE)
+  
+  source("/home/gsvidaurre/Desktop/GitHub_repos/Abissmal/R/find_perching_events.R")
+  
+  find_perching_events(file_nm = "combined_raw_data_IRBB.csv", threshold = th, run_length = run_length, sensor_id_col = "sensor_id", timestamps_col = "timestamp_ms", PIT_tag_col = NULL, rfid_label = NULL, outer_irbb_label = "Outer Beam Breaker", inner_irbb_label = NULL, general_metadata_cols = c("chamber_id", "sensor_id"), path = path, data_dir = file.path(data_dir, "raw_combined"), out_dir = file.path(data_dir, "processed"), out_file_nm = "perching_events.csv", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS")
+  
+  # Read in the output, check the output, then delete all files
+  test_res <- read.csv(file.path(tmp_path, "processed", "perching_events_IRBB.csv")) %>% 
+    # Make sure the timestamps are in the right format
+    dplyr::mutate(
+      perching_start = as.POSIXct(format(as.POSIXct(perching_start, tz = "America/New York"), "%Y-%m-%d %H:%M:%OS6")),
+      perching_end = as.POSIXct(format(as.POSIXct(perching_end, tz = "America/New York"), "%Y-%m-%d %H:%M:%OS6"))
+    )
+
+  # Check that the results contain the expected number of detection clusters
+  expect_equal(nrow(test_res), length(starts))
+  
+  # Check that the start and end timestamps of each perching event are correct
+  invisible(lapply(1:nrow(test_res), function(x){
+    
+    expect_equal(test_res$perching_start[x], starts[x])
+    expect_equal(test_res$perching_end[x], ends[x])
+    
+  }))
+  
+  # Check that the duration of each perching event is correct
+  invisible(lapply(1:nrow(test_res), function(x){
+    
+    expect_equal(test_res$perching_duration_s[x], as.numeric(ends[x] - starts[x]))
+    
+  }))
+  
+  # Check that 4 perching events were identified per sensor
+  expect_equal(test_res$sensor_id, rep("Outer Beam Breaker", length(starts)))
+  
+  # Remove the temporary directory and all files within it
+  if(tmp_path == file.path(path, data_dir)){
+    unlink(tmp_path, recursive = TRUE)
+  }
+  
+})
+
+# Multiple temporal thresholds and run lengths, outer beam breaker data
+test_that("The correct number and timing of discrete perching events are identified for the outer beam breaker pair", {
+  
+  # Avoid library calls and other changes to the virtual environment
+  # See https://r-pkgs.org/testing-design.html
+  withr::local_package("tidyverse")
+  withr::local_package("plyr")
+  withr::local_package("dplyr")
+  withr::local_package("lubridate")
+  withr::local_package("pbapply")
+  
+  # Just for code development
+  # library(tidyverse)
+  # library(lubridate)
+  # library(pbapply)
+  # library(testthat)
+  
+  # Create a temporary directory for testing. Files will be written and read here
+  path <- "/home/gsvidaurre/Desktop"
+  data_dir <- "tmp_tests"
+  tmp_path <- file.path(path, data_dir)
+  
+  if(!dir.exists(tmp_path)){ 
+    dir.create(tmp_path)
+  }
+  
+  # Create the input data directory that the function expects
+  dir.create(file.path(tmp_path, "raw_combined"))
+  
+  # Create 4 clusters of detections: each cluster consists of a different number of detections (testing `run_length`) spaced different numbers of seconds apart (testing `threshold`)
+  starts <- as.POSIXct(c(
+    "2023-01-01 01:00:00 EST",
+    "2023-01-01 01:05:00 EST",
+    "2023-01-01 02:00:00 EST",
+    "2023-01-01 02:05:00 EST"
+  ))
+  
+  # Create 4 clusters of detections: each cluster consists of a different number of detections (testing `run_length`) spaced different numbers of seconds apart (testing `threshold`)
+  ths <- seq(0.5, 5, by = 0.5)
+  
+  # Since run lengths are calculated from the difference in timestamps, each run_length value should be applied to a clusters of detections of length rls + 1
+  rls <- seq(1, 10, by = 1)
+  
+  # threshold values are x, run length values are y
+  invisible(mapply(function(x, y){
+    
+    # Create the timestamps
+    tmp_tstmps <- data.table::rbindlist(lapply(1:length(starts), function(i){
+      
+      sim_ts <- seq(starts[i], starts[i] + max(seq_len(y*y)), by = x)[1:(y + 1)]
+      
+      return(data.frame(tstmps = sim_ts, cluster = i))
+      
+    }))
+    
+    # Write out a spreadsheet with these timestamps that will be used as input data for the function
+    sim_ts <- data.frame(timestamp_ms = tmp_tstmps$tstmps) %>% 
+      dplyr::mutate(
+        chamber_id = "Box_01",
+        year = year(timestamp_ms),
+        month = month(timestamp_ms),
+        day = day(timestamp_ms),
+        original_timestamp = gsub(" EST", "" , gsub("2023-01-01 ", "", timestamp_ms)),
+        sensor_id = "Outer Beam Breaker",
+        data_type = "IRBB",
+        data_stage = "raw_combined",
+        date_combined = Sys.Date()
+      )
+    
+    write.csv(sim_ts, file.path(tmp_path, "raw_combined", "combined_raw_data_IRBB.csv"), row.names = FALSE)
+    
+    find_perching_events(file_nm = "combined_raw_data_IRBB.csv", threshold = x, run_length = y, sensor_id_col = "sensor_id", timestamps_col = "timestamp_ms", PIT_tag_col = NULL, rfid_label = NULL, outer_irbb_label = "Outer Beam Breaker", inner_irbb_label = NULL, general_metadata_cols = c("chamber_id", "sensor_id"), path = path, data_dir = file.path(data_dir, "raw_combined"), out_dir = file.path(data_dir, "processed"), out_file_nm = "perching_events.csv", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS")
+    
+    # Read in the output, check the output, then delete all files
+    test_res <- read.csv(file.path(tmp_path, "processed", "perching_events_IRBB.csv")) %>% 
+      # Make sure the timestamps are in the right format
+      dplyr::mutate(
+        perching_start = as.POSIXct(format(as.POSIXct(perching_start, tz = "America/New York"), "%Y-%m-%d %H:%M:%OS6")),
+        perching_end = as.POSIXct(format(as.POSIXct(perching_end, tz = "America/New York"), "%Y-%m-%d %H:%M:%OS6"))
+      )
+    
+    # Check that the results contain the expected number of detection clusters
+    expect_equal(nrow(test_res), length(starts))
+    
+    # Check that the start and end timestamps of each perching event are correct
+    invisible(lapply(1:nrow(test_res), function(i){
+      
+      # Get the expected end timestamp per simulated perching event cluster
+      tmp_end <- max(tmp_tstmps$tstmps[tmp_tstmps$cluster == i])
+      
+      expect_equal(test_res$perching_start[i], tmp_starts[i])
+      expect_equal(test_res$perching_end[i], tmp_end)
+      
+    }))
+    
+    # Check that the duration of each perching event is correct
+    invisible(lapply(1:nrow(test_res), function(i){
+      
+      # Get the expected end timestamp per simulated perching event cluster
+      tmp_end <- max(tmp_tstmps$tstmps[tmp_tstmps$cluster == i])
+      
+      expect_equal(test_res$perching_duration_s[i], as.numeric(tmp_end - tmp_starts[i]))
+      
+    }))
+    
+    # Check that 4 perching events were identified for this sensor
+    expect_equal(test_res$sensor_id, rep("Outer Beam Breaker", length(starts)))
+    
+  }))
+  
+  # Remove the temporary directory and all files within it
+  if(tmp_path == file.path(path, data_dir)){
+    unlink(tmp_path, recursive = TRUE)
+  }
+  
+})
+
+# A single temporal threshold and run length, inner beam breaker data
+test_that("The correct number and timing of perching events are identified for the inner beam breaker pair", {
+  
+  # Avoid library calls and other changes to the virtual environment
+  # See https://r-pkgs.org/testing-design.html
+  withr::local_package("tidyverse")
+  withr::local_package("plyr")
+  withr::local_package("dplyr")
+  withr::local_package("lubridate")
+  withr::local_package("pbapply")
+  
+  # Just for code development
+  # library(tidyverse)
+  # library(lubridate)
+  # library(pbapply)
+  # library(testthat)
+  
+  # Create a temporary directory for testing. Files will be written and read here
+  path <- "/home/gsvidaurre/Desktop"
+  data_dir <- "tmp_tests"
+  tmp_path <- file.path(path, data_dir)
+  
+  if(!dir.exists(tmp_path)){ 
+    dir.create(tmp_path)
+  }
+  
+  # Create the input data directory that the function expects
+  dir.create(file.path(tmp_path, "raw_combined"))
+  
+  # Generate a file with raw timestamps for 1 beam breaker sensor
+  
+  # Create 4 clusters of detections: each cluster consists of a given number of detections (1 `run_length` value) spaced a given number of seconds apart (1 `threshold` value). Here this will be 2 perching events for each sensor
+  starts <- as.POSIXct(c(
+    "2023-01-01 01:00:00 EST",
+    "2023-01-01 01:05:00 EST",
+    "2023-01-01 02:00:00 EST",
+    "2023-01-01 02:05:00 EST"
+  ))
+  
+  ends <- starts + 10
+  
+  # Set a single value each for the temporal threshold and run_length  
+  th <- 1
+  run_length <- 2
+  
+  # Each cluster will contain detections spaced by less than the temporal threshold
+  event_ts <- sapply(1:length(starts), function(x){
+    
+    return(seq(starts[x], ends[x], 0.5))
+    
+  }, simplify = FALSE)
+  
+  # Write out a spreadsheet with these timestamps that will be used as input data for the function
+  sim_ts <- data.frame(timestamp_ms = c(event_ts[[1]], event_ts[[2]], event_ts[[3]], event_ts[[4]])) %>% 
+    dplyr::mutate(
+      chamber_id = "Box_01",
+      year = year(timestamp_ms),
+      month = month(timestamp_ms),
+      day = day(timestamp_ms),
+      original_timestamp = gsub(" EST", "" , gsub("2023-01-01 ", "", timestamp_ms)),
+      sensor_id = "Inner Beam Breaker",
+      data_type = "IRBB",
+      data_stage = "raw_combined",
+      date_combined = Sys.Date()
+    )
+  
+  write.csv(sim_ts, file.path(tmp_path, "raw_combined", "combined_raw_data_IRBB.csv"), row.names = FALSE)
+  
+  find_perching_events(file_nm = "combined_raw_data_IRBB.csv", threshold = th, run_length = run_length, sensor_id_col = "sensor_id", timestamps_col = "timestamp_ms", PIT_tag_col = NULL, rfid_label = NULL, outer_irbb_label = NULL, inner_irbb_label = "Inner Beam Breaker", general_metadata_cols = c("chamber_id", "sensor_id"), path = path, data_dir = file.path(data_dir, "raw_combined"), out_dir = file.path(data_dir, "processed"), out_file_nm = "perching_events.csv", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS")
+  
+  # Read in the output, check the output, then delete all files
+  test_res <- read.csv(file.path(tmp_path, "processed", "perching_events_IRBB.csv")) %>% 
+    # Make sure the timestamps are in the right format
+    dplyr::mutate(
+      perching_start = as.POSIXct(format(as.POSIXct(perching_start, tz = "America/New York"), "%Y-%m-%d %H:%M:%OS6")),
+      perching_end = as.POSIXct(format(as.POSIXct(perching_end, tz = "America/New York"), "%Y-%m-%d %H:%M:%OS6"))
+    )
+  
+  # Check that the results contain the expected number of detection clusters
+  expect_equal(nrow(test_res), length(starts))
+  
+  # Check that the start and end timestamps of each perching event are correct
+  invisible(lapply(1:nrow(test_res), function(x){
+    
+    expect_equal(test_res$perching_start[x], starts[x])
+    expect_equal(test_res$perching_end[x], ends[x])
+    
+  }))
+  
+  # Check that the duration of each perching event is correct
+  invisible(lapply(1:nrow(test_res), function(x){
+    
+    expect_equal(test_res$perching_duration_s[x], as.numeric(ends[x] - starts[x]))
+    
+  }))
+  
+  # Check that 4 perching events were identified per sensor
+  expect_equal(test_res$sensor_id, rep("Inner Beam Breaker", length(starts)))
+  
+  # Remove the temporary directory and all files within it
+  if(tmp_path == file.path(path, data_dir)){
+    unlink(tmp_path, recursive = TRUE)
+  }
+  
+})
+
+# Multiple temporal thresholds and run lengths, inner beam breaker data
+test_that("The correct number and timing of discrete perching events are identified for the inner beam breaker pair", {
+  
+  # Avoid library calls and other changes to the virtual environment
+  # See https://r-pkgs.org/testing-design.html
+  withr::local_package("tidyverse")
+  withr::local_package("plyr")
+  withr::local_package("dplyr")
+  withr::local_package("lubridate")
+  withr::local_package("pbapply")
+  
+  # Just for code development
+  # library(tidyverse)
+  # library(lubridate)
+  # library(pbapply)
+  # library(testthat)
+  
+  # Create a temporary directory for testing. Files will be written and read here
+  path <- "/home/gsvidaurre/Desktop"
+  data_dir <- "tmp_tests"
+  tmp_path <- file.path(path, data_dir)
+  
+  if(!dir.exists(tmp_path)){ 
+    dir.create(tmp_path)
+  }
+  
+  # Create the input data directory that the function expects
+  dir.create(file.path(tmp_path, "raw_combined"))
+  
+  # Create 4 clusters of detections: each cluster consists of a different number of detections (testing `run_length`) spaced different numbers of seconds apart (testing `threshold`)
+  starts <- as.POSIXct(c(
+    "2023-01-01 01:00:00 EST",
+    "2023-01-01 01:05:00 EST",
+    "2023-01-01 02:00:00 EST",
+    "2023-01-01 02:05:00 EST"
+  ))
+  
+  # Create 4 clusters of detections: each cluster consists of a different number of detections (testing `run_length`) spaced different numbers of seconds apart (testing `threshold`)
+  ths <- seq(0.5, 5, by = 0.5)
+  
+  # Since run lengths are calculated from the difference in timestamps, each run_length value should be applied to a clusters of detections of length rls + 1
+  rls <- seq(1, 10, by = 1)
+  
+  # threshold values are x, run length values are y
+  invisible(mapply(function(x, y){
+    
+    # Create the timestamps
+    tmp_tstmps <- data.table::rbindlist(lapply(1:length(starts), function(i){
+      
+      sim_ts <- seq(starts[i], starts[i] + max(seq_len(y*y)), by = x)[1:(y + 1)]
+      
+      return(data.frame(tstmps = sim_ts, cluster = i))
+      
+    }))
+    
+    # Write out a spreadsheet with these timestamps that will be used as input data for the function
+    sim_ts <- data.frame(timestamp_ms = tmp_tstmps$tstmps) %>% 
+      dplyr::mutate(
+        chamber_id = "Box_01",
+        year = year(timestamp_ms),
+        month = month(timestamp_ms),
+        day = day(timestamp_ms),
+        original_timestamp = gsub(" EST", "" , gsub("2023-01-01 ", "", timestamp_ms)),
+        sensor_id = "Inner Beam Breaker",
+        data_type = "IRBB",
+        data_stage = "raw_combined",
+        date_combined = Sys.Date()
+      )
+    
+    write.csv(sim_ts, file.path(tmp_path, "raw_combined", "combined_raw_data_IRBB.csv"), row.names = FALSE)
+    
+    find_perching_events(file_nm = "combined_raw_data_IRBB.csv", threshold = x, run_length = y, sensor_id_col = "sensor_id", timestamps_col = "timestamp_ms", PIT_tag_col = NULL, rfid_label = NULL, outer_irbb_label = NULL, inner_irbb_label = "Inner Beam Breaker", general_metadata_cols = c("chamber_id", "sensor_id"), path = path, data_dir = file.path(data_dir, "raw_combined"), out_dir = file.path(data_dir, "processed"), out_file_nm = "perching_events.csv", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS")
+    
+    # Read in the output, check the output, then delete all files
+    test_res <- read.csv(file.path(tmp_path, "processed", "perching_events_IRBB.csv")) %>% 
+      # Make sure the timestamps are in the right format
+      dplyr::mutate(
+        perching_start = as.POSIXct(format(as.POSIXct(perching_start, tz = "America/New York"), "%Y-%m-%d %H:%M:%OS6")),
+        perching_end = as.POSIXct(format(as.POSIXct(perching_end, tz = "America/New York"), "%Y-%m-%d %H:%M:%OS6"))
+      )
+    
+    # Check that the results contain the expected number of detection clusters
+    expect_equal(nrow(test_res), length(starts))
+    
+    # Check that the start and end timestamps of each perching event are correct
+    invisible(lapply(1:nrow(test_res), function(i){
+      
+      # Get the expected end timestamp per simulated perching event cluster
+      tmp_end <- max(tmp_tstmps$tstmps[tmp_tstmps$cluster == i])
+      
+      expect_equal(test_res$perching_start[i], tmp_starts[i])
+      expect_equal(test_res$perching_end[i], tmp_end)
+      
+    }))
+    
+    # Check that the duration of each perching event is correct
+    invisible(lapply(1:nrow(test_res), function(i){
+      
+      # Get the expected end timestamp per simulated perching event cluster
+      tmp_end <- max(tmp_tstmps$tstmps[tmp_tstmps$cluster == i])
+      
+      expect_equal(test_res$perching_duration_s[i], as.numeric(tmp_end - tmp_starts[i]))
+      
+    }))
+    
+    # Check that 4 perching events were identified for this sensor
+    expect_equal(test_res$sensor_id, rep("Inner Beam Breaker", length(starts)))
+    
+  }))
+  
+  # Remove the temporary directory and all files within it
+  if(tmp_path == file.path(path, data_dir)){
+    unlink(tmp_path, recursive = TRUE)
+  }
+  
+})
+
+# A single temporal threshold and run length, beam breaker data (two pairs)
+test_that("The correct number and timing of perching events are identified for 2 pairs of beam breakers", {
+  
+  # Avoid library calls and other changes to the virtual environment
+  # See https://r-pkgs.org/testing-design.html
+  withr::local_package("tidyverse")
+  withr::local_package("plyr")
+  withr::local_package("dplyr")
+  withr::local_package("lubridate")
+  withr::local_package("pbapply")
+  
+  # Just for code development
+  # library(tidyverse)
+  # library(lubridate)
+  # library(pbapply)
+  # library(testthat)
+  
+  # Create a temporary directory for testing. Files will be written and read here
+  path <- "/home/gsvidaurre/Desktop"
+  data_dir <- "tmp_tests"
+  tmp_path <- file.path(path, data_dir)
+  
+  if(!dir.exists(tmp_path)){ 
+    dir.create(tmp_path)
+  }
+  
+  # Create the input data directory that the function expects
+  dir.create(file.path(tmp_path, "raw_combined"))
+  
+  # Generate a file with raw timestamps for 2 beam breaker sensors
+  
+  # Create 4 clusters of detections: each cluster consists of a given number of detections (1 `run_length` value) spaced a given number of seconds apart (1 `threshold` value). Here this will be 2 perching events for each sensor
+  starts <- as.POSIXct(c(
+    "2023-01-01 01:00:00 EST",
+    "2023-01-01 01:05:00 EST",
+    "2023-01-01 02:00:00 EST",
+    "2023-01-01 02:05:00 EST"
+  ))
+  
+  ends <- starts + 10
+  
+  # Set a single value each for the temporal threshold and run_length  
+  th <- 1
+  run_length <- 2
+  
+  # Each cluster will contain detections spaced by less than the temporal threshold
+  event_ts <- sapply(1:length(starts), function(x){
+    
+    return(seq(starts[x], ends[x], 0.5))
+    
+  }, simplify = FALSE)
+  
+  # Write out a spreadsheet with these timestamps that will be used as input data for the function
+  sim_ts <- data.frame(timestamp_ms = c(event_ts[[1]], event_ts[[2]], event_ts[[3]], event_ts[[4]])) %>% 
+    dplyr::mutate(
+      chamber_id = "Box_01",
+      year = year(timestamp_ms),
+      month = month(timestamp_ms),
+      day = day(timestamp_ms),
+      original_timestamp = gsub(" EST", "" , gsub("2023-01-01 ", "", timestamp_ms)),
+      sensor_id = c(rep("Outer Beam Breaker", length(event_ts[[1]]) + length(event_ts[[2]])), rep("Inner Beam Breaker", length(event_ts[[3]]) + length(event_ts[[4]]))),
+      data_type = "IRBB",
+      data_stage = "raw_combined",
+      date_combined = Sys.Date()
+    )
+  
+  write.csv(sim_ts, file.path(tmp_path, "raw_combined", "combined_raw_data_IRBB.csv"), row.names = FALSE)
+  
+  find_perching_events(file_nm = "combined_raw_data_IRBB.csv", threshold = th, run_length = run_length, sensor_id_col = "sensor_id", timestamps_col = "timestamp_ms", PIT_tag_col = NULL, rfid_label = NULL, outer_irbb_label = "Outer Beam Breaker", inner_irbb_label = "Inner Beam Breaker", general_metadata_cols = c("chamber_id", "sensor_id"), path = path, data_dir = file.path(data_dir, "raw_combined"), out_dir = file.path(data_dir, "processed"), out_file_nm = "perching_events.csv", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS")
+  
+  # Read in the output, check the output, then delete all files
+  test_res <- read.csv(file.path(tmp_path, "processed", "perching_events_IRBB.csv")) %>% 
+    # Make sure the timestamps are in the right format
+    dplyr::mutate(
+      perching_start = as.POSIXct(format(as.POSIXct(perching_start, tz = "America/New York"), "%Y-%m-%d %H:%M:%OS6")),
+      perching_end = as.POSIXct(format(as.POSIXct(perching_end, tz = "America/New York"), "%Y-%m-%d %H:%M:%OS6"))
+    )
+  
+  glimpse(test_res)
+  
+  # Check that the results contain the expected number of detection clusters
+  expect_equal(nrow(test_res), length(starts))
+  
+  # Check that the start and end timestamps of each perching event are correct
+  invisible(lapply(1:nrow(test_res), function(x){
+    
+    expect_equal(test_res$perching_start[x], starts[x])
+    expect_equal(test_res$perching_end[x], ends[x])
+    
+  }))
+  
+  # Check that the duration of each perching event is correct
+  invisible(lapply(1:nrow(test_res), function(x){
+    
+    expect_equal(test_res$perching_duration_s[x], as.numeric(ends[x] - starts[x]))
+    
+  }))
+  
+  # Check that 2 perching events were identified per sensor
+  expect_equal(test_res$sensor_id, c(rep("Outer Beam Breaker", 2), rep("Inner Beam Breaker", 2)))
+  
+  # Remove the temporary directory and all files within it
+  if(tmp_path == file.path(path, data_dir)){
+    unlink(tmp_path, recursive = TRUE)
+  }
+  
+})
+
+# Multiple temporal thresholds and run lengths, beam breaker data (two pairs)
+test_that("The correct number and timing of discrete perching events are identified for 2 pairs of beam breakers", {
+  
+  # Avoid library calls and other changes to the virtual environment
+  # See https://r-pkgs.org/testing-design.html
+  withr::local_package("tidyverse")
+  withr::local_package("plyr")
+  withr::local_package("dplyr")
+  withr::local_package("lubridate")
+  withr::local_package("pbapply")
+  
+  # Just for code development
+  # library(tidyverse)
+  # library(lubridate)
+  # library(pbapply)
+  # library(testthat)
+  
+  # Create a temporary directory for testing. Files will be written and read here
+  path <- "/home/gsvidaurre/Desktop"
+  data_dir <- "tmp_tests"
+  tmp_path <- file.path(path, data_dir)
+  
+  if(!dir.exists(tmp_path)){ 
+    dir.create(tmp_path)
+  }
+  
+  # Create the input data directory that the function expects
+  dir.create(file.path(tmp_path, "raw_combined"))
+  
+  # Create 4 clusters of detections: each cluster consists of a different number of detections (testing `run_length`) spaced different numbers of seconds apart (testing `threshold`)
+  starts <- as.POSIXct(c(
+    "2023-01-01 01:00:00 EST",
+    "2023-01-01 01:05:00 EST",
+    "2023-01-01 02:00:00 EST",
+    "2023-01-01 02:05:00 EST"
+  ))
+  
+  # Create 4 clusters of detections: each cluster consists of a different number of detections (testing `run_length`) spaced different numbers of seconds apart (testing `threshold`)
+  ths <- seq(0.5, 5, by = 0.5)
+  
+  # Since run lengths are calculated from the difference in timestamps, each run_length value should be applied to a clusters of detections of length rls + 1
+  rls <- seq(1, 10, by = 1)
+  
+  # threshold values are x, run length values are y
+  invisible(mapply(function(x, y){
+    
+    # Create the timestamps
+    tmp_tstmps <- data.table::rbindlist(lapply(1:length(starts), function(i){
+      
+      sim_ts <- seq(starts[i], starts[i] + max(seq_len(y*y)), by = x)[1:(y + 1)]
+      
+      return(data.frame(tstmps = sim_ts, cluster = i))
+      
+    }))
+    
+    # Write out a spreadsheet with these timestamps that will be used as input data for the function
+    sim_ts <- data.frame(timestamp_ms = tmp_tstmps$tstmps) %>% 
+      dplyr::mutate(
+        chamber_id = "Box_01",
+        year = year(timestamp_ms),
+        month = month(timestamp_ms),
+        day = day(timestamp_ms),
+        original_timestamp = gsub(" EST", "" , gsub("2023-01-01 ", "", timestamp_ms)),
+        sensor_id = c(rep("Outer Beam Breaker", nrow(tmp_tstmps)/2), rep("Inner Beam Breaker", nrow(tmp_tstmps)/2)),
+        data_type = "IRBB",
+        data_stage = "raw_combined",
+        date_combined = Sys.Date()
+      )
+    
+    write.csv(sim_ts, file.path(tmp_path, "raw_combined", "combined_raw_data_IRBB.csv"), row.names = FALSE)
+    
+    source("/home/gsvidaurre/Desktop/GitHub_repos/Abissmal/R/find_perching_events.R")
+    
+    find_perching_events(file_nm = "combined_raw_data_IRBB.csv", threshold = x, run_length = y, sensor_id_col = "sensor_id", timestamps_col = "timestamp_ms", PIT_tag_col = NULL, rfid_label = NULL, outer_irbb_label = "Outer Beam Breaker", inner_irbb_label = "Inner Beam Breaker", general_metadata_cols = c("chamber_id", "sensor_id"), path = path, data_dir = file.path(data_dir, "raw_combined"), out_dir = file.path(data_dir, "processed"), out_file_nm = "perching_events.csv", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS")
+    
+    # Read in the output, check the output, then delete all files
+    test_res <- read.csv(file.path(tmp_path, "processed", "perching_events_IRBB.csv")) %>% 
+      # Make sure the timestamps are in the right format
+      dplyr::mutate(
+        perching_start = as.POSIXct(format(as.POSIXct(perching_start, tz = "America/New York"), "%Y-%m-%d %H:%M:%OS6")),
+        perching_end = as.POSIXct(format(as.POSIXct(perching_end, tz = "America/New York"), "%Y-%m-%d %H:%M:%OS6"))
+      )
+    
+    # Check that the results contain the expected number of detection clusters
+    expect_equal(nrow(test_res), length(starts))
+    
+    # Check that the start and end timestamps of each perching event are correct
+    invisible(lapply(1:nrow(test_res), function(i){
+      
+      # Get the expected end timestamp per simulated perching event cluster
+      tmp_end <- max(tmp_tstmps$tstmps[tmp_tstmps$cluster == i])
+      
+      expect_equal(test_res$perching_start[i], tmp_starts[i])
+      expect_equal(test_res$perching_end[i], tmp_end)
+      
+    }))
+    
+    # Check that the duration of each perching event is correct
+    invisible(lapply(1:nrow(test_res), function(i){
+      
+      # Get the expected end timestamp per simulated perching event cluster
+      tmp_end <- max(tmp_tstmps$tstmps[tmp_tstmps$cluster == i])
+      
+      expect_equal(test_res$perching_duration_s[i], as.numeric(tmp_end - tmp_starts[i]))
+      
+    }))
+    
+    # Check that 2 perching events were identified per sensor
+    expect_equal(test_res$sensor_id, c(rep("Outer Beam Breaker", 2), rep("Inner Beam Breaker", 2)))
+    
+  }))
+  
+  # Remove the temporary directory and all files within it
+  if(tmp_path == file.path(path, data_dir)){
+    unlink(tmp_path, recursive = TRUE)
+  }
+  
+})
+
+
+
+########## Testing error messages ##########
 
 test_that("the raw data is a data frame", {
   
@@ -85,7 +951,7 @@ test_that("the raw data is a data frame", {
   df <- list(test_df)
   # glimpse(df)
   # class(df)
-
+  
   expect_error(
     find_rfid_perching_events(df = df, threshold = 1, rfid_col_nm = "RFID", tag_id_col_nm = "tag_id", run_length = 2),
     regexp = 'The input object needs to be a data frame'
@@ -194,7 +1060,7 @@ test_that("the input dataset has the column of PIT tag IDs, and this column does
   # Just for code development
   library(tidyverse)
   library(lubridate)
-
+  
   start <- as.POSIXct("2023-01-01 01:00:00 EST")
   interval <- 1
   end <- start + 240
@@ -408,639 +1274,3 @@ test_that("the timestamps are in the right format", {
   
   
 })
-
-
-########## Testing expected behavior ########## 
-
-test_that("The correct number of perching events is detected", {
-  
-  # Avoid library calls and other changes to the virtual environment
-  # See https://r-pkgs.org/testing-design.html
-  withr::local_package("tidyverse")
-  withr::local_package("plyr")
-  withr::local_package("dplyr")
-  withr::local_package("lubridate")
-  
-  # Just for code development
-  # library(tidyverse)
-  # library(lubridate)
-  
-  ### A single PIT tag ID
-  start <- as.POSIXct("2023-01-01 01:00:00 EST")
-  interval <- 1
-  end <- start + 240
-  
-  # 3 separate perching events (e.g. stretches of detections 1 second apart) separated by gaps of 1 minute 
-  tstmps_1 <- seq(from = start, by = interval, to = end)
-  tstmps_2 <- seq(from = (end + 60), by = interval, to = end + 120)
-  tstmps_3 <- seq(from = (end + 120 + 60), by = interval, to = end + 240)
-  
-  test_df <- data.frame(RFID = c(tstmps_1, tstmps_2, tstmps_3)) %>% 
-    dplyr::mutate(
-      year = year(start),
-      month = month(start),
-      day = day(start),
-      tag_id = "01-02-03-AA-BB-CC"
-    ) 
-  
-  res_df <- test_df %>%
-    group_split(tag_id) %>%
-    map_dfr(
-      ~ find_rfid_perching_events(df = .x, threshold = 1, rfid_col_nm = "RFID", tag_id_col_nm = "tag_id", run_length = 2)
-    )
-  
-  expect_equal(nrow(res_df), 3)
-  
-  ### Multiple PIT tag IDs
-  start <- as.POSIXct("2023-01-01 01:00:00 EST")
-  interval <- 1
-  end <- start + 240
-  
-  # 3 separate perching events (e.g. stretches of detections 1 second apart) separated by gaps of 1 minute 
-  tstmps_1 <- seq(from = start, by = interval, to = end)
-  tstmps_2 <- seq(from = (end + 60), by = interval, to = end + 120)
-  tstmps_3 <- seq(from = (end + 120 + 60), by = interval, to = end + 240)
-  
-  test_df <- data.frame(RFID = c(tstmps_1, tstmps_2, tstmps_3)) %>% 
-    dplyr::mutate(
-      year = year(start),
-      month = month(start),
-      day = day(start),
-      tag_id = c(
-        rep("01-02-03-AA-BB-CC", length(tstmps_1)),
-        rep("01-02-03-XX-YY-ZZ", length(tstmps_2)),
-        rep("33-55-99-XX-YY-ZZ", length(tstmps_3))
-    )) 
-  
-  res_df <- test_df %>%
-    group_split(tag_id) %>%
-    map_dfr(
-      ~ find_rfid_perching_events(df = .x, threshold = 1, rfid_col_nm = "RFID", tag_id_col_nm = "tag_id", run_length = 2)
-    )
-  
-  expect_equal(nrow(res_df), 3)
-  
-})
-
-
-test_that("Timestamps within each perching event are not farther apart than the temporal threshold", {
-  
-  # Avoid library calls and other changes to the virtual environment
-  # See https://r-pkgs.org/testing-design.html
-  withr::local_package("tidyverse")
-  withr::local_package("plyr")
-  withr::local_package("dplyr")
-  withr::local_package("lubridate")
-  
-  ### A single PIT tag ID
-  start <- as.POSIXct("2023-01-01 01:00:00 EST")
-  interval <- 1
-  end <- start + 240
-  
-  # 3 separate perching events (e.g. stretches of detections 1 second apart) separated by gaps of 1 minute 
-  tstmps_1 <- seq(from = start, by = interval, to = end)
-  tstmps_2 <- seq(from = (end + 60), by = interval, to = end + 120)
-  tstmps_3 <- seq(from = (end + 120 + 60), by = interval, to = end + 240)
-  
-  test_df <- data.frame(RFID = c(tstmps_1, tstmps_2, tstmps_3)) %>% 
-    dplyr::mutate(
-      year = year(start),
-      month = month(start),
-      day = day(start),
-      tag_id = "01-02-03-AA-BB-CC"
-    ) 
-  
-  threshold <- 1
-  
-  res_df <- test_df %>%
-    group_split(tag_id) %>%
-    map_dfr(
-      ~ find_rfid_perching_events(df = .x, threshold = threshold, rfid_col_nm = "RFID", tag_id_col_nm = "tag_id", run_length = 2)
-    )
-  
-  # glimpse(res_df)
-  
-  # Filter the original timestamps for each perching event and calculate the gaps between consecutive timestamps within each perching event
-  gaps <- res_df %>% 
-    rowid_to_column() %>% 
-    dplyr::rename(
-      `uniq_event_id` = "rowid" 
-    ) %>% 
-    dplyr::select(uniq_event_id, start, end) %>% 
-    pmap_dfr(., function(uniq_event_id, start, end){
-      tmp <- test_df %>%
-        dplyr::filter(RFID >= start & RFID <= end) %>%
-        dplyr::mutate(
-          uniq_event_id = uniq_event_id,
-        ) 
-      
-      return(tmp)
-      
-    }) %>% 
-    group_by(uniq_event_id) %>% 
-    # This should be the same lag calculation as in the function itself
-    dplyr::mutate(
-      shift = dplyr::lag(RFID, default = first(RFID))
-    ) %>% 
-    dplyr::mutate(
-      diff = floor(RFID - shift),
-      diff = as.numeric(diff)
-    ) %>% 
-    dplyr::summarise(
-      max = max(diff)
-    ) %>% 
-    pull(max)
-  
-  sapply(1:length(gaps), function(i){
-    expect_lte(gaps[i], threshold)
-  })
-  
-  ### Multiple PIT tag IDs
-  start <- as.POSIXct("2023-01-01 01:00:00 EST")
-  interval <- 1
-  end <- start + 240
-  
-  # 3 separate perching events (e.g. stretches of detections 1 second apart) separated by gaps of 1 minute 
-  tstmps_1 <- seq(from = start, by = interval, to = end)
-  tstmps_2 <- seq(from = (end + 60), by = interval, to = end + 120)
-  tstmps_3 <- seq(from = (end + 120 + 60), by = interval, to = end + 240)
-  
-  test_df <- data.frame(RFID = c(tstmps_1, tstmps_2, tstmps_3)) %>% 
-    dplyr::mutate(
-      year = year(start),
-      month = month(start),
-      day = day(start),
-      tag_id = c(
-        rep("01-02-03-AA-BB-CC", length(tstmps_1)),
-        rep("01-02-03-XX-YY-ZZ", length(tstmps_2)),
-        rep("33-55-99-XX-YY-ZZ", length(tstmps_3))
-      )
-    ) 
-  
-  threshold <- 1
-  
-  res_df <- test_df %>%
-    group_split(tag_id) %>%
-    map_dfr(
-      ~ find_rfid_perching_events(df = .x, threshold = threshold, rfid_col_nm = "RFID", tag_id_col_nm = "tag_id", run_length = 2)
-    )
-  
-  # glimpse(res_df)
-  
-  # Filter the original timestamps for each perching event and calculate the gaps between consecutive timestamps within each perching event
-  gaps <- res_df %>% 
-    rowid_to_column() %>% 
-    dplyr::rename(
-      `uniq_event_id` = "rowid" 
-    ) %>% 
-    dplyr::select(uniq_event_id, start, end) %>% 
-    pmap_dfr(., function(uniq_event_id, start, end){
-      tmp <- test_df %>%
-        dplyr::filter(RFID >= start & RFID <= end) %>%
-        dplyr::mutate(
-          uniq_event_id = uniq_event_id,
-        ) 
-      
-      return(tmp)
-      
-    }) %>% 
-    group_by(uniq_event_id) %>% 
-    # This should be the same lag calculation as in the function itself
-    dplyr::mutate(
-      shift = dplyr::lag(RFID, default = first(RFID))
-    ) %>% 
-    dplyr::mutate(
-      diff = floor(RFID - shift),
-      diff = as.numeric(diff)
-    ) %>% 
-    dplyr::summarise(
-      max = max(diff)
-    ) %>% 
-    pull(max)
-  
-  sapply(1:length(gaps), function(i){
-    expect_lte(gaps[i], threshold)
-  })
-  
-})
-
-
-test_that("An empty data frame is returned when no perching events are found for the given threshold", {
-  
-  # Avoid library calls and other changes to the virtual environment
-  # See https://r-pkgs.org/testing-design.html
-  withr::local_package("tidyverse")
-  withr::local_package("plyr")
-  withr::local_package("dplyr")
-  withr::local_package("lubridate")
-  
-  ### A single PIT tag ID
-  start <- as.POSIXct("2023-01-01 01:00:00 EST")
-  interval <- 1
-  end <- start + 240
-  
-  # 3 separate perching events (e.g. stretches of detections 1 second apart) separated by gaps of 1 minute 
-  tstmps_1 <- seq(from = start, by = interval, to = end)
-  tstmps_2 <- seq(from = (end + 60), by = interval, to = end + 120)
-  tstmps_3 <- seq(from = (end + 120 + 60), by = interval, to = end + 240)
-  
-  test_df <- data.frame(RFID = c(tstmps_1, tstmps_2, tstmps_3)) %>% 
-    dplyr::mutate(
-      year = year(start),
-      month = month(start),
-      day = day(start),
-      tag_id = "01-02-03-AA-BB-CC"
-    ) 
-  
-  threshold <- 0.1
-  
-  res_df <- test_df %>%
-    group_split(tag_id) %>%
-    map_dfr(
-      ~ find_rfid_perching_events(df = .x, threshold = threshold, rfid_col_nm = "RFID", tag_id_col_nm = "tag_id", run_length = 2)
-    )
-  
-  expect_equal(res_df$start, NA)
-  expect_equal(res_df$end, NA)
-  expect_equal(res_df$duration_seconds, NA)
-  expect_equal(res_df$event_type, NA)
-  
-  ### Multiple PIT tag IDs
-  start <- as.POSIXct("2023-01-01 01:00:00 EST")
-  interval <- 1
-  end <- start + 240
-  
-  # 3 separate perching events (e.g. stretches of detections 1 second apart) separated by gaps of 1 minute 
-  tstmps_1 <- seq(from = start, by = interval, to = end)
-  tstmps_2 <- seq(from = (end + 60), by = interval, to = end + 120)
-  tstmps_3 <- seq(from = (end + 120 + 60), by = interval, to = end + 240)
-  
-  test_df <- data.frame(RFID = c(tstmps_1, tstmps_2, tstmps_3)) %>% 
-    dplyr::mutate(
-      year = year(start),
-      month = month(start),
-      day = day(start),
-      tag_id = c(
-        rep("01-02-03-AA-BB-CC", length(tstmps_1)),
-        rep("01-02-03-XX-YY-ZZ", length(tstmps_2)),
-        rep("33-55-99-XX-YY-ZZ", length(tstmps_3))
-      )
-    ) 
-  
-  threshold <- 0.1
-  
-  res_df <- test_df %>%
-    group_split(tag_id) %>%
-    map_dfr(
-      ~ find_rfid_perching_events(df = .x, threshold = threshold, rfid_col_nm = "RFID", tag_id_col_nm = "tag_id", run_length = 2)
-    )
-  
-  expect_equal(unique(res_df$start), NA)
-  expect_equal(unique(res_df$end), NA)
-  expect_equal(unique(res_df$duration_seconds), NA)
-  expect_equal(unique(res_df$event_type), NA)
-  
-})
-
-
-test_that("The first and last timestamp of each run of consecutive RFID detections are used for the perching events", {
-  
-  # Avoid library calls and other changes to the virtual environment
-  # See https://r-pkgs.org/testing-design.html
-  withr::local_package("tidyverse")
-  withr::local_package("plyr")
-  withr::local_package("dplyr")
-  withr::local_package("lubridate")
-  
-  ### A single PIT tag ID
-  start <- as.POSIXct("2023-01-01 01:00:00 EST")
-  interval <- 1
-  end <- start + 240
-  
-  # 3 separate perching events (e.g. stretches of detections 1 second apart) separated by gaps of 1 minute 
-  tstmps_1 <- seq(from = start, by = interval, to = end)
-  tstmps_2 <- seq(from = (end + 60), by = interval, to = end + 120)
-  tstmps_3 <- seq(from = (end + 120 + 60), by = interval, to = end + 240)
-  
-  test_df <- data.frame(RFID = c(tstmps_1, tstmps_2, tstmps_3)) %>% 
-    dplyr::mutate(
-      year = year(start),
-      month = month(start),
-      day = day(start),
-      tag_id = "01-02-03-AA-BB-CC",
-      uniq_event_id = c(
-        rep("1", length(tstmps_1)),
-        rep("2", length(tstmps_2)),
-        rep("3", length(tstmps_3))
-      )
-    ) %>% 
-    group_by(uniq_event_id) %>% 
-    dplyr::mutate(
-      group_row_id = row_number()
-    ) %>%
-    ungroup()
-  
-  # glimpse(test_df)
-  
-  # Make a data frame of the min and max index of timestamps for each dummy perching event
-  index_df <- test_df %>% 
-    group_by(uniq_event_id) %>% 
-    dplyr::summarise(
-      min = min(group_row_id),
-      max = max(group_row_id)
-    )
-  
-  # glimpse(index_df)
-  
-  threshold <- 1
-  
-  res_df <- test_df %>%
-    group_split(tag_id) %>%
-    map_dfr(
-      ~ find_rfid_perching_events(df = .x, threshold = threshold, rfid_col_nm = "RFID", tag_id_col_nm = "tag_id", run_length = 2)
-    )
-  
-  # glimpse(res_df)
-  
-  # Find the group row indices for the start and end timestamps for each perching event
-  comp_df <- res_df %>% 
-    rowid_to_column() %>% 
-    dplyr::rename(
-      `uniq_event_id` = "rowid" 
-    ) %>% 
-    dplyr::select(uniq_event_id, start, end) %>% 
-    pmap_dfr(., function(uniq_event_id, start, end){
-      tmp <- test_df %>%
-        dplyr::filter(RFID == start | RFID == end) %>%
-        dplyr::mutate(
-          uniq_event_id = uniq_event_id,
-        ) 
-      
-      return(tmp)
-      
-    }) %>% 
-    group_by(uniq_event_id) %>% 
-    dplyr::arrange(-desc(RFID), .by_group = TRUE) %>% 
-    dplyr::mutate(
-      type = c("min", "max")
-    ) %>% 
-    ungroup() %>% 
-    dplyr::select(uniq_event_id, RFID, group_row_id, type) %>% 
-    pivot_wider(
-      id_cols = "uniq_event_id",
-      names_from = "type",
-      values_from = "group_row_id"
-    )
-  
-  expect_equal(index_df[["min"]], comp_df[["min"]])
-  expect_equal(index_df[["max"]], comp_df[["max"]])
-  
-  ### Multiple PIT tag IDs
-  start <- as.POSIXct("2023-01-01 01:00:00 EST")
-  interval <- 1
-  end <- start + 240
-  
-  # 3 separate perching events (e.g. stretches of detections 1 second apart) separated by gaps of 1 minute 
-  tstmps_1 <- seq(from = start, by = interval, to = end)
-  tstmps_2 <- seq(from = (end + 60), by = interval, to = end + 120)
-  tstmps_3 <- seq(from = (end + 120 + 60), by = interval, to = end + 240)
-  
-  test_df <- data.frame(RFID = c(tstmps_1, tstmps_2, tstmps_3)) %>% 
-    dplyr::mutate(
-      year = year(start),
-      month = month(start),
-      day = day(start),
-      tag_id = c(
-        rep("01-02-03-AA-BB-CC", length(tstmps_1)),
-        rep("01-02-03-XX-YY-ZZ", length(tstmps_2)),
-        rep("33-55-99-XX-YY-ZZ", length(tstmps_3))
-      ),
-      uniq_event_id = c(
-        rep("1", length(tstmps_1)),
-        rep("2", length(tstmps_2)),
-        rep("3", length(tstmps_3))
-      )
-    ) %>% 
-    group_by(uniq_event_id) %>% 
-    dplyr::mutate(
-      group_row_id = row_number()
-    ) %>%
-    ungroup()
-  
-  # glimpse(test_df)
-  
-  # Make a data frame of the min and max index of timestamps for each dummy perching event
-  index_df <- test_df %>% 
-    group_by(uniq_event_id) %>% 
-    dplyr::summarise(
-      min = min(group_row_id),
-      max = max(group_row_id)
-    )
-  
-  # glimpse(index_df)
-  
-  threshold <- 1
-  
-  res_df <- test_df %>%
-    group_split(tag_id) %>%
-    map_dfr(
-      ~ find_rfid_perching_events(df = .x, threshold = threshold, rfid_col_nm = "RFID", tag_id_col_nm = "tag_id", run_length = 2)
-    )
-  
-  # glimpse(res_df)
-  
-  # Find the group row indices for the start and end timestamps for each perching event
-  comp_df <- res_df %>% 
-    rowid_to_column() %>% 
-    dplyr::rename(
-      `uniq_event_id` = "rowid" 
-    ) %>% 
-    dplyr::select(uniq_event_id, start, end) %>% 
-    pmap_dfr(., function(uniq_event_id, start, end){
-      tmp <- test_df %>%
-        dplyr::filter(RFID == start | RFID == end) %>%
-        dplyr::mutate(
-          uniq_event_id = uniq_event_id,
-        ) 
-      
-      return(tmp)
-      
-    }) %>% 
-    group_by(uniq_event_id) %>% 
-    dplyr::arrange(-desc(RFID), .by_group = TRUE) %>% 
-    dplyr::mutate(
-      type = c("min", "max")
-    ) %>% 
-    ungroup() %>% 
-    dplyr::select(uniq_event_id, RFID, group_row_id, type) %>% 
-    pivot_wider(
-      id_cols = "uniq_event_id",
-      names_from = "type",
-      values_from = "group_row_id"
-    )
-  
-  expect_equal(index_df[["min"]], comp_df[["min"]])
-  expect_equal(index_df[["max"]], comp_df[["max"]])
-  
-})
-
-
-test_that("The start and end times for each perching event occur during the same day", {
-  
-  # Avoid library calls and other changes to the virtual environment
-  # See https://r-pkgs.org/testing-design.html
-  withr::local_package("tidyverse")
-  withr::local_package("plyr")
-  withr::local_package("dplyr")
-  withr::local_package("lubridate")
-  
-  # Just for code development
-  # library(tidyverse)
-  # library(lubridate)
-  
-  ### A single PIT tag ID
-  
-  # 3 separate perching events on 3 different days
-  # All of these perching events should occur on their single respective day
-  start1 <- as.POSIXct("2023-01-01 01:00:00 EST")
-  interval <- 1
-  end1 <- start + 240
-  tstmps_1 <- seq(from = start1, by = interval, to = end1)
-  
-  start2 <- as.POSIXct("2023-01-02 10:00:00 EST")
-  interval <- 1
-  end2 <- start2 + 200
-  tstmps_2 <- seq(from = start2, by = interval, to = end2)
-  
-  start3 <- as.POSIXct("2023-01-05 15:00:00 EST")
-  interval <- 1
-  end3 <- start3 + 1000
-  tstmps_3 <- seq(from = start3, by = interval, to = end3)
-  
-  # A fourth perching event that bleeds into another day
-  # Given how the function is written (which is based on our data collection and transfer logic in the tracking system), this perching event should be split into 2 days
-  start4 <- as.POSIXct("2023-01-08 23:30:30 EST")
-  interval <- 1
-  end4 <- start4 + 7000
-  tstmps_4 <- seq(from = start4, by = interval, to = end4)
-  
-  # head(tstmps_4)
-  # tail(tstmps_4)
-  
-  test_df <- data.frame(RFID = c(tstmps_1, tstmps_2, tstmps_3, tstmps_4)) %>% 
-    dplyr::mutate(
-      year = c(year(tstmps_1), year(tstmps_2), year(tstmps_3), year(tstmps_4)),
-      month = c(month(tstmps_1), month(tstmps_2), month(tstmps_3), month(tstmps_4)),
-      day = c(day(tstmps_1), day(tstmps_2), day(tstmps_3), day(tstmps_4)),
-      tag_id = "01-02-03-AA-BB-CC",
-      uniq_event_id = c(
-        rep("1", length(tstmps_1)),
-        rep("2", length(tstmps_2)),
-        rep("3", length(tstmps_3)),
-        rep("4", length(tstmps_4))
-      )
-    ) %>% 
-    group_by(uniq_event_id) %>% 
-    dplyr::mutate(
-      group_row_id = row_number()
-    ) %>%
-    ungroup()
-  
-  # glimpse(test_df)
-
-  threshold <- 1
-  
-  res_df <- test_df %>%
-    group_split(tag_id) %>%
-    map_dfr(
-      ~ find_rfid_perching_events(df = .x, threshold = threshold, rfid_col_nm = "RFID", tag_id_col_nm = "tag_id", run_length = 2)
-    ) %>% 
-    dplyr::mutate(
-      start_date = paste(year(start), month(start), day(start), sep = "-"),
-      end_date = paste(year(end), month(end), day(end), sep = "-")
-    )
-  
-  # looks great - the last perching event is split up into 2 separate events just before and just after midnight
-  # View(res_df)
-  # glimpse(res_df)
-  
-  expect_equal(res_df$start_date, res_df$end_date)
-  
-  ### Multiple PIT tag IDs
-  
-  # 3 separate perching events on 3 different days
-  # All of these perching events should occur on their single respective day
-  start1 <- as.POSIXct("2023-01-01 01:00:00 EST")
-  interval <- 1
-  end1 <- start + 240
-  tstmps_1 <- seq(from = start1, by = interval, to = end1)
-  
-  start2 <- as.POSIXct("2023-01-02 10:00:00 EST")
-  interval <- 1
-  end2 <- start2 + 200
-  tstmps_2 <- seq(from = start2, by = interval, to = end2)
-  
-  start3 <- as.POSIXct("2023-01-05 15:00:00 EST")
-  interval <- 1
-  end3 <- start3 + 1000
-  tstmps_3 <- seq(from = start3, by = interval, to = end3)
-  
-  # A fourth perching event that bleeds into another day
-  # Given how the function is written (which is based on our data collection and transfer logic in the tracking system), this perching event should be split into 2 days
-  start4 <- as.POSIXct("2023-01-08 23:30:30 EST")
-  interval <- 1
-  end4 <- start4 + 7000
-  tstmps_4 <- seq(from = start4, by = interval, to = end4)
-  
-  # head(tstmps_4)
-  # tail(tstmps_4)
-  
-  test_df <- data.frame(RFID = c(tstmps_1, tstmps_2, tstmps_3, tstmps_4)) %>% 
-    dplyr::mutate(
-      year = c(year(tstmps_1), year(tstmps_2), year(tstmps_3), year(tstmps_4)),
-      month = c(month(tstmps_1), month(tstmps_2), month(tstmps_3), month(tstmps_4)),
-      day = c(day(tstmps_1), day(tstmps_2), day(tstmps_3), day(tstmps_4)),
-      tag_id = c(
-        rep("01-02-03-AA-BB-CC", length(tstmps_1)),
-        rep("01-02-03-XX-YY-ZZ", length(tstmps_2)),
-        rep("33-55-99-XX-YY-ZZ", length(tstmps_3)),
-        rep("TT-QQ-R6-KK-89-34", length(tstmps_4))
-      ),
-      uniq_event_id = c(
-        rep("1", length(tstmps_1)),
-        rep("2", length(tstmps_2)),
-        rep("3", length(tstmps_3)),
-        rep("4", length(tstmps_4))
-      )
-    ) %>% 
-    group_by(uniq_event_id) %>% 
-    dplyr::mutate(
-      group_row_id = row_number()
-    ) %>%
-    ungroup()
-  
-  # glimpse(test_df)
-  
-  threshold <- 1
-  
-  res_df <- test_df %>%
-    group_split(tag_id) %>%
-    map_dfr(
-      ~ find_rfid_perching_events(df = .x, threshold = threshold, rfid_col_nm = "RFID", tag_id_col_nm = "tag_id", run_length = 2)
-    ) %>% 
-    dplyr::mutate(
-      start_date = paste(year(start), month(start), day(start), sep = "-"),
-      end_date = paste(year(end), month(end), day(end), sep = "-")
-    )
-  
-  # The last perching event is also split up into 2 separate events just before and just after midnight
-  # View(res_df)
-  # glimpse(res_df)
-  
-  expect_equal(res_df$start_date, res_df$end_date)
-  
-})
-
-
-
-

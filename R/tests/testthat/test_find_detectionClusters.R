@@ -476,11 +476,12 @@ test_that("The function detects the expected number of clusters using data from 
     "2023-01-01 01:05:00 EST",
     "2023-01-01 02:05:00 EST"
   ))
-          
+  
+  # threshold values are x, run length values are y        
   invisible(mapply(function(x, y){
     
     # Create the RFID timestamps
-    tmp_rfid <- data.table::rbindlist(lapply(1:length(starts), function(i){
+    tmp_rfid <- data.table::rbindlist(lapply(1:length(starts_rfid), function(i){
       
       sim_ts <- seq(starts_rfid[i], starts_rfid[i] + max(seq_len(y*y)), by = x)[1:(y + 1)]
       
@@ -489,7 +490,7 @@ test_that("The function detects the expected number of clusters using data from 
     }))
     
     # Create the outer beam breaker timestamps. For each simulated detection cluster, the first timestamp for the outer beam breaker pair is offset by x seconds more than the last RFID timestamp
-    tmp_irbb_o <- data.table::rbindlist(lapply(1:length(starts), function(i){
+    tmp_irbb_o <- data.table::rbindlist(lapply(1:length(starts_rfid), function(i){
       
       start_irbb_o <- max(tmp_rfid$tstmps[tmp_rfid$cluster == i]) + x
       
@@ -500,7 +501,7 @@ test_that("The function detects the expected number of clusters using data from 
     }))
 
     # Create the inner beam breaker timestamps. For each simulated detection cluster, the first timestamp for the outer beam breaker pair is offset by x seconds more than the last timestamp of the cluster for the outer beam breaker pair
-    tmp_irbb_i <- data.table::rbindlist(lapply(1:length(starts), function(i){
+    tmp_irbb_i <- data.table::rbindlist(lapply(1:length(starts_rfid), function(i){
       
       start_irbb_i <- max(tmp_irbb_o$tstmps[tmp_irbb_o$cluster == i]) + x
       
