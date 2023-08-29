@@ -23,14 +23,16 @@
 # timestamps_col = "timestamp_ms"
 # group_col_nm = "PIT_tag_ID"
 # pixel_col_nm = NULL
-# thin_threshold = 1
+# ths <- seq(0.5, 5, by = 0.5)
+# x <- 4
+# thin_threshold = ths[x]
+# mode = "thin"
 # pixel_threshold = NULL
 # path = path
 # data_dir = file.path(data_dir, "raw_combined")
 # out_dir = file.path(data_dir, "processed")
-# tz = "America/New York"
+# tz = "%Y-%m-%d %H:%M:%OS"
 # POSIXct_format = "%Y-%m-%d %H:%M:%OS"
-# mode = "thin"
 
 preprocess_detections <- function(sensor, timestamps_col, group_col_nm = NULL, pixel_col_nm = NULL, mode, thin_threshold = NULL, pixel_threshold = NULL, path, data_dir, out_dir, tz, POSIXct_format = "%Y-%m-%d %H:%M:%OS"){
   
@@ -245,13 +247,23 @@ preprocess_detections <- function(sensor, timestamps_col, group_col_nm = NULL, p
           pmap_dfr(., function(group_col, run_values, run_lengths, run_indices){
             # For each run of FALSE values (e.g. cluster), retain every other detection (starting with the first detection) in order to thin the cluster
             
-            if(run_indices == run_lengths){
+            if(run_indices == run_lengths & run_lengths %% 2 != 0){
               
               rem_indices <- seq((run_indices - (run_lengths - 2)), run_indices - 1, 2)
               
-            } else {
+            } else if(run_indices == run_lengths & run_lengths %% 2 == 0){
               
+              rem_indices <- seq((run_indices - (run_lengths - 2)), run_indices, 2)
+              
+            } else if(run_indices != run_lengths & length(1:run_indices) %% 2 != 0){
+              
+              # If the total number of indices is odd, then make sure the last index is flagged for removal
               rem_indices <- seq((run_indices - (run_lengths - 1)), run_indices - 1, 2)
+              
+            } else if(run_indices != run_lengths & length(1:run_indices) %% 2 == 0){
+              
+              # If the total number of indices is even, then make sure the last index will be retained
+              rem_indices <- seq((run_indices - (run_lengths - 1)), run_indices, 2)
               
             }
             
