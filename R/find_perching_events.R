@@ -22,6 +22,24 @@
 #' 
 #' @return `find_perching_events` returns a .csv file with all metadata columns in the original data frame, as well as the start and end timestamps of each perching period identified in the raw data per sensor type. When beam breaker data is used as input, the resulting spreadsheet contains perching events detected across both pairs of beam breakers. Each row in the resulting spreadsheet is a perching event. The function also returns information about parameters used for this data processing.
 #' 
+
+# file_nm = "combined_raw_data_RFID.csv"
+# threshold = th
+# run_length = run_length
+# sensor_id_col = "sensor_id"
+# timestamps_col = "timestamp_ms"
+# PIT_tag_col = "PIT_tag_ID"
+# rfid_label = "RFID"
+# outer_irbb_label = NULL
+# inner_irbb_label = NULL
+# general_metadata_cols = c("chamber_id", "sensor_id")
+# path = path
+# data_dir = file.path(data_dir, "raw_combined")
+# out_dir = file.path(data_dir, "processed")
+# out_file_nm = "perching_events.csv"
+# tz = "America/New York"
+# POSIXct_format = "%Y-%m-%d %H:%M:%OS"
+
 find_perching_events <- function(file_nm, threshold, run_length = 2, sensor_id_col, timestamps_col, PIT_tag_col = NULL, rfid_label = NULL, outer_irbb_label = NULL, inner_irbb_label = NULL, general_metadata_cols, path, data_dir, out_dir, out_file_nm = "perching_events.csv", tz, POSIXct_format = "%Y-%m-%d %H:%M:%OS"){
   
   # Get the current global options
@@ -41,13 +59,17 @@ find_perching_events <- function(file_nm, threshold, run_length = 2, sensor_id_c
   # Check that the formal arguments that should be strings are strings
   expect_numeric <- c("threshold", "run_length")
   
-  if(!grepl(rfid_label, file_nm)){
-    
-    expect_null <- c("PIT_tag_col", "rfid_label")
-    
-  } else {
+  if(!is.null(rfid_label) & is.null(outer_irbb_label) & is.null(inner_irbb_label)){
     
     expect_null <- c("outer_irbb_label", "inner_irbb_label")
+    
+  } else if(is.null(rfid_label) & is.null(inner_irbb_label)){
+    
+    expect_null <- c("PIT_tag_col", "rfid_label", "inner_irbb_label")
+    
+  } else if(is.null(rfid_label) & is.null(outer_irbb_label)){
+    
+    expect_null <- c("PIT_tag_col", "rfid_label", "outer_irbb_label")
     
   }
   
@@ -55,7 +77,6 @@ find_perching_events <- function(file_nm, threshold, run_length = 2, sensor_id_c
   
   invisible(sapply(1:length(expect_strings), function(i){
     check_string(expect_strings[[i]])
-    
   }))
   
   # Check that the formal arguments that should be numeric are numeric
@@ -64,7 +85,9 @@ find_perching_events <- function(file_nm, threshold, run_length = 2, sensor_id_c
   }))
   
   # Check that the formal arguments that should be NULL are NULL
-  check_null(f_args[[grep(paste(paste("^", expect_null, "$", sep = ""), collapse = "|"), names(f_args))]])
+  invisible(sapply(1:length(expect_null), function(i){
+    check_null(f_args[[grep(paste(paste("^", expect_null[i], "$", sep = ""), collapse = "|"), names(f_args))]])
+  }))
   
   # Check that each input directory exists
   check_dirs(path, data_dir)
@@ -161,13 +184,14 @@ find_perching_events <- function(file_nm, threshold, run_length = 2, sensor_id_c
         ) %>% 
           # Convert differences to Boolean based on the thinning threshold to remove stretches of detection events very close together
           dplyr::mutate(
-            diff = as.numeric(floor(!!sym(timestamps_col) - shift)),
-            # Taking anything less than or equal to the threshold,. The diff > 0 condition should remove the first timestamp compared to itself, which should in turn make it no longer necessary to correct the timestamp indices
+            diff = as.numeric(!!sym(timestamps_col) - shift),
+            # Taking anything less than or equal to the threshold,. The diff > 0 condition removes the first timestamp compared to itself
             binary_diff = (diff <= threshold & diff > 0)
           ) %>% 
-          dplyr::select(all_of(timestamps_col), diff, binary_diff) 
+          dplyr::select(all_of(timestamps_col), shift, diff, binary_diff) 
       )
     ) %>% 
+    
     # Make a data frame of the first and last indices of each run longer than the given run_length that contain temporal difference values below or equal to the given threshold
     dplyr::mutate(
       # Map over the nested data frames in lags
@@ -213,7 +237,7 @@ find_perching_events <- function(file_nm, threshold, run_length = 2, sensor_id_c
     unnest(`cols` = c(perching)) %>%
     ungroup() %>% 
     dplyr::select(-c(dates))
-
+  
   if(nrow(perching_df) > 0){
     
     # Add metadata and arrange columns and rows before writing this out
@@ -221,13 +245,21 @@ find_perching_events <- function(file_nm, threshold, run_length = 2, sensor_id_c
       dplyr::mutate(
         perching_duration_s = as.numeric(perching_end - perching_start),
         min_perching_run_length = run_length,
-        threshold = threshold,
+        threshold_s = threshold,
         data_stage = "pre-processing",
         date_preprocessed = paste(Sys.Date(), Sys.time(), sep = " ")
-      ) %>% 
-      # Remove the sensor ID column (applies to beam breaker data)
-      dplyr::select(-c(all_of(sensor_id_col))) %>% 
-      # Add back general metadata columns from the original dataset
+      )
+    
+    # Remove the sensor ID column (applies to beam breaker data)
+    if(!is.null(outer_irbb_label) | !is.null(outer_irbb_label) & is.null(rfid_label)){
+      
+      perching_events <- perching_events %>% 
+        dplyr::select(-c(all_of(sensor_id_col))) 
+      
+    }
+    
+    # Add back general metadata columns from the original dataset
+    perching_events <- perching_events %>% 
       dplyr::inner_join(
         raw_data %>%
           # Rename the timestamps column for the join with perching_start timestamps immediately below
@@ -247,12 +279,12 @@ find_perching_events <- function(file_nm, threshold, run_length = 2, sensor_id_c
     if(!is.null(rfid_label)){
       
       perching_events <- perching_events %>% 
-        dplyr::select(all_of(general_metadata_cols), all_of(sensor_id_col), all_of(PIT_tag_col), perching_start, perching_end, perching_duration_s, unique_perching_event, min_perching_run_length, threshold, data_stage, date_preprocessed)
+        dplyr::select(all_of(general_metadata_cols), all_of(sensor_id_col), all_of(PIT_tag_col), perching_start, perching_end, perching_duration_s, unique_perching_event, min_perching_run_length, threshold_s, data_stage, date_preprocessed)
       
     } else if(!is.null(outer_irbb_label) | !is.null(inner_irbb_label)){
       
       perching_events <- perching_events %>% 
-        dplyr::select(all_of(general_metadata_cols), all_of(sensor_id_col), perching_start, perching_end, perching_duration_s, unique_perching_event, min_perching_run_length, threshold, data_stage, date_preprocessed)
+        dplyr::select(all_of(general_metadata_cols), all_of(sensor_id_col), perching_start, perching_end, perching_duration_s, unique_perching_event, min_perching_run_length, threshold_s, data_stage, date_preprocessed)
       
     }
     
@@ -267,11 +299,11 @@ find_perching_events <- function(file_nm, threshold, run_length = 2, sensor_id_c
         perching_duration_s = NA,
         unique_perching_event = NA,
         min_perching_run_length = run_length,
-        threshold = threshold,
+        threshold_s = threshold,
         data_stage = "pre-processing",
         date_preprocessed = paste(Sys.Date(), Sys.time(), sep = " ")
       ) %>% 
-      dplyr::select(all_of(general_metadata_cols), all_of(sensor_id_col), year, month, day, perching_start, perching_end, perching_duration_s, unique_perching_event, min_perching_run_length, threshold, data_stage, date_preprocessed)
+      dplyr::select(all_of(general_metadata_cols), all_of(sensor_id_col), year, month, day, perching_start, perching_end, perching_duration_s, unique_perching_event, min_perching_run_length, threshold_s, data_stage, date_preprocessed)
     
   }
   
