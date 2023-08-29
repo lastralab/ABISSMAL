@@ -228,7 +228,7 @@ check_fArgs_cols_nas <- function(y, df){
   
   if(length(y) == 1){
     
-    err <- paste("The column", y, "has NA (missing) values", sep = " ")
+    err <- paste("The column", y, "has NA values", sep = " ")
     
     if(any(is.na(df[[y]]))){
       stop(err)
@@ -238,7 +238,7 @@ check_fArgs_cols_nas <- function(y, df){
     
     sapply(1:length(y), function(z){
       
-      err <- paste("The column", y[z], "has NA (missing) values", sep = " ")
+      err <- paste("The column", y[z], "has NA values", sep = " ")
       
       if(any(is.na(df[[y[z]]]))){
         stop(err)

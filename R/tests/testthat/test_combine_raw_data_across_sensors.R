@@ -518,3 +518,5 @@ test_that("The function combines data from all 4 sensor types collected across d
   }
   
 })
+
+########## Testing error messages ########## 
