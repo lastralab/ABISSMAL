@@ -17,8 +17,6 @@ source("/home/gsvidaurre/Desktop/GitHub_repos/Abissmal/R/utilities.R")
 
 ########## Testing output ########## 
 
-# As of right now, this function retains only 1 detection per cluster. Is this the behavior I want? Because if not, then I need to update the function to retain all detections per cluster separated by more than the threshold. This needs to be a sequence starting from the first detection. Maybe these are 2 modes of pre-processing
-
 # A single temporal threshold
 test_that("The correct number and timing of discrete movement events are retained per pre-processing mode", {
   
@@ -188,10 +186,8 @@ test_that("The correct number and timing of discrete movement events are retaine
   
   ends <- starts + 10
   
-  ths <- seq(0.5, 5, by = 0.5) 
-
+  ths <- seq(0.5, 5, by = 0.5)
   
-  x <- 4
   invisible(lapply(1:length(ths), function(x){
     
     # Create the timestamps
@@ -224,13 +220,15 @@ test_that("The correct number and timing of discrete movement events are retaine
     
     preprocess_detections(sensor = "RFID", timestamps_col = "timestamp_ms", group_col_nm = "PIT_tag_ID", pixel_col_nm = NULL, thin_threshold = ths[x], mode = "retain_first", pixel_threshold = NULL, path = path, data_dir = file.path(data_dir, "raw_combined"), out_dir = file.path(data_dir, "processed"), tz = "%Y-%m-%d %H:%M:%OS", POSIXct_format = "%Y-%m-%d %H:%M:%OS")
     
+    # cat("retain first mode: th = ", ths[x], "\n")
+    
     # Read in the output, check the output, then delete all files
     test_res <- read.csv(file.path(tmp_path, "processed", "pre_processed_data_RFID.csv")) %>% 
       # Make sure the timestamps are in the right format
       dplyr::mutate(
         !!timestamps_col := as.POSIXct(format(as.POSIXct(!!sym(timestamps_col), tz = "America/New York"), "%Y-%m-%d %H:%M:%OS6"))
       )
-
+    
     # Check that the results contain the expected number of detection clusters
     expect_equal(nrow(test_res), length(starts))
     
@@ -243,9 +241,9 @@ test_that("The correct number and timing of discrete movement events are retaine
     # Check that the first timestamp from the raw data is returned as the timestamp per detection cluster
     tmp_starts <- starts[order(starts)]
     
-    invisible(lapply(1:nrow(test_res), function(x){
+    invisible(lapply(1:nrow(test_res), function(z){
       
-      expect_equal(test_res$timestamp_ms[x], tmp_starts[x])
+      expect_equal(test_res$timestamp_ms[z], tmp_starts[z])
       
     }))
     
@@ -259,31 +257,33 @@ test_that("The correct number and timing of discrete movement events are retaine
         !!timestamps_col := as.POSIXct(format(as.POSIXct(!!sym(timestamps_col), tz = "America/New York"), "%Y-%m-%d %H:%M:%OS6"))
       )
 
-    glimpse(test_res)
-    
     # Check that the results contain the expected number of detections. This should be the number of total clusters by the number of detections expected per cluster using mode = 'thin'
-    cat("th = ", ths[x], "\n")
+    # cat("thin mode: th = ", ths[x], "\n")
     
-  # TKTK something strange is happening when x = 4 and th = 2. Seems like some timestamps are being not skipped in a way that doesn't make sense. Actually the very last timestamp is being retained when it should be skipped. Go back to the function to troubleshoot this
+    num_seq <- seq(starts[1], ends[1], by = ths[x])
     
-    sim_ts <- seq(starts[i], ends[i], by = ths[x])
+    expect_equal(nrow(test_res), length(starts) * length(seq(1, length(num_seq), 2)))
     
-    View(test_res)
-    
-    expect_equal(nrow(test_res), length(starts) * length(seq(1, length(sim_ts), 2)))
-    
-    # Test detections are separated by more than the given temporal threshold
+    # Check that detections are separated by more than the given temporal threshold
     diffs <- test_res$timestamp_ms - lag(test_res$timestamp_ms)
     diffs <- diffs[!is.na(diffs)]
     
     expect_true(all(diffs >= ths[x]))
     
-    # Test that the every other timestamp from the raw data is returned as the timestamp per detection cluster
+    # Check that the every other timestamp from the raw data is returned as the timestamp per detection cluster
     tmp_tstmps <- data.table::rbindlist(lapply(1:length(starts), function(i){
       
       sim_ts <- seq(starts[i], ends[i], by = ths[x])
       
-      sim_ts <- sim_ts[-seq(2, length(sim_ts) - 1, 2)]
+      if(length(sim_ts) %% 2 != 0){
+        
+        sim_ts <- sim_ts[-seq(2, length(sim_ts) - 1, 2)]
+        
+      } else if(length(sim_ts) %% 2 == 0){
+        
+        sim_ts <- sim_ts[-seq(2, length(sim_ts), 2)]
+        
+      }
       
       return(data.frame(tstmps = sim_ts, cluster = i))
       
