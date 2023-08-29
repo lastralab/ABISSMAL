@@ -24,14 +24,14 @@
 # group_col_nm = "PIT_tag_ID"
 # pixel_col_nm = NULL
 # ths <- seq(0.5, 5, by = 0.5)
-# x <- 4
+# x <- 1
 # thin_threshold = ths[x]
 # mode = "thin"
 # pixel_threshold = NULL
 # path = path
 # data_dir = file.path(data_dir, "raw_combined")
 # out_dir = file.path(data_dir, "processed")
-# tz = "%Y-%m-%d %H:%M:%OS"
+# tz = "America/New York"
 # POSIXct_format = "%Y-%m-%d %H:%M:%OS"
 
 preprocess_detections <- function(sensor, timestamps_col, group_col_nm = NULL, pixel_col_nm = NULL, mode, thin_threshold = NULL, pixel_threshold = NULL, path, data_dir, out_dir, tz, POSIXct_format = "%Y-%m-%d %H:%M:%OS"){
@@ -117,13 +117,7 @@ preprocess_detections <- function(sensor, timestamps_col, group_col_nm = NULL, p
   }
   
   # Read in the combined raw data for the given sensor type
-  raw_data <- read.csv(file.path(path, data_dir, paste("combined_raw_data_", sensor, ".csv", sep = ""))) %>% 
-    # Also make sure the timestamps are in the right format
-    dplyr::mutate(
-      timestamp_ms = as.POSIXct(paste(paste(year, month, day, sep = "-"), original_timestamp, sep = " "), tz = tz, format = POSIXct_format)
-    ) %>% 
-    # Drop columns that aren't needed here
-    dplyr::select(-c("original_timestamp", "data_stage", "date_combined"))
+  raw_data <- read.csv(file.path(path, data_dir, paste("combined_raw_data_", sensor, ".csv", sep = "")))
   
   # Check that this object is a data frame
   check_df_class(raw_data)
@@ -151,6 +145,14 @@ preprocess_detections <- function(sensor, timestamps_col, group_col_nm = NULL, p
   invisible(sapply(1:length(expected_cols), function(i){
     check_cols_nas(expected_cols[i], raw_data)
   }))
+  
+  # Then use the year, month, and day columns to make a new timestamps column in the right format
+  raw_data <- raw_data %>% 
+    dplyr::mutate(
+    timestamp_ms = as.POSIXct(paste(paste(year, month, day, sep = "-"), original_timestamp, sep = " "), tz = tz, format = POSIXct_format)
+  ) %>% 
+    # Drop columns that aren't needed here
+    dplyr::select(-c("original_timestamp", "data_stage", "date_combined"))
   
   # Check that columns with timestamps are in the right format
   tstmps_cols <- f_args[grep("time", names(f_args))]

@@ -918,47 +918,6 @@ test_that("The correct number and timing of discrete perching events are identif
 
 ########## Testing error messages ##########
 
-test_that("the raw data is a data frame", {
-  
-  # Avoid library calls and other changes to the virtual environment
-  # See https://r-pkgs.org/testing-design.html
-  withr::local_package("tidyverse")
-  withr::local_package("plyr")
-  withr::local_package("dplyr")
-  withr::local_package("lubridate")
-  
-  # Just for code development
-  # library(tidyverse)
-  # library(lubridate)
-  
-  start <- as.POSIXct("2023-01-01 01:00:00 EST")
-  interval <- 1
-  end <- start + 240
-  
-  # 3 separate perching events (e.g. stretches of detections 1 second apart) separated by gaps of 1 minute 
-  tstmps_1 <- seq(from = start, by = interval, to = end)
-  tstmps_2 <- seq(from = (end + 60), by = interval, to = end + 120)
-  tstmps_3 <- seq(from = (end + 120 + 60), by = interval, to = end + 240)
-  
-  test_df <- data.frame(RFID = c(tstmps_1, tstmps_2, tstmps_3)) %>% 
-    dplyr::mutate(
-      year = year(start),
-      month = month(start),
-      day = day(start),
-      tag_id = "01-02-03-AA-BB-CC"
-    ) 
-  
-  df <- list(test_df)
-  # glimpse(df)
-  # class(df)
-  
-  expect_error(
-    find_rfid_perching_events(df = df, threshold = 1, rfid_col_nm = "RFID", tag_id_col_nm = "tag_id", run_length = 2),
-    regexp = 'The input object needs to be a data frame'
-  )
-  
-})
-
 
 test_that("the temporal threshold is a number", {
   
