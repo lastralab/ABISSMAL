@@ -919,7 +919,7 @@ test_that("The correct number and timing of discrete perching events are identif
 ########## Testing error messages ##########
 
 
-test_that("the temporal threshold is a number", {
+test_that("the function catches when numeric arguments are non-numeric", {
   
   # Avoid library calls and other changes to the virtual environment
   # See https://r-pkgs.org/testing-design.html
@@ -929,8 +929,8 @@ test_that("the temporal threshold is a number", {
   withr::local_package("lubridate")
   
   # Just for code development
-  # library(tidyverse)
-  # library(lubridate)
+  library(tidyverse)
+  library(lubridate)
   
   start <- as.POSIXct("2023-01-01 01:00:00 EST")
   interval <- 1
