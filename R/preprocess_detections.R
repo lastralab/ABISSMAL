@@ -46,12 +46,18 @@ preprocess_detections <- function(sensor, timestamps_col, group_col_nm = NULL, p
   # Get the user-specified values for each formal argument of the current function
   f_args <- getFunctionParameters()
   
-  # Check that the formal arguments that should not be NULL are not NULL under the right conditions (e.g. when processing RFID data)
-  if(sensor == "RFID"){
-    
-    expect_null <- c("pixel_col_nm", "pixel_threshold")
-    
-  } else if(sensor == "IRBB"){
+  # Check that arguments that cannot ever be non-NULL are not NULL
+  expect_nonNulls <- f_args[grep(paste(paste("^", c("sensor", "timestamps_col", "path", "data_dir", "out_dir", "tz", "POSIXct_format"), "$", sep = ""), collapse = "|"), names(f_args))]
+  
+  invisible(sapply(1:length(expect_nonNulls), function(i){
+    check_not_null(names(expect_nonNulls[i]), expect_nonNulls[[i]])
+  }))
+  
+  # Check that the sensor argument was written correctly
+  check_sensor_spelling("sensor", f_args[grep(paste(paste("^", "sensor", "$", sep = ""), collapse = "|"), names(f_args))])
+  
+  # Check that the formal arguments that should not be NULL under certain conditions are not NULL given the current user-specified arguments
+  if(sensor == "RFID" | sensor == "IRBB"){
     
     expect_null <- c("pixel_col_nm", "pixel_threshold")
     
@@ -64,14 +70,28 @@ preprocess_detections <- function(sensor, timestamps_col, group_col_nm = NULL, p
   expect_nulls <- f_args[grep(paste(paste("^", expect_null, "$", sep = ""), collapse = "|"), names(f_args))]
   
   invisible(sapply(1:length(expect_nulls), function(i){
-    check_null(expect_nulls[i], expect_nulls[[i]])
+    check_null(names(expect_nulls[i]), expect_nulls[[i]])
   }))
   
-  # Check that all formal arguments that should not be NULL were all specified
-  expect_nonNulls <- f_args[-grep(paste(paste("^", expect_null, "$", sep = ""), collapse = "|"), names(f_args))]
+  # Check that all formal arguments that cannot be NULL depending on which sensor is specified are not NULL:
+  
+  # When sensor = RFID|IRBB, the arguments group_col_nm, thin_threshold, mode cannot be NULL
+  # When sensor = Video, the arguments pixel_col_nm, pixel_threshold cannot be NULL
+  
+  if(sensor == "RFID" | sensor == "IRBB"){
+    
+    expect_nonNull <- c("group_col_nm", "thin_threshold", "mode")
+    
+  } else if(sensor == "Video"){
+    
+    expect_nonNull <- c("pixel_col_nm", "pixel_threshold")
+    
+  }
+  
+  expect_nonNulls <- f_args[grep(paste(paste("^", expect_nonNull, "$", sep = ""), collapse = "|"), names(f_args))]
   
   invisible(sapply(1:length(expect_nonNulls), function(i){
-    check_defined(expect_nonNulls[i], expect_nonNulls[[i]])
+    check_not_null(names(expect_nonNulls[i]), expect_nonNulls[[i]])
   }))
   
   # Check that the formal arguments that should be strings are strings
@@ -91,20 +111,17 @@ preprocess_detections <- function(sensor, timestamps_col, group_col_nm = NULL, p
   if(length(expect_null) > 0){
     
     expect_strings <- expect_strings[-grep(paste(paste("^", expect_null, "$", sep = ""), collapse = "|"), names(expect_strings))]
-      
+    
   }
   
   invisible(sapply(1:length(expect_strings), function(i){
-    check_string(expect_strings[i], expect_strings[[i]])
+    check_string(names(expect_strings[i]), expect_strings[[i]])
   }))
   
   # Check that the formal arguments that should be numeric are numeric
   invisible(sapply(1:length(expect_numeric), function(i){
     check_numeric(expect_numeric[i], f_args[[grep(paste(paste("^", expect_numeric[i], "$", sep = ""), collapse = "|"), names(f_args))]])
   }))
-  
-  # Check that the sensor argument was written correctly
-  check_sensor_spelling(sensor)
   
   # Check that the input directory exists
   check_dirs(path, data_dir)
@@ -150,8 +167,8 @@ preprocess_detections <- function(sensor, timestamps_col, group_col_nm = NULL, p
   # Then use the year, month, and day columns to make a new timestamps column in the right format
   raw_data <- raw_data %>% 
     dplyr::mutate(
-    timestamp_ms = as.POSIXct(paste(paste(year, month, day, sep = "-"), original_timestamp, sep = " "), tz = tz, format = POSIXct_format)
-  ) %>% 
+      timestamp_ms = as.POSIXct(paste(paste(year, month, day, sep = "-"), original_timestamp, sep = " "), tz = tz, format = POSIXct_format)
+    ) %>% 
     # Drop columns that aren't needed here
     dplyr::select(-c("original_timestamp", "data_stage", "date_combined"))
   
@@ -203,7 +220,7 @@ preprocess_detections <- function(sensor, timestamps_col, group_col_nm = NULL, p
         diff = as.numeric(diff),
         binary_diff = (diff > thin_threshold & diff > 0)
       ) 
-
+    
     if(!is.null(group_col_nm)){
       
       lags <- lags %>% 
@@ -228,7 +245,7 @@ preprocess_detections <- function(sensor, timestamps_col, group_col_nm = NULL, p
     if(!is.null(group_col_nm)){
       
       if(mode == "retain_first"){
-       
+        
         lags_runs2 <- lags_runs %>% 
           dplyr::select(group_col, run_values, run_lengths, run_indices) %>% 
           pmap_dfr(., function(group_col, run_values, run_lengths, run_indices){
@@ -242,7 +259,7 @@ preprocess_detections <- function(sensor, timestamps_col, group_col_nm = NULL, p
           }) %>% 
           # Make sure to drop the first index per group, since these first observations should be retained
           dplyr::filter(rem_indices != 1)
-      
+        
       } else if(mode == "thin"){
         
         lags_runs2 <- lags_runs %>% 
@@ -281,7 +298,7 @@ preprocess_detections <- function(sensor, timestamps_col, group_col_nm = NULL, p
           dplyr::filter(rem_indices != 1)
         
       }
-
+      
       # Per group, remove the indices that represent the detections that are too close together
       filt_df <- tmp_df %>% 
         nest() %>%
