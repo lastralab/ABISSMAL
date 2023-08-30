@@ -43,15 +43,15 @@ getFunctionParameters <- function() {
 
 ############################## Formal arguments ####################################
 
-check_defined <- function(nm, y){
-
-  err <- paste("The argument", nm, "must be specified, and cannot be NULL or NA", sep = " ")
-  
-  if(is.null(y) | is.na(y) & y != ""){
-    stop(err)
-  }
-  
-}
+# check_defined <- function(nm, y){
+# 
+#   err <- paste("The argument", nm, "must be specified, and cannot be NULL or NA", sep = " ")
+#   
+#   if(is.null(y) | is.na(y) & y != ""){
+#     stop(err)
+#   }
+#   
+# }
 
 # Check that arguments are strings
 check_string <- function(nm, y){
@@ -129,7 +129,7 @@ check_not_null <- function(nm, y){
 # Check that sensor arguments are written as expected
 check_sensor_spelling <- function(nm, y){
   
-  err <- paste("The value provided for the sensor argument, ", nm, ", is not correct, check your spelling or captialization", sep = "")
+  err <- paste("The value provided for the argument, ", nm, ", is not correct. Check your spelling or captialization", sep = "")
   
   if(!grepl("^RFID$|^IRBB$|^Video$", y)){
     stop(err)
@@ -189,9 +189,9 @@ check_df_class <- function(df){
 check_fArgs_data_cols <- function(y, df){
   
   if(length(y) == 1){
-     
-      err <- paste("The column", y, "was not found in the data frame", sep = " ")
-      
+    
+    err <- paste("The column", y, "was not found in the data frame", sep = " ")
+    
     if(!y %in% names(df)){
       stop(err)
     }
@@ -215,11 +215,11 @@ check_fArgs_data_cols <- function(y, df){
 # Check that a data frame has each column in a vector of columns NOT specified in the formal arguments
 check_data_cols <- function(y, df){
   
-    err <- paste("The column", y, "was not found in the data frame", sep = " ")
-    
-    if(!y %in% names(df)){
-      stop(err)
-    }
+  err <- paste("The column", y, "was not found in the data frame", sep = " ")
+  
+  if(!y %in% names(df)){
+    stop(err)
+  }
 }
 
 # Check that a given column from the formal arguments does not have NAs 
