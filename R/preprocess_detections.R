@@ -6,7 +6,7 @@
 #' @param group_col_nm A character string. This argument is the column name for the column that contains values used to group the data before pre-processing. For RFID data, this column should contain the PIT tag identifiers, so that pre-processing is performed for each unique PIT tag. For beam breaker data, this column should be the unique beam breaker labels so that pre-processing is carried out separately for each beam breaker pair. The default is `NULL`, since this argument is not needed to process the video data
 #' @param pixel_col_nm A character string. This argument is the column name for the column that contains the number of pixels that triggered each unique video recording event. The default is `NULL`, since this argument is not needed to process the RFID or beam breaker data.
 #' @param thin_threshold A single numeric value. This argument is the temporal threshold in seconds that will be used to thin the raw data. The default is `NULL`, since this argument is not needed to pre-process the video data.
-#' @param mode A character string. This argument determines how raw detections will be filtered during pre-processing. If set to `retain_first`, then only the first detection per cluster (in which a cluster is a run of detections separated by gaps less than or equal to the temporal threshold) will be retained and all other detections will be dropped. If set to `thin`, then every other detection will be dropped in a thinning approach, which yields a longer sequence of detections per cluster separated by more than the given temporal threshold.
+#' @param mode A character string. This argument determines how raw RFID or beam breaker detections will be filtered during pre-processing. If set to `retain_first`, then only the first detection per cluster (in which a cluster is a run of detections separated by gaps less than or equal to the temporal threshold) will be retained and all other detections will be dropped. If set to `thin`, then every other detection will be dropped in a thinning approach, which yields a longer sequence of detections per cluster separated by more than the given temporal threshold. The default is NULL, since this argument is not needed for pre-processing video data
 #' @param pixel_threshold A single numeric value. This argument is a numeric threshold (number of pixels) that will be used to filter out video recording events with total pixels that changed below this threshold. The default is `NULL`, since this argument is not needed to process the RFID or beam breaker data.
 #' @param path A character string. This should be the path on the local computer or external hard drive specifying where the data is saved across sensors for a given experimental setup. For instance, "/media/gsvidaurre/Anodorhynchus/Data_Testing/Box_02_31Dec2022/Data".
 #' @param data_dir A character string. This should be the name of directory where the raw data is saved across sensors inside the path above. For instance, "raw_combined".
@@ -19,22 +19,23 @@
 #' @return This function returns a spreadsheet in .csv format with the pre-processed detections per sensor and all metadata columns in the original data frame. Each spreadsheet also contains a column indicating the temporal threshold used for pre-processing by thinning (in seconds) for the RFID and beam breaker data, or a column indicating the threshold used to filter detections by the number of pixels that changed for the video data. Each row of this data frame is a pre-processed detection or movement event from the raw data collected by the given sensor. This function performs pre-processing in 1 of 2 ways: by either retaining only the first detection from a cluster of detections that occurred close in time, or thinning the cluster to return a sequence of detections per cluster separated by more than the given temporal threshold.
 
 
-# sensor = "RFID"
+# sensor = "Video"
 # timestamps_col = "timestamp_ms"
-# group_col_nm = "PIT_tag_ID"
-# pixel_col_nm = NULL
-# ths <- seq(0.5, 5, by = 0.5)
-# x <- 1
-# thin_threshold = ths[x]
-# mode = "thin"
-# pixel_threshold = NULL
+# group_col_nm = NULL
+# pixel_col_nm = "total_pixels_motionTrigger"
+# # ths <- seq(0.5, 5, by = 0.5)
+# # x <- 1
+# # thin_threshold = ths[x]
+# thin_threshold = NULL
+# mode = NULL
+# pixel_threshold = px
 # path = path
 # data_dir = file.path(data_dir, "raw_combined")
 # out_dir = file.path(data_dir, "processed")
 # tz = "America/New York"
 # POSIXct_format = "%Y-%m-%d %H:%M:%OS"
 
-preprocess_detections <- function(sensor, timestamps_col, group_col_nm = NULL, pixel_col_nm = NULL, mode, thin_threshold = NULL, pixel_threshold = NULL, path, data_dir, out_dir, tz, POSIXct_format = "%Y-%m-%d %H:%M:%OS"){
+preprocess_detections <- function(sensor, timestamps_col, group_col_nm = NULL, pixel_col_nm = NULL, mode = NULL, thin_threshold = NULL, pixel_threshold = NULL, path, data_dir, out_dir, tz, POSIXct_format = "%Y-%m-%d %H:%M:%OS"){
   
   # Get the current global options
   orig_opts <- options()
@@ -52,11 +53,11 @@ preprocess_detections <- function(sensor, timestamps_col, group_col_nm = NULL, p
     
   } else if(sensor == "IRBB"){
     
-    expect_null <- c("group_col_nm", "pixel_col_nm", "pixel_threshold")
+    expect_null <- c("pixel_col_nm", "pixel_threshold")
     
   } else if(sensor == "Video"){
     
-    expect_null <- c("group_col_nm", "thin_threshold")
+    expect_null <- c("group_col_nm", "thin_threshold", "mode")
     
   }
   
@@ -366,6 +367,11 @@ preprocess_detections <- function(sensor, timestamps_col, group_col_nm = NULL, p
       )
     
   }
+  
+  filt_df2 <- filt_df2 %>% 
+    dplyr::arrange(
+      -desc(!!sym(timestamps_col))
+    )
   
   # Save the pre-processed data for each sensor in the given setup
   write.csv(filt_df2, file.path(path, out_dir, paste("pre_processed_data_", sensor, ".csv", sep = "")), row.names = FALSE)
