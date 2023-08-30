@@ -43,9 +43,9 @@ getFunctionParameters <- function() {
 
 ############################## Formal arguments ####################################
 
-check_defined <- function(y){
+check_defined <- function(nm, y){
 
-  err <- paste(y, "must be specified, and cannot be NULL or NA", sep = " ")
+  err <- paste("The argument", nm, "must be specified, and cannot be NULL or NA", sep = " ")
   
   if(is.null(y) | is.na(y) & y != ""){
     stop(err)
@@ -54,9 +54,9 @@ check_defined <- function(y){
 }
 
 # Check that arguments are strings
-check_string <- function(y){
+check_string <- function(nm, y){
   
-  err <- paste("Expected a string but", y, "is not a string", sep = " ")
+  err <- paste("Expected a string but the argument", nm, "is not a string", sep = " ")
   
   if(class(y) != "character"){
     stop(err)
@@ -65,9 +65,9 @@ check_string <- function(y){
 }
 
 # Check that arguments are numeric 
-check_numeric <- function(y){
+check_numeric <- function(nm, y){
   
-  err <- paste("Expected a numeric value but", y, "is not numeric", sep = " ")
+  err <- paste("Expected a numeric value but the argument", nm, "is not numeric", sep = " ")
   
   if(class(y) != "numeric"){
     stop(err)
@@ -75,11 +75,10 @@ check_numeric <- function(y){
   
 }
 
-
 # Check that arguments are Boolean
-check_boolean <- function(y){
+check_boolean <- function(nm, y){
   
-  err <- paste("Expected a Boolean value but", y, "is not Boolean", sep = " ")
+  err <- paste("Expected a Boolean value but the argument", nm, "is not Boolean", sep = " ")
   
   if(class(y) != "logical"){
     stop(err)
@@ -88,9 +87,9 @@ check_boolean <- function(y){
 }
 
 # Check that arguments are NA
-check_NA <- function(y){
+check_NA <- function(nm, y){
   
-  err <- paste("Expected an NA value but", y, "is not NA", sep = " ")
+  err <- paste("Expected an NA value but the argument", nm, "is not NA", sep = " ")
   
   if(length(y) == 1){
     if(!is.na(y)){
@@ -106,9 +105,9 @@ check_NA <- function(y){
 }
 
 # Check that arguments are NULL
-check_null <- function(y){
+check_null <- function(nm, y){
   
-  err <- paste("Expected a NULL value but", y, "is not NULL", sep = " ")
+  err <- paste("Expected a NULL value but the argument", nm, "is not NULL", sep = " ")
   
   if(!is.null(y)){
     stop(err)
@@ -117,9 +116,9 @@ check_null <- function(y){
 }
 
 # Check that arguments are not NULL
-check_not_null <- function(y){
+check_not_null <- function(nm, y){
   
-  err <- paste("Expected a non-NULL value but", y, "is NULL", sep = " ")
+  err <- paste("Expected a non-NULL value but the argument", nm, "is NULL", sep = " ")
   
   if(is.null(y)){
     stop(err)
@@ -128,9 +127,9 @@ check_not_null <- function(y){
 }
 
 # Check that sensor arguments are written as expected
-check_sensor_spelling <- function(y){
+check_sensor_spelling <- function(nm, y){
   
-  err <- paste("The value provided for the sensor argument, ", y, ", is not correct, check your spelling or captialization", sep = "")
+  err <- paste("The value provided for the sensor argument, ", nm, ", is not correct, check your spelling or captialization", sep = "")
   
   if(!grepl("^RFID$|^IRBB$|^Video$", y)){
     stop(err)

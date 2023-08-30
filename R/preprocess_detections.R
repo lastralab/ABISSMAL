@@ -64,14 +64,14 @@ preprocess_detections <- function(sensor, timestamps_col, group_col_nm = NULL, p
   expect_nulls <- f_args[grep(paste(paste("^", expect_null, "$", sep = ""), collapse = "|"), names(f_args))]
   
   invisible(sapply(1:length(expect_nulls), function(i){
-    check_null(expect_nulls[[i]])
+    check_null(expect_nulls[i], expect_nulls[[i]])
   }))
   
   # Check that all formal arguments that should not be NULL were all specified
   expect_nonNulls <- f_args[-grep(paste(paste("^", expect_null, "$", sep = ""), collapse = "|"), names(f_args))]
   
   invisible(sapply(1:length(expect_nonNulls), function(i){
-    check_defined(expect_nonNulls[[i]])
+    check_defined(expect_nonNulls[i], expect_nonNulls[[i]])
   }))
   
   # Check that the formal arguments that should be strings are strings
@@ -95,12 +95,12 @@ preprocess_detections <- function(sensor, timestamps_col, group_col_nm = NULL, p
   }
   
   invisible(sapply(1:length(expect_strings), function(i){
-    check_string(expect_strings[[i]])
+    check_string(expect_strings[i], expect_strings[[i]])
   }))
   
   # Check that the formal arguments that should be numeric are numeric
   invisible(sapply(1:length(expect_numeric), function(i){
-    check_numeric(f_args[[grep(paste(paste("^", expect_numeric[i], "$", sep = ""), collapse = "|"), names(f_args))]])
+    check_numeric(expect_numeric[i], f_args[[grep(paste(paste("^", expect_numeric[i], "$", sep = ""), collapse = "|"), names(f_args))]])
   }))
   
   # Check that the sensor argument was written correctly

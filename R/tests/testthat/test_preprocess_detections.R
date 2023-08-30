@@ -790,9 +790,9 @@ test_that("the function catches when numeric arguments are non-numeric", {
   withr::local_package("tidyquant")
   
   # Just for code development
-  library(tidyverse)
-  library(lubridate)
-  library(testthat)
+  # library(tidyverse)
+  # library(lubridate)
+  # library(testthat)
   
   # Create a temporary directory for testing. Files will be written and read here
   path <- "/home/gsvidaurre/Desktop"
@@ -851,28 +851,36 @@ test_that("the function catches when numeric arguments are non-numeric", {
   
   ####### Testing pixel_threshold #######
   
+  # Repeat these timestamps (1 pre- and 1 post-motion video per timestamp)
+  tstmps <- rep(starts, each = 2)
+  # tstmps
+  
+  px <- 100
+  
+  #### 1/2 of the videos have total pixels less than the pixel threshold ####
+  
   # Write out a spreadsheet with these timestamps that will be used as input data for the function
-  sim_ts <- data.frame(timestamp_ms = c(event_ts[[1]], event_ts[[2]], event_ts[[3]], event_ts[[4]])) %>% 
+  sim_ts <- data.frame(timestamp_ms = tstmps) %>% 
     dplyr::mutate(
       chamber_id = "Box_01",
       year = year(timestamp_ms),
       month = month(timestamp_ms),
       day = day(timestamp_ms),
       original_timestamp = gsub(" EST", "" , gsub("2023-01-01 ", "", timestamp_ms)),
-      sensor_id = "RFID",
-      data_type = "RFID",
+      sensor_id = "Camera",
+      data_type = "Video",
+      total_pixels_motionTrigger = rep(c(px * 10, px / 10), each = 4), 
+      pixel_threshold = px, 
+      video_file_name = paste(paste(rep(paste("Box_01_2023_1_1", paste(hour(starts), minute(starts), second(starts), sep = "_"), sep = "_"), 2), c("pre_trigger", "post_trigger"), sep = "_"), ".mp4", sep = ""),
       data_stage = "raw_combined",
-      date_combined = Sys.Date(),
-      PIT_tag_ID = "test"
+      date_combined = Sys.Date()
     )
   
-  write.csv(sim_ts, file.path(tmp_path, "raw_combined", "combined_raw_data_RFID.csv"), row.names = FALSE)
-  
-  px <- 100
+  write.csv(sim_ts, file.path(tmp_path, "raw_combined", "combined_raw_data_Video.csv"), row.names = FALSE)
   
   expect_error(
-    preprocess_detections(sensor = "RFID", timestamps_col = "timestamp_ms", group_col_nm = "PIT_tag_ID", pixel_col_nm = NULL, thin_threshold = NULL, mode = "retain_first", pixel_threshold = as.character(px), path = path, data_dir = file.path(data_dir, "raw_combined"), out_dir = file.path(data_dir, "processed"), tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
-    regexp = paste("Expected a numeric value but", th, "is not numeric", sep = " ")
+    preprocess_detections(sensor = "Video", timestamps_col = "timestamp_ms", group_col_nm = NULL, pixel_col_nm = "total_pixels_motionTrigger", thin_threshold = NULL, mode = NULL, pixel_threshold = as.character(px), path = path, data_dir = file.path(data_dir, "raw_combined"), out_dir = file.path(data_dir, "processed"), tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
+    regexp = paste("Expected a numeric value but the argument pixel_threshold is not numeric", sep = " ")
   )
   
   # Remove the temporary directory and all files within it
@@ -882,7 +890,15 @@ test_that("the function catches when numeric arguments are non-numeric", {
   
 })
 
-test_that("the input dataset has the PIT_tag_ID column", {
+# TKTK CONTINUE
+# test that the the function catches when non-NULL arguments are NULL
+# test that the the function catches when NULL arguments are non-NULL
+# test that the the function catches when character string arguments are not strings
+
+# TKTK make a test of sensor id spelling, and check errors in the function for other tests that should be done
+
+# TKTK next up
+test_that("the input dataset has all of the expected columns", {
   
   # Avoid library calls and other changes to the virtual environment
   # See https://r-pkgs.org/testing-design.html
@@ -958,7 +974,8 @@ test_that("the input dataset has the PIT_tag_ID column", {
   
 })
 
-test_that("the input dataset has no NAs in the timestamps column", {
+# TKTK next up
+test_that("the input dataset has no NAs in columns that cannot have NAs", {
   
   # Avoid library calls and other changes to the virtual environment
   # See https://r-pkgs.org/testing-design.html
@@ -1036,6 +1053,9 @@ test_that("the input dataset has no NAs in the timestamps column", {
   
 })
 
+
+
+# TKTK merge with above
 test_that("the input dataset has no NAs in the grouping column", {
   
   # Avoid library calls and other changes to the virtual environment
@@ -1115,6 +1135,7 @@ test_that("the input dataset has no NAs in the grouping column", {
   
 })
 
+# TKTK merge with above
 test_that("the input dataset has the year, month, and day columns, and that these columns do not have NAs", {
   
   # Avoid library calls and other changes to the virtual environment
