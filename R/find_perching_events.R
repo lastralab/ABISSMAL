@@ -59,7 +59,7 @@ find_perching_events <- function(file_nm, threshold, run_length = 2, sensor_id_c
   }))
   
   # Check that the sensor suffix in the input file name is correct
-  check_file_nm(file_nm)
+  check_file_nm1(file_nm)
   
   # Check that the formal arguments that should be strings are strings
   expect_numeric <- c("threshold", "run_length")
