@@ -28,16 +28,25 @@ combine_raw_data_per_sensor <- function(sensors = c("IRBB", "RFID", "Video", "Te
   # Get the user-specified values for each formal argument of the current function
   f_args <- getFunctionParameters()
   
-  # Check that the formal arguments were all specified
-  invisible(sapply(1:length(f_args), function(i){
-    check_defined(f_args[i])
+  # Check that arguments that cannot ever be non-NULL are not NULL
+  expect_nonNulls <- f_args[grep(paste(paste("^", c("sensors", "path", "data_dir", "out_dir", "tz", "POSIXct_format"), "$", sep = ""), collapse = "|"), names(f_args))]
+  
+  invisible(sapply(1:length(expect_nonNulls), function(i){
+    check_not_null(names(expect_nonNulls[i]), expect_nonNulls[[i]])
+  }))
+
+  # Check that the sensor argument was written correctly
+  invisible(lapply(1:length(sensors), function(i){
+    
+    check_sensor_spelling_cmb("sensors", sensors[i])
+    
   }))
   
-  # Check that the formal arguments that should be strings are strings
-  expect_strings <- f_args
+  # Check that all other formal arguments that should be strings are strings
+  expect_strings <- f_args[-grep(paste(paste("^", c("sensors"), "$", sep = ""), collapse = "|"), names(f_args))]
   
   invisible(sapply(1:length(expect_strings), function(i){
-    check_string(expect_strings[[i]])
+    check_string(names(expect_strings[i]), expect_strings[[i]])
   }))
   
   # Check that each input directory exists
@@ -94,7 +103,7 @@ combine_raw_data_per_sensor <- function(sensors = c("IRBB", "RFID", "Video", "Te
       ) %>% 
       # Return the shared columns in the order specified above, and any additional metadata columns per sensor afterwards
       dplyr::select(
-        col_nms, names(.)[-grep(paste(paste("^", col_nms, "$", sep = ""), collapse = "|"), names(.))], "data_stage", "date_combined"
+        all_of(col_nms), names(.)[-grep(paste(paste("^", col_nms, "$", sep = ""), collapse = "|"), names(.))], "data_stage", "date_combined"
       )
     
     # Checking: Does this data frame have the same number of rows as the data read in across files?

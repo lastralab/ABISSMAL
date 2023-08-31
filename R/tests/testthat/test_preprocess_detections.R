@@ -159,7 +159,6 @@ test_that("The correct number and timing of discrete movement events are retaine
   # Just for code development
   # library(tidyverse)
   # library(lubridate)
-  # library(pbapply)
   # library(testthat)
   
   # Create a temporary directory for testing. Files will be written and read here
@@ -631,7 +630,6 @@ test_that("The correct number and timing of discrete movement events are retaine
   # Just for code development
   # library(tidyverse)
   # library(lubridate)
-  # library(pbapply)
   # library(testthat)
   
   # Create a temporary directory for testing. Files will be written and read here
@@ -796,7 +794,7 @@ test_that("the function catches when non-NULL arguments are NULL", {
   }
   
   # Create the input data directory that the function expects
-  if(!dir.exists(file.path(tmp_path, "raw_combined"))){ 
+  if(!dir.exists(file.path(tmp_path, "raw_combined"))){
     dir.create(file.path(tmp_path, "raw_combined"))
   }
   
