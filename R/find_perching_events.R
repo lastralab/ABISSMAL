@@ -4,17 +4,17 @@
 #' @param file_nm A character string. This argument should be the name and extension of the .csv file that contains all of the raw RFID or beam breaker detections combined across dates. Each row is a unique detection event. This spreadsheet must contain all the columns specified for the input data in the subsequent arguments.
 #' @param threshold A single numeric value. This argument represents a temporal threshold in seconds that will be used to identify detections that occurred in close succession (e.g. within 1 or 2 seconds) as perching events.
 #' @param run_length A single numeric value. This argument indicates the minimum number of consecutive detections used to label a perching event. The default setting is 2. 
-#' @param sensor_id_col A character string. This is the name of the metadata column that contains information about the data type (e.g. "sensor_id").
-#' @param timestamps_col A character string. This argument is the name of the column that contains timestamps in a format that supports calculations in milliseconds (e.g. "timestamp_ms").
-#' @param PIT_tag_col A character string. This argument is the name of the metadata column that contains information about the PIT tags detected by the RFID antenna when RFID data is used as input (e.g. "PIT_tag_ID"). The default is NULL, since the function also accepts beam breaker data that does not contain PIT tag information.
-#' @param rfid_label A character string. This argument is the label for the RFID sensor in the sensor_id_col column in pre-processed data (e.g. "RFID"). The default is NULL, since the function also accepts beam breaker data
-#' @param outer_irbb_label A character string. This argument is the label for the outer pair of beam breakers in the sensor_id_col column in pre-processed data (e.g. "Outer Beam Breaker"). The default is NULL, since the function also accepts RFID data
-#' @param inner_irbb_label A character string. This argument is the label for the inner pair of beam breakers in the sensor_id_col column in pre-processed data (e.g. "Inner Beam Breaker"). The default is NULL, since the function also accepts RFID data
+#' @param sensor_id_col_nm A character string. This is the name of the metadata column that contains information about the data type (e.g. "sensor_id").
+#' @param timestamps_col_nm A character string. This argument is the column name that will be used to create a new column containing timestamps for the given sensor. These timestamps will be converted to POSIXct or POSIXt format with millisecond resolution (e.g. format = "%Y-%m-%d %H:%M:%OS", see `POSIXct_format` below).
+#' @param PIT_tag_col_nm A character string. This argument is the name of the metadata column that contains information about the PIT tags detected by the RFID antenna when RFID data is used as input (e.g. "PIT_tag_ID"). The default is NULL, since the function also accepts beam breaker data that does not contain PIT tag information.
+#' @param rfid_label A character string. This argument is the label for the RFID sensor in the sensor_id_col_nm column in pre-processed data (e.g. "RFID"). The default is NULL, since the function also accepts beam breaker data
+#' @param outer_irbb_label A character string. This argument is the label for the outer pair of beam breakers in the sensor_id_col_nm column in pre-processed data (e.g. "Outer Beam Breaker"). The default is NULL, since the function also accepts RFID data. This argument must be specified even when IRBB data from 1 pair of beam breakers is used as input.
+#' @param inner_irbb_label A character string. This argument is the label for the inner pair of beam breakers in the sensor_id_col_nm column in pre-processed data (e.g. "Inner Beam Breaker"). The default is NULL, since the function also accepts RFID data. This argument must be specified even when IRBB data from 1 pair of beam breakers is used as input.
 #' @param general_metadata_cols A character vector. This should be a string of the general metadata column names that will be carried through into the resulting spreadsheet. For this particular function, these metadata columns should be general to the experiment and not specific to individuals or dates. For instance: `c("chamber_id", "sensor_id")`. These columns will be added as the first columns in the resulting spreadsheet, in the same order in which they are provided.
 #' @param path A character string. This argument should be the path specifying the overall directory where data is saved for a given experimental setup. For instance, "/media/gsvidaurre/Anodorhynchus/Data_Testing/Box_02_31Dec2022/Data".
 #' @param data_dir A character string. This argument should be the name of directory where the spreadsheet of perching events should be saved inside the path above. For instance, "pre-processed".
 #' @param out_dir A character string. This argument should be the name of a directory inside the path above specifying where the resulting .csv file of perching events should be saved (e.g. "pre-processed"). This folder will be created as a new directory if it doesn't already exist.
-#' @param out_file_nm A character string. The name (plus extension) of the resulting file that will be written to out_dir. The default file name is "perching_events.csv". The function will automatically add the sensor type to this default file name (as a suffix before the extension).
+#' @param out_file_prefix A character string. The name (plus extension) of the resulting file that will be written to out_dir. The default prefix is "perching_events". The function will automatically add the sensor type to this default file name as a suffix before the .csv extension.
 #' @param tz A character string. This argument should contain the timezone used for converting timestamps to POSIXct format. For instance, "America/New York". See the base function `as.POSIXct` for more information.
 #' @param POSIXct_format A character string. This argument should contain the format used to converting timestamps to POSIXct format. The default is "%Y-%m-%d %H:%M:%OS6" to return timestamps with milliseconds in decimal format. See the base function `as.POSIXct` for more information.
 #'
@@ -26,9 +26,9 @@
 # file_nm = "combined_raw_data_RFID.csv"
 # threshold = th
 # run_length = run_length
-# sensor_id_col = "sensor_id"
-# timestamps_col = "timestamp_ms"
-# PIT_tag_col = "PIT_tag_ID"
+# sensor_id_col_nm = "sensor_id"
+# timestamps_col_nm = "timestamp_ms"
+# PIT_tag_col_nm = "PIT_tag_ID"
 # rfid_label = "RFID"
 # outer_irbb_label = NULL
 # inner_irbb_label = NULL
@@ -36,11 +36,11 @@
 # path = path
 # data_dir = file.path(data_dir, "raw_combined")
 # out_dir = file.path(data_dir, "processed")
-# out_file_nm = "perching_events.csv"
+# out_file_prefix = "perching_events.csv"
 # tz = "America/New York"
 # POSIXct_format = "%Y-%m-%d %H:%M:%OS"
 
-find_perching_events <- function(file_nm, threshold, run_length = 2, sensor_id_col, timestamps_col, PIT_tag_col = NULL, rfid_label = NULL, outer_irbb_label = NULL, inner_irbb_label = NULL, general_metadata_cols, path, data_dir, out_dir, out_file_nm = "perching_events.csv", tz, POSIXct_format = "%Y-%m-%d %H:%M:%OS"){
+find_perching_events <- function(file_nm, threshold, run_length = 2, sensor_id_col_nm, timestamps_col_nm, PIT_tag_col_nm = NULL, rfid_label = NULL, outer_irbb_label = NULL, inner_irbb_label = NULL, general_metadata_cols, path, data_dir, out_dir, out_file_prefix = "perching_events", tz, POSIXct_format = "%Y-%m-%d %H:%M:%OS"){
   
   # Get the current global options
   orig_opts <- options()
@@ -51,42 +51,62 @@ find_perching_events <- function(file_nm, threshold, run_length = 2, sensor_id_c
   # Get the user-specified values for each formal argument of the current function
   f_args <- getFunctionParameters()
   
-  # Check that the formal arguments were all specified, and are not NULL or NA
-  invisible(sapply(1:length(f_args), function(i){
-    check_defined(f_args[i])
+  # Check that arguments that cannot ever be non-NULL are not NULL
+  expect_nonNulls <- f_args[grep(paste(paste("^", c("file_nm", "sensor_id_col_nm", "timestamps_col_nm", "general_metadata_cols", "path", "data_dir", "out_dir", "out_file_prefix", "tz", "POSIXct_format"), "$", sep = ""), collapse = "|"), names(f_args))]
+  
+  invisible(sapply(1:length(expect_nonNulls), function(i){
+    check_not_null(names(expect_nonNulls[i]), expect_nonNulls[[i]])
   }))
+  
+  # Check that the sensor suffix in the input file name is correct
+  check_file_nm(file_nm)
   
   # Check that the formal arguments that should be strings are strings
   expect_numeric <- c("threshold", "run_length")
   
-  if(!is.null(rfid_label) & is.null(outer_irbb_label) & is.null(inner_irbb_label)){
+  # Check that the formal arguments that should be NULL under certain conditions are NULL given the current user-specified arguments
+  if(grepl("RFID", file_nm)){
     
     expect_null <- c("outer_irbb_label", "inner_irbb_label")
     
-  } else if(is.null(rfid_label) & is.null(inner_irbb_label)){
+  } else if(grepl("IRBB", file_nm)){
     
-    expect_null <- c("PIT_tag_col", "rfid_label", "inner_irbb_label")
-    
-  } else if(is.null(rfid_label) & is.null(outer_irbb_label)){
-    
-    expect_null <- c("PIT_tag_col", "rfid_label", "outer_irbb_label")
+    expect_null <- c("PIT_tag_col_nm", "rfid_label")
     
   }
+  
+  expect_nulls <- f_args[grep(paste(paste("^", expect_null, "$", sep = ""), collapse = "|"), names(f_args))]
+  
+  invisible(sapply(1:length(expect_nulls), function(i){
+    check_null(names(expect_nulls[i]), expect_nulls[[i]])
+  }))
+  
+  # Check that all formal arguments that cannot be NULL are not NULL:
+  if(grepl("RFID", file_nm)){
+    
+    expect_nonNull <- c("PIT_tag_col_nm", "rfid_label")
+    
+  } else if(grepl("IRBB", file_nm)){
+    
+    expect_nonNull <- c("outer_irbb_label", "inner_irbb_label")
+    
+  }
+  
+  expect_nonNulls <- f_args[grep(paste(paste("^", expect_nonNull, "$", sep = ""), collapse = "|"), names(f_args))]
+  
+  invisible(sapply(1:length(expect_nonNulls), function(i){
+    check_not_null(names(expect_nonNulls[i]), expect_nonNulls[[i]])
+  }))
   
   expect_strings <- f_args[-grep(paste(paste("^", c(expect_numeric, expect_null), "$", sep = ""), collapse = "|"), names(f_args))]
   
   invisible(sapply(1:length(expect_strings), function(i){
-    check_string(expect_strings[[i]])
+    check_string(names(expect_strings[i]), expect_strings[[i]])
   }))
   
   # Check that the formal arguments that should be numeric are numeric
   invisible(sapply(1:length(expect_numeric), function(i){
-    check_numeric(f_args[[grep(paste(paste("^", expect_numeric[i], "$", sep = ""), collapse = "|"), names(f_args))]])
-  }))
-  
-  # Check that the formal arguments that should be NULL are NULL
-  invisible(sapply(1:length(expect_null), function(i){
-    check_null(f_args[[grep(paste(paste("^", expect_null[i], "$", sep = ""), collapse = "|"), names(f_args))]])
+    check_numeric(expect_numeric[i], f_args[[grep(paste(paste("^", expect_numeric[i], "$", sep = ""), collapse = "|"), names(f_args))]])
   }))
   
   # Check that each input directory exists
@@ -100,18 +120,15 @@ find_perching_events <- function(file_nm, threshold, run_length = 2, sensor_id_c
     dir.create(file.path(path, out_dir))
   }
   
-  # Read in the pre-processed RFID data
-  raw_data <- read.csv(file.path(path, data_dir, file_nm)) %>% 
-    # Make sure that the timestamps are in the right format
-    dplyr::mutate(
-      !!timestamps_col := as.POSIXct(format(as.POSIXct(!!sym(timestamps_col), tz = "America/New York"), "%Y-%m-%d %H:%M:%OS6"))
-    ) 
+  # Read in the raw data
+  raw_data <- read.csv(file.path(path, data_dir, file_nm)) 
   
   # Check that this object is a data frame
   check_df_class(raw_data)
   
   # Check that the expected columns from formal arguments are found in the data
   expected_cols <- f_args[grep("col", names(f_args))]
+  expected_cols <- expected_cols[-grep("time", names(expected_cols))]
   
   invisible(sapply(1:length(expected_cols), function(i){
     check_fArgs_data_cols(expected_cols[[i]], raw_data)
@@ -123,7 +140,7 @@ find_perching_events <- function(file_nm, threshold, run_length = 2, sensor_id_c
   }))
   
   # Check that date-related columns are found in the data
-  expected_cols <- c("year", "month", "day")
+  expected_cols <- c("original_timestamp", "year", "month", "day")
   
   invisible(sapply(1:length(expected_cols), function(i){
     check_data_cols(expected_cols[i], raw_data)
@@ -134,12 +151,11 @@ find_perching_events <- function(file_nm, threshold, run_length = 2, sensor_id_c
     check_cols_nas(expected_cols[i], raw_data)
   }))
   
-  # Check that columns with timestamps are in the right format
-  tstmps_cols <- f_args[grep("time", names(f_args))]
-  
-  invisible(sapply(1:length(tstmps_cols), function(i){
-    check_tstmps_cols(tstmps_cols[[i]], raw_data, "%Y-%m-%d %H:%M:%OS6")
-  }))
+  raw_data <- raw_data %>% 
+    # Make sure that the timestamps are in the right format
+    dplyr::mutate(
+      !!timestamps_col_nm := as.POSIXct(format(as.POSIXct(!!sym(timestamps_col_nm), tz = "America/New York"), "%Y-%m-%d %H:%M:%OS6"))
+    )
   
   # If RFID data is used as input, then group by PIT tag ID and date
   if(!is.null(rfid_label)){
@@ -148,8 +164,8 @@ find_perching_events <- function(file_nm, threshold, run_length = 2, sensor_id_c
       dplyr::mutate(
         dates = paste(year, month, day, sep = "-")
       ) %>%
-      group_by(!!sym(PIT_tag_col), dates) %>% 
-      dplyr::arrange(!!sym(timestamps_col), .by_group = TRUE) %>% 
+      group_by(!!sym(PIT_tag_col_nm), dates) %>% 
+      dplyr::arrange(!!sym(timestamps_col_nm), .by_group = TRUE) %>% 
       # Make unique row indices within groups
       dplyr::mutate(
         group_row_id = row_number()
@@ -163,8 +179,8 @@ find_perching_events <- function(file_nm, threshold, run_length = 2, sensor_id_c
       dplyr::mutate(
         dates = paste(year, month, day, sep = "-")
       ) %>%
-      group_by(!!sym(sensor_id_col), dates) %>% 
-      dplyr::arrange(!!sym(timestamps_col), .by_group = TRUE) %>% 
+      group_by(!!sym(sensor_id_col_nm), dates) %>% 
+      dplyr::arrange(!!sym(timestamps_col_nm), .by_group = TRUE) %>% 
       # Make unique row indices within groups
       dplyr::mutate(
         group_row_id = row_number()
@@ -180,15 +196,15 @@ find_perching_events <- function(file_nm, threshold, run_length = 2, sensor_id_c
       lags = map(
         .x = data,
         .f = ~ dplyr::mutate(.x,
-                             shift = dplyr::lag(!!sym(timestamps_col), default = first(!!sym(timestamps_col)))
+                             shift = dplyr::lag(!!sym(timestamps_col_nm), default = first(!!sym(timestamps_col_nm)))
         ) %>% 
           # Convert differences to Boolean based on the thinning threshold to remove stretches of detection events very close together
           dplyr::mutate(
-            diff = as.numeric(!!sym(timestamps_col) - shift),
+            diff = as.numeric(!!sym(timestamps_col_nm) - shift),
             # Taking anything less than or equal to the threshold,. The diff > 0 condition removes the first timestamp compared to itself
             binary_diff = (diff <= threshold & diff > 0)
           ) %>% 
-          dplyr::select(all_of(timestamps_col), shift, diff, binary_diff) 
+          dplyr::select(all_of(timestamps_col_nm), shift, diff, binary_diff) 
       )
     ) %>% 
     
@@ -222,10 +238,10 @@ find_perching_events <- function(file_nm, threshold, run_length = 2, sensor_id_c
             tmp_perching <- data.frame(
               perching_start = .y[[1]] %>%
                 dplyr::filter(group_row_id == first_indices) %>%
-                pull(all_of(timestamps_col)),
+                pull(all_of(timestamps_col_nm)),
               perching_end = .y[[1]] %>%
                 dplyr::filter(group_row_id == last_indices) %>%
-                pull(all_of(timestamps_col))
+                pull(all_of(timestamps_col_nm))
             ) 
             
             return(tmp_perching)
@@ -254,7 +270,7 @@ find_perching_events <- function(file_nm, threshold, run_length = 2, sensor_id_c
     if(!is.null(outer_irbb_label) | !is.null(outer_irbb_label) & is.null(rfid_label)){
       
       perching_events <- perching_events %>% 
-        dplyr::select(-c(all_of(sensor_id_col))) 
+        dplyr::select(-c(all_of(sensor_id_col_nm))) 
       
     }
     
@@ -264,7 +280,7 @@ find_perching_events <- function(file_nm, threshold, run_length = 2, sensor_id_c
         raw_data %>%
           # Rename the timestamps column for the join with perching_start timestamps immediately below
           dplyr::rename(
-            `perching_start` = !!sym(timestamps_col)
+            `perching_start` = !!sym(timestamps_col_nm)
           ) %>% 
           dplyr::select(all_of(general_metadata_cols), perching_start),
         by = c("perching_start")
@@ -279,12 +295,12 @@ find_perching_events <- function(file_nm, threshold, run_length = 2, sensor_id_c
     if(!is.null(rfid_label)){
       
       perching_events <- perching_events %>% 
-        dplyr::select(all_of(general_metadata_cols), all_of(sensor_id_col), all_of(PIT_tag_col), perching_start, perching_end, perching_duration_s, unique_perching_event, min_perching_run_length, threshold_s, data_stage, date_preprocessed)
+        dplyr::select(all_of(general_metadata_cols), all_of(sensor_id_col_nm), all_of(PIT_tag_col_nm), perching_start, perching_end, perching_duration_s, unique_perching_event, min_perching_run_length, threshold_s, data_stage, date_preprocessed)
       
     } else if(!is.null(outer_irbb_label) | !is.null(inner_irbb_label)){
       
       perching_events <- perching_events %>% 
-        dplyr::select(all_of(general_metadata_cols), all_of(sensor_id_col), perching_start, perching_end, perching_duration_s, unique_perching_event, min_perching_run_length, threshold_s, data_stage, date_preprocessed)
+        dplyr::select(all_of(general_metadata_cols), all_of(sensor_id_col_nm), perching_start, perching_end, perching_duration_s, unique_perching_event, min_perching_run_length, threshold_s, data_stage, date_preprocessed)
       
     }
     
@@ -303,7 +319,7 @@ find_perching_events <- function(file_nm, threshold, run_length = 2, sensor_id_c
         data_stage = "pre-processing",
         date_preprocessed = paste(Sys.Date(), Sys.time(), sep = " ")
       ) %>% 
-      dplyr::select(all_of(general_metadata_cols), all_of(sensor_id_col), year, month, day, perching_start, perching_end, perching_duration_s, unique_perching_event, min_perching_run_length, threshold_s, data_stage, date_preprocessed)
+      dplyr::select(all_of(general_metadata_cols), all_of(sensor_id_col_nm), year, month, day, perching_start, perching_end, perching_duration_s, unique_perching_event, min_perching_run_length, threshold_s, data_stage, date_preprocessed)
     
   }
   
@@ -311,7 +327,7 @@ find_perching_events <- function(file_nm, threshold, run_length = 2, sensor_id_c
   sensor_id <- strsplit(file_nm, split = "_")[[1]]
   sensor_id <- gsub(".csv", "", sensor_id[length(sensor_id)])
   
-  out_file_nm_tmp <- gsub(".csv", paste("_", sensor_id, ".csv", sep = ""), out_file_nm)
+  out_file_nm_tmp <- paste(out_file_prefix, "_", sensor_id, ".csv", sep = "")
   
   write.csv(perching_events, file.path(path, out_dir, out_file_nm_tmp), row.names = FALSE)
   
