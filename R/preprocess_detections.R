@@ -2,7 +2,7 @@
 #' @description Pre-process raw data for each movement sensor type
 #' 
 #' @param sensor A character string. This argument should contain the movement sensor type for which pre-processing will be performed, either "IRBB", "RFID", or "Video". The data for the two beam breaker pairs will be pre-processed separately here (see `group_col_nm` below).
-#' @param timestamps_col A character string. This argument is the column name for the columns that contains timestamps for the given sensor. These timestamps must be in POSIXct or POSIXt format with millisecond resolution (e.g. format = "%Y-%m-%d %H:%M:%OS", see `POSIXct_format` below).
+#' @param timestamps_col_nm A character string. This argument is the column name for the columns that contains timestamps for the given sensor. These timestamps must be in POSIXct or POSIXt format with millisecond resolution (e.g. format = "%Y-%m-%d %H:%M:%OS", see `POSIXct_format` below).
 #' @param group_col_nm A character string. This argument is the column name for the column that contains values used to group the data before pre-processing. For RFID data, this column should contain the PIT tag identifiers, so that pre-processing is performed for each unique PIT tag. For beam breaker data, this column should be the unique beam breaker labels so that pre-processing is carried out separately for each beam breaker pair. The default is `NULL`, since this argument is not needed to process the video data
 #' @param pixel_col_nm A character string. This argument is the column name for the column that contains the number of pixels that triggered each unique video recording event. The default is `NULL`, since this argument is not needed to process the RFID or beam breaker data.
 #' @param thin_threshold A single numeric value. This argument is the temporal threshold in seconds that will be used to thin the raw data. The default is `NULL`, since this argument is not needed to pre-process the video data.
@@ -20,7 +20,7 @@
 
 
 # sensor = "Video"
-# timestamps_col = "timestamp_ms"
+# timestamps_col_nm = "timestamp_ms"
 # group_col_nm = NULL
 # pixel_col_nm = "total_pixels_motionTrigger"
 # # ths <- seq(0.5, 5, by = 0.5)
@@ -35,7 +35,7 @@
 # tz = "America/New York"
 # POSIXct_format = "%Y-%m-%d %H:%M:%OS"
 
-preprocess_detections <- function(sensor, timestamps_col, group_col_nm = NULL, pixel_col_nm = NULL, mode = NULL, thin_threshold = NULL, pixel_threshold = NULL, path, data_dir, out_dir, tz, POSIXct_format = "%Y-%m-%d %H:%M:%OS"){
+preprocess_detections <- function(sensor, timestamps_col_nm, group_col_nm = NULL, pixel_col_nm = NULL, mode = NULL, thin_threshold = NULL, pixel_threshold = NULL, path, data_dir, out_dir, tz, POSIXct_format = "%Y-%m-%d %H:%M:%OS"){
   
   # Get the current global options
   orig_opts <- options()
@@ -47,7 +47,7 @@ preprocess_detections <- function(sensor, timestamps_col, group_col_nm = NULL, p
   f_args <- getFunctionParameters()
   
   # Check that arguments that cannot ever be non-NULL are not NULL
-  expect_nonNulls <- f_args[grep(paste(paste("^", c("sensor", "timestamps_col", "path", "data_dir", "out_dir", "tz", "POSIXct_format"), "$", sep = ""), collapse = "|"), names(f_args))]
+  expect_nonNulls <- f_args[grep(paste(paste("^", c("sensor", "timestamps_col_nm", "path", "data_dir", "out_dir", "tz", "POSIXct_format"), "$", sep = ""), collapse = "|"), names(f_args))]
   
   invisible(sapply(1:length(expect_nonNulls), function(i){
     check_not_null(names(expect_nonNulls[i]), expect_nonNulls[[i]])
@@ -56,7 +56,7 @@ preprocess_detections <- function(sensor, timestamps_col, group_col_nm = NULL, p
   # Check that the sensor argument was written correctly
   check_sensor_spelling("sensor", f_args[grep(paste(paste("^", "sensor", "$", sep = ""), collapse = "|"), names(f_args))])
   
-  # Check that the formal arguments that should not be NULL under certain conditions are not NULL given the current user-specified arguments
+  # Check that the formal arguments that should be NULL under certain conditions are NULL given the current user-specified arguments
   if(sensor == "RFID" | sensor == "IRBB"){
     
     expect_null <- c("pixel_col_nm", "pixel_threshold")
@@ -153,7 +153,7 @@ preprocess_detections <- function(sensor, timestamps_col, group_col_nm = NULL, p
   }))
   
   # Check that date-related columns are found in the data
-  expected_cols <- c("year", "month", "day")
+  expected_cols <- c("original_timestamp", "year", "month", "day")
   
   invisible(sapply(1:length(expected_cols), function(i){
     check_data_cols(expected_cols[i], raw_data)
@@ -182,13 +182,13 @@ preprocess_detections <- function(sensor, timestamps_col, group_col_nm = NULL, p
   if(grepl("RFID|IRBB", sensor)){
     
     # Initialize column names that will be shared across sensors, in the order in which they'll appear in the .csv file 
-    col_nms <- c("data_type", "chamber_id", "year", "month", "day", timestamps_col, group_col_nm)
+    col_nms <- c("data_type", "chamber_id", "year", "month", "day", timestamps_col_nm, group_col_nm)
     
     if(!is.null(group_col_nm)){
       
       tmp_df <- raw_data %>%
         group_by(!!sym(group_col_nm)) %>%
-        dplyr::arrange(!!sym(timestamps_col), .by_group = TRUE) %>% 
+        dplyr::arrange(!!sym(timestamps_col_nm), .by_group = TRUE) %>% 
         # Make unique row indices within groups
         dplyr::mutate(
           group_row_id = row_number()
@@ -200,7 +200,7 @@ preprocess_detections <- function(sensor, timestamps_col, group_col_nm = NULL, p
     } else if(is.null(group_col_nm)){
       
       tmp_df <- raw_data %>% 
-        dplyr::arrange(!!sym(timestamps_col)) %>% 
+        dplyr::arrange(!!sym(timestamps_col_nm)) %>% 
         # Make unique row indices with the same column name as the group indices above
         dplyr::mutate(
           group_row_id = row_number(),
@@ -212,11 +212,11 @@ preprocess_detections <- function(sensor, timestamps_col, group_col_nm = NULL, p
     # If the group_col is specified, then the lags are calculated per group in the grouped data frame
     lags <- tmp_df %>% 
       dplyr::mutate(
-        shift = dplyr::lag(!!sym(timestamps_col), default = first(!!sym(timestamps_col)))
+        shift = dplyr::lag(!!sym(timestamps_col_nm), default = first(!!sym(timestamps_col_nm)))
       ) %>% 
       # Convert differences to boolean based on the thinning threshold to be able to remove stretches of detection events very close together
       dplyr::mutate(
-        diff = floor(!!sym(timestamps_col) - shift),
+        diff = floor(!!sym(timestamps_col_nm) - shift),
         diff = as.numeric(diff),
         binary_diff = (diff > thin_threshold & diff > 0)
       ) 
@@ -224,12 +224,12 @@ preprocess_detections <- function(sensor, timestamps_col, group_col_nm = NULL, p
     if(!is.null(group_col_nm)){
       
       lags <- lags %>% 
-        dplyr::select(!!sym(timestamps_col), group_col, diff, binary_diff) 
+        dplyr::select(!!sym(timestamps_col_nm), group_col, diff, binary_diff) 
       
     } else {
       
       lags <- lags %>% 
-        dplyr::select(!!sym(timestamps_col), diff, binary_diff) 
+        dplyr::select(!!sym(timestamps_col_nm), diff, binary_diff) 
       
     }
     
@@ -324,7 +324,7 @@ preprocess_detections <- function(sensor, timestamps_col, group_col_nm = NULL, p
       filt_df2 <- filt_df %>% 
         dplyr::select(-c("group_row_id")) %>% 
         dplyr::select(
-          col_nms, names(.)[-grep(paste(paste("^", col_nms, "$", sep = ""), collapse = "|"), names(.))], "data_stage", "date_pre_processed"
+          all_of(col_nms), names(.)[-grep(paste(paste("^", col_nms, "$", sep = ""), collapse = "|"), names(.))], "data_stage", "date_pre_processed"
         )
       
     } else {
@@ -358,7 +358,7 @@ preprocess_detections <- function(sensor, timestamps_col, group_col_nm = NULL, p
       filt_df2 <- filt_df %>% 
         dplyr::select(-c("group_row_id")) %>% 
         dplyr::select(
-          col_nms, names(.)[-grep(paste(paste("^", col_nms, "$", sep = ""), collapse = "|"), names(.))], "data_stage", "date_pre_processed"
+          all_of(col_nms), names(.)[-grep(paste(paste("^", col_nms, "$", sep = ""), collapse = "|"), names(.))], "data_stage", "date_pre_processed"
         )
       
     }
@@ -366,7 +366,7 @@ preprocess_detections <- function(sensor, timestamps_col, group_col_nm = NULL, p
   } else if(grepl("Video", sensor)){
     
     # Initialize column names that will be shared across sensors, in the order in which they'll appear in the .csv file 
-    col_nms <- c("data_type", "chamber_id", "year", "month", "day", timestamps_col, pixel_col_nm)
+    col_nms <- c("data_type", "chamber_id", "year", "month", "day", timestamps_col_nm, pixel_col_nm)
     
     filt_df <- raw_data %>%
       dplyr::filter(!!sym(pixel_col_nm) >= pixel_threshold) %>% 
@@ -387,7 +387,7 @@ preprocess_detections <- function(sensor, timestamps_col, group_col_nm = NULL, p
   
   filt_df2 <- filt_df2 %>% 
     dplyr::arrange(
-      -desc(!!sym(timestamps_col))
+      -desc(!!sym(timestamps_col_nm))
     )
   
   # Save the pre-processed data for each sensor in the given setup
