@@ -43,16 +43,6 @@ getFunctionParameters <- function() {
 
 ############################## Formal arguments ####################################
 
-# check_defined <- function(nm, y){
-# 
-#   err <- paste("The argument", nm, "must be specified, and cannot be NULL or NA", sep = " ")
-#   
-#   if(is.null(y) | is.na(y) & y != ""){
-#     stop(err)
-#   }
-#   
-# }
-
 # Check that arguments are strings
 check_string <- function(nm, y){
   
@@ -179,6 +169,16 @@ check_file <- function(path, y){
   err <- paste("The file", y, "does not exist in the directory", path, sep = " ")
   
   if(!file.exists(file.path(path, y))){
+    stop(err)
+  }
+  
+}
+
+check_file_nm <- function(y){
+  
+  err <- "The input file name does not contain the correct sensor suffix"
+  
+  if(!grepl("RFID|IRBB", y)){
     stop(err)
   }
   
