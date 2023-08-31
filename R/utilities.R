@@ -142,7 +142,7 @@ check_sensor_spelling <- function(nm, y){
 # Check that the each directory in a vector of directories exists
 check_dirs <- function(path, y){
   
-  err <- paste("The directory", y, "does not exist", sep = " ")
+  err <- paste("The directory", file.path(path, y), "does not exist", sep = " ")
   
   if(!dir.exists(file.path(path, y))){
     stop(err)
@@ -252,7 +252,7 @@ check_fArgs_cols_nas <- function(y, df){
 # Check that a data frame has each column in a vector of columns NOT specified in the formal arguments does not have NAs
 check_cols_nas <- function(y, df){
   
-  err <- paste("The column", y, "has NA (missing) values", sep = " ")
+  err <- paste("The column", y, "has NA values", sep = " ")
   
   if(any(is.na(df[[y]]))){
     stop(err)
