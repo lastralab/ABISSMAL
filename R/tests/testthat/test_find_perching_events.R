@@ -125,8 +125,6 @@ test_that("The correct number and timing of perching events are identified for R
   
 })
 
-# ── Skip (???): The correct number and timing of discrete perching events are identified for RFID data with multiple temporal thresholds and run lengths ──
-# Reason: empty test
 test_that("The correct number and timing of discrete perching events are identified for RFID data with multiple temporal thresholds and run lengths", {
   
   # Avoid library calls and other changes to the virtual environment
@@ -219,7 +217,7 @@ test_that("The correct number and timing of discrete perching events are identif
       # Get the expected end timestamp per simulated perching event cluster
       tmp_end <- max(tmp_tstmps$tstmps[tmp_tstmps$cluster == i])
 
-      expect_equal(test_res$perching_start[i], tmp_starts[i])
+      expect_equal(test_res$perching_start[i], starts[i])
       expect_equal(test_res$perching_end[i], tmp_end)
 
     }))
@@ -230,7 +228,7 @@ test_that("The correct number and timing of discrete perching events are identif
       # Get the expected end timestamp per simulated perching event cluster
       tmp_end <- max(tmp_tstmps$tstmps[tmp_tstmps$cluster == i])
 
-      expect_equal(test_res$perching_duration_s[i], as.numeric(tmp_end - tmp_starts[i]))
+      expect_equal(test_res$perching_duration_s[i], as.numeric(tmp_end - starts[i]))
 
     }))
   
@@ -350,8 +348,6 @@ test_that("The correct number and timing of perching events are identified for t
   
 })
 
-# ── Skip (???): The correct number and timing of discrete perching events are identified for the outer beam breaker pair with multiple temporal thresholds and run lengths ──
-# Reason: empty test
 test_that("The correct number and timing of discrete perching events are identified for the outer beam breaker pair with multiple temporal thresholds and run lengths", {
   
   # Avoid library calls and other changes to the virtual environment
@@ -396,13 +392,13 @@ test_that("The correct number and timing of discrete perching events are identif
   # Since run lengths are calculated from the difference in timestamps, each run_length value should be applied to a clusters of detections of length rls + 1
   rls <- seq(1, 10, by = 1)
   
-  # threshold values are x, run length values are y
-  invisible(mapply(function(x, y){
+  # The threshold and run length vectors must have the same number of values
+  invisible(lapply(1:length(ths), function(x){
     
     # Create the timestamps
     tmp_tstmps <- data.table::rbindlist(lapply(1:length(starts), function(i){
       
-      sim_ts <- seq(starts[i], starts[i] + max(seq_len(y*y)), by = x)[1:(y + 1)]
+      sim_ts <- seq(starts[i], starts[i] + max(seq_len(rls[x]*rls[x])), by = ths[x])[1:(rls[x] + 1)]
       
       return(data.frame(tstmps = sim_ts, cluster = i))
       
@@ -424,7 +420,7 @@ test_that("The correct number and timing of discrete perching events are identif
     
     write.csv(sim_ts, file.path(tmp_path, "raw_combined", "combined_raw_data_IRBB.csv"), row.names = FALSE)
     
-    find_perching_events(file_nm = "combined_raw_data_IRBB.csv", threshold = x, run_length = y, sensor_id_col_nm = "sensor_id", timestamps_col_nm = "timestamp_ms", PIT_tag_col_nm = NULL, rfid_label = NULL, outer_irbb_label = "Outer Beam Breaker", inner_irbb_label = "Inner Beam Breaker", general_metadata_cols = c("chamber_id", "sensor_id"), path = path, data_dir = file.path(data_dir, "raw_combined"), out_dir = file.path(data_dir, "processed"), out_file_prefix = "perching_events", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS")
+    find_perching_events(file_nm = "combined_raw_data_IRBB.csv", threshold = ths[x], run_length = rls[x], sensor_id_col_nm = "sensor_id", timestamps_col_nm = "timestamp_ms", PIT_tag_col_nm = NULL, rfid_label = NULL, outer_irbb_label = "Outer Beam Breaker", inner_irbb_label = "Inner Beam Breaker", general_metadata_cols = c("chamber_id", "sensor_id"), path = path, data_dir = file.path(data_dir, "raw_combined"), out_dir = file.path(data_dir, "processed"), out_file_prefix = "perching_events", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS")
     
     # Read in the output, check the output, then delete all files
     test_res <- read.csv(file.path(tmp_path, "processed", "perching_events_IRBB.csv")) %>% 
@@ -443,7 +439,7 @@ test_that("The correct number and timing of discrete perching events are identif
       # Get the expected end timestamp per simulated perching event cluster
       tmp_end <- max(tmp_tstmps$tstmps[tmp_tstmps$cluster == i])
       
-      expect_equal(test_res$perching_start[i], tmp_starts[i])
+      expect_equal(test_res$perching_start[i], starts[i])
       expect_equal(test_res$perching_end[i], tmp_end)
       
     }))
@@ -454,7 +450,7 @@ test_that("The correct number and timing of discrete perching events are identif
       # Get the expected end timestamp per simulated perching event cluster
       tmp_end <- max(tmp_tstmps$tstmps[tmp_tstmps$cluster == i])
       
-      expect_equal(test_res$perching_duration_s[i], as.numeric(tmp_end - tmp_starts[i]))
+      expect_equal(test_res$perching_duration_s[i], as.numeric(tmp_end - starts[i]))
       
     }))
     
@@ -621,13 +617,13 @@ test_that("The correct number and timing of discrete perching events are identif
   # Since run lengths are calculated from the difference in timestamps, each run_length value should be applied to a clusters of detections of length rls + 1
   rls <- seq(1, 10, by = 1)
   
-  # threshold values are x, run length values are y
-  invisible(mapply(function(x, y){
+  # The threshold and run length vectors must have the same number of values
+  invisible(lapply(1:length(ths), function(x){
     
     # Create the timestamps
     tmp_tstmps <- data.table::rbindlist(lapply(1:length(starts), function(i){
       
-      sim_ts <- seq(starts[i], starts[i] + max(seq_len(y*y)), by = x)[1:(y + 1)]
+      sim_ts <- seq(starts[i], starts[i] + max(seq_len(rls[x]*rls[x])), by = ths[x])[1:(rls[x] + 1)]
       
       return(data.frame(tstmps = sim_ts, cluster = i))
       
@@ -649,7 +645,7 @@ test_that("The correct number and timing of discrete perching events are identif
     
     write.csv(sim_ts, file.path(tmp_path, "raw_combined", "combined_raw_data_IRBB.csv"), row.names = FALSE)
     
-    find_perching_events(file_nm = "combined_raw_data_IRBB.csv", threshold = x, run_length = y, sensor_id_col_nm = "sensor_id", timestamps_col_nm = "timestamp_ms", PIT_tag_col_nm = NULL, rfid_label = NULL, outer_irbb_label = "Outer Beam Breaker", inner_irbb_label = "Inner Beam Breaker", general_metadata_cols = c("chamber_id", "sensor_id"), path = path, data_dir = file.path(data_dir, "raw_combined"), out_dir = file.path(data_dir, "processed"), out_file_prefix = "perching_events", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS")
+    find_perching_events(file_nm = "combined_raw_data_IRBB.csv", threshold = ths[x], run_length = rls[x], sensor_id_col_nm = "sensor_id", timestamps_col_nm = "timestamp_ms", PIT_tag_col_nm = NULL, rfid_label = NULL, outer_irbb_label = "Outer Beam Breaker", inner_irbb_label = "Inner Beam Breaker", general_metadata_cols = c("chamber_id", "sensor_id"), path = path, data_dir = file.path(data_dir, "raw_combined"), out_dir = file.path(data_dir, "processed"), out_file_prefix = "perching_events", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS")
     
     # Read in the output, check the output, then delete all files
     test_res <- read.csv(file.path(tmp_path, "processed", "perching_events_IRBB.csv")) %>% 
@@ -668,7 +664,7 @@ test_that("The correct number and timing of discrete perching events are identif
       # Get the expected end timestamp per simulated perching event cluster
       tmp_end <- max(tmp_tstmps$tstmps[tmp_tstmps$cluster == i])
       
-      expect_equal(test_res$perching_start[i], tmp_starts[i])
+      expect_equal(test_res$perching_start[i], starts[i])
       expect_equal(test_res$perching_end[i], tmp_end)
       
     }))
@@ -679,7 +675,7 @@ test_that("The correct number and timing of discrete perching events are identif
       # Get the expected end timestamp per simulated perching event cluster
       tmp_end <- max(tmp_tstmps$tstmps[tmp_tstmps$cluster == i])
       
-      expect_equal(test_res$perching_duration_s[i], as.numeric(tmp_end - tmp_starts[i]))
+      expect_equal(test_res$perching_duration_s[i], as.numeric(tmp_end - starts[i]))
       
     }))
     
@@ -695,9 +691,6 @@ test_that("The correct number and timing of discrete perching events are identif
   
 })
 
-
-# ── Skip (???): The correct number and timing of discrete perching events are identified for the inner beam breaker pair with multiple temporal thresholds and run lengths ──
-# Reason: empty test
 test_that("The correct number and timing of perching events are identified for 2 pairs of beam breakers with a single temporal threshold and run length", {
   
   # Avoid library calls and other changes to the virtual environment
@@ -805,10 +798,6 @@ test_that("The correct number and timing of perching events are identified for 2
   
 })
 
-# TKTK I'm getting this error for some reason when tests are inside a loop. But I wasn't getting this error for the preprocess_detections testing...it might be because I'm using mapply instead of lapply here. Troubleshoot by keeping the lapply and restructure the code somehow
-
-# ── Skip (???): The correct number and timing of discrete perching events are identified for 2 pairs of beam breakers with multiple temporal thresholds and run lengths ──
-# Reason: empty test
 test_that("The correct number and timing of discrete perching events are identified for 2 pairs of beam breakers with multiple temporal thresholds and run lengths", {
   
   # Avoid library calls and other changes to the virtual environment
@@ -853,13 +842,13 @@ test_that("The correct number and timing of discrete perching events are identif
   # Since run lengths are calculated from the difference in timestamps, each run_length value should be applied to a clusters of detections of length rls + 1
   rls <- seq(1, 10, by = 1)
   
-  # threshold values are x, run length values are y
-  invisible(mapply(function(x, y){
+  # The threshold and run length vectors must have the same number of values
+  invisible(lapply(1:length(ths), function(x){
     
     # Create the timestamps
     tmp_tstmps <- data.table::rbindlist(lapply(1:length(starts), function(i){
       
-      sim_ts <- seq(starts[i], starts[i] + max(seq_len(y*y)), by = x)[1:(y + 1)]
+      sim_ts <- seq(starts[i], starts[i] + max(seq_len(rls[x]*rls[x])), by = ths[x])[1:(rls[x] + 1)]
       
       return(data.frame(tstmps = sim_ts, cluster = i))
       
@@ -881,9 +870,7 @@ test_that("The correct number and timing of discrete perching events are identif
     
     write.csv(sim_ts, file.path(tmp_path, "raw_combined", "combined_raw_data_IRBB.csv"), row.names = FALSE)
     
-    source("/home/gsvidaurre/Desktop/GitHub_repos/Abissmal/R/find_perching_events.R")
-    
-    find_perching_events(file_nm = "combined_raw_data_IRBB.csv", threshold = x, run_length = y, sensor_id_col_nm = "sensor_id", timestamps_col_nm = "timestamp_ms", PIT_tag_col_nm = NULL, rfid_label = NULL, outer_irbb_label = "Outer Beam Breaker", inner_irbb_label = "Inner Beam Breaker", general_metadata_cols = c("chamber_id", "sensor_id"), path = path, data_dir = file.path(data_dir, "raw_combined"), out_dir = file.path(data_dir, "processed"), out_file_prefix = "perching_events", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS")
+    find_perching_events(file_nm = "combined_raw_data_IRBB.csv", threshold = ths[x], run_length = rls[x], sensor_id_col_nm = "sensor_id", timestamps_col_nm = "timestamp_ms", PIT_tag_col_nm = NULL, rfid_label = NULL, outer_irbb_label = "Outer Beam Breaker", inner_irbb_label = "Inner Beam Breaker", general_metadata_cols = c("chamber_id", "sensor_id"), path = path, data_dir = file.path(data_dir, "raw_combined"), out_dir = file.path(data_dir, "processed"), out_file_prefix = "perching_events", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS")
     
     # Read in the output, check the output, then delete all files
     test_res <- read.csv(file.path(tmp_path, "processed", "perching_events_IRBB.csv")) %>% 
@@ -902,7 +889,7 @@ test_that("The correct number and timing of discrete perching events are identif
       # Get the expected end timestamp per simulated perching event cluster
       tmp_end <- max(tmp_tstmps$tstmps[tmp_tstmps$cluster == i])
       
-      expect_equal(test_res$perching_start[i], tmp_starts[i])
+      expect_equal(test_res$perching_start[i], starts[i])
       expect_equal(test_res$perching_end[i], tmp_end)
       
     }))
@@ -913,7 +900,7 @@ test_that("The correct number and timing of discrete perching events are identif
       # Get the expected end timestamp per simulated perching event cluster
       tmp_end <- max(tmp_tstmps$tstmps[tmp_tstmps$cluster == i])
       
-      expect_equal(test_res$perching_duration_s[i], as.numeric(tmp_end - tmp_starts[i]))
+      expect_equal(test_res$perching_duration_s[i], as.numeric(tmp_end - starts[i]))
       
     }))
     
@@ -1765,4 +1752,3 @@ test_that("the input dataset has no NAs in columns that cannot have NAs", {
   }
   
 })
-
