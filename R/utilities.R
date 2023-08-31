@@ -174,11 +174,21 @@ check_file <- function(path, y){
   
 }
 
-check_file_nm <- function(y){
+check_file_nm1 <- function(y){
   
   err <- "The input file name does not contain the correct sensor suffix"
   
   if(!grepl("RFID|IRBB", y)){
+    stop(err)
+  }
+  
+}
+
+check_file_nm2 <- function(y){
+  
+  err <- "The input file name does not contain the correct sensor suffix"
+  
+  if(!grepl("RFID|IRBB|Video", y)){
     stop(err)
   }
   
