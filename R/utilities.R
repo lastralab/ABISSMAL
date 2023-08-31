@@ -137,6 +137,17 @@ check_sensor_spelling <- function(nm, y){
   
 }
 
+# Check that sensor arguments are written as expected for the combine_raw_data function
+check_sensor_spelling_cmb <- function(nm, y){
+  
+  err <- paste("One or more values provided for the argument, ", nm, ", are not correct. Check your spelling or captialization", sep = "")
+  
+    if(!all(y %in% c("RFID", "IRBB", "Video", "Temp"))){
+      stop(err)
+    }
+
+}
+
 ############################## Directories and Files ####################################
 
 # Check that the each directory in a vector of directories exists
@@ -154,7 +165,7 @@ check_dirs <- function(path, y){
 # For earlier functions combining many raw data files into a single combined raw data file
 check_dir_notEmpty <- function(path, pattern){
   
-  err <- paste("The directory", path, "does not have", pattern, "files", sep = " ")
+  err <- paste("The directory", path, "does not have the correct files", sep = " ")
   
   if(length(list.files(path, pattern)) == 0){
     stop(err)
