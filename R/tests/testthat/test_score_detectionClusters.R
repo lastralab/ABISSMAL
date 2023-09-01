@@ -1,17 +1,21 @@
+# G. Smith-Vidaurre
+# 03 January 2023
+
+# See more info on the testthat package: https://r-pkgs.org/testing-basics.html
+
+# See examples on: 
+# https://www.r-bloggers.com/2019/11/automated-testing-with-testthat-in-practice/
 
 if (!require(testthat)) install.packages('testthat')
 library(testthat)
 
-score_detectionClusters <- source("/home/gsvidaurre/Desktop/GitHub_repos/Abissmal/R/score_detectionClusters.R")$value
+source("/home/gsvidaurre/Desktop/GitHub_repos/Abissmal/R/score_detectionClusters.R")
 
 source("/home/gsvidaurre/Desktop/GitHub_repos/Abissmal/R/utilities.R")
 
 # This testing file can be run by calling test_file("./path/to/this/file)
 
-#### No perching integration ####
-
-# Test that the function labels entrances and exits as expected when data from 1 sensor type is used as input (2 pairs of beam breakers)
-test_that("The function labels entrances and exits as expected using data from 2 beam breaker pairs", {
+test_that("The function labels entrances and exits as expected using data from 2 beam breaker pairs (no perching integration)", {
   
   # Avoid library calls and other changes to the virtual environment
   # See https://r-pkgs.org/testing-design.html
@@ -19,12 +23,10 @@ test_that("The function labels entrances and exits as expected using data from 2
   withr::local_package("plyr")
   withr::local_package("dplyr")
   withr::local_package("lubridate")
-  withr::local_package("pbapply")
   
   # Just for code development
   # library(tidyverse)
   # library(lubridate)
-  # library(pbapply)
   # library(testthat)
   
   # Create a temporary directory for testing. Files will be written and read here
@@ -34,6 +36,11 @@ test_that("The function labels entrances and exits as expected using data from 2
   
   if(!dir.exists(tmp_path)){ 
     dir.create(tmp_path)
+  }
+  
+  # Create the input data directory that the function expects
+  if(!dir.exists(file.path(tmp_path, "processed"))){ 
+    dir.create(file.path(tmp_path, "processed"))
   }
   
   # Generate a file with pre-processed timestamps for 1 sensor type
@@ -74,12 +81,12 @@ test_that("The function labels entrances and exits as expected using data from 2
       date_pre_processed = Sys.Date()
     )
   
-  write.csv(sim_dats, file.path(tmp_path, "simulated_detectionClusters.csv"), row.names = FALSE)
+  write.csv(sim_dats, file.path(tmp_path, "processed",  "detection_clusters.csv"), row.names = FALSE)
   
-  score_detectionClusters(file_nm = "simulated_detectionClusters.csv", sensor_id_col = NULL, PIT_tag_col = NULL, rfid_label = NULL, camera_label = NULL, outer_irbb_label = "Outer Beam Breaker", inner_irbb_label = "Inner Beam Breaker", general_metadata_cols = c("chamber_id", "year", "month", "day"), video_metadata_cols = NULL, integrate_perching = FALSE, perching_dataset = NULL, perching_prefix = NULL, path = path, data_dir = data_dir, out_dir = data_dir, out_file_nm = "scored_detectionClusters.csv", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS")
+  score_detectionClusters(file_nm = "detection_clusters.csv", sensor_id_col_nm = NULL, PIT_tag_col_nm = NULL, rfid_label = NULL, camera_label = NULL, outer_irbb_label = "Outer Beam Breaker", inner_irbb_label = "Inner Beam Breaker", general_metadata_col_nms = c("chamber_id", "year", "month", "day"), video_metadata_col_nms = NULL, integrate_perching = FALSE, perching_dataset = NULL, perching_prefix = NULL, path = path, data_dir = file.path(data_dir, "processed"), out_dir = file.path(data_dir, "processed"), out_file_nm = "scored_detectionClusters.csv", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS")
   
   # Read in the output, check the output, then delete all files
-  test_res <- read.csv(file.path(tmp_path, "scored_detectionClusters.csv"))
+  test_res <- read.csv(file.path(tmp_path, "processed", "scored_detectionClusters.csv"))
   
   # Test that the results are 3 entrance events and 3 exit events, in that order
   event_labels <- sapply(1:nrow(test_res), function(i){
@@ -112,8 +119,7 @@ test_that("The function labels entrances and exits as expected using data from 2
   
 })
 
-# Test that the function labels entrances and exits as expected when data from 2 sensor types is used as input (RFID and 2 pairs of beam breakers)
-test_that("The function labels entrances and exits as expected using data from RFID and 2 beam breaker pairs", {
+test_that("The function labels entrances and exits as expected using data from RFID and 2 beam breaker pairs (no perching integration)", {
   
   # Avoid library calls and other changes to the virtual environment
   # See https://r-pkgs.org/testing-design.html
@@ -121,12 +127,10 @@ test_that("The function labels entrances and exits as expected using data from R
   withr::local_package("plyr")
   withr::local_package("dplyr")
   withr::local_package("lubridate")
-  withr::local_package("pbapply")
   
   # Just for code development
   # library(tidyverse)
   # library(lubridate)
-  # library(pbapply)
   # library(testthat)
   
   # Create a temporary directory for testing. Files will be written and read here
@@ -136,6 +140,11 @@ test_that("The function labels entrances and exits as expected using data from R
   
   if(!dir.exists(tmp_path)){ 
     dir.create(tmp_path)
+  }
+  
+  # Create the input data directory that the function expects
+  if(!dir.exists(file.path(tmp_path, "processed"))){ 
+    dir.create(file.path(tmp_path, "processed"))
   }
   
   # Generate a file with pre-processed timestamps for two sensor types
@@ -176,12 +185,12 @@ test_that("The function labels entrances and exits as expected using data from R
       date_pre_processed = Sys.Date()
     )
   
-  write.csv(sim_dats, file.path(tmp_path, "simulated_detectionClusters.csv"), row.names = FALSE)
+  write.csv(sim_dats, file.path(tmp_path, "processed", "detection_clusters.csv"), row.names = FALSE)
   
-  score_detectionClusters(file_nm = "simulated_detectionClusters.csv", sensor_id_col = NULL, PIT_tag_col = NULL, rfid_label = "RFID", camera_label = NULL, outer_irbb_label = "Outer Beam Breaker", inner_irbb_label = "Inner Beam Breaker", general_metadata_cols = c("chamber_id", "year", "month", "day"), video_metadata_cols = NULL, integrate_perching = FALSE, perching_dataset = NULL, perching_prefix = NULL, path = path, data_dir = data_dir, out_dir = data_dir, out_file_nm = "scored_detectionClusters.csv", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS")
+  score_detectionClusters(file_nm = "detection_clusters.csv", sensor_id_col_nm = NULL, PIT_tag_col_nm = NULL, rfid_label = "RFID", camera_label = NULL, outer_irbb_label = "Outer Beam Breaker", inner_irbb_label = "Inner Beam Breaker", general_metadata_col_nms = c("chamber_id", "year", "month", "day"), video_metadata_col_nms = NULL, integrate_perching = FALSE, perching_dataset = NULL, perching_prefix = NULL, path = path, data_dir = file.path(data_dir, "processed"), out_dir = file.path(data_dir, "processed"), out_file_nm = "scored_detectionClusters.csv", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS")
   
   # Read in the output, check the output, then delete all files
-  test_res <- read.csv(file.path(tmp_path, "scored_detectionClusters.csv"))
+  test_res <- read.csv(file.path(tmp_path, "processed", "scored_detectionClusters.csv"))
   
   # Test that the results are 3 entrance events and 3 exit events, in that order
   event_labels <- sapply(1:nrow(test_res), function(i){
@@ -219,8 +228,7 @@ test_that("The function labels entrances and exits as expected using data from R
   
 })
 
-# Test that the function labels entrances and exits as expected when data from 3 sensor types is used as input (RFID, 2 pairs of beam breakers, and a camera)
-test_that("The function labels entrances and exits as expected using data from RFID, 2 beam breaker pairs, and a camera", {
+test_that("The function labels entrances and exits as expected using data from RFID, 2 beam breaker pairs, and a camera (no perching integration)", {
   
   # Avoid library calls and other changes to the virtual environment
   # See https://r-pkgs.org/testing-design.html
@@ -228,12 +236,10 @@ test_that("The function labels entrances and exits as expected using data from R
   withr::local_package("plyr")
   withr::local_package("dplyr")
   withr::local_package("lubridate")
-  withr::local_package("pbapply")
   
   # Just for code development
   # library(tidyverse)
   # library(lubridate)
-  # library(pbapply)
   # library(testthat)
   
   # Create a temporary directory for testing. Files will be written and read here
@@ -243,6 +249,11 @@ test_that("The function labels entrances and exits as expected using data from R
   
   if(!dir.exists(tmp_path)){ 
     dir.create(tmp_path)
+  }
+  
+  # Create the input data directory that the function expects
+  if(!dir.exists(file.path(tmp_path, "processed"))){ 
+    dir.create(file.path(tmp_path, "processed"))
   }
   
   # Generate a file with pre-processed timestamps for three sensor types
@@ -287,12 +298,12 @@ test_that("The function labels entrances and exits as expected using data from R
       date_pre_processed = Sys.Date()
     )
 
-  write.csv(sim_dats, file.path(tmp_path, "simulated_detectionClusters.csv"), row.names = FALSE)
+  write.csv(sim_dats, file.path(tmp_path, "processed", "detection_clusters.csv"), row.names = FALSE)
   
-  score_detectionClusters(file_nm = "simulated_detectionClusters.csv", sensor_id_col = NULL, PIT_tag_col = NULL, rfid_label = "RFID", camera_label = "Camera", outer_irbb_label = "Outer Beam Breaker", inner_irbb_label = "Inner Beam Breaker", general_metadata_cols = c("chamber_id", "year", "month", "day"), video_metadata_cols = c("total_pixels_motionTrigger", "pixel_threshold", "video_file_name"), integrate_perching = FALSE, perching_dataset = NULL, perching_prefix = NULL, path = path, data_dir = data_dir, out_dir = data_dir, out_file_nm = "scored_detectionClusters.csv", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS")
+  score_detectionClusters(file_nm = "detection_clusters.csv", sensor_id_col_nm = NULL, PIT_tag_col_nm = NULL, rfid_label = "RFID", camera_label = "Camera", outer_irbb_label = "Outer Beam Breaker", inner_irbb_label = "Inner Beam Breaker", general_metadata_col_nms = c("chamber_id", "year", "month", "day"), video_metadata_col_nms = c("total_pixels_motionTrigger", "pixel_threshold", "video_file_name"), integrate_perching = FALSE, perching_dataset = NULL, perching_prefix = NULL, path = path, data_dir = file.path(data_dir, "processed"), out_dir = file.path(data_dir, "processed"), out_file_nm = "scored_detectionClusters.csv", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS")
   
   # Read in the output, check the output, then delete all files
-  test_res <- read.csv(file.path(tmp_path, "scored_detectionClusters.csv"))
+  test_res <- read.csv(file.path(tmp_path, "processed", "scored_detectionClusters.csv"))
   
   # Test that the results are 3 entrance events and 3 exit events, in that order
   event_labels <- sapply(1:nrow(test_res), function(i){
@@ -330,9 +341,6 @@ test_that("The function labels entrances and exits as expected using data from R
   
 })
 
-#### RFID perching integration ####
-
-# Test that the function labels entrances and exits as expected when data from 1 sensor type is used as input (2 pairs of beam breakers), and perching events are integrated
 test_that("The function labels entrances and exits as expected using data from 2 beam breaker pairs and integrating RFID perching data", {
   
   # Avoid library calls and other changes to the virtual environment
@@ -341,12 +349,10 @@ test_that("The function labels entrances and exits as expected using data from 2
   withr::local_package("plyr")
   withr::local_package("dplyr")
   withr::local_package("lubridate")
-  withr::local_package("pbapply")
   
   # Just for code development
   # library(tidyverse)
   # library(lubridate)
-  # library(pbapply)
   # library(testthat)
   
   # Create a temporary directory for testing. Files will be written and read here
@@ -356,6 +362,11 @@ test_that("The function labels entrances and exits as expected using data from 2
   
   if(!dir.exists(tmp_path)){ 
     dir.create(tmp_path)
+  }
+  
+  # Create the input data directory that the function expects
+  if(!dir.exists(file.path(tmp_path, "processed"))){ 
+    dir.create(file.path(tmp_path, "processed"))
   }
   
   # Generate a file with pre-processed timestamps for 1 sensor type
@@ -396,7 +407,7 @@ test_that("The function labels entrances and exits as expected using data from 2
       date_pre_processed = Sys.Date()
     )
   
-  write.csv(sim_dats, file.path(tmp_path, "simulated_detectionClusters.csv"), row.names = FALSE)
+  write.csv(sim_dats, file.path(tmp_path, "processed", "detection_clusters.csv"), row.names = FALSE)
 
   # Create a dataset of 3 simulated perching events that encompass 2 entrances and 1 exit above
   starts_p <- starts[c(1:2, 5)]
@@ -416,12 +427,12 @@ test_that("The function labels entrances and exits as expected using data from 2
       date_pre_processed = Sys.Date()
     )
 
-  write.csv(sim_perch, file.path(tmp_path, "simulated_perching_events_RFID.csv"), row.names = FALSE)
+  write.csv(sim_perch, file.path(tmp_path, "processed", "perching_events_RFID.csv"), row.names = FALSE)
   
-  score_detectionClusters(file_nm = "simulated_detectionClusters.csv", sensor_id_col = "sensor_id", PIT_tag_col = "PIT_tag_ID", rfid_label = NULL, camera_label = NULL, outer_irbb_label = "Outer Beam Breaker", inner_irbb_label = "Inner Beam Breaker", general_metadata_cols = c("chamber_id", "year", "month", "day"), video_metadata_cols = NULL, integrate_perching = TRUE, perching_dataset = "RFID", perching_prefix = "simulated_perching_events_", path = path, data_dir = data_dir, out_dir = data_dir, out_file_nm = "scored_detectionClusters.csv", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS")
+  score_detectionClusters(file_nm = "detection_clusters.csv", sensor_id_col_nm = "sensor_id", PIT_tag_col_nm = "PIT_tag_ID", rfid_label = NULL, camera_label = NULL, outer_irbb_label = "Outer Beam Breaker", inner_irbb_label = "Inner Beam Breaker", general_metadata_col_nms = c("chamber_id", "year", "month", "day"), video_metadata_col_nms = NULL, integrate_perching = TRUE, perching_dataset = "RFID", perching_prefix = "perching_events_", path = path, data_dir = file.path(data_dir, "processed"), out_dir = file.path(data_dir, "processed"), out_file_nm = "scored_detectionClusters.csv", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS")
   
   # Read in the output, check the output, then delete all files
-  test_res <- read.csv(file.path(tmp_path, "scored_detectionClusters.csv"))
+  test_res <- read.csv(file.path(tmp_path, "processed", "scored_detectionClusters.csv"))
   
   # Test that the results are 3 entrance events and 3 exit events, in that order
   event_labels <- sapply(1:nrow(test_res), function(i){
@@ -465,7 +476,6 @@ test_that("The function labels entrances and exits as expected using data from 2
   
 })
 
-# Test that the function labels entrances and exits as expected when data from 2 sensor types is used as input (RFID and 2 pairs of beam breakers), and perching events are integrated
 test_that("The function labels entrances and exits as expected using data from RFID and 2 beam breaker pairs and integrating RFID perching data", {
   
   # Avoid library calls and other changes to the virtual environment
@@ -474,12 +484,10 @@ test_that("The function labels entrances and exits as expected using data from R
   withr::local_package("plyr")
   withr::local_package("dplyr")
   withr::local_package("lubridate")
-  withr::local_package("pbapply")
   
   # Just for code development
   # library(tidyverse)
   # library(lubridate)
-  # library(pbapply)
   # library(testthat)
   
   # Create a temporary directory for testing. Files will be written and read here
@@ -489,6 +497,11 @@ test_that("The function labels entrances and exits as expected using data from R
   
   if(!dir.exists(tmp_path)){ 
     dir.create(tmp_path)
+  }
+  
+  # Create the input data directory that the function expects
+  if(!dir.exists(file.path(tmp_path, "processed"))){ 
+    dir.create(file.path(tmp_path, "processed"))
   }
   
   # Generate a file with pre-processed timestamps for two sensor types
@@ -529,7 +542,7 @@ test_that("The function labels entrances and exits as expected using data from R
       date_pre_processed = Sys.Date()
     )
   
-  write.csv(sim_dats, file.path(tmp_path, "simulated_detectionClusters.csv"), row.names = FALSE)
+  write.csv(sim_dats, file.path(tmp_path, "processed", "detection_clusters.csv"), row.names = FALSE)
   
   # Create a dataset of 3 simulated perching events that encompass 2 entrances and 1 exit above
   starts_p <- starts[c(1:2, 5)]
@@ -549,12 +562,12 @@ test_that("The function labels entrances and exits as expected using data from R
       date_pre_processed = Sys.Date()
     )
   
-  write.csv(sim_perch, file.path(tmp_path, "simulated_perching_events_RFID.csv"), row.names = FALSE)
+  write.csv(sim_perch, file.path(tmp_path, "processed", "perching_events_RFID.csv"), row.names = FALSE)
   
-  score_detectionClusters(file_nm = "simulated_detectionClusters.csv", sensor_id_col = "sensor_id", PIT_tag_col = "PIT_tag_ID", rfid_label = "RFID", camera_label = NULL, outer_irbb_label = "Outer Beam Breaker", inner_irbb_label = "Inner Beam Breaker", general_metadata_cols = c("chamber_id", "year", "month", "day"), video_metadata_cols = NULL, integrate_perching = TRUE, perching_dataset = "RFID", perching_prefix = "simulated_perching_events_", path = path, data_dir = data_dir, out_dir = data_dir, out_file_nm = "scored_detectionClusters.csv", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS")
+  score_detectionClusters(file_nm = "detection_clusters.csv", sensor_id_col_nm = "sensor_id", PIT_tag_col_nm = "PIT_tag_ID", rfid_label = "RFID", camera_label = NULL, outer_irbb_label = "Outer Beam Breaker", inner_irbb_label = "Inner Beam Breaker", general_metadata_col_nms = c("chamber_id", "year", "month", "day"), video_metadata_col_nms = NULL, integrate_perching = TRUE, perching_dataset = "RFID", perching_prefix = "perching_events_", path = path, data_dir = file.path(data_dir, "processed"), out_dir = file.path(data_dir, "processed"), out_file_nm = "scored_detectionClusters.csv", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS")
   
   # Read in the output, check the output, then delete all files
-  test_res <- read.csv(file.path(tmp_path, "scored_detectionClusters.csv"))
+  test_res <- read.csv(file.path(tmp_path, "processed", "scored_detectionClusters.csv"))
   
   # Test that the results are 3 entrance events and 3 exit events, in that order
   event_labels <- sapply(1:nrow(test_res), function(i){
@@ -603,7 +616,6 @@ test_that("The function labels entrances and exits as expected using data from R
   
 })
 
-# Test that the function labels entrances and exits as expected when data from 3 sensor types is used as input (RFID, 2 pairs of beam breakers, and a camera), and perching events are integrat
 test_that("The function labels entrances and exits as expected using data from RFID, 2 beam breaker pairs, and a camera and integrating RFID perching data", {
   
   # Avoid library calls and other changes to the virtual environment
@@ -612,12 +624,10 @@ test_that("The function labels entrances and exits as expected using data from R
   withr::local_package("plyr")
   withr::local_package("dplyr")
   withr::local_package("lubridate")
-  withr::local_package("pbapply")
   
   # Just for code development
   # library(tidyverse)
   # library(lubridate)
-  # library(pbapply)
   # library(testthat)
   
   # Create a temporary directory for testing. Files will be written and read here
@@ -627,6 +637,11 @@ test_that("The function labels entrances and exits as expected using data from R
   
   if(!dir.exists(tmp_path)){ 
     dir.create(tmp_path)
+  }
+  
+  # Create the input data directory that the function expects
+  if(!dir.exists(file.path(tmp_path, "processed"))){ 
+    dir.create(file.path(tmp_path, "processed"))
   }
   
   # Generate a file with pre-processed timestamps for three sensor types
@@ -671,7 +686,7 @@ test_that("The function labels entrances and exits as expected using data from R
       date_pre_processed = Sys.Date()
     )
   
-  write.csv(sim_dats, file.path(tmp_path, "simulated_detectionClusters.csv"), row.names = FALSE)
+  write.csv(sim_dats, file.path(tmp_path, "processed", "detection_clusters.csv"), row.names = FALSE)
   
   # Create a dataset of 3 simulated perching events that encompass 2 entrances and 1 exit above
   starts_p <- starts[c(1:2, 5)]
@@ -691,12 +706,12 @@ test_that("The function labels entrances and exits as expected using data from R
       date_pre_processed = Sys.Date()
     )
   
-  write.csv(sim_perch, file.path(tmp_path, "simulated_perching_events_RFID.csv"), row.names = FALSE)
+  write.csv(sim_perch, file.path(tmp_path, "processed", "perching_events_RFID.csv"), row.names = FALSE)
   
-  score_detectionClusters(file_nm = "simulated_detectionClusters.csv", sensor_id_col = "sensor_id", PIT_tag_col = "PIT_tag_ID", rfid_label = "RFID", camera_label = "Camera", outer_irbb_label = "Outer Beam Breaker", inner_irbb_label = "Inner Beam Breaker", general_metadata_cols = c("chamber_id", "year", "month", "day"), video_metadata_cols = c("total_pixels_motionTrigger", "pixel_threshold", "video_file_name"), integrate_perching = TRUE, perching_dataset = "RFID", perching_prefix = "simulated_perching_events_", path = path, data_dir = data_dir, out_dir = data_dir, out_file_nm = "scored_detectionClusters.csv", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS")
+  score_detectionClusters(file_nm = "detection_clusters.csv", sensor_id_col_nm = "sensor_id", PIT_tag_col_nm = "PIT_tag_ID", rfid_label = "RFID", camera_label = "Camera", outer_irbb_label = "Outer Beam Breaker", inner_irbb_label = "Inner Beam Breaker", general_metadata_col_nms = c("chamber_id", "year", "month", "day"), video_metadata_col_nms = c("total_pixels_motionTrigger", "pixel_threshold", "video_file_name"), integrate_perching = TRUE, perching_dataset = "RFID", perching_prefix = "perching_events_", path = path, data_dir = file.path(data_dir, "processed"), out_dir = file.path(data_dir, "processed"), out_file_nm = "scored_detectionClusters.csv", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS")
   
   # Read in the output, check the output, then delete all files
-  test_res <- read.csv(file.path(tmp_path, "scored_detectionClusters.csv"))
+  test_res <- read.csv(file.path(tmp_path, "processed", "scored_detectionClusters.csv"))
   
   # Test that the results are 3 entrance events and 3 exit events, in that order
   event_labels <- sapply(1:nrow(test_res), function(i){
@@ -745,9 +760,6 @@ test_that("The function labels entrances and exits as expected using data from R
   
 })
 
-#### IRBB perching integration ####
-
-# Test that the function labels entrances and exits as expected when data from 1 sensor type is used as input (2 pairs of beam breakers), and perching events are integrated
 test_that("The function labels entrances and exits as expected using data from 2 beam breaker pairs and integrating IRBB perching data", {
   
   # Avoid library calls and other changes to the virtual environment
@@ -756,12 +768,10 @@ test_that("The function labels entrances and exits as expected using data from 2
   withr::local_package("plyr")
   withr::local_package("dplyr")
   withr::local_package("lubridate")
-  withr::local_package("pbapply")
   
   # Just for code development
   # library(tidyverse)
   # library(lubridate)
-  # library(pbapply)
   # library(testthat)
   
   # Create a temporary directory for testing. Files will be written and read here
@@ -771,6 +781,11 @@ test_that("The function labels entrances and exits as expected using data from 2
   
   if(!dir.exists(tmp_path)){ 
     dir.create(tmp_path)
+  }
+  
+  # Create the input data directory that the function expects
+  if(!dir.exists(file.path(tmp_path, "processed"))){ 
+    dir.create(file.path(tmp_path, "processed"))
   }
   
   # Generate a file with pre-processed timestamps for 1 sensor type
@@ -811,7 +826,7 @@ test_that("The function labels entrances and exits as expected using data from 2
       date_pre_processed = Sys.Date()
     )
   
-  write.csv(sim_dats, file.path(tmp_path, "simulated_detectionClusters.csv"), row.names = FALSE)
+  write.csv(sim_dats, file.path(tmp_path, "processed", "detection_clusters.csv"), row.names = FALSE)
   
   # Create a dataset of 3 simulated perching events that encompass 2 entrances and 1 exit above
   starts_p <- starts[c(1:2, 5)]
@@ -830,12 +845,12 @@ test_that("The function labels entrances and exits as expected using data from 2
       date_pre_processed = Sys.Date()
     )
   
-  write.csv(sim_perch, file.path(tmp_path, "simulated_perching_events_IRBB.csv"), row.names = FALSE)
+  write.csv(sim_perch, file.path(tmp_path, "processed", "perching_events_IRBB.csv"), row.names = FALSE)
   
-  score_detectionClusters(file_nm = "simulated_detectionClusters.csv", sensor_id_col = "sensor_id", PIT_tag_col = NULL, rfid_label = NULL, camera_label = NULL, outer_irbb_label = "Outer Beam Breaker", inner_irbb_label = "Inner Beam Breaker", general_metadata_cols = c("chamber_id", "year", "month", "day"), video_metadata_cols = NULL, integrate_perching = TRUE, perching_dataset = "IRBB", perching_prefix = "simulated_perching_events_", path = path, data_dir = data_dir, out_dir = data_dir, out_file_nm = "scored_detectionClusters.csv", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS")
+  score_detectionClusters(file_nm = "detection_clusters.csv", sensor_id_col_nm = "sensor_id", PIT_tag_col_nm = NULL, rfid_label = NULL, camera_label = NULL, outer_irbb_label = "Outer Beam Breaker", inner_irbb_label = "Inner Beam Breaker", general_metadata_col_nms = c("chamber_id", "year", "month", "day"), video_metadata_col_nms = NULL, integrate_perching = TRUE, perching_dataset = "IRBB", perching_prefix = "perching_events_", path = path, data_dir = file.path(data_dir, "processed"), out_dir = file.path(data_dir, "processed"), out_file_nm = "scored_detectionClusters.csv", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS")
   
   # Read in the output, check the output, then delete all files
-  test_res <- read.csv(file.path(tmp_path, "scored_detectionClusters.csv"))
+  test_res <- read.csv(file.path(tmp_path, "processed", "scored_detectionClusters.csv"))
   
   # Test that the results are 3 entrance events and 3 exit events, in that order
   event_labels <- sapply(1:nrow(test_res), function(i){
@@ -879,7 +894,6 @@ test_that("The function labels entrances and exits as expected using data from 2
   
 })
 
-# Test that the function labels entrances and exits as expected when data from 2 sensor types is used as input (RFID and 2 pairs of beam breakers), and perching events are integrated
 test_that("The function labels entrances and exits as expected using data from RFID and 2 beam breaker pairs and integrating IRBB perching data", {
   
   # Avoid library calls and other changes to the virtual environment
@@ -888,12 +902,10 @@ test_that("The function labels entrances and exits as expected using data from R
   withr::local_package("plyr")
   withr::local_package("dplyr")
   withr::local_package("lubridate")
-  withr::local_package("pbapply")
   
   # Just for code development
   # library(tidyverse)
   # library(lubridate)
-  # library(pbapply)
   # library(testthat)
   
   # Create a temporary directory for testing. Files will be written and read here
@@ -903,6 +915,11 @@ test_that("The function labels entrances and exits as expected using data from R
   
   if(!dir.exists(tmp_path)){ 
     dir.create(tmp_path)
+  }
+  
+  # Create the input data directory that the function expects
+  if(!dir.exists(file.path(tmp_path, "processed"))){ 
+    dir.create(file.path(tmp_path, "processed"))
   }
   
   # Generate a file with pre-processed timestamps for two sensor types
@@ -943,7 +960,7 @@ test_that("The function labels entrances and exits as expected using data from R
       date_pre_processed = Sys.Date()
     )
   
-  write.csv(sim_dats, file.path(tmp_path, "simulated_detectionClusters.csv"), row.names = FALSE)
+  write.csv(sim_dats, file.path(tmp_path, "processed", "detection_clusters.csv"), row.names = FALSE)
   
   # Create a dataset of 3 simulated perching events that encompass 2 entrances and 1 exit above
   starts_p <- starts[c(1:2, 5)]
@@ -962,12 +979,12 @@ test_that("The function labels entrances and exits as expected using data from R
       date_pre_processed = Sys.Date()
     )
   
-  write.csv(sim_perch, file.path(tmp_path, "simulated_perching_events_IRBB.csv"), row.names = FALSE)
+  write.csv(sim_perch, file.path(tmp_path, "processed", "perching_events_IRBB.csv"), row.names = FALSE)
   
-  score_detectionClusters(file_nm = "simulated_detectionClusters.csv", sensor_id_col = "sensor_id", PIT_tag_col = NULL, rfid_label = "RFID", camera_label = NULL, outer_irbb_label = "Outer Beam Breaker", inner_irbb_label = "Inner Beam Breaker", general_metadata_cols = c("chamber_id", "year", "month", "day"), video_metadata_cols = NULL, integrate_perching = TRUE, perching_dataset = "IRBB", perching_prefix = "simulated_perching_events_", path = path, data_dir = data_dir, out_dir = data_dir, out_file_nm = "scored_detectionClusters.csv", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS")
+  score_detectionClusters(file_nm = "detection_clusters.csv", sensor_id_col_nm = "sensor_id", PIT_tag_col_nm = NULL, rfid_label = "RFID", camera_label = NULL, outer_irbb_label = "Outer Beam Breaker", inner_irbb_label = "Inner Beam Breaker", general_metadata_col_nms = c("chamber_id", "year", "month", "day"), video_metadata_col_nms = NULL, integrate_perching = TRUE, perching_dataset = "IRBB", perching_prefix = "perching_events_", path = path, data_dir = file.path(data_dir, "processed"), out_dir = file.path(data_dir, "processed"), out_file_nm = "scored_detectionClusters.csv", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS")
   
   # Read in the output, check the output, then delete all files
-  test_res <- read.csv(file.path(tmp_path, "scored_detectionClusters.csv"))
+  test_res <- read.csv(file.path(tmp_path, "processed", "scored_detectionClusters.csv"))
   
   # Test that the results are 3 entrance events and 3 exit events, in that order
   event_labels <- sapply(1:nrow(test_res), function(i){
@@ -1016,7 +1033,6 @@ test_that("The function labels entrances and exits as expected using data from R
   
 })
 
-# Test that the function labels entrances and exits as expected when data from 3 sensor types is used as input (RFID, 2 pairs of beam breakers, and a camera), and perching events are integrated
 test_that("The function labels entrances and exits as expected using data from RFID, 2 beam breaker pairs, and a camera and integrating IRBB perching data", {
   
   # Avoid library calls and other changes to the virtual environment
@@ -1025,12 +1041,10 @@ test_that("The function labels entrances and exits as expected using data from R
   withr::local_package("plyr")
   withr::local_package("dplyr")
   withr::local_package("lubridate")
-  withr::local_package("pbapply")
   
   # Just for code development
   # library(tidyverse)
   # library(lubridate)
-  # library(pbapply)
   # library(testthat)
   
   # Create a temporary directory for testing. Files will be written and read here
@@ -1040,6 +1054,11 @@ test_that("The function labels entrances and exits as expected using data from R
   
   if(!dir.exists(tmp_path)){ 
     dir.create(tmp_path)
+  }
+  
+  # Create the input data directory that the function expects
+  if(!dir.exists(file.path(tmp_path, "processed"))){ 
+    dir.create(file.path(tmp_path, "processed"))
   }
   
   # Generate a file with pre-processed timestamps for three sensor types
@@ -1084,7 +1103,7 @@ test_that("The function labels entrances and exits as expected using data from R
       date_pre_processed = Sys.Date()
     )
   
-  write.csv(sim_dats, file.path(tmp_path, "simulated_detectionClusters.csv"), row.names = FALSE)
+  write.csv(sim_dats, file.path(tmp_path, "processed", "detection_clusters.csv"), row.names = FALSE)
   
   # Create a dataset of 3 simulated perching events that encompass 2 entrances and 1 exit above
   starts_p <- starts[c(1:2, 5)]
@@ -1103,12 +1122,12 @@ test_that("The function labels entrances and exits as expected using data from R
       date_pre_processed = Sys.Date()
     )
   
-  write.csv(sim_perch, file.path(tmp_path, "simulated_perching_events_IRBB.csv"), row.names = FALSE)
+  write.csv(sim_perch, file.path(tmp_path, "processed", "perching_events_IRBB.csv"), row.names = FALSE)
   
-  score_detectionClusters(file_nm = "simulated_detectionClusters.csv", sensor_id_col = "sensor_id", PIT_tag_col = NULL, rfid_label = "RFID", camera_label = "Camera", outer_irbb_label = "Outer Beam Breaker", inner_irbb_label = "Inner Beam Breaker", general_metadata_cols = c("chamber_id", "year", "month", "day"), video_metadata_cols = c("total_pixels_motionTrigger", "pixel_threshold", "video_file_name"), integrate_perching = TRUE, perching_dataset = "IRBB", perching_prefix = "simulated_perching_events_", path = path, data_dir = data_dir, out_dir = data_dir, out_file_nm = "scored_detectionClusters.csv", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS")
+  score_detectionClusters(file_nm = "detection_clusters.csv", sensor_id_col_nm = "sensor_id", PIT_tag_col_nm = NULL, rfid_label = "RFID", camera_label = "Camera", outer_irbb_label = "Outer Beam Breaker", inner_irbb_label = "Inner Beam Breaker", general_metadata_col_nms = c("chamber_id", "year", "month", "day"), video_metadata_col_nms = c("total_pixels_motionTrigger", "pixel_threshold", "video_file_name"), integrate_perching = TRUE, perching_dataset = "IRBB", perching_prefix = "perching_events_", path = path, data_dir = file.path(data_dir, "processed"), out_dir = file.path(data_dir, "processed"), out_file_nm = "scored_detectionClusters.csv", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS")
   
   # Read in the output, check the output, then delete all files
-  test_res <- read.csv(file.path(tmp_path, "scored_detectionClusters.csv"))
+  test_res <- read.csv(file.path(tmp_path, "processed", "scored_detectionClusters.csv"))
   
   # Test that the results are 3 entrance events and 3 exit events, in that order
   event_labels <- sapply(1:nrow(test_res), function(i){
@@ -1157,10 +1176,6 @@ test_that("The function labels entrances and exits as expected using data from R
   
 })
 
-
-#### RFID and IRBB perching integration ####
-
-# Test that the function labels entrances and exits as expected when data from 1 sensor type is used as input (2 pairs of beam breakers), and perching events are integrated from RFID and IRBB datasets
 test_that("The function labels entrances and exits as expected using data from 2 beam breaker pairs and integrating RFID and IRBB perching data", {
   
   # Avoid library calls and other changes to the virtual environment
@@ -1169,12 +1184,10 @@ test_that("The function labels entrances and exits as expected using data from 2
   withr::local_package("plyr")
   withr::local_package("dplyr")
   withr::local_package("lubridate")
-  withr::local_package("pbapply")
   
   # Just for code development
   # library(tidyverse)
   # library(lubridate)
-  # library(pbapply)
   # library(testthat)
   
   # Create a temporary directory for testing. Files will be written and read here
@@ -1184,6 +1197,11 @@ test_that("The function labels entrances and exits as expected using data from 2
   
   if(!dir.exists(tmp_path)){ 
     dir.create(tmp_path)
+  }
+  
+  # Create the input data directory that the function expects
+  if(!dir.exists(file.path(tmp_path, "processed"))){ 
+    dir.create(file.path(tmp_path, "processed"))
   }
   
   # Generate a file with pre-processed timestamps for 1 sensor type
@@ -1224,7 +1242,7 @@ test_that("The function labels entrances and exits as expected using data from 2
       date_pre_processed = Sys.Date()
     )
   
-  write.csv(sim_dats, file.path(tmp_path, "simulated_detectionClusters.csv"), row.names = FALSE)
+  write.csv(sim_dats, file.path(tmp_path, "processed", "detection_clusters.csv"), row.names = FALSE)
   
   # Create a dataset of 3 simulated perching events that encompass 2 entrances and 1 exit above
   starts_p <- starts[c(1:2, 5)]
@@ -1257,14 +1275,14 @@ test_that("The function labels entrances and exits as expected using data from 2
       date_pre_processed = Sys.Date()
     )
   
-  write.csv(sim_perch_rfid, file.path(tmp_path, "simulated_perching_events_RFID.csv"), row.names = FALSE)
+  write.csv(sim_perch_rfid, file.path(tmp_path, "processed", "perching_events_RFID.csv"), row.names = FALSE)
   
-  write.csv(sim_perch_irbb, file.path(tmp_path, "simulated_perching_events_IRBB.csv"), row.names = FALSE)
+  write.csv(sim_perch_irbb, file.path(tmp_path, "processed", "perching_events_IRBB.csv"), row.names = FALSE)
   
-  score_detectionClusters(file_nm = "simulated_detectionClusters.csv", sensor_id_col = "sensor_id", PIT_tag_col = "PIT_tag_ID", rfid_label = NULL, camera_label = NULL, outer_irbb_label = "Outer Beam Breaker", inner_irbb_label = "Inner Beam Breaker", general_metadata_cols = c("chamber_id", "year", "month", "day"), video_metadata_cols = NULL, integrate_perching = TRUE, perching_dataset = "RFID-IRBB", perching_prefix = "simulated_perching_events_", path = path, data_dir = data_dir, out_dir = data_dir, out_file_nm = "scored_detectionClusters.csv", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS")
+  score_detectionClusters(file_nm = "detection_clusters.csv", sensor_id_col_nm = "sensor_id", PIT_tag_col_nm = "PIT_tag_ID", rfid_label = NULL, camera_label = NULL, outer_irbb_label = "Outer Beam Breaker", inner_irbb_label = "Inner Beam Breaker", general_metadata_col_nms = c("chamber_id", "year", "month", "day"), video_metadata_col_nms = NULL, integrate_perching = TRUE, perching_dataset = "RFID-IRBB", perching_prefix = "perching_events_", path = path, data_dir = file.path(data_dir, "processed"), out_dir = file.path(data_dir, "processed"), out_file_nm = "scored_detectionClusters.csv", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS")
   
   # Read in the output, check the output, then delete all files
-  test_res <- read.csv(file.path(tmp_path, "scored_detectionClusters.csv"))
+  test_res <- read.csv(file.path(tmp_path, "processed", "scored_detectionClusters.csv"))
   
   # Test that the results are 3 entrance events and 3 exit events, in that order
   event_labels <- sapply(1:nrow(test_res), function(i){
@@ -1312,7 +1330,6 @@ test_that("The function labels entrances and exits as expected using data from 2
   
 })
 
-# Test that the function labels entrances and exits as expected when data from 2 sensor types is used as input (RFID and 2 pairs of beam breakers), and perching events are integrated from RFID and IRBB datasets
 test_that("The function labels entrances and exits as expected using data from RFID and 2 beam breaker pairs and integrating RFID and IRBB perching data", {
   
   # Avoid library calls and other changes to the virtual environment
@@ -1321,12 +1338,10 @@ test_that("The function labels entrances and exits as expected using data from R
   withr::local_package("plyr")
   withr::local_package("dplyr")
   withr::local_package("lubridate")
-  withr::local_package("pbapply")
   
   # Just for code development
   # library(tidyverse)
   # library(lubridate)
-  # library(pbapply)
   # library(testthat)
   
   # Create a temporary directory for testing. Files will be written and read here
@@ -1336,6 +1351,11 @@ test_that("The function labels entrances and exits as expected using data from R
   
   if(!dir.exists(tmp_path)){ 
     dir.create(tmp_path)
+  }
+  
+  # Create the input data directory that the function expects
+  if(!dir.exists(file.path(tmp_path, "processed"))){ 
+    dir.create(file.path(tmp_path, "processed"))
   }
   
   # Generate a file with pre-processed timestamps for two sensor types
@@ -1376,7 +1396,7 @@ test_that("The function labels entrances and exits as expected using data from R
       date_pre_processed = Sys.Date()
     )
   
-  write.csv(sim_dats, file.path(tmp_path, "simulated_detectionClusters.csv"), row.names = FALSE)
+  write.csv(sim_dats, file.path(tmp_path, "processed", "detection_clusters.csv"), row.names = FALSE)
   
   # Create a dataset of 3 simulated perching events that encompass 2 entrances and 1 exit above
   starts_p <- starts[c(1:2, 5)]
@@ -1409,14 +1429,14 @@ test_that("The function labels entrances and exits as expected using data from R
       date_pre_processed = Sys.Date()
     )
   
-  write.csv(sim_perch_rfid, file.path(tmp_path, "simulated_perching_events_RFID.csv"), row.names = FALSE)
+  write.csv(sim_perch_rfid, file.path(tmp_path, "processed", "perching_events_RFID.csv"), row.names = FALSE)
   
-  write.csv(sim_perch_irbb, file.path(tmp_path, "simulated_perching_events_IRBB.csv"), row.names = FALSE)
+  write.csv(sim_perch_irbb, file.path(tmp_path, "processed", "perching_events_IRBB.csv"), row.names = FALSE)
   
-  score_detectionClusters(file_nm = "simulated_detectionClusters.csv", sensor_id_col = "sensor_id", PIT_tag_col = "PIT_tag_ID", rfid_label = "RFID", camera_label = NULL, outer_irbb_label = "Outer Beam Breaker", inner_irbb_label = "Inner Beam Breaker", general_metadata_cols = c("chamber_id", "year", "month", "day"), video_metadata_cols = NULL, integrate_perching = TRUE, perching_dataset = "RFID-IRBB", perching_prefix = "simulated_perching_events_", path = path, data_dir = data_dir, out_dir = data_dir, out_file_nm = "scored_detectionClusters.csv", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS")
+  score_detectionClusters(file_nm = "detection_clusters.csv", sensor_id_col_nm = "sensor_id", PIT_tag_col_nm = "PIT_tag_ID", rfid_label = "RFID", camera_label = NULL, outer_irbb_label = "Outer Beam Breaker", inner_irbb_label = "Inner Beam Breaker", general_metadata_col_nms = c("chamber_id", "year", "month", "day"), video_metadata_col_nms = NULL, integrate_perching = TRUE, perching_dataset = "RFID-IRBB", perching_prefix = "perching_events_", path = path, data_dir = file.path(data_dir, "processed"), out_dir = file.path(data_dir, "processed"), out_file_nm = "scored_detectionClusters.csv", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS")
   
   # Read in the output, check the output, then delete all files
-  test_res <- read.csv(file.path(tmp_path, "scored_detectionClusters.csv"))
+  test_res <- read.csv(file.path(tmp_path, "processed", "scored_detectionClusters.csv"))
   
   # Test that the results are 3 entrance events and 3 exit events, in that order
   event_labels <- sapply(1:nrow(test_res), function(i){
@@ -1469,7 +1489,6 @@ test_that("The function labels entrances and exits as expected using data from R
   
 })
 
-# Test that the function labels entrances and exits as expected when data from 3 sensor types is used as input (RFID, 2 pairs of beam breakers, and a camera), and perching events are integrated from RFID and IRBB datasets
 test_that("The function labels entrances and exits as expected using data from RFID, 2 beam breaker pairs, and a camera and integrating RFID and IRBB perching data", {
   
   # Avoid library calls and other changes to the virtual environment
@@ -1478,12 +1497,10 @@ test_that("The function labels entrances and exits as expected using data from R
   withr::local_package("plyr")
   withr::local_package("dplyr")
   withr::local_package("lubridate")
-  withr::local_package("pbapply")
   
   # Just for code development
   # library(tidyverse)
   # library(lubridate)
-  # library(pbapply)
   # library(testthat)
   
   # Create a temporary directory for testing. Files will be written and read here
@@ -1493,6 +1510,11 @@ test_that("The function labels entrances and exits as expected using data from R
   
   if(!dir.exists(tmp_path)){ 
     dir.create(tmp_path)
+  }
+  
+  # Create the input data directory that the function expects
+  if(!dir.exists(file.path(tmp_path, "processed"))){ 
+    dir.create(file.path(tmp_path, "processed"))
   }
   
   # Generate a file with pre-processed timestamps for three sensor types
@@ -1537,7 +1559,7 @@ test_that("The function labels entrances and exits as expected using data from R
       date_pre_processed = Sys.Date()
     )
   
-  write.csv(sim_dats, file.path(tmp_path, "simulated_detectionClusters.csv"), row.names = FALSE)
+  write.csv(sim_dats, file.path(tmp_path, "processed", "detection_clusters.csv"), row.names = FALSE)
   
   # Create a dataset of 3 simulated perching events that encompass 2 entrances and 1 exit above
   starts_p <- starts[c(1:2, 5)]
@@ -1570,14 +1592,14 @@ test_that("The function labels entrances and exits as expected using data from R
       date_pre_processed = Sys.Date()
     )
   
-  write.csv(sim_perch_rfid, file.path(tmp_path, "simulated_perching_events_RFID.csv"), row.names = FALSE)
+  write.csv(sim_perch_rfid, file.path(tmp_path, "processed", "perching_events_RFID.csv"), row.names = FALSE)
   
-  write.csv(sim_perch_irbb, file.path(tmp_path, "simulated_perching_events_IRBB.csv"), row.names = FALSE)
+  write.csv(sim_perch_irbb, file.path(tmp_path, "processed", "perching_events_IRBB.csv"), row.names = FALSE)
   
-  score_detectionClusters(file_nm = "simulated_detectionClusters.csv", sensor_id_col = "sensor_id", PIT_tag_col = "PIT_tag_ID", rfid_label = "RFID", camera_label = "Camera", outer_irbb_label = "Outer Beam Breaker", inner_irbb_label = "Inner Beam Breaker", general_metadata_cols = c("chamber_id", "year", "month", "day"), video_metadata_cols = c("total_pixels_motionTrigger", "pixel_threshold", "video_file_name"), integrate_perching = TRUE, perching_dataset = "RFID-IRBB", perching_prefix = "simulated_perching_events_", path = path, data_dir = data_dir, out_dir = data_dir, out_file_nm = "scored_detectionClusters.csv", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS")
+  score_detectionClusters(file_nm = "detection_clusters.csv", sensor_id_col_nm = "sensor_id", PIT_tag_col_nm = "PIT_tag_ID", rfid_label = "RFID", camera_label = "Camera", outer_irbb_label = "Outer Beam Breaker", inner_irbb_label = "Inner Beam Breaker", general_metadata_col_nms = c("chamber_id", "year", "month", "day"), video_metadata_col_nms = c("total_pixels_motionTrigger", "pixel_threshold", "video_file_name"), integrate_perching = TRUE, perching_dataset = "RFID-IRBB", perching_prefix = "perching_events_", path = path, data_dir = file.path(data_dir, "processed"), out_dir = file.path(data_dir, "processed"), out_file_nm = "scored_detectionClusters.csv", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS")
   
   # Read in the output, check the output, then delete all files
-  test_res <- read.csv(file.path(tmp_path, "scored_detectionClusters.csv"))
+  test_res <- read.csv(file.path(tmp_path, "processed", "scored_detectionClusters.csv"))
   
   # Test that the results are 3 entrance events and 3 exit events, in that order
   event_labels <- sapply(1:nrow(test_res), function(i){
@@ -1631,5 +1653,812 @@ test_that("The function labels entrances and exits as expected using data from R
 })
 
 
-########## Testing error messages ########## 
+########## Testing error handling ########## 
 
+test_that("the function catches when the perching_dataset argument does not contain the patterns 'RFID', 'IRBB', or 'RFID-IRBB'", {
+  
+  # Avoid library calls and other changes to the virtual environment
+  # See https://r-pkgs.org/testing-design.html
+  withr::local_package("tidyverse")
+  withr::local_package("plyr")
+  withr::local_package("dplyr")
+  withr::local_package("lubridate")
+  
+  # Just for code development
+  # library(tidyverse)
+  # library(lubridate)
+  # library(testthat)
+
+  # Create a temporary directory for testing. Files will be written and read here
+  path <- "/home/gsvidaurre/Desktop"
+  data_dir <- "tmp_tests"
+  tmp_path <- file.path(path, data_dir)
+  
+  if(!dir.exists(tmp_path)){ 
+    dir.create(tmp_path)
+  }
+  
+  # Create the input data directory that the function expects
+  if(!dir.exists(file.path(tmp_path, "processed"))){ 
+    dir.create(file.path(tmp_path, "processed"))
+  }
+  
+  # Generate a file with pre-processed timestamps for 1 sensor type
+  
+  # Create 3 entrance and 3 exit events using different combinations of the 2 pairs of beam breakers. Each event is a detection cluster of a given duration (see ends below)
+  starts <- as.POSIXct(c(
+    "2023-01-01 01:00:00 EST"
+  )) + seq(1, 300, 50)
+  
+  ends <- starts + rep(c(5, 10, 15), 2)
+  
+  # Create a spreadsheet of the simulated directional movement events
+  sim_dats <- data.frame(start = starts) %>% 
+    dplyr::mutate(
+      chamber_id = "Box_01",
+      year = year(start),
+      month = month(start),
+      day = day(start),
+      end = ends,
+      event_seq = c(
+        paste(c(rep("Outer Beam Breaker", 2), rep("Inner Beam Breaker", 2)), collapse = "; "), # entrance
+        paste(c(rep("Outer Beam Breaker", 4), rep("Inner Beam Breaker", 2)), collapse = "; "), # no directionality
+        paste(c(rep("Outer Beam Breaker", 4), rep("Inner Beam Breaker", 5)), collapse = "; "), # entrance
+        paste(c(rep("Inner Beam Breaker", 2), rep("Outer Beam Breaker", 2)), collapse = "; "), # exit
+        paste(c(rep("Inner Beam Breaker", 5), rep("Outer Beam Breaker", 2)), collapse = "; "), # exit
+        paste(c(rep("Inner Beam Breaker", 1), rep("Outer Beam Breaker", 4)), collapse = "; ") # exit
+      ),
+      indiv1_id = "test",
+      indiv2_id = NA,
+      # Matches the number of RFID detections if present above
+      total_indiv1_detections = c(NA, 2, 3, NA, 2, 4), 
+      total_indiv2_detections = 0,
+      individual_initiated = "test",
+      individual_ended = "test",
+      threshold_seconds = 1,
+      run_length = 1,
+      data_stage = "pre-processing",
+      date_pre_processed = Sys.Date()
+    )
+  
+  write.csv(sim_dats, file.path(tmp_path, "processed",  "detection_clusters.csv"), row.names = FALSE)
+  
+  expect_error(
+    score_detectionClusters(file_nm = "detection_clusters.csv", sensor_id_col_nm = NULL, PIT_tag_col_nm = NULL, rfid_label = NULL, camera_label = NULL, outer_irbb_label = "Outer Beam Breaker", inner_irbb_label = "Inner Beam Breaker", general_metadata_col_nms = c("chamber_id", "year", "month", "day"), video_metadata_col_nms = NULL, integrate_perching = TRUE, perching_dataset = "RFD", perching_prefix = "perching_events", path = path, data_dir = file.path(data_dir, "processed"), out_dir = file.path(data_dir, "processed"), out_file_nm = "scored_detectionClusters.csv", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
+    regexp = "The perching dataset is not specified correctly"
+  )
+  
+  expect_error(
+    score_detectionClusters(file_nm = "detection_clusters.csv", sensor_id_col_nm = NULL, PIT_tag_col_nm = NULL, rfid_label = NULL, camera_label = NULL, outer_irbb_label = "Outer Beam Breaker", inner_irbb_label = "Inner Beam Breaker", general_metadata_col_nms = c("chamber_id", "year", "month", "day"), video_metadata_col_nms = NULL, integrate_perching = TRUE, perching_dataset = "RFID-irbb", perching_prefix = "perching_events", path = path, data_dir = file.path(data_dir, "processed"), out_dir = file.path(data_dir, "processed"), out_file_nm = "scored_detectionClusters.csv", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
+    regexp = "The perching dataset is not specified correctly"
+  )
+  
+  # Remove the temporary directory and all files within it
+  if(tmp_path == file.path(path, data_dir)){
+    unlink(tmp_path, recursive = TRUE)
+  }
+  
+})
+
+test_that("the function catches when non-NULL arguments are NULL", {
+  
+  # Avoid library calls and other changes to the virtual environment
+  # See https://r-pkgs.org/testing-design.html
+  withr::local_package("tidyverse")
+  withr::local_package("plyr")
+  withr::local_package("dplyr")
+  withr::local_package("lubridate")
+  
+  # Just for code development
+  # library(tidyverse)
+  # library(lubridate)
+  # library(testthat)
+  
+  # Create a temporary directory for testing. Files will be written and read here
+  path <- "/home/gsvidaurre/Desktop"
+  data_dir <- "tmp_tests"
+  tmp_path <- file.path(path, data_dir)
+  
+  if(!dir.exists(tmp_path)){ 
+    dir.create(tmp_path)
+  }
+  
+  # Create the input data directory that the function expects
+  if(!dir.exists(file.path(tmp_path, "processed"))){ 
+    dir.create(file.path(tmp_path, "processed"))
+  }
+  
+  # Generate a file with pre-processed timestamps for 1 sensor type
+  
+  # Create 3 entrance and 3 exit events using different combinations of the 2 pairs of beam breakers. Each event is a detection cluster of a given duration (see ends below)
+  starts <- as.POSIXct(c(
+    "2023-01-01 01:00:00 EST"
+  )) + seq(1, 300, 50)
+  
+  ends <- starts + rep(c(5, 10, 15), 2)
+  
+  # Create a spreadsheet of the simulated directional movement events
+  sim_dats <- data.frame(start = starts) %>% 
+    dplyr::mutate(
+      chamber_id = "Box_01",
+      year = year(start),
+      month = month(start),
+      day = day(start),
+      end = ends,
+      event_seq = c(
+        paste(c(rep("Outer Beam Breaker", 2), rep("Inner Beam Breaker", 2)), collapse = "; "), # entrance
+        paste(c(rep("Outer Beam Breaker", 4), rep("Inner Beam Breaker", 2)), collapse = "; "), # no directionality
+        paste(c(rep("Outer Beam Breaker", 4), rep("Inner Beam Breaker", 5)), collapse = "; "), # entrance
+        paste(c(rep("Inner Beam Breaker", 2), rep("Outer Beam Breaker", 2)), collapse = "; "), # exit
+        paste(c(rep("Inner Beam Breaker", 5), rep("Outer Beam Breaker", 2)), collapse = "; "), # exit
+        paste(c(rep("Inner Beam Breaker", 1), rep("Outer Beam Breaker", 4)), collapse = "; ") # exit
+      ),
+      indiv1_id = "test",
+      indiv2_id = NA,
+      # Matches the number of RFID detections if present above
+      total_indiv1_detections = c(NA, 2, 3, NA, 2, 4), 
+      total_indiv2_detections = 0,
+      individual_initiated = "test",
+      individual_ended = "test",
+      threshold_seconds = 1,
+      run_length = 1,
+      data_stage = "pre-processing",
+      date_pre_processed = Sys.Date()
+    )
+  
+  write.csv(sim_dats, file.path(tmp_path, "processed",  "detection_clusters.csv"), row.names = FALSE)
+  
+  # General arguments that cannot ever be NULL:
+  arg_nms <- c("file_nm", "general_metadata_col_nms", "integrate_perching", "path", "data_dir", "out_dir", "out_file_nm", "tz", "POSIXct_format")
+  
+  args <- list(
+    `file_nm` = "detection_clusters.csv",
+    `general_metadata_col_nms` = c("chamber_id"),
+    `integrate_perching` = FALSE,
+    `path` = path,
+    `data_dir` = file.path(data_dir, "processed"),
+    `out_dir` = file.path(data_dir, "processed"),
+    `out_file_nm` = "scored_detection_clusters.csv", 
+    `tz` = "America/New York",
+    `POSIXct_format` = "%Y-%m-%d %H:%M:%OS"
+  )
+
+  invisible(lapply(1:length(arg_nms), function(i){
+    
+    args[arg_nms[i]] <- list(NULL)
+    
+    expect_error(
+      score_detectionClusters(file_nm = args[["file_nm"]], sensor_id_col_nm = NULL, PIT_tag_col_nm = NULL, rfid_label = NULL, camera_label = NULL, outer_irbb_label = "Outer Beam Breaker", inner_irbb_label = "Inner Beam Breaker", general_metadata_col_nms = args[["general_metadata_col_nms"]], video_metadata_col_nms = NULL, integrate_perching = args[["integrate_perching"]], perching_dataset = NULL, perching_prefix = NULL, path = args[["path"]], data_dir = args[["data_dir"]], out_dir = args[["out_dir"]], out_file_nm = args[["out_file_nm"]], tz = args[["tz"]], POSIXct_format = args[["POSIXct_format"]]),
+      regexp = paste("Expected a non-NULL value but the argument", arg_nms[i], "is NULL", sep = " ")
+    )
+    
+  }))
+  
+  # Arguments that cannot be NULL when perching events are integrated:
+  arg_nms <- c("sensor_id_col_nm", "PIT_tag_col_nm", "perching_dataset", "perching_prefix")
+  
+  args <- list(
+    `sensor_id_col_nm` = "sensor_id",
+    `PIT_tag_col_nm` = "PIT_tag_ID",
+    `perching_dataset` = "RFID",
+    `perching_prefix` = "perching_events_"
+  )
+
+  invisible(lapply(1:length(arg_nms), function(i){
+    
+    args[arg_nms[i]] <- list(NULL)
+    
+    expect_error(
+      score_detectionClusters(file_nm = "detection_clusters.csv", sensor_id_col_nm = args[["sensor_id_col_nm"]], PIT_tag_col_nm = args[["PIT_tag_col_nm"]], rfid_label = NULL, camera_label = NULL, outer_irbb_label = "Outer Beam Breaker", inner_irbb_label = "Inner Beam Breaker", general_metadata_col_nms = c("chamber_id", "year", "month", "day"), video_metadata_col_nms = NULL, integrate_perching = TRUE, perching_dataset = args[["perching_dataset"]], perching_prefix = args[["perching_prefix"]], path = path, data_dir = file.path(data_dir, "processed"), out_dir = file.path(data_dir, "processed"), out_file_nm = "scored_detectionClusters.csv", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
+      regexp = paste("Expected a non-NULL value but the argument", arg_nms[i], "is NULL", sep = " ")
+    )
+    
+  }))
+  
+  # When camera_label is not NULL, video_metadata_col_nms also cannot be NULL
+  arg_nms <- c("video_metadata_col_nms")
+  
+  args <- list(
+    `video_metadata_col_nms` = c("total_pixels_motionTrigger")
+  )
+  
+  invisible(lapply(1:length(arg_nms), function(i){
+    
+    args[arg_nms[i]] <- list(NULL)
+    
+    expect_error(
+      score_detectionClusters(file_nm = "detection_clusters.csv", sensor_id_col_nm = NULL, PIT_tag_col_nm = NULL, rfid_label = "RFID", camera_label = "Video", outer_irbb_label = NULL, inner_irbb_label = NULL, general_metadata_col_nms = c("chamber_id", "year", "month", "day"), video_metadata_col_nms = args[["video_metadata_col_nms"]], integrate_perching = FALSE, perching_dataset = NULL, perching_prefix = NULL, path = path, data_dir = file.path(data_dir, "processed"), out_dir = file.path(data_dir, "processed"), out_file_nm = "scored_detectionClusters.csv", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
+      regexp = paste("Expected a non-NULL value but the argument", arg_nms[i], "is NULL", sep = " ")
+    )
+    
+  }))
+  
+  # Finally, check that the sensor label arguments are specified correctly given the combinations expected by the function
+  expect_error(
+    score_detectionClusters(file_nm = "detection_clusters.csv", sensor_id_col_nm = NULL, PIT_tag_col_nm = NULL, rfid_label = NULL, camera_label = NULL, outer_irbb_label = NULL, inner_irbb_label = NULL, general_metadata_col_nms = c("chamber_id", "year", "month", "day"), video_metadata_col_nms = NULL, integrate_perching = FALSE, perching_dataset = NULL, perching_prefix = NULL, path = path, data_dir = file.path(data_dir, "processed"), out_dir = file.path(data_dir, "processed"), out_file_nm = "scored_detectionClusters.csv", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
+    regexp = "Data from at least two sensor types, or two beam breaker pairs, must be specified"
+  )
+  
+  expect_error(
+    score_detectionClusters(file_nm = "detection_clusters.csv", sensor_id_col_nm = NULL, PIT_tag_col_nm = NULL, rfid_label = "RFID", camera_label = NULL, outer_irbb_label = NULL, inner_irbb_label = NULL, general_metadata_col_nms = c("chamber_id", "year", "month", "day"), video_metadata_col_nms = NULL, integrate_perching = FALSE, perching_dataset = NULL, perching_prefix = NULL, path = path, data_dir = file.path(data_dir, "processed"), out_dir = file.path(data_dir, "processed"), out_file_nm = "scored_detectionClusters.csv", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
+    regexp = "The RFID data must be accompanied by beam breaker and/or video data"
+  )
+  
+  expect_error(
+    score_detectionClusters(file_nm = "detection_clusters.csv", sensor_id_col_nm = NULL, PIT_tag_col_nm = NULL, rfid_label = NULL, camera_label = "Video", outer_irbb_label = NULL, inner_irbb_label = NULL, general_metadata_col_nms = c("chamber_id", "year", "month", "day"), video_metadata_col_nms = NULL, integrate_perching = FALSE, perching_dataset = NULL, perching_prefix = NULL, path = path, data_dir = file.path(data_dir, "processed"), out_dir = file.path(data_dir, "processed"), out_file_nm = "scored_detectionClusters.csv", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
+    regexp = "The video data must be accompanied by beam breaker and/or RFID data"
+  )
+  
+  expect_error(
+    score_detectionClusters(file_nm = "detection_clusters.csv", sensor_id_col_nm = NULL, PIT_tag_col_nm = NULL, rfid_label = NULL, camera_label = NULL, outer_irbb_label = "Outer Beam Breaker", inner_irbb_label = NULL, general_metadata_col_nms = c("chamber_id", "year", "month", "day"), video_metadata_col_nms = NULL, integrate_perching = FALSE, perching_dataset = NULL, perching_prefix = NULL, path = path, data_dir = file.path(data_dir, "processed"), out_dir = file.path(data_dir, "processed"), out_file_nm = "scored_detectionClusters.csv", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
+    regexp = "The outer beam breaker data must be accompanied by inner beam breaker data"
+  )
+  
+  expect_error(
+    score_detectionClusters(file_nm = "detection_clusters.csv", sensor_id_col_nm = NULL, PIT_tag_col_nm = NULL, rfid_label = NULL, camera_label = NULL, outer_irbb_label = NULL, inner_irbb_label = "Inner Beam Breaker", general_metadata_col_nms = c("chamber_id", "year", "month", "day"), video_metadata_col_nms = NULL, integrate_perching = FALSE, perching_dataset = NULL, perching_prefix = NULL, path = path, data_dir = file.path(data_dir, "processed"), out_dir = file.path(data_dir, "processed"), out_file_nm = "scored_detectionClusters.csv", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
+    regexp = "The inner beam breaker data must be accompanied by outer beam breaker data"
+  )
+  
+  # Remove the temporary directory and all files within it
+  if(tmp_path == file.path(path, data_dir)){
+    unlink(tmp_path, recursive = TRUE)
+  }
+  
+})
+
+test_that("the function catches when NULL arguments are non-NULL", {
+  
+  # Avoid library calls and other changes to the virtual environment
+  # See https://r-pkgs.org/testing-design.html
+  withr::local_package("tidyverse")
+  withr::local_package("plyr")
+  withr::local_package("dplyr")
+  withr::local_package("lubridate")
+  
+  # Just for code development
+  library(tidyverse)
+  library(lubridate)
+  library(testthat)
+  
+  # Create a temporary directory for testing. Files will be written and read here
+  path <- "/home/gsvidaurre/Desktop"
+  data_dir <- "tmp_tests"
+  tmp_path <- file.path(path, data_dir)
+  
+  if(!dir.exists(tmp_path)){ 
+    dir.create(tmp_path)
+  }
+  
+  # Create the input data directory that the function expects
+  if(!dir.exists(file.path(tmp_path, "processed"))){ 
+    dir.create(file.path(tmp_path, "processed"))
+  }
+  
+  # Generate a file with pre-processed timestamps for 1 sensor type
+  
+  # Create 3 entrance and 3 exit events using different combinations of the 2 pairs of beam breakers. Each event is a detection cluster of a given duration (see ends below)
+  starts <- as.POSIXct(c(
+    "2023-01-01 01:00:00 EST"
+  )) + seq(1, 300, 50)
+  
+  ends <- starts + rep(c(5, 10, 15), 2)
+  
+  # Create a spreadsheet of the simulated directional movement events
+  sim_dats <- data.frame(start = starts) %>% 
+    dplyr::mutate(
+      chamber_id = "Box_01",
+      year = year(start),
+      month = month(start),
+      day = day(start),
+      end = ends,
+      event_seq = c(
+        paste(c(rep("Outer Beam Breaker", 2), rep("Inner Beam Breaker", 2)), collapse = "; "), # entrance
+        paste(c(rep("Outer Beam Breaker", 4), rep("Inner Beam Breaker", 2)), collapse = "; "), # no directionality
+        paste(c(rep("Outer Beam Breaker", 4), rep("Inner Beam Breaker", 5)), collapse = "; "), # entrance
+        paste(c(rep("Inner Beam Breaker", 2), rep("Outer Beam Breaker", 2)), collapse = "; "), # exit
+        paste(c(rep("Inner Beam Breaker", 5), rep("Outer Beam Breaker", 2)), collapse = "; "), # exit
+        paste(c(rep("Inner Beam Breaker", 1), rep("Outer Beam Breaker", 4)), collapse = "; ") # exit
+      ),
+      indiv1_id = "test",
+      indiv2_id = NA,
+      # Matches the number of RFID detections if present above
+      total_indiv1_detections = c(NA, 2, 3, NA, 2, 4), 
+      total_indiv2_detections = 0,
+      individual_initiated = "test",
+      individual_ended = "test",
+      threshold_seconds = 1,
+      run_length = 1,
+      data_stage = "pre-processing",
+      date_pre_processed = Sys.Date()
+    )
+  
+  write.csv(sim_dats, file.path(tmp_path, "processed",  "detection_clusters.csv"), row.names = FALSE)
+  
+  # Arguments that should be NULL?? When integrate perching is FALSE, then the 4 perching related columns should be NULL
+  arg_nms <- c("sensor_id_col_nm", "PIT_tag_col_nm", "perching_dataset", "perching_prefix")
+  
+  args <- list(
+    `sensor_id_col_nm` = NULL,
+    `PIT_tag_col_nm` = NULL,
+    `perching_dataset` = NULL,
+    `perching_prefix` = NULL
+  )
+  
+  invisible(lapply(1:length(arg_nms), function(i){
+    
+    args[arg_nms[i]] <- "test"
+    
+    expect_error(
+      score_detectionClusters(file_nm = "detection_clusters.csv", sensor_id_col_nm = args[["sensor_id_col_nm"]], PIT_tag_col_nm = args[["PIT_tag_col_nm"]], rfid_label = NULL, camera_label = NULL, outer_irbb_label = "Outer Beam Breaker", inner_irbb_label = "Inner Beam Breaker", general_metadata_col_nms = c("chamber_id", "year", "month", "day"), video_metadata_col_nms = NULL, integrate_perching = FALSE, perching_dataset = args[["perching_dataset"]], perching_prefix = args[["perching_prefix"]], path = path, data_dir = file.path(data_dir, "processed"), out_dir = file.path(data_dir, "processed"), out_file_nm = "scored_detectionClusters.csv", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
+      regexp = paste("Expected a NULL value but the argument", arg_nms[i], "is not NULL", sep = " ")
+    )
+    
+  }))
+  
+  # Remove the temporary directory and all files within it
+  if(tmp_path == file.path(path, data_dir)){
+    unlink(tmp_path, recursive = TRUE)
+  }
+  
+})
+
+test_that("the function catches when character string arguments are not strings", {
+  
+  # Avoid library calls and other changes to the virtual environment
+  # See https://r-pkgs.org/testing-design.html
+  withr::local_package("tidyverse")
+  withr::local_package("plyr")
+  withr::local_package("dplyr")
+  withr::local_package("lubridate")
+  
+  # Just for code development
+  # library(tidyverse)
+  # library(lubridate)
+  # library(testthat)
+  
+  # Create a temporary directory for testing. Files will be written and read here
+  path <- "/home/gsvidaurre/Desktop"
+  data_dir <- "tmp_tests"
+  tmp_path <- file.path(path, data_dir)
+  
+  if(!dir.exists(tmp_path)){ 
+    dir.create(tmp_path)
+  }
+  
+  # Create the input data directory that the function expects
+  if(!dir.exists(file.path(tmp_path, "processed"))){ 
+    dir.create(file.path(tmp_path, "processed"))
+  }
+  
+  # Generate a file with pre-processed timestamps for 1 sensor type
+  
+  # Create 3 entrance and 3 exit events using different combinations of the 2 pairs of beam breakers. Each event is a detection cluster of a given duration (see ends below)
+  starts <- as.POSIXct(c(
+    "2023-01-01 01:00:00 EST"
+  )) + seq(1, 300, 50)
+  
+  ends <- starts + rep(c(5, 10, 15), 2)
+  
+  # Create a spreadsheet of the simulated directional movement events
+  sim_dats <- data.frame(start = starts) %>% 
+    dplyr::mutate(
+      chamber_id = "Box_01",
+      year = year(start),
+      month = month(start),
+      day = day(start),
+      end = ends,
+      event_seq = c(
+        paste(c(rep("Outer Beam Breaker", 2), rep("Inner Beam Breaker", 2)), collapse = "; "), # entrance
+        paste(c(rep("Outer Beam Breaker", 4), rep("Inner Beam Breaker", 2)), collapse = "; "), # no directionality
+        paste(c(rep("Outer Beam Breaker", 4), rep("Inner Beam Breaker", 5)), collapse = "; "), # entrance
+        paste(c(rep("Inner Beam Breaker", 2), rep("Outer Beam Breaker", 2)), collapse = "; "), # exit
+        paste(c(rep("Inner Beam Breaker", 5), rep("Outer Beam Breaker", 2)), collapse = "; "), # exit
+        paste(c(rep("Inner Beam Breaker", 1), rep("Outer Beam Breaker", 4)), collapse = "; ") # exit
+      ),
+      indiv1_id = "test",
+      indiv2_id = NA,
+      # Matches the number of RFID detections if present above
+      total_indiv1_detections = c(NA, 2, 3, NA, 2, 4), 
+      total_indiv2_detections = 0,
+      individual_initiated = "test",
+      individual_ended = "test",
+      threshold_seconds = 1,
+      run_length = 1,
+      data_stage = "pre-processing",
+      date_pre_processed = Sys.Date()
+    )
+  
+  write.csv(sim_dats, file.path(tmp_path, "processed",  "detection_clusters.csv"), row.names = FALSE)
+  
+  # General arguments that must always be strings:
+  arg_nms <- c("file_nm", "general_metadata_col_nms", "path", "data_dir", "out_dir", "out_file_nm", "tz", "POSIXct_format")
+  
+  args <- list(
+    `file_nm` = "detection_clusters.csv",
+    `general_metadata_col_nms` = c("chamber_id"),
+    `path` = path,
+    `data_dir` = file.path(data_dir, "processed"),
+    `out_dir` = file.path(data_dir, "processed"),
+    `out_file_nm` = "scored_detection_clusters.csv", 
+    `tz` = "America/New York",
+    `POSIXct_format` = "%Y-%m-%d %H:%M:%OS"
+  )
+  
+  invisible(lapply(1:length(arg_nms), function(i){
+    
+    args[arg_nms[i]] <- 1
+    
+    expect_error(
+      score_detectionClusters(file_nm = args[["file_nm"]], sensor_id_col_nm = NULL, PIT_tag_col_nm = NULL, rfid_label = NULL, camera_label = NULL, outer_irbb_label = "Outer Beam Breaker", inner_irbb_label = "Inner Beam Breaker", general_metadata_col_nms = args[["general_metadata_col_nms"]], video_metadata_col_nms = NULL, integrate_perching = FALSE, perching_dataset = NULL, perching_prefix = NULL, path = args[["path"]], data_dir = args[["data_dir"]], out_dir = args[["out_dir"]], out_file_nm = args[["out_file_nm"]], tz = args[["tz"]], POSIXct_format = args[["POSIXct_format"]]),
+      regexp = paste("Expected a string but the argument", arg_nms[i], "is not a string", sep = " ")
+    )
+    
+  }))
+  
+  # Arguments that must be strings when perching events are integrated (the perching_dataset is caught in a different test):
+  arg_nms <- c("sensor_id_col_nm", "PIT_tag_col_nm", "perching_prefix")
+  
+  args <- list(
+    `sensor_id_col_nm` = "sensor_id",
+    `PIT_tag_col_nm` = "PIT_tag_ID",
+    `perching_prefix` = "perching_events_"
+  )
+  
+  invisible(lapply(1:length(arg_nms), function(i){
+    
+    args[arg_nms[i]] <- 1
+    
+    expect_error(
+      score_detectionClusters(file_nm = "detection_clusters.csv", sensor_id_col_nm = args[["sensor_id_col_nm"]], PIT_tag_col_nm = args[["PIT_tag_col_nm"]], rfid_label = NULL, camera_label = NULL, outer_irbb_label = "Outer Beam Breaker", inner_irbb_label = "Inner Beam Breaker", general_metadata_col_nms = c("chamber_id", "year", "month", "day"), video_metadata_col_nms = NULL, integrate_perching = TRUE, perching_dataset = "RFID", perching_prefix = args[["perching_prefix"]], path = path, data_dir = file.path(data_dir, "processed"), out_dir = file.path(data_dir, "processed"), out_file_nm = "scored_detectionClusters.csv", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
+      regexp = paste("Expected a string but the argument", arg_nms[i], "is not a string", sep = " ")
+    )
+    
+  }))
+  
+  # When camera_label is not NULL, video_metadata_col_nms must be a string
+  arg_nms <- c("video_metadata_col_nms")
+  
+  args <- list(
+    `video_metadata_col_nms` = c("total_pixels_motionTrigger")
+  )
+  
+  invisible(lapply(1:length(arg_nms), function(i){
+    
+    args[arg_nms[i]] <- 1
+    
+    expect_error(
+      score_detectionClusters(file_nm = "detection_clusters.csv", sensor_id_col_nm = NULL, PIT_tag_col_nm = NULL, rfid_label = "RFID", camera_label = "Video", outer_irbb_label = NULL, inner_irbb_label = NULL, general_metadata_col_nms = c("chamber_id", "year", "month", "day"), video_metadata_col_nms = args[["video_metadata_col_nms"]], integrate_perching = FALSE, perching_dataset = NULL, perching_prefix = NULL, path = path, data_dir = file.path(data_dir, "processed"), out_dir = file.path(data_dir, "processed"), out_file_nm = "scored_detectionClusters.csv", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
+      regexp = paste("Expected a string but the argument", arg_nms[i], "is not a string", sep = " ")
+    )
+    
+  }))
+  
+  # The sensor label arguments are caught in the non-NULL tests above
+  
+  # Remove the temporary directory and all files within it
+  if(tmp_path == file.path(path, data_dir)){
+    unlink(tmp_path, recursive = TRUE)
+  }
+  
+})
+
+test_that("the function catches when Boolean arguments are not Boolean", {
+  
+  # Avoid library calls and other changes to the virtual environment
+  # See https://r-pkgs.org/testing-design.html
+  withr::local_package("tidyverse")
+  withr::local_package("plyr")
+  withr::local_package("dplyr")
+  withr::local_package("lubridate")
+  
+  # Just for code development
+  # library(tidyverse)
+  # library(lubridate)
+  # library(testthat)
+  
+  # Create a temporary directory for testing. Files will be written and read here
+  path <- "/home/gsvidaurre/Desktop"
+  data_dir <- "tmp_tests"
+  tmp_path <- file.path(path, data_dir)
+  
+  if(!dir.exists(tmp_path)){ 
+    dir.create(tmp_path)
+  }
+  
+  # Create the input data directory that the function expects
+  if(!dir.exists(file.path(tmp_path, "processed"))){ 
+    dir.create(file.path(tmp_path, "processed"))
+  }
+  
+  # Generate a file with pre-processed timestamps for 1 sensor type
+  
+  # Create 3 entrance and 3 exit events using different combinations of the 2 pairs of beam breakers. Each event is a detection cluster of a given duration (see ends below)
+  starts <- as.POSIXct(c(
+    "2023-01-01 01:00:00 EST"
+  )) + seq(1, 300, 50)
+  
+  ends <- starts + rep(c(5, 10, 15), 2)
+  
+  # Create a spreadsheet of the simulated directional movement events
+  sim_dats <- data.frame(start = starts) %>% 
+    dplyr::mutate(
+      chamber_id = "Box_01",
+      year = year(start),
+      month = month(start),
+      day = day(start),
+      end = ends,
+      event_seq = c(
+        paste(c(rep("Outer Beam Breaker", 2), rep("Inner Beam Breaker", 2)), collapse = "; "), # entrance
+        paste(c(rep("Outer Beam Breaker", 4), rep("Inner Beam Breaker", 2)), collapse = "; "), # no directionality
+        paste(c(rep("Outer Beam Breaker", 4), rep("Inner Beam Breaker", 5)), collapse = "; "), # entrance
+        paste(c(rep("Inner Beam Breaker", 2), rep("Outer Beam Breaker", 2)), collapse = "; "), # exit
+        paste(c(rep("Inner Beam Breaker", 5), rep("Outer Beam Breaker", 2)), collapse = "; "), # exit
+        paste(c(rep("Inner Beam Breaker", 1), rep("Outer Beam Breaker", 4)), collapse = "; ") # exit
+      ),
+      indiv1_id = "test",
+      indiv2_id = NA,
+      # Matches the number of RFID detections if present above
+      total_indiv1_detections = c(NA, 2, 3, NA, 2, 4), 
+      total_indiv2_detections = 0,
+      individual_initiated = "test",
+      individual_ended = "test",
+      threshold_seconds = 1,
+      run_length = 1,
+      data_stage = "pre-processing",
+      date_pre_processed = Sys.Date()
+    )
+  
+  write.csv(sim_dats, file.path(tmp_path, "processed",  "detection_clusters.csv"), row.names = FALSE)
+  
+  expect_error(
+    score_detectionClusters(file_nm = "detection_clusters.csv", sensor_id_col_nm = NULL, PIT_tag_col_nm = NULL, rfid_label = "RFID", camera_label = "Video", outer_irbb_label = NULL, inner_irbb_label = NULL, general_metadata_col_nms = c("chamber_id", "year", "month", "day"), video_metadata_col_nms = c("pixel_threshold"), integrate_perching = "test", perching_dataset = NULL, perching_prefix = NULL, path = path, data_dir = file.path(data_dir, "processed"), out_dir = file.path(data_dir, "processed"), out_file_nm = "scored_detectionClusters.csv", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
+    regexp = paste("Expected a Boolean value but the argument integrate_perching is not Boolean", sep = " ")
+  )
+  
+  # Remove the temporary directory and all files within it
+  if(tmp_path == file.path(path, data_dir)){
+    unlink(tmp_path, recursive = TRUE)
+  }
+  
+})
+
+
+
+source("/home/gsvidaurre/Desktop/GitHub_repos/Abissmal/R/score_detectionClusters.R")
+
+source("/home/gsvidaurre/Desktop/GitHub_repos/Abissmal/R/utilities.R")
+
+
+# TKTK continue
+test_that("the function catches when paths don't exist", {
+  
+  # Avoid library calls and other changes to the virtual environment
+  # See https://r-pkgs.org/testing-design.html
+  withr::local_package("tidyverse")
+  withr::local_package("dplyr")
+  withr::local_package("lubridate")
+  withr::local_package("tidyquant")
+  
+  # Just for code development
+  # library(tidyverse)
+  # library(lubridate)
+  # library(testthat)
+  
+  # Create a temporary directory for testing. Files will be written and read here
+  path <- "/home/gsvidaurre/Desktop"
+  data_dir <- "tmp_tests"
+  tmp_path <- file.path(path, data_dir)
+  
+  if(!dir.exists(tmp_path)){ 
+    dir.create(tmp_path)
+  }
+  
+  # Create the input data directory that the function expects
+  if(!dir.exists(file.path(tmp_path, "processed"))){ 
+    dir.create(file.path(tmp_path, "processed"))
+  }
+  
+  # Generate a file with pre-processed timestamps for one sensor
+  
+  # Create 4 clusters of detections: each cluster consists of 2 detections spaced 1 second apart
+  starts <- as.POSIXct(c(
+    "2023-01-01 01:00:00 EST",
+    "2023-01-01 02:00:00 EST",
+    "2023-01-01 01:05:00 EST",
+    "2023-01-01 02:05:00 EST"
+  ))
+  
+  ends <- starts + 1
+  
+  # Write out a spreadsheet with these timestamps that will be used as input data for the function
+  sim_ts <- data.frame(timestamp_ms = c(starts, ends)) %>% 
+    dplyr::mutate(
+      chamber_id = "Box_01",
+      year = year(timestamp_ms),
+      month = month(timestamp_ms),
+      day = day(timestamp_ms),
+      sensor_id = "RFID",
+      PIT_tag_ID = "test",
+      thin_threshold_s = 1,
+      data_stage = "pre-processing",
+      date_pre_processed = Sys.Date()
+    )
+  
+  write.csv(sim_ts, file.path(tmp_path, "processed", "pre_processed_data_RFID.csv"), row.names = FALSE)
+  
+  # Remove this file
+  file.remove(file.path(tmp_path, "processed", "pre_processed_data_RFID.csv"))
+  
+  expect_error(
+    find_detectionClusters(file_nms = "pre_processed_data_RFID.csv", threshold = 1, run_length = 2, sensor_id_col_nm_nm = "sensor_id", timestamps_col_nm = "timestamp_ms", PIT_tag_col_nm_nm = "PIT_tag_ID", rfid_label = "RFID", camera_label = NULL, drop_tag = NULL, preproc_metadata_col_nms = c("thin_threshold_s", "data_stage", "date_pre_processed"), general_metadata_col_nms = c("chamber_id", "year", "month", "day"), video_metadata_col_nms = NULL, path = path, data_dir = file.path(data_dir, "processed"), out_dir = file.path(data_dir, "processed"), out_file_nm = "detection_clusters.csv", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
+    regexp = paste("The file pre_processed_data_RFID.csv does not exist in the directory", file.path(path, data_dir, "processed"), sep = " ")
+  )
+  
+  # Generate the file again, then remove the whole directory
+  write.csv(sim_ts, file.path(tmp_path, "processed", "pre_processed_data_RFID.csv"), row.names = FALSE)
+  
+  # Remove the directory where this file is located
+  if(tmp_path == file.path(path, data_dir)){
+    unlink(tmp_path, recursive = TRUE)
+  }
+  
+  expect_error(
+    find_detectionClusters(file_nms = "pre_processed_data_RFID.csv", threshold = 1, run_length = 2, sensor_id_col_nm_nm = "sensor_id", timestamps_col_nm = "timestamp_ms", PIT_tag_col_nm_nm = "PIT_tag_ID", rfid_label = "RFID", camera_label = NULL, drop_tag = NULL, preproc_metadata_col_nms = c("thin_threshold_s", "data_stage", "date_pre_processed"), general_metadata_col_nms = c("chamber_id", "year", "month", "day"), video_metadata_col_nms = NULL, path = path, data_dir = file.path(data_dir, "processed"), out_dir = file.path(data_dir, "processed"), out_file_nm = "detection_clusters.csv", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
+    regexp = paste("The directory", file.path(path, data_dir, "processed"), "does not exist", sep = " ")
+  )
+  
+})
+
+test_that("the input dataset has all of the expected columns", {
+  
+  # Avoid library calls and other changes to the virtual environment
+  # See https://r-pkgs.org/testing-design.html
+  withr::local_package("tidyverse")
+  withr::local_package("dplyr")
+  withr::local_package("lubridate")
+  withr::local_package("tidyquant")
+  
+  # Just for code development
+  # library(tidyverse)
+  # library(lubridate)
+  # library(testthat)
+  
+  # Create a temporary directory for testing. Files will be written and read here
+  path <- "/home/gsvidaurre/Desktop"
+  data_dir <- "tmp_tests"
+  tmp_path <- file.path(path, data_dir)
+  
+  if(!dir.exists(tmp_path)){ 
+    dir.create(tmp_path)
+  }
+  
+  # Create the input data directory that the function expects
+  if(!dir.exists(file.path(tmp_path, "processed"))){ 
+    dir.create(file.path(tmp_path, "processed"))
+  }
+  
+  # Generate a file with pre-processed timestamps for one sensor
+  
+  # Create 4 clusters of detections: each cluster consists of 2 detections spaced 1 second apart
+  starts <- as.POSIXct(c(
+    "2023-01-01 01:00:00 EST",
+    "2023-01-01 02:00:00 EST",
+    "2023-01-01 01:05:00 EST",
+    "2023-01-01 02:05:00 EST"
+  ))
+  
+  ends <- starts + 1
+  
+  # Columns that must always be present in the pre-processed data
+  col_nms <- c("sensor_id", "timestamp_ms", "year", "month", "day")
+  
+  invisible(lapply(1:length(col_nms), function(i){
+    
+    # Write out a spreadsheet with these timestamps that will be used as input data for the function
+    sim_ts <- data.frame(timestamp_ms = c(starts, ends)) %>% 
+      dplyr::mutate(
+        chamber_id = "Box_01",
+        year = year(timestamp_ms),
+        month = month(timestamp_ms),
+        day = day(timestamp_ms),
+        sensor_id = "RFID",
+        PIT_tag_ID = "test",
+        thin_threshold_s = 1,
+        data_stage = "pre-processing",
+        date_pre_processed = Sys.Date()
+      ) %>% 
+      # Drop the given column
+      dplyr::select(-c(all_of(col_nms[i])))
+    
+    write.csv(sim_ts, file.path(tmp_path, "processed", "pre_processed_data_RFID.csv"), row.names = FALSE)
+    
+    expect_error(
+      find_detectionClusters(file_nms = "pre_processed_data_RFID.csv", threshold = 1, run_length = 2, sensor_id_col_nm_nm = "sensor_id", timestamps_col_nm = "timestamp_ms", PIT_tag_col_nm_nm = "PIT_tag_ID", rfid_label = "RFID", camera_label = NULL, drop_tag = NULL, preproc_metadata_col_nms = c("thin_threshold_s", "data_stage", "date_pre_processed"), general_metadata_col_nms = c("chamber_id", "year", "month", "day"), video_metadata_col_nms = NULL, path = path, data_dir = file.path(data_dir, "processed"), out_dir = file.path(data_dir, "processed"), out_file_nm = "detection_clusters.csv", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
+      regexp = paste("The column", col_nms[i], "was not found in the data frame", sep = " ")
+    )
+    
+  }))
+  
+  # Remove the temporary directory and all files within it
+  if(tmp_path == file.path(path, data_dir)){
+    unlink(tmp_path, recursive = TRUE)
+  }
+  
+})
+
+test_that("the input dataset has no NAs in columns that cannot have NAs", {
+  
+  # Avoid library calls and other changes to the virtual environment
+  # See https://r-pkgs.org/testing-design.html
+  withr::local_package("tidyverse")
+  withr::local_package("dplyr")
+  withr::local_package("lubridate")
+  withr::local_package("tidyquant")
+  
+  # Just for code development
+  # library(tidyverse)
+  # library(lubridate)
+  # library(testthat)
+  
+  # Create a temporary directory for testing. Files will be written and read here
+  path <- "/home/gsvidaurre/Desktop"
+  data_dir <- "tmp_tests"
+  tmp_path <- file.path(path, data_dir)
+  
+  if(!dir.exists(tmp_path)){ 
+    dir.create(tmp_path)
+  }
+  
+  # Create the input data directory that the function expects
+  if(!dir.exists(file.path(tmp_path, "processed"))){ 
+    dir.create(file.path(tmp_path, "processed"))
+  }
+  
+  # Generate a file with pre-processed timestamps for one sensor
+  
+  # Create 4 clusters of detections: each cluster consists of 2 detections spaced 1 second apart
+  starts <- as.POSIXct(c(
+    "2023-01-01 01:00:00 EST",
+    "2023-01-01 02:00:00 EST",
+    "2023-01-01 01:05:00 EST",
+    "2023-01-01 02:05:00 EST"
+  ))
+  
+  ends <- starts + 1
+  
+  # Columns that cannot have NAs in the pre-processed data
+  col_nms <- c("sensor_id", "timestamp_ms", "year", "month", "day")
+  
+  invisible(lapply(1:length(col_nms), function(i){
+    
+    # Write out a spreadsheet with these timestamps that will be used as input data for the function
+    sim_ts <- data.frame(timestamp_ms = c(starts, ends)) %>% 
+      dplyr::mutate(
+        chamber_id = "Box_01",
+        year = year(timestamp_ms),
+        month = month(timestamp_ms),
+        day = day(timestamp_ms),
+        sensor_id = "RFID",
+        PIT_tag_ID = "test",
+        thin_threshold_s = 1,
+        data_stage = "pre-processing",
+        date_pre_processed = Sys.Date()
+      )
+    
+    sim_ts[[col_nms[i]]][1] <- NA
+    
+    write.csv(sim_ts, file.path(tmp_path, "processed", "pre_processed_data_RFID.csv"), row.names = FALSE)
+    
+    expect_error(
+      find_detectionClusters(file_nms = "pre_processed_data_RFID.csv", threshold = 1, run_length = 2, sensor_id_col_nm_nm = "sensor_id", timestamps_col_nm = "timestamp_ms", PIT_tag_col_nm_nm = "PIT_tag_ID", rfid_label = "RFID", camera_label = NULL, drop_tag = NULL, preproc_metadata_col_nms = c("thin_threshold_s", "data_stage", "date_pre_processed"), general_metadata_col_nms = c("chamber_id", "year", "month", "day"), video_metadata_col_nms = NULL, path = path, data_dir = file.path(data_dir, "processed"), out_dir = file.path(data_dir, "processed"), out_file_nm = "detection_clusters.csv", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
+      regexp = paste("The column", col_nms[i], "has NA values", sep = " ")
+    )
+    
+  }))
+  
+  # Remove the temporary directory and all files within it
+  if(tmp_path == file.path(path, data_dir)){
+    unlink(tmp_path, recursive = TRUE)
+  }
+  
+})
