@@ -153,7 +153,6 @@ find_detectionClusters <- function(file_nms, threshold, run_length = 2, sensor_i
     
     tmp <- read.csv(file.path(path, data_dir, file_nms[x])) 
     
-    
     # Check that the data contains the timestamps column
     expected_cols <- f_args[grep("timestamp", names(f_args))]
     
