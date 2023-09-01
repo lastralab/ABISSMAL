@@ -392,11 +392,12 @@ test_that("The function detects the expected number of clusters using RFID data 
     "2023-01-01 02:05:00 EST"
   ))
   
-  invisible(mapply(function(x, y){
+  # ths and rls must be the same length
+  invisible(lapply(1:length(ths), function(x){
     
     tmp <- data.table::rbindlist(lapply(1:length(starts), function(i){
       
-      sim_ts <- seq(starts[i], starts[i] + max(seq_len(y*y)), by = x)[1:(y + 1)]
+      sim_ts <- seq(starts[i], starts[i] + max(seq_len(rls[x]*rls[x])), by = ths[x])[1:(rls[x] + 1)]
       # sim_ts
       
       return(data.frame(tstmps = sim_ts, cluster = i))
@@ -417,11 +418,9 @@ test_that("The function detects the expected number of clusters using RFID data 
         date_pre_processed = Sys.Date()
       )
     
-    tmp_nm <- paste(paste("simulated_single_sensor", paste("th", x, sep = ""), paste("rl", y, sep = ""), sep = "_"), ".csv", sep = "")
+    write.csv(sim_ts, file.path(tmp_path, "processed", "pre_processed_data_RFID.csv"), row.names = FALSE)
     
-    write.csv(sim_ts, file.path(tmp_path, "processed", tmp_nm), row.names = FALSE)
-    
-    find_detectionClusters(file_nms = tmp_nm, threshold = x, run_length = y, sensor_id_col_nm = "sensor_id", timestamps_col_nm = "timestamp_ms", PIT_tag_col_nm = "PIT_tag_ID", rfid_label = "RFID", camera_label = NULL, drop_tag = NULL, preproc_metadata_col_nms = c("thin_threshold_s", "data_stage", "date_pre_processed"), general_metadata_col_nms = c("chamber_id", "year", "month", "day"), video_metadata_col_nms = NULL, path = path, data_dir = file.path(data_dir, "processed"), out_dir = file.path(data_dir, "processed"), out_file_nm = "detection_clusters.csv", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS")
+    find_detectionClusters(file_nms = "pre_processed_data_RFID.csv", threshold = ths[x], run_length = rls[x], sensor_id_col_nm = "sensor_id", timestamps_col_nm = "timestamp_ms", PIT_tag_col_nm = "PIT_tag_ID", rfid_label = "RFID", camera_label = NULL, drop_tag = NULL, preproc_metadata_col_nms = c("thin_threshold_s", "data_stage", "date_pre_processed"), general_metadata_col_nms = c("chamber_id", "year", "month", "day"), video_metadata_col_nms = NULL, path = path, data_dir = file.path(data_dir, "processed"), out_dir = file.path(data_dir, "processed"), out_file_nm = "detection_clusters.csv", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS")
     
     # Read in the output, check the output, then delete all files
     test_res <- read.csv(file.path(tmp_path, "processed", "detection_clusters.csv"))
@@ -447,7 +446,7 @@ test_that("The function detects the expected number of clusters using RFID data 
       
     }))      
     
-  }, ths, rls, SIMPLIFY = FALSE))
+  }))
   
   # Remove the temporary directory and all files within it
   if(tmp_path == file.path(path, data_dir)){
@@ -499,14 +498,14 @@ test_that("The function detects the expected number of clusters using data from 
     "2023-01-01 01:05:00 EST",
     "2023-01-01 02:05:00 EST"
   ))
-  
-  # threshold values are x, run length values are y        
-  invisible(mapply(function(x, y){
+
+  # ths and rls must be the same length     
+  invisible(lapply(1:length(ths), function(x){
     
     # Create the RFID timestamps
     tmp_rfid <- data.table::rbindlist(lapply(1:length(starts_rfid), function(i){
       
-      sim_ts <- seq(starts_rfid[i], starts_rfid[i] + max(seq_len(y*y)), by = x)[1:(y + 1)]
+      sim_ts <- seq(starts_rfid[i], starts_rfid[i] + max(seq_len(rls[x]*rls[x])), by = ths[x])[1:(rls[x] + 1)]
       
       return(data.frame(tstmps = sim_ts, cluster = i))
       
@@ -515,9 +514,9 @@ test_that("The function detects the expected number of clusters using data from 
     # Create the outer beam breaker timestamps. For each simulated detection cluster, the first timestamp for the outer beam breaker pair is offset by x seconds more than the last RFID timestamp
     tmp_irbb_o <- data.table::rbindlist(lapply(1:length(starts_rfid), function(i){
       
-      start_irbb_o <- max(tmp_rfid$tstmps[tmp_rfid$cluster == i]) + x
+      start_irbb_o <- max(tmp_rfid$tstmps[tmp_rfid$cluster == i]) + ths[x]
       
-      sim_ts <- seq(start_irbb_o, start_irbb_o + max(seq_len(y*y)), by = x)[1:(y + 1)]
+      sim_ts <- seq(start_irbb_o, start_irbb_o + max(seq_len(rls[x]*rls[x])), by = ths[x])[1:(rls[x] + 1)]
       
       return(data.frame(tstmps = sim_ts, cluster = i))
       
@@ -526,9 +525,9 @@ test_that("The function detects the expected number of clusters using data from 
     # Create the inner beam breaker timestamps. For each simulated detection cluster, the first timestamp for the outer beam breaker pair is offset by x seconds more than the last timestamp of the cluster for the outer beam breaker pair
     tmp_irbb_i <- data.table::rbindlist(lapply(1:length(starts_rfid), function(i){
       
-      start_irbb_i <- max(tmp_irbb_o$tstmps[tmp_irbb_o$cluster == i]) + x
+      start_irbb_i <- max(tmp_irbb_o$tstmps[tmp_irbb_o$cluster == i]) + ths[x]
       
-      sim_ts <- seq(start_irbb_i, start_irbb_i + max(seq_len(y*y)), by = x)[1:(y + 1)]
+      sim_ts <- seq(start_irbb_i, start_irbb_i + max(seq_len(rls[x]*rls[x])), by = ths[x])[1:(rls[x] + 1)]
       
       return(data.frame(tstmps = sim_ts, cluster = i))
       
@@ -560,14 +559,11 @@ test_that("The function detects the expected number of clusters using data from 
         date_pre_processed = Sys.Date()
       )
     
-    tmp_nm_rfid <- paste(paste("simulated_RFID", paste("th", x, sep = ""), paste("rl", y, sep = ""), sep = "_"), ".csv", sep = "")
+    write.csv(rfid_ts, file.path(tmp_path, "processed", "pre_processed_data_RFID.csv"), row.names = FALSE)
     
-    tmp_nm_irbb <- paste(paste("simulated_IRBB", paste("th", x, sep = ""), paste("rl", y, sep = ""), sep = "_"), ".csv", sep = "")
+    write.csv(irbb_ts, file.path(tmp_path, "processed", "pre_processed_data_IRBB.csv"), row.names = FALSE)
     
-    write.csv(rfid_ts, file.path(tmp_path, "processed", tmp_nm_rfid), row.names = FALSE)
-    write.csv(irbb_ts, file.path(tmp_path, "processed", tmp_nm_irbb), row.names = FALSE)
-    
-    find_detectionClusters(file_nms = c(tmp_nm_rfid, tmp_nm_irbb), threshold = x, run_length = y, sensor_id_col_nm = "sensor_id", timestamps_col_nm = "timestamp_ms", PIT_tag_col_nm = "PIT_tag_ID", rfid_label = "RFID", camera_label = NULL, drop_tag = NULL, preproc_metadata_col_nms = c("thin_threshold_s", "data_stage", "date_pre_processed"), general_metadata_col_nms = c("chamber_id", "year", "month", "day"), video_metadata_col_nms = NULL, path = path, data_dir = file.path(data_dir, "processed"), out_dir = file.path(data_dir, "processed"), out_file_nm = "detection_clusters.csv", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS")
+    find_detectionClusters(file_nms = c("pre_processed_data_RFID.csv", "pre_processed_data_IRBB.csv"), threshold = ths[x], run_length = rls[x], sensor_id_col_nm = "sensor_id", timestamps_col_nm = "timestamp_ms", PIT_tag_col_nm = "PIT_tag_ID", rfid_label = "RFID", camera_label = NULL, drop_tag = NULL, preproc_metadata_col_nms = c("thin_threshold_s", "data_stage", "date_pre_processed"), general_metadata_col_nms = c("chamber_id", "year", "month", "day"), video_metadata_col_nms = NULL, path = path, data_dir = file.path(data_dir, "processed"), out_dir = file.path(data_dir, "processed"), out_file_nm = "detection_clusters.csv", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS")
     
     # Read in the output, check the output, then delete all files
     test_res <- read.csv(file.path(tmp_path, "processed", "detection_clusters.csv"))
@@ -595,7 +591,7 @@ test_that("The function detects the expected number of clusters using data from 
       
     }))      
     
-  }, ths, rls, SIMPLIFY = FALSE))
+  }))
   
   # Remove the temporary directory and all files within it
   if(tmp_path == file.path(path, data_dir)){
@@ -648,45 +644,46 @@ test_that("The function detects the expected number of clusters using data from 
     "2023-01-01 02:05:00 EST"
   ))
   
-  invisible(mapply(function(x, y){
+  # ths and rls must be the same length     
+  invisible(lapply(1:length(ths), function(x){
     
     # Create the RFID timestamps
-    tmp_rfid <- data.table::rbindlist(lapply(1:length(starts), function(i){
+    tmp_rfid <- data.table::rbindlist(lapply(1:length(starts_rfid), function(i){
       
-      sim_ts <- seq(starts_rfid[i], starts_rfid[i] + max(seq_len(y*y)), by = x)[1:(y + 1)]
+      sim_ts <- seq(starts_rfid[i], starts_rfid[i] + max(seq_len(rls[x]*rls[x])), by = ths[x])[1:(rls[x] + 1)]
       
       return(data.frame(tstmps = sim_ts, cluster = i))
       
     }))
     
     # Create the outer beam breaker timestamps. For each simulated detection cluster, the first timestamp for the outer beam breaker pair is offset by x seconds more than the last RFID timestamp
-    tmp_irbb_o <- data.table::rbindlist(lapply(1:length(starts), function(i){
+    tmp_irbb_o <- data.table::rbindlist(lapply(1:length(starts_rfid), function(i){
       
-      start_irbb_o <- max(tmp_rfid$tstmps[tmp_rfid$cluster == i]) + x
+      start_irbb_o <- max(tmp_rfid$tstmps[tmp_rfid$cluster == i]) + ths[x]
       
-      sim_ts <- seq(start_irbb_o, start_irbb_o + max(seq_len(y*y)), by = x)[1:(y + 1)]
+      sim_ts <- seq(start_irbb_o, start_irbb_o + max(seq_len(rls[x]*rls[x])), by = ths[x])[1:(rls[x] + 1)]
       
       return(data.frame(tstmps = sim_ts, cluster = i))
       
     }))
     
     # Create the inner beam breaker timestamps. For each simulated detection cluster, the first timestamp for the outer beam breaker pair is offset by x seconds more than the last timestamp of the cluster for the outer beam breaker pair
-    tmp_irbb_i <- data.table::rbindlist(lapply(1:length(starts), function(i){
+    tmp_irbb_i <- data.table::rbindlist(lapply(1:length(starts_rfid), function(i){
       
-      start_irbb_i <- max(tmp_irbb_o$tstmps[tmp_irbb_o$cluster == i]) + x
+      start_irbb_i <- max(tmp_irbb_o$tstmps[tmp_irbb_o$cluster == i]) + ths[x]
       
-      sim_ts <- seq(start_irbb_i, start_irbb_i + max(seq_len(y*y)), by = x)[1:(y + 1)]
+      sim_ts <- seq(start_irbb_i, start_irbb_i + max(seq_len(rls[x]*rls[x])), by = ths[x])[1:(rls[x] + 1)]
       
       return(data.frame(tstmps = sim_ts, cluster = i))
       
     }))
     
     # Create the camera timestamps. For each simulated detection cluster, the first timestamp for the camera is offset by x seconds more than the last timestamp of the cluster for the inner beam breaker pair
-    tmp_camera <- data.table::rbindlist(lapply(1:length(starts), function(i){
+    tmp_camera <- data.table::rbindlist(lapply(1:length(starts_rfid), function(i){
       
-      start_camera <- max(tmp_irbb_i$tstmps[tmp_irbb_i$cluster == i]) + x
+      start_camera <- max(tmp_irbb_i$tstmps[tmp_irbb_i$cluster == i]) + ths[x]
       
-      sim_ts <- seq(start_camera, start_camera + max(seq_len(y*y)), by = x)[1:(y + 1)]
+      sim_ts <- seq(start_camera, start_camera + max(seq_len(rls[x]*rls[x])), by = ths[x])[1:(rls[x] + 1)]
       
       return(data.frame(tstmps = sim_ts, cluster = i))
       
@@ -735,17 +732,13 @@ test_that("The function detects the expected number of clusters using data from 
         date_pre_processed = Sys.Date()
       )
     
-    tmp_nm_rfid <- paste(paste("simulated_RFID", paste("th", x, sep = ""), paste("rl", y, sep = ""), sep = "_"), ".csv", sep = "")
+    write.csv(rfid_ts, file.path(tmp_path, "processed", "pre_processed_data_RFID.csv"), row.names = FALSE)
     
-    tmp_nm_irbb <- paste(paste("simulated_IRBB", paste("th", x, sep = ""), paste("rl", y, sep = ""), sep = "_"), ".csv", sep = "")
+    write.csv(irbb_ts, file.path(tmp_path, "processed", "pre_processed_data_IRBB.csv"), row.names = FALSE)
     
-    tmp_nm_camera <- paste(paste("simulated_camera", paste("th", x, sep = ""), paste("rl", y, sep = ""), sep = "_"), ".csv", sep = "")
+    write.csv(camera_ts, file.path(tmp_path, "processed", "pre_processed_data_Video.csv"), row.names = FALSE)
     
-    write.csv(rfid_ts, file.path(tmp_path, "processed", tmp_nm_rfid), row.names = FALSE)
-    write.csv(irbb_ts, file.path(tmp_path, "processed", tmp_nm_irbb), row.names = FALSE)
-    write.csv(camera_ts, file.path(tmp_path, "processed", tmp_nm_camera), row.names = FALSE)
-    
-    find_detectionClusters(file_nms = c(tmp_nm_rfid, tmp_nm_irbb, tmp_nm_camera), threshold = x, run_length = y, sensor_id_col_nm = "sensor_id", timestamps_col_nm = "timestamp_ms", PIT_tag_col_nm = "PIT_tag_ID", rfid_label = "RFID", camera_label = "Camera", drop_tag = NULL, preproc_metadata_col_nms = c("thin_threshold_s", "data_stage", "date_pre_processed"), general_metadata_col_nms = c("chamber_id", "year", "month", "day"), video_metadata_col_nms = c("total_pixels_motionTrigger", "pixel_threshold", "video_file_name"), path = path, data_dir = file.path(data_dir, "processed"), out_dir = file.path(data_dir, "processed"), out_file_nm = "detection_clusters.csv", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS")
+    find_detectionClusters(file_nms = c("pre_processed_data_RFID.csv", "pre_processed_data_IRBB.csv", "pre_processed_data_Video.csv"), threshold = ths[x], run_length = rls[x], sensor_id_col_nm = "sensor_id", timestamps_col_nm = "timestamp_ms", PIT_tag_col_nm = "PIT_tag_ID", rfid_label = "RFID", camera_label = "Camera", drop_tag = NULL, preproc_metadata_col_nms = c("thin_threshold_s", "data_stage", "date_pre_processed"), general_metadata_col_nms = c("chamber_id", "year", "month", "day"), video_metadata_col_nms = c("total_pixels_motionTrigger", "pixel_threshold", "video_file_name"), path = path, data_dir = file.path(data_dir, "processed"), out_dir = file.path(data_dir, "processed"), out_file_nm = "detection_clusters.csv", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS")
     
     # Read in the output, check the output, then delete all files
     test_res <- read.csv(file.path(tmp_path, "processed", "detection_clusters.csv"))
@@ -774,7 +767,7 @@ test_that("The function detects the expected number of clusters using data from 
       
     }))      
     
-  }, ths, rls, SIMPLIFY = FALSE))
+  }))
   
   # Remove the temporary directory and all files within it
   if(tmp_path == file.path(path, data_dir)){
@@ -956,66 +949,7 @@ test_that("the function catches when non-NULL arguments are NULL", {
   
   # Arguments that cannot be NULL depending on which sensor is specified:
   
-  # When using RFID data, the following arguments cannot be NULL:
-  arg_nms <- c("PIT_tag_col_nm", "rfid_label")
-  
-  args <- list(
-    `PIT_tag_col_nm` = "PIT_tag_ID",
-    `rfid_label` = "RFID"
-  )
-
-  invisible(lapply(1:length(arg_nms), function(i){
-    
-    args[arg_nms[i]] <- list(NULL)
-    
-    expect_error(
-      find_detectionClusters(file_nms = "pre_processed_data_RFID.csv", threshold = 2, run_length = 1, sensor_id_col_nm = "sensor_id", timestamps_col_nm = "timestamp_ms", PIT_tag_col_nm = args[["PIT_tag_col_nm"]], rfid_label = args[["rfid_label"]], camera_label = NULL, drop_tag = NULL, preproc_metadata_col_nms = c("thin_threshold_s", "data_stage", "date_pre_processed"), general_metadata_col_nms = c("chamber_id", "year", "month", "day"), video_metadata_col_nms = NULL, path = path, data_dir = file.path(data_dir, "processed"), out_dir = file.path(data_dir, "processed"), out_file_nm = "detection_clusters.csv", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
-      regexp = paste("Expected a non-NULL value but the argument", arg_nms[i], "is NULL", sep = " ")
-    )
-    
-  }))
-  
-  # When using Video data, the following arguments cannot be NULL:
-  write.csv(sim_ts, file.path(tmp_path, "processed", "pre_processed_data_Video.csv"), row.names = FALSE)
-  
-  arg_nms <- c("camera_label", "video_metadata_col_nms")
-  
-  args <- list(
-    `camera_label` = "Video",
-    `video_metadata_col_nms` = c("total_pixels_motionTrigger", "pixel_threshold")
-  )
-
-  invisible(lapply(1:length(arg_nms), function(i){
-    
-    args[arg_nms[i]] <- list(NULL)
-    
-    expect_error(
-      find_detectionClusters(file_nms = "pre_processed_data_Video.csv", threshold = 2, run_length = 1, sensor_id_col_nm = "sensor_id", timestamps_col_nm = "timestamp_ms", PIT_tag_col_nm = NULL, rfid_label = NULL, camera_label = args[["camera_label"]], drop_tag = NULL, preproc_metadata_col_nms = c("thin_threshold_s", "data_stage", "date_pre_processed"), general_metadata_col_nms = c("chamber_id", "year", "month", "day"), video_metadata_col_nms = args[["video_metadata_col_nms"]], path = path, data_dir = file.path(data_dir, "processed"), out_dir = file.path(data_dir, "processed"), out_file_nm = "detection_clusters.csv", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
-      regexp = paste("Expected a non-NULL value but the argument", arg_nms[i], "is NULL", sep = " ")
-    )
-    
-  }))
-  
-  # When using RFID and Video data, the following arguments cannot be NULL:
-  arg_nms <- c("PIT_tag_col_nm", "rfid_label", "camera_label", "video_metadata_col_nms")
-  
-  args <- list(
-    `PIT_tag_col_nm` = "PIT_tag_ID",
-    `rfid_label` = "RFID",
-    `camera_label` = "Video",
-    `video_metadata_col_nms` = c("total_pixels_motionTrigger", "pixel_threshold")
-  )
-  
-  invisible(lapply(1:length(arg_nms), function(i){
-    
-    args[arg_nms[i]] <- list(NULL)
-
-    expect_error(
-      find_detectionClusters(file_nms = c("pre_processed_data_RFID.csv", "pre_processed_data_Video.csv"), threshold = 2, run_length = 1, sensor_id_col_nm = "sensor_id", timestamps_col_nm = "timestamp_ms", PIT_tag_col_nm = args[["PIT_tag_col_nm"]], rfid_label = args[["rfid_label"]], camera_label = args[["camera_label"]], drop_tag = NULL, preproc_metadata_col_nms = c("thin_threshold_s", "data_stage", "date_pre_processed"), general_metadata_col_nms = c("chamber_id", "year", "month", "day"), video_metadata_col_nms = args[["video_metadata_col_nms"]], path = path, data_dir = file.path(data_dir, "processed"), out_dir = file.path(data_dir, "processed"), out_file_nm = "detection_clusters.csv", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
-      regexp = paste("Expected a non-NULL value but the argument", arg_nms[i], "is NULL", sep = " ")
-    )
-    
-  }))
+  # When using RFID data, PIT_tag_col_nm and rfid_label cannot be NULL. When using Video data, camera_label and video_metadata_col_nms. However these columns are tested separately (earlier in the function) with the string check
   
   # Remove the temporary directory and all files within it
   if(tmp_path == file.path(path, data_dir)){
@@ -1023,9 +957,6 @@ test_that("the function catches when non-NULL arguments are NULL", {
   }
   
 })
-
-
-
 
 test_that("the function catches when NULL arguments are non-NULL", {
   
@@ -1115,63 +1046,13 @@ test_that("the function catches when NULL arguments are non-NULL", {
     `rfid_label` = NULL,
     `drop_tag` = NULL
   )
-  
-  # i <- 2
+
   invisible(lapply(1:length(arg_nms), function(i){
     
     args[arg_nms[i]] <- "test"
     
     expect_error(
-      find_detectionClusters(file_nms = "pre_processed_data_RFID.csv", threshold = 2, run_length = 1, sensor_id_col_nm = "sensor_id", timestamps_col_nm = "timestamp_ms", PIT_tag_col_nm = args[["PIT_tag_col_nm"]], rfid_label = args[["camera_label"]], camera_label = "Video", drop_tag = args[["drop_tag"]], preproc_metadata_col_nms = c("thin_threshold_s", "data_stage", "date_pre_processed"), general_metadata_col_nms = c("chamber_id", "year", "month", "day"), video_metadata_col_nms = args[["video_metadata_col_nms"]], path = path, data_dir = file.path(data_dir, "processed"), out_dir = file.path(data_dir, "processed"), out_file_nm = "detection_clusters.csv", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
-      regexp = paste("Expected a NULL value but the argument", arg_nms[i], "is not NULL", sep = " ")
-    )
-    
-  }))
-  
-  # Checks when sensor = Video
-  
-  # Repeat timestamps (1 pre- and 1 post-motion video per timestamp)
-  tstmps <- rep(starts, each = 2)
-  # tstmps
-  
-  px <- 100
-  
-  #### 1/2 of the videos have total pixels less than the pixel threshold ####
-  
-  # Write out a spreadsheet with these timestamps that will be used as input data for the function
-  sim_ts <- data.frame(timestamp_ms = tstmps) %>% 
-    dplyr::mutate(
-      chamber_id = "Box_01",
-      year = year(timestamp_ms),
-      month = month(timestamp_ms),
-      day = day(timestamp_ms),
-      original_timestamp = gsub(" EST", "" , gsub("2023-01-01 ", "", timestamp_ms)),
-      sensor_id = "Camera",
-      data_type = "Video",
-      total_pixels_motionTrigger = rep(c(px * 10, px / 10), each = 4), 
-      pixel_threshold = px, 
-      video_file_name = paste(paste(rep(paste("Box_01_2023_1_1", paste(hour(starts), minute(starts), second(starts), sep = "_"), sep = "_"), 2), c("pre_trigger", "post_trigger"), sep = "_"), ".mp4", sep = ""),
-      data_stage = "processed",
-      date_combined = Sys.Date()
-    )
-  
-  
-  
-  # Arguments that should be NULL when sensor = Video:
-  arg_nms <- c("group_col_nm", "thin_threshold", "mode")
-  
-  args <- list(
-    `group_col_nm` = NULL,
-    `thin_threshold` = NULL,
-    `mode` = NULL
-  )
-  
-  invisible(lapply(1:length(arg_nms), function(i){
-    
-    args[arg_nms[i]] <- "test"
-    
-    expect_error(
-      preprocess_detections(sensor = "Video", timestamps_col_nm_nm = "timestamps_col_nm_nm", group_col_nm = args[["group_col_nm"]], pixel_col_nm = "total_pixels_motionTrigger", thin_threshold = args[["thin_threshold"]], mode = args[["mode"]], pixel_threshold = "pixel_threshold", path = path, data_dir = file.path(data_dir, "processed"), out_dir = file.path(data_dir, "processed"), tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
+      find_detectionClusters(file_nms = "pre_processed_data_Video.csv", threshold = 2, run_length = 1, sensor_id_col_nm = "sensor_id", timestamps_col_nm = "timestamp_ms", PIT_tag_col_nm = args[["PIT_tag_col_nm"]], rfid_label = args[["rfid_label"]], camera_label = "Video", drop_tag = args[["drop_tag"]], preproc_metadata_col_nms = c("thin_threshold_s", "data_stage", "date_pre_processed"), general_metadata_col_nms = c("chamber_id", "year", "month", "day"), video_metadata_col_nms = c("total_pixels_motionTrigger", "pixel_threshold"), path = path, data_dir = file.path(data_dir, "processed"), out_dir = file.path(data_dir, "processed"), out_file_nm = "detection_clusters.csv", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
       regexp = paste("Expected a NULL value but the argument", arg_nms[i], "is not NULL", sep = " ")
     )
     
@@ -1183,10 +1064,6 @@ test_that("the function catches when NULL arguments are non-NULL", {
   }
   
 })
-
-
-
-
 
 test_that("the function catches when character string arguments are not strings", {
   
@@ -1217,7 +1094,8 @@ test_that("the function catches when character string arguments are not strings"
   }
   
   # Generate a file with pre-processed timestamps for one sensor
-  # Create 4 clusters of detections: each cluster consists of 21 detections spaced 0.5 seconds apart
+  
+  # Create 4 clusters of detections: each cluster consists of 2 detections spaced 1 second apart
   starts <- as.POSIXct(c(
     "2023-01-01 01:00:00 EST",
     "2023-01-01 02:00:00 EST",
@@ -1225,41 +1103,36 @@ test_that("the function catches when character string arguments are not strings"
     "2023-01-01 02:05:00 EST"
   ))
   
-  ends <- starts + 10
-  
-  event_ts <- sapply(1:length(starts), function(x){
-    
-    return(seq(starts[x], ends[x], 0.5))
-    
-  }, simplify = FALSE)
+  ends <- starts + 1
   
   # Write out a spreadsheet with these timestamps that will be used as input data for the function
-  sim_ts <- data.frame(timestamp_ms = c(event_ts[[1]], event_ts[[2]], event_ts[[3]], event_ts[[4]])) %>% 
+  sim_ts <- data.frame(timestamp_ms = c(starts, ends)) %>% 
     dplyr::mutate(
       chamber_id = "Box_01",
       year = year(timestamp_ms),
       month = month(timestamp_ms),
       day = day(timestamp_ms),
-      original_timestamp = gsub(" EST", "" , gsub("2023-01-01 ", "", timestamp_ms)),
       sensor_id = "RFID",
-      data_type = "RFID",
-      data_stage = "processed",
-      date_combined = Sys.Date(),
-      PIT_tag_ID = "test"
+      PIT_tag_ID = "test",
+      thin_threshold_s = 1,
+      data_stage = "pre-processing",
+      date_pre_processed = Sys.Date()
     )
   
-  write.csv(sim_ts, file.path(tmp_path, "processed", "combined_raw_data_RFID.csv"), row.names = FALSE)
+  write.csv(sim_ts, file.path(tmp_path, "processed", "pre_processed_data_RFID.csv"), row.names = FALSE)
   
-  th <- 1
-  
-  # General arguments that should always be strings. Not including sensor here because this argument is checked in a separate test above
-  arg_nms <- c("timestamps_col_nm_nm", "path", "data_dir", "out_dir", "tz", "POSIXct_format")
+  # General arguments that must always be strings (file_nms is tested above in a different way):
+  arg_nms <- c("sensor_id_col_nm", "timestamps_col_nm", "preproc_metadata_col_nms", "general_metadata_col_nms", "path", "data_dir", "out_dir", "out_file_nm", "tz", "POSIXct_format")
   
   args <- list(
-    `timestamps_col_nm_nm` = "timestamp_ms",
+    `sensor_id_col_nm` = "sensor_id",
+    `timestamps_col_nm` = "timestamp_ms",
+    `preproc_metadata_col_nms` = c("thin_threshold_s", "data_stage", "date_pre_processed"),
+    `general_metadata_col_nms` = c("chamber_id", "sensor_id"),
     `path` = path,
     `data_dir` = file.path(data_dir, "processed"),
     `out_dir` = file.path(data_dir, "processed"),
+    `out_file_nm` = "detection_clusters.csv", 
     `tz` = "America/New York",
     `POSIXct_format` = "%Y-%m-%d %H:%M:%OS"
   )
@@ -1269,18 +1142,42 @@ test_that("the function catches when character string arguments are not strings"
     args[arg_nms[i]] <- 1
     
     expect_error(
-      preprocess_detections(sensor = "RFID", timestamps_col_nm_nm = args[["timestamps_col_nm_nm"]], group_col_nm = "PIT_tag_ID", pixel_col_nm = NULL, thin_threshold = th, mode = "retain_first", pixel_threshold = NULL, path = args[["path"]], data_dir = args[["data_dir"]], out_dir = args[["out_dir"]], tz = args[["tz"]], POSIXct_format = args[["POSIXct_format"]]),
+      find_detectionClusters(file_nms = "pre_processed_data_RFID.csv", threshold = 1, run_length = 2, sensor_id_col_nm = args[["sensor_id_col_nm"]], timestamps_col_nm = args[["timestamps_col_nm"]], PIT_tag_col_nm = "PIT_tag_ID", rfid_label = "RFID", camera_label = NULL, drop_tag = NULL, preproc_metadata_col_nms = args[["preproc_metadata_col_nms"]], general_metadata_col_nms = args[["general_metadata_col_nms"]], video_metadata_col_nms = NULL, path = args[["path"]], data_dir = args[["data_dir"]], out_dir = args[["out_dir"]], out_file_nm = args[["out_file_nm"]], tz = args[["tz"]], POSIXct_format = args[["POSIXct_format"]]),
       regexp = paste("Expected a string but the argument", arg_nms[i], "is not a string", sep = " ")
     )
     
   }))
   
-  # Arguments that should be strings when sensor = RFID or IRBB:
-  arg_nms <- c("group_col_nm", "mode")
+  # Arguments that should be strings depending on which sensor datasets are specified:
+  
+  # When using RFID data, the following arguments should always be strings:
+  arg_nms <- c("PIT_tag_col_nm", "rfid_label")
   
   args <- list(
-    `group_col_nm` = "PIT_tag_ID",
-    `mode` = "thin"
+    `PIT_tag_col_nm` = "PIT_tag_ID",
+    `rfid_label` = "RFID"
+  )
+  
+  # i <- 2
+  invisible(lapply(1:length(arg_nms), function(i){
+    
+    args[arg_nms[i]] <- 1
+    
+    expect_error(
+      find_detectionClusters(file_nms = "pre_processed_data_RFID.csv", threshold = 2, run_length = 1, sensor_id_col_nm = "sensor_id", timestamps_col_nm = "timestamp_ms", PIT_tag_col_nm = args[["PIT_tag_col_nm"]], rfid_label = args[["rfid_label"]], camera_label = NULL, drop_tag = NULL, preproc_metadata_col_nms = c("thin_threshold_s", "data_stage", "date_pre_processed"), general_metadata_col_nms = c("chamber_id", "year", "month", "day"), video_metadata_col_nms = NULL, path = path, data_dir = file.path(data_dir, "processed"), out_dir = file.path(data_dir, "processed"), out_file_nm = "detection_clusters.csv", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
+      regexp = paste("Expected a string but the argument", arg_nms[i], "is not a string", sep = " ")
+    )
+    
+  }))
+  
+  write.csv(sim_ts, file.path(tmp_path, "processed", "pre_processed_data_Video.csv"), row.names = FALSE)
+  
+  # Arguments that should be strings when using Video data: 
+  arg_nms <- c("camera_label", "video_metadata_col_nms")
+  
+  args <- list(
+    `camera_label` = "Video",
+    `video_metadata_col_nms` = c("total_pixels_motionTrigger", "pixel_threshold")
   )
   
   invisible(lapply(1:length(arg_nms), function(i){
@@ -1288,54 +1185,7 @@ test_that("the function catches when character string arguments are not strings"
     args[arg_nms[i]] <- 1
     
     expect_error(
-      preprocess_detections(sensor = "RFID", timestamps_col_nm_nm = "timestamps_col_nm_nm", group_col_nm = args[["group_col_nm"]], pixel_col_nm = NULL, thin_threshold = th, mode = args[["mode"]], pixel_threshold = NULL, path = path, data_dir = file.path(data_dir, "processed"), out_dir = file.path(data_dir, "processed"), tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
-      regexp = paste("Expected a string but the argument", arg_nms[i], "is not a string", sep = " ")
-    )
-    
-  }))
-  
-  # Checks when sensor = Video
-  
-  # Repeat timestamps (1 pre- and 1 post-motion video per timestamp)
-  tstmps <- rep(starts, each = 2)
-  # tstmps
-  
-  px <- 100
-  
-  #### 1/2 of the videos have total pixels less than the pixel threshold ####
-  
-  # Write out a spreadsheet with these timestamps that will be used as input data for the function
-  sim_ts <- data.frame(timestamp_ms = tstmps) %>% 
-    dplyr::mutate(
-      chamber_id = "Box_01",
-      year = year(timestamp_ms),
-      month = month(timestamp_ms),
-      day = day(timestamp_ms),
-      original_timestamp = gsub(" EST", "" , gsub("2023-01-01 ", "", timestamp_ms)),
-      sensor_id = "Camera",
-      data_type = "Video",
-      total_pixels_motionTrigger = rep(c(px * 10, px / 10), each = 4), 
-      pixel_threshold = px, 
-      video_file_name = paste(paste(rep(paste("Box_01_2023_1_1", paste(hour(starts), minute(starts), second(starts), sep = "_"), sep = "_"), 2), c("pre_trigger", "post_trigger"), sep = "_"), ".mp4", sep = ""),
-      data_stage = "processed",
-      date_combined = Sys.Date()
-    )
-  
-  write.csv(sim_ts, file.path(tmp_path, "processed", "combined_raw_data_Video.csv"), row.names = FALSE)
-  
-  # Arguments that should be strings when sensor = Video:
-  arg_nms <- c("pixel_col_nm")
-  
-  args <- list(
-    `pixel_col_nm` = "total_pixels_motionTrigger"
-  )
-  
-  invisible(lapply(1:length(arg_nms), function(i){
-    
-    args[arg_nms[i]] <- 1
-    
-    expect_error(
-      preprocess_detections(sensor = "Video", timestamps_col_nm_nm = "timestamps_col_nm_nm", group_col_nm = NULL, pixel_col_nm = args[["pixel_col_nm"]], thin_threshold = NULL, mode = NULL, pixel_threshold = px, path = path, data_dir = file.path(data_dir, "processed"), out_dir = file.path(data_dir, "processed"), tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
+      find_detectionClusters(file_nms = "pre_processed_data_Video.csv", threshold = 2, run_length = 1, sensor_id_col_nm = "sensor_id", timestamps_col_nm = "timestamp_ms", PIT_tag_col_nm = NULL, rfid_label = NULL, camera_label = args[["camera_label"]], drop_tag = NULL, preproc_metadata_col_nms = c("thin_threshold_s", "data_stage", "date_pre_processed"), general_metadata_col_nms = c("chamber_id", "year", "month", "day"), video_metadata_col_nms = args[["video_metadata_col_nms"]], path = path, data_dir = file.path(data_dir, "processed"), out_dir = file.path(data_dir, "processed"), out_file_nm = "detection_clusters.csv", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
       regexp = paste("Expected a string but the argument", arg_nms[i], "is not a string", sep = " ")
     )
     
@@ -1377,7 +1227,8 @@ test_that("the function catches when numeric arguments are non-numeric", {
   }
   
   # Generate a file with pre-processed timestamps for one sensor
-  # Create 4 clusters of detections: each cluster consists of 21 detections spaced 0.5 seconds apart
+  
+  # Create 4 clusters of detections: each cluster consists of 2 detections spaced 1 second apart
   starts <- as.POSIXct(c(
     "2023-01-01 01:00:00 EST",
     "2023-01-01 02:00:00 EST",
@@ -1385,73 +1236,42 @@ test_that("the function catches when numeric arguments are non-numeric", {
     "2023-01-01 02:05:00 EST"
   ))
   
-  ends <- starts + 10
-  
-  event_ts <- sapply(1:length(starts), function(x){
-    
-    return(seq(starts[x], ends[x], 0.5))
-    
-  }, simplify = FALSE)
-  
-  ####### Testing thin_threshold #######
+  ends <- starts + 1
   
   # Write out a spreadsheet with these timestamps that will be used as input data for the function
-  sim_ts <- data.frame(timestamp_ms = c(event_ts[[1]], event_ts[[2]], event_ts[[3]], event_ts[[4]])) %>% 
+  sim_ts <- data.frame(timestamp_ms = c(starts, ends)) %>% 
     dplyr::mutate(
       chamber_id = "Box_01",
       year = year(timestamp_ms),
       month = month(timestamp_ms),
       day = day(timestamp_ms),
-      original_timestamp = gsub(" EST", "" , gsub("2023-01-01 ", "", timestamp_ms)),
       sensor_id = "RFID",
-      data_type = "RFID",
-      data_stage = "processed",
-      date_combined = Sys.Date(),
-      PIT_tag_ID = "test"
+      PIT_tag_ID = "test",
+      thin_threshold_s = 1,
+      data_stage = "pre-processing",
+      date_pre_processed = Sys.Date()
     )
   
-  write.csv(sim_ts, file.path(tmp_path, "processed", "combined_raw_data_RFID.csv"), row.names = FALSE)
+  write.csv(sim_ts, file.path(tmp_path, "processed", "pre_processed_data_RFID.csv"), row.names = FALSE)
   
-  th <- 1
+  # Arguments that should be always be numeric:
+  arg_nms <- c("threshold", "run_length")
   
-  expect_error(
-    preprocess_detections(sensor = "RFID", timestamps_col_nm_nm = "timestamp_ms", group_col_nm = "PIT_tag_ID", pixel_col_nm = NULL, thin_threshold = as.character(th), mode = "retain_first", pixel_threshold = NULL, path = path, data_dir = file.path(data_dir, "processed"), out_dir = file.path(data_dir, "processed"), tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
-    regexp = "Expected a numeric value but the argument thin_threshold is not numeric"
+  args <- list(
+    `threshold` = 2,
+    `run_length` = 1
   )
-  
-  ####### Testing pixel_threshold #######
-  
-  # Repeat these timestamps (1 pre- and 1 post-motion video per timestamp)
-  tstmps <- rep(starts, each = 2)
-  # tstmps
-  
-  px <- 100
-  
-  #### 1/2 of the videos have total pixels less than the pixel threshold ####
-  
-  # Write out a spreadsheet with these timestamps that will be used as input data for the function
-  sim_ts <- data.frame(timestamp_ms = tstmps) %>% 
-    dplyr::mutate(
-      chamber_id = "Box_01",
-      year = year(timestamp_ms),
-      month = month(timestamp_ms),
-      day = day(timestamp_ms),
-      original_timestamp = gsub(" EST", "" , gsub("2023-01-01 ", "", timestamp_ms)),
-      sensor_id = "Camera",
-      data_type = "Video",
-      total_pixels_motionTrigger = rep(c(px * 10, px / 10), each = 4), 
-      pixel_threshold = px, 
-      video_file_name = paste(paste(rep(paste("Box_01_2023_1_1", paste(hour(starts), minute(starts), second(starts), sep = "_"), sep = "_"), 2), c("pre_trigger", "post_trigger"), sep = "_"), ".mp4", sep = ""),
-      data_stage = "processed",
-      date_combined = Sys.Date()
+
+  invisible(lapply(1:length(arg_nms), function(i){
+    
+    args[arg_nms[i]] <- "test"
+    
+    expect_error(
+      find_detectionClusters(file_nms = "pre_processed_data_RFID.csv", threshold = args[["threshold"]], run_length = args[["run_length"]], sensor_id_col_nm = "sensor_id", timestamps_col_nm = "timestamp_ms", PIT_tag_col_nm = "PIT_tag_ID", rfid_label = "RFID", camera_label = NULL, drop_tag = NULL, preproc_metadata_col_nms = c("thin_threshold_s", "data_stage", "date_pre_processed"), general_metadata_col_nms = c("chamber_id", "year", "month", "day"), video_metadata_col_nms = NULL, path = path, data_dir = file.path(data_dir, "processed"), out_dir = file.path(data_dir, "processed"), out_file_nm = "detection_clusters.csv", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
+      regexp = paste("Expected a numeric value but the argument", arg_nms[i], "is not numeric", sep = " ")
     )
-  
-  write.csv(sim_ts, file.path(tmp_path, "processed", "combined_raw_data_Video.csv"), row.names = FALSE)
-  
-  expect_error(
-    preprocess_detections(sensor = "Video", timestamps_col_nm_nm = "timestamp_ms", group_col_nm = NULL, pixel_col_nm = "total_pixels_motionTrigger", thin_threshold = NULL, mode = NULL, pixel_threshold = as.character(px), path = path, data_dir = file.path(data_dir, "processed"), out_dir = file.path(data_dir, "processed"), tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
-    regexp = paste("Expected a numeric value but the argument pixel_threshold is not numeric", sep = " ")
-  )
+    
+  }))
   
   # Remove the temporary directory and all files within it
   if(tmp_path == file.path(path, data_dir)){
@@ -1489,7 +1309,8 @@ test_that("the function catches when paths don't exist", {
   }
   
   # Generate a file with pre-processed timestamps for one sensor
-  # Create 4 clusters of detections: each cluster consists of 21 detections spaced 0.5 seconds apart
+  
+  # Create 4 clusters of detections: each cluster consists of 2 detections spaced 1 second apart
   starts <- as.POSIXct(c(
     "2023-01-01 01:00:00 EST",
     "2023-01-01 02:00:00 EST",
@@ -1497,43 +1318,34 @@ test_that("the function catches when paths don't exist", {
     "2023-01-01 02:05:00 EST"
   ))
   
-  ends <- starts + 10
+  ends <- starts + 1
   
-  event_ts <- sapply(1:length(starts), function(x){
-    
-    return(seq(starts[x], ends[x], 0.5))
-    
-  }, simplify = FALSE)
-  
-  
-  th <- 1
-  
-  sim_ts <- data.frame(timestamp_ms = c(event_ts[[1]], event_ts[[2]], event_ts[[3]], event_ts[[4]])) %>% 
+  # Write out a spreadsheet with these timestamps that will be used as input data for the function
+  sim_ts <- data.frame(timestamp_ms = c(starts, ends)) %>% 
     dplyr::mutate(
       chamber_id = "Box_01",
       year = year(timestamp_ms),
       month = month(timestamp_ms),
       day = day(timestamp_ms),
-      original_timestamp = gsub(" EST", "" , gsub("2023-01-01 ", "", timestamp_ms)),
       sensor_id = "RFID",
-      data_type = "RFID",
-      data_stage = "processed",
-      date_combined = Sys.Date(),
-      PIT_tag_ID = "test"
-    ) 
+      PIT_tag_ID = "test",
+      thin_threshold_s = 1,
+      data_stage = "pre-processing",
+      date_pre_processed = Sys.Date()
+    )
   
-  write.csv(sim_ts, file.path(tmp_path, "processed", "combined_raw_data_RFID.csv"), row.names = FALSE)
+  write.csv(sim_ts, file.path(tmp_path, "processed", "pre_processed_data_RFID.csv"), row.names = FALSE)
   
   # Remove this file
-  file.remove(file.path(tmp_path, "processed", "combined_raw_data_RFID.csv"))
-  
-  expect_error(
-    preprocess_detections(sensor = "RFID", timestamps_col_nm_nm = "timestamp_ms", group_col_nm = "PIT_tag_ID", pixel_col_nm = NULL, thin_threshold = th, mode = "retain_first", pixel_threshold = NULL, path = path, data_dir = file.path(data_dir, "processed"), out_dir = file.path(data_dir, "processed"), tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
-    regexp = paste("The file combined_raw_data_RFID.csv does not exist in the directory", file.path(tmp_path, "processed"), sep = " ")
-  )
+  file.remove(file.path(tmp_path, "processed", "pre_processed_data_RFID.csv"))
+    
+    expect_error(
+      find_detectionClusters(file_nms = "pre_processed_data_RFID.csv", threshold = 1, run_length = 2, sensor_id_col_nm = "sensor_id", timestamps_col_nm = "timestamp_ms", PIT_tag_col_nm = "PIT_tag_ID", rfid_label = "RFID", camera_label = NULL, drop_tag = NULL, preproc_metadata_col_nms = c("thin_threshold_s", "data_stage", "date_pre_processed"), general_metadata_col_nms = c("chamber_id", "year", "month", "day"), video_metadata_col_nms = NULL, path = path, data_dir = file.path(data_dir, "processed"), out_dir = file.path(data_dir, "processed"), out_file_nm = "detection_clusters.csv", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
+      regexp = paste("The file pre_processed_data_RFID.csv does not exist in the directory", file.path(path, data_dir, "processed"), sep = " ")
+    )
   
   # Generate the file again, then remove the whole directory
-  write.csv(sim_ts, file.path(tmp_path, "processed", "combined_raw_data_RFID.csv"), row.names = FALSE)
+  write.csv(sim_ts, file.path(tmp_path, "processed", "pre_processed_data_RFID.csv"), row.names = FALSE)
   
   # Remove the directory where this file is located
   if(tmp_path == file.path(path, data_dir)){
@@ -1541,7 +1353,7 @@ test_that("the function catches when paths don't exist", {
   }
   
   expect_error(
-    preprocess_detections(sensor = "RFID", timestamps_col_nm_nm = "timestamp_ms", group_col_nm = "PIT_tag_ID", pixel_col_nm = NULL, thin_threshold = th, mode = "retain_first", pixel_threshold = NULL, path = path, data_dir = file.path(data_dir, "processed"), out_dir = file.path(data_dir, "processed"), tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
+    find_detectionClusters(file_nms = "pre_processed_data_RFID.csv", threshold = 1, run_length = 2, sensor_id_col_nm = "sensor_id", timestamps_col_nm = "timestamp_ms", PIT_tag_col_nm = "PIT_tag_ID", rfid_label = "RFID", camera_label = NULL, drop_tag = NULL, preproc_metadata_col_nms = c("thin_threshold_s", "data_stage", "date_pre_processed"), general_metadata_col_nms = c("chamber_id", "year", "month", "day"), video_metadata_col_nms = NULL, path = path, data_dir = file.path(data_dir, "processed"), out_dir = file.path(data_dir, "processed"), out_file_nm = "detection_clusters.csv", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
     regexp = paste("The directory", file.path(path, data_dir, "processed"), "does not exist", sep = " ")
   )
   
@@ -1576,7 +1388,8 @@ test_that("the input dataset has all of the expected columns", {
   }
   
   # Generate a file with pre-processed timestamps for one sensor
-  # Create 4 clusters of detections: each cluster consists of 21 detections spaced 0.5 seconds apart
+  
+  # Create 4 clusters of detections: each cluster consists of 2 detections spaced 1 second apart
   starts <- as.POSIXct(c(
     "2023-01-01 01:00:00 EST",
     "2023-01-01 02:00:00 EST",
@@ -1584,101 +1397,37 @@ test_that("the input dataset has all of the expected columns", {
     "2023-01-01 02:05:00 EST"
   ))
   
-  ends <- starts + 10
+  ends <- starts + 1
   
-  event_ts <- sapply(1:length(starts), function(x){
-    
-    return(seq(starts[x], ends[x], 0.5))
-    
-  }, simplify = FALSE)
-  
-  
-  th <- 1
-  
-  # Columns that must always be present in the raw data. All of these columns are used to make the timestamp_ms column
-  col_nms <- c("original_timestamp", "year", "month", "day")
+  # Columns that must always be present in the pre-processed data
+  col_nms <- c("sensor_id", "timestamp_ms", "year", "month", "day")
   
   invisible(lapply(1:length(col_nms), function(i){
     
     # Write out a spreadsheet with these timestamps that will be used as input data for the function
-    sim_ts <- data.frame(timestamp_ms = c(event_ts[[1]], event_ts[[2]], event_ts[[3]], event_ts[[4]])) %>% 
+    sim_ts <- data.frame(timestamp_ms = c(starts, ends)) %>% 
       dplyr::mutate(
         chamber_id = "Box_01",
         year = year(timestamp_ms),
         month = month(timestamp_ms),
         day = day(timestamp_ms),
-        original_timestamp = gsub(" EST", "" , gsub("2023-01-01 ", "", timestamp_ms)),
         sensor_id = "RFID",
-        data_type = "RFID",
-        data_stage = "processed",
-        date_combined = Sys.Date(),
-        PIT_tag_ID = "test"
+        PIT_tag_ID = "test",
+        thin_threshold_s = 1,
+        data_stage = "pre-processing",
+        date_pre_processed = Sys.Date()
       ) %>% 
       # Drop the given column
       dplyr::select(-c(all_of(col_nms[i])))
     
-    write.csv(sim_ts, file.path(tmp_path, "processed", "combined_raw_data_RFID.csv"), row.names = FALSE)
+    write.csv(sim_ts, file.path(tmp_path, "processed", "pre_processed_data_RFID.csv"), row.names = FALSE)
     
     expect_error(
-      preprocess_detections(sensor = "RFID", timestamps_col_nm_nm = "timestamp_ms", group_col_nm = "PIT_tag_ID", pixel_col_nm = NULL, thin_threshold = th, mode = "retain_first", pixel_threshold = NULL, path = path, data_dir = file.path(data_dir, "processed"), out_dir = file.path(data_dir, "processed"), tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
+      find_detectionClusters(file_nms = "pre_processed_data_RFID.csv", threshold = 1, run_length = 2, sensor_id_col_nm = "sensor_id", timestamps_col_nm = "timestamp_ms", PIT_tag_col_nm = "PIT_tag_ID", rfid_label = "RFID", camera_label = NULL, drop_tag = NULL, preproc_metadata_col_nms = c("thin_threshold_s", "data_stage", "date_pre_processed"), general_metadata_col_nms = c("chamber_id", "year", "month", "day"), video_metadata_col_nms = NULL, path = path, data_dir = file.path(data_dir, "processed"), out_dir = file.path(data_dir, "processed"), out_file_nm = "detection_clusters.csv", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
       regexp = paste("The column", col_nms[i], "was not found in the data frame", sep = " ")
     )
     
   }))
-  
-  # When sensor = RFID or IRBB, the column in group_col_nm must be present
-  sim_ts <- data.frame(timestamp_ms = c(event_ts[[1]], event_ts[[2]], event_ts[[3]], event_ts[[4]])) %>% 
-    dplyr::mutate(
-      chamber_id = "Box_01",
-      year = year(timestamp_ms),
-      month = month(timestamp_ms),
-      day = day(timestamp_ms),
-      original_timestamp = gsub(" EST", "" , gsub("2023-01-01 ", "", timestamp_ms)),
-      sensor_id = "RFID",
-      data_type = "RFID",
-      data_stage = "processed",
-      date_combined = Sys.Date(),
-      PIT_tag_ID = "test"
-    ) %>% 
-    # Drop the PIT_tag_ID column
-    dplyr::select(-c(PIT_tag_ID))
-  
-  write.csv(sim_ts, file.path(tmp_path, "processed", "combined_raw_data_RFID.csv"), row.names = FALSE)
-  
-  expect_error(
-    preprocess_detections(sensor = "RFID", timestamps_col_nm_nm = "timestamp_ms", group_col_nm = "PIT_tag_ID", pixel_col_nm = NULL, thin_threshold = th, mode = "retain_first", pixel_threshold = NULL, path = path, data_dir = file.path(data_dir, "processed"), out_dir = file.path(data_dir, "processed"), tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
-    regexp = paste("The column PIT_tag_ID was not found in the data frame")
-  )
-  
-  # When sensor = Video, the column in pixel_col_nm must be present
-  # Repeat these timestamps (1 pre- and 1 post-motion video per timestamp)
-  tstmps <- rep(starts, each = 2)
-  px <- 100
-  
-  sim_ts <- data.frame(timestamp_ms = tstmps) %>% 
-    dplyr::mutate(
-      chamber_id = "Box_01",
-      year = year(timestamp_ms),
-      month = month(timestamp_ms),
-      day = day(timestamp_ms),
-      original_timestamp = gsub(" EST", "" , gsub("2023-01-01 ", "", timestamp_ms)),
-      sensor_id = "Camera",
-      data_type = "Video",
-      total_pixels_motionTrigger = rep(c(px * 10, px / 10), each = 4), 
-      pixel_threshold = px, 
-      video_file_name = paste(paste(rep(paste("Box_01_2023_1_1", paste(hour(starts), minute(starts), second(starts), sep = "_"), sep = "_"), 2), c("pre_trigger", "post_trigger"), sep = "_"), ".mp4", sep = ""),
-      data_stage = "processed",
-      date_combined = Sys.Date()
-    ) %>% 
-    # Drop the pixels column
-    dplyr::select(-c(total_pixels_motionTrigger))
-  
-  write.csv(sim_ts, file.path(tmp_path, "processed", "combined_raw_data_Video.csv"), row.names = FALSE)
-  
-  expect_error(
-    preprocess_detections(sensor = "Video", timestamps_col_nm_nm = "timestamp_ms", group_col_nm = NULL, pixel_col_nm = "total_pixels_motionTrigger", thin_threshold = NULL, mode = NULL, pixel_threshold = px, path = path, data_dir = file.path(data_dir, "processed"), out_dir = file.path(data_dir, "processed"), tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
-    regexp = paste("The column total_pixels_motionTrigger was not found in the data frame")
-  )
   
   # Remove the temporary directory and all files within it
   if(tmp_path == file.path(path, data_dir)){
@@ -1716,7 +1465,8 @@ test_that("the input dataset has no NAs in columns that cannot have NAs", {
   }
   
   # Generate a file with pre-processed timestamps for one sensor
-  # Create 4 clusters of detections: each cluster consists of 21 detections spaced 0.5 seconds apart
+  
+  # Create 4 clusters of detections: each cluster consists of 2 detections spaced 1 second apart
   starts <- as.POSIXct(c(
     "2023-01-01 01:00:00 EST",
     "2023-01-01 02:00:00 EST",
@@ -1724,101 +1474,37 @@ test_that("the input dataset has no NAs in columns that cannot have NAs", {
     "2023-01-01 02:05:00 EST"
   ))
   
-  ends <- starts + 10
+  ends <- starts + 1
   
-  event_ts <- sapply(1:length(starts), function(x){
-    
-    return(seq(starts[x], ends[x], 0.5))
-    
-  }, simplify = FALSE)
-  
-  
-  th <- 1
-  
-  # Columns in the raw data that cannot ever have NA values (these columns are used to create timestamps used for lag calculations across functions):
-  col_nms <- c("original_timestamp", "year", "month", "day")
+  # Columns that cannot have NAs in the pre-processed data
+  col_nms <- c("sensor_id", "timestamp_ms", "year", "month", "day")
   
   invisible(lapply(1:length(col_nms), function(i){
     
     # Write out a spreadsheet with these timestamps that will be used as input data for the function
-    sim_ts <- data.frame(timestamp_ms = c(event_ts[[1]], event_ts[[2]], event_ts[[3]], event_ts[[4]])) %>% 
+    sim_ts <- data.frame(timestamp_ms = c(starts, ends)) %>% 
       dplyr::mutate(
         chamber_id = "Box_01",
         year = year(timestamp_ms),
         month = month(timestamp_ms),
         day = day(timestamp_ms),
-        original_timestamp = gsub(" EST", "" , gsub("2023-01-01 ", "", timestamp_ms)),
         sensor_id = "RFID",
-        data_type = "RFID",
-        data_stage = "processed",
-        date_combined = Sys.Date(),
-        PIT_tag_ID = "test"
+        PIT_tag_ID = "test",
+        thin_threshold_s = 1,
+        data_stage = "pre-processing",
+        date_pre_processed = Sys.Date()
       )
     
     sim_ts[[col_nms[i]]][1] <- NA
     
-    write.csv(sim_ts, file.path(tmp_path, "processed", "combined_raw_data_RFID.csv"), row.names = FALSE)
+    write.csv(sim_ts, file.path(tmp_path, "processed", "pre_processed_data_RFID.csv"), row.names = FALSE)
     
     expect_error(
-      preprocess_detections(sensor = "RFID", timestamps_col_nm_nm = "timestamp_ms", group_col_nm = "PIT_tag_ID", pixel_col_nm = NULL, thin_threshold = th, mode = "retain_first", pixel_threshold = NULL, path = path, data_dir = file.path(data_dir, "processed"), out_dir = file.path(data_dir, "processed"), tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
+      find_detectionClusters(file_nms = "pre_processed_data_RFID.csv", threshold = 1, run_length = 2, sensor_id_col_nm = "sensor_id", timestamps_col_nm = "timestamp_ms", PIT_tag_col_nm = "PIT_tag_ID", rfid_label = "RFID", camera_label = NULL, drop_tag = NULL, preproc_metadata_col_nms = c("thin_threshold_s", "data_stage", "date_pre_processed"), general_metadata_col_nms = c("chamber_id", "year", "month", "day"), video_metadata_col_nms = NULL, path = path, data_dir = file.path(data_dir, "processed"), out_dir = file.path(data_dir, "processed"), out_file_nm = "detection_clusters.csv", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
       regexp = paste("The column", col_nms[i], "has NA values", sep = " ")
     )
     
   }))
-  
-  # When sensor = RFID or IRBB, the column in group_col_nm should not have NAs
-  sim_ts <- data.frame(timestamp_ms = c(event_ts[[1]], event_ts[[2]], event_ts[[3]], event_ts[[4]])) %>% 
-    dplyr::mutate(
-      chamber_id = "Box_01",
-      year = year(timestamp_ms),
-      month = month(timestamp_ms),
-      day = day(timestamp_ms),
-      original_timestamp = gsub(" EST", "" , gsub("2023-01-01 ", "", timestamp_ms)),
-      sensor_id = "RFID",
-      data_type = "RFID",
-      data_stage = "processed",
-      date_combined = Sys.Date(),
-      PIT_tag_ID = "test"
-    )
-  
-  sim_ts[["PIT_tag_ID"]][1] <- NA
-  
-  write.csv(sim_ts, file.path(tmp_path, "processed", "combined_raw_data_RFID.csv"), row.names = FALSE)
-  
-  expect_error(
-    preprocess_detections(sensor = "RFID", timestamps_col_nm_nm = "timestamp_ms", group_col_nm = "PIT_tag_ID", pixel_col_nm = NULL, thin_threshold = th, mode = "retain_first", pixel_threshold = NULL, path = path, data_dir = file.path(data_dir, "processed"), out_dir = file.path(data_dir, "processed"), tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
-    regexp = paste("The column PIT_tag_ID has NA values")
-  )
-  
-  # When sensor = Video, the column in pixel_col_nm must be present
-  # Repeat these timestamps (1 pre- and 1 post-motion video per timestamp)
-  tstmps <- rep(starts, each = 2)
-  px <- 100
-  
-  sim_ts <- data.frame(timestamp_ms = tstmps) %>% 
-    dplyr::mutate(
-      chamber_id = "Box_01",
-      year = year(timestamp_ms),
-      month = month(timestamp_ms),
-      day = day(timestamp_ms),
-      original_timestamp = gsub(" EST", "" , gsub("2023-01-01 ", "", timestamp_ms)),
-      sensor_id = "Camera",
-      data_type = "Video",
-      total_pixels_motionTrigger = rep(c(px * 10, px / 10), each = 4), 
-      pixel_threshold = px, 
-      video_file_name = paste(paste(rep(paste("Box_01_2023_1_1", paste(hour(starts), minute(starts), second(starts), sep = "_"), sep = "_"), 2), c("pre_trigger", "post_trigger"), sep = "_"), ".mp4", sep = ""),
-      data_stage = "processed",
-      date_combined = Sys.Date()
-    )
-  
-  sim_ts[["total_pixels_motionTrigger"]][1] <- NA
-  
-  write.csv(sim_ts, file.path(tmp_path, "processed", "combined_raw_data_Video.csv"), row.names = FALSE)
-  
-  expect_error(
-    preprocess_detections(sensor = "Video", timestamps_col_nm_nm = "timestamp_ms", group_col_nm = NULL, pixel_col_nm = "total_pixels_motionTrigger", thin_threshold = NULL, mode = NULL, pixel_threshold = px, path = path, data_dir = file.path(data_dir, "processed"), out_dir = file.path(data_dir, "processed"), tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
-    regexp = paste("The column total_pixels_motionTrigger has NA values")
-  )
   
   # Remove the temporary directory and all files within it
   if(tmp_path == file.path(path, data_dir)){
@@ -1826,4 +1512,3 @@ test_that("the input dataset has no NAs in columns that cannot have NAs", {
   }
   
 })
-
