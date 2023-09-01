@@ -26,25 +26,24 @@
 #' 
 #' 
 
-# file_nms = c(tmp_nm_rfid, tmp_nm_irbb, tmp_nm_camera)
-# threshold = x
-# run_length = y
+# file_nms = "pre_processed_data_RFID.csv"
+# threshold = 2
+# run_length = 1
 # sensor_id_col_nm = "sensor_id"
 # timestamps_col_nm = "timestamp_ms"
 # PIT_tag_col_nm = "PIT_tag_ID"
 # rfid_label = "RFID"
-# camera_label = "Camera"
+# camera_label = NULL
 # drop_tag = NULL
 # preproc_metadata_col_nms = c("thin_threshold_s", "data_stage", "date_pre_processed")
 # general_metadata_col_nms = c("chamber_id", "year", "month", "day")
-# video_metadata_col_nms = c("total_pixels_motionTrigger", "pixel_threshold", "video_file_name")
+# video_metadata_col_nms = NULL
 # path = path
-# data_dir = data_dir
-# out_dir = data_dir
+# data_dir = file.path(data_dir, "processed")
+# out_dir = file.path(data_dir, "processed")
 # out_file_nm = "detection_clusters.csv"
 # tz = "America/New York"
 # POSIXct_format = "%Y-%m-%d %H:%M:%OS"
-
 
 find_detectionClusters <- function(file_nms, threshold, run_length = 2, sensor_id_col_nm, timestamps_col_nm, PIT_tag_col_nm = NULL, rfid_label = NULL, camera_label = NULL, drop_tag = NULL, preproc_metadata_col_nms, general_metadata_col_nms, video_metadata_col_nms = NULL, path, data_dir, out_dir, out_file_nm = "detection_clusters.csv", tz, POSIXct_format = "%Y-%m-%d %H:%M:%OS"){
   
@@ -72,17 +71,6 @@ find_detectionClusters <- function(file_nms, threshold, run_length = 2, sensor_i
   # Check that the formal arguments that should be strings are strings
   expect_numeric <- c("threshold", "run_length")
   
-  # # If some formal arguments are NULL, then remove these from the string and numeric checks
-  # if(any(sapply(f_args, function(i){ is.null(i) }))){
-  #   
-  #   expect_null <- names(f_args)[which(sapply(f_args, function(i){ is.null(i) }))]
-  #   
-  # } else {
-  #   
-  #   expect_null <- ""
-  #   
-  # }
-  
   # Check that the formal arguments that should be NULL under certain conditions are NULL given the current user-specified arguments
   if(any(grepl("RFID", file_nms) | grepl("IRBB", file_nms)) & all(!grepl("Video", file_nms))){
     
@@ -96,10 +84,23 @@ find_detectionClusters <- function(file_nms, threshold, run_length = 2, sensor_i
 
   if(exists("expect_nulls")){
     
+    # Add drop_tag to the list of NULLS as needed
+    if(is.null(drop_tag)){
+      
+      expect_nulls <- c(expect_nulls, "drop_tag")
+      
+    }
+    
     expect_nulls <- f_args[grep(paste(paste("^", expect_nulls, "$", sep = ""), collapse = "|"), names(f_args))]
     
     invisible(sapply(1:length(expect_nulls), function(i){
       check_null(names(expect_nulls[i]), expect_nulls[[i]])
+    }))
+    
+    expect_strings <- f_args[-grep(paste(paste("^", c(expect_numeric, names(expect_nulls)), "$", sep = ""), collapse = "|"), names(f_args))]
+    
+    invisible(sapply(1:length(expect_strings), function(i){
+      check_string(names(expect_strings[i]), expect_strings[[i]])
     }))
     
   }
@@ -129,12 +130,6 @@ find_detectionClusters <- function(file_nms, threshold, run_length = 2, sensor_i
     
   }
   
-  expect_strings <- f_args[-grep(paste(paste("^", c(expect_numeric, expect_null), "$", sep = ""), collapse = "|"), names(f_args))]
-  
-  invisible(sapply(1:length(expect_strings), function(i){
-    check_string(names(expect_strings[i]), expect_strings[[i]])
-  }))
-  
   # Check that the formal arguments that should be numeric are numeric
   invisible(sapply(1:length(expect_numeric), function(i){
     check_numeric(expect_numeric[i], f_args[[grep(paste(paste("^", expect_numeric[i], "$", sep = ""), collapse = "|"), names(f_args))]])
@@ -158,6 +153,7 @@ find_detectionClusters <- function(file_nms, threshold, run_length = 2, sensor_i
     
     tmp <- read.csv(file.path(path, data_dir, file_nms[x])) 
     
+    
     # Check that the data contains the timestamps column
     expected_cols <- f_args[grep("timestamp", names(f_args))]
     
@@ -176,7 +172,7 @@ find_detectionClusters <- function(file_nms, threshold, run_length = 2, sensor_i
       dplyr::select(-c(all_of(cols2drop)))
     
     # If the data frame has video recordings, then drop all post-trigger video recordings (these have the same timestamp as the respective pre-trigger recordings)
-    if(!is.null(camera_label)){
+    if(!is.null(camera_label) & !is.null(video_metadata_col_nms)){
       
       if(any(grepl(camera_label, tmp[[sensor_id_col_nm]]))){
         
@@ -217,7 +213,7 @@ find_detectionClusters <- function(file_nms, threshold, run_length = 2, sensor_i
     
   }))
   
-  # Check that this objects is a data frame
+  # Check that this object is a data frame
   check_df_class(all_sensors)
   
   # Check that the expected columns from formal arguments are found in the combined data
@@ -293,9 +289,8 @@ find_detectionClusters <- function(file_nms, threshold, run_length = 2, sensor_i
         ) %>% 
           # Convert differences to Boolean based on the thinning threshold to find stretches of detection events very close together
           dplyr::mutate(
-            # diff = as.numeric(floor(!!sym(timestamps_col_nm) - shift)),
             diff = as.numeric(!!sym(timestamps_col_nm) - shift),
-            # Taking anything less than or equal to the threshold, see previous RFID pre-processing. The diff > 0 condition should remove the first timestamp compared to itself, which should in turn make it no longer necessary to correct the timestamp indices
+            # Taking anything less than or equal to the threshold, see previous RFID pre-processing. The diff > 0 condition removes the first timestamp compared to itself
             binary_diff = (diff <= threshold & diff > 0)
           ) %>% 
           dplyr::select(all_of(timestamps_col_nm), diff, binary_diff) 
@@ -379,48 +374,50 @@ find_detectionClusters <- function(file_nms, threshold, run_length = 2, sensor_i
               )
             
             # If video data is present, then add back video-related information
-            if(!is.null(camera_label)){
-              
+            if(!is.null(camera_label) & !is.null(video_metadata_col_nms)){
+
               if(any(grepl(camera_label, tmp$event_seq))){
-                
+
                 vid_cols_tmp <- .y[[1]] %>%
                   dplyr::filter(group_row_id >= first_indices & group_row_id <= last_indices) %>%
-                  dplyr::select(all_of(video_metadata_col_nms)) %>% 
+                  dplyr::select(all_of(video_metadata_col_nms)) %>%
                   # Drop rows that have NAs in these columns
                   dplyr::filter(complete.cases(.))
-                
+
                 # If multiple videos occurred within a detection cluster, then concatenate these file names together
                 if(nrow(vid_cols_tmp) > 1){
-                  
+
                   tmp_col_nm <- video_metadata_col_nms[grep("file", video_metadata_col_nms)]
                   
-                  vid_file_nms <- vid_cols_tmp %>% 
+                  vid_file_nms <- vid_cols_tmp %>%
                     dplyr::reframe(
-                      !!tmp_col_nm := str_c(!!sym(tmp_col_nm), collapse = "; ")
-                    ) %>% 
+                      tmp_col_nm = str_c(tmp_col_nm, collapse = "; ")
+                    ) %>%
                     pull(tmp_col_nm)
-                  
+
                   vid_cols_tmp[[tmp_col_nm]] <- vid_file_nms
-                  
-                  vid_cols_tmp <- vid_cols_tmp %>% 
+
+                  vid_cols_tmp <- vid_cols_tmp %>%
                     distinct()
-                  
+
                 }
-                
+
                 tmp <- tmp %>%
                   bind_cols(
                     vid_cols_tmp
                   )
-                
+
               }
-              
+
             }
             
             return(tmp)
             
           })
       ) 
-    ) %>%
+    ) 
+
+  detectns2 <- detectns %>%
     dplyr::select(-c(data, lags, lags_runs)) %>% 
     unnest(`cols` = c(bouts)) %>%
     ungroup() %>% 
@@ -428,7 +425,7 @@ find_detectionClusters <- function(file_nms, threshold, run_length = 2, sensor_i
   
   if(nrow(detectns) > 0){
     
-    detectns2 <- detectns %>% 
+    detectns3 <- detectns2 %>% 
       dplyr::inner_join(
         all_sensors %>% 
           dplyr::select(all_of(general_metadata_col_nms), all_of(timestamps_col_nm)) %>% 
@@ -444,7 +441,7 @@ find_detectionClusters <- function(file_nms, threshold, run_length = 2, sensor_i
     
   } else {
     
-    detectns2 <- data.frame(
+    detectns3 <- data.frame(
       start = NA,
       end = NA,
       event_seq = NA,
@@ -470,19 +467,19 @@ find_detectionClusters <- function(file_nms, threshold, run_length = 2, sensor_i
   }
   
   # Order the data and add back important metadata before writing it out
-  if(!is.null(video_metadata_col_nms) & any(grepl(paste(video_metadata_col_nms, collapse = "|"), names(detectns2)))){
+  if(!is.null(video_metadata_col_nms) & any(grepl(paste(video_metadata_col_nms, collapse = "|"), names(detectns3)))){
     
-    detectns2 <- detectns2 %>% 
+    detectns4 <- detectns3 %>% 
       dplyr::select(all_of(general_metadata_col_nms), names(.)[-grep(paste(c(general_metadata_col_nms, video_metadata_col_nms, "threshold_seconds", "run_length", "data_stage", "date_processed"), collapse = "|"), names(.))], all_of(video_metadata_col_nms), threshold_seconds, run_length, data_stage, date_processed)
     
   } else {
     
-    detectns2 <- detectns2 %>% 
+    detectns4 <- detectns3 %>% 
       dplyr::select(all_of(general_metadata_col_nms), names(.)[-grep(paste(c(general_metadata_col_nms, "threshold_seconds", "run_length", "data_stage", "date_processed"), collapse = "|"), names(.))], threshold_seconds, run_length, data_stage, date_processed)
     
   }
   
-  write.csv(detectns2, file.path(path, out_dir, out_file_nm), row.names = FALSE)
+  write.csv(detectns4, file.path(path, out_dir, out_file_nm), row.names = FALSE)
   
   # Reset the current global options
   options(orig_opts)
