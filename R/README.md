@@ -1,6 +1,3 @@
-## Grace Smith-Vidaurre
-## 19 June 2023
-
 # General documentation for data processing and integration functions
 
 <style type="text/css">
@@ -40,29 +37,31 @@ code.r{ /* Code block */
 }
 </style>
 
-This set of functions were written for a hardware setup in which 3 types of movement sensors are mounted around the entrance of a nest container in the following order:
+`ABISSMAL` includes a set of functions to process raw data and integrate pre-processed data across movement sensors in order to make behavioral inferences about movement events. 
 
-- Outer pair of beam breakers (captures movement just outside of the nest container entrance)
-- RFID antenna (captures movement that occurs right at the nest container entrance)
-- Inner pair of beam breakers (captures movement inside the nest container, just after the nest container entrance)
-- Camera (mounted on top of the nest container, captures movement inside the nest container from inside the entrance itself to further inside of the nest container)
+**Hardware requirements**: These functions were written for a specific hardware setup in which 3 types of movement sensors are mounted around the entrance of a nest container in the following order:
 
-Given the order in which these sensors are mounted, the outer pair of beam breakers and the camera should be the first and last sensors to trigger when an animal enters the nest container, respectively. When an animal leaves the nest container, this order should be inverted. However, these expectations are complicated by the fact that individuals can sit inside the circular entrance for longer periods of time (triggering not only the RFID antenna but also the beam breakers and camera with fine-scale movements), and individuals can also come in and out of the nest container with individual variation in the speed and angle at which they enter. Multiple individuals can also be inside the container, such that video recording events may be triggered by movements from more than one individual.
+- Outer pair of beam breakers (just outside of the nest container entrance)
+- RFID antenna (inside of the nest container entrance)
+- Inner pair of beam breakers (just inside of the nest container entrance)
+- Camera (mounted on top of the nest container for a bird's-eye view of the nest inside)
 
-The functions inside this directory were written to pre-process the raw data from each sensor and integrate data among different sensors while imposing minimal assumptions about the order in which sensors triggered. There are 4 separate data integration functions (between each pair of sensor types, and among all 3 types of sensors) because the way in which the sensors were mounted determines how temporal differences between sensors are calculated for integration. Each function was written to process data for a single experimental setup (e.g. data collected over time for 1 pair of adult birds housed in 1 recording chamber). Therefore, these functions must be implemented across experimental setups if the tracking system was used to collect data for serial or parallel experimental replicates. Note that the majority of the functions are focused on processing and integrating datasets collected by movement sensors. The raw data collected by temperature probes is combined into a single spreadsheet but is not pre-processed nor integrated with other datasets.
+**Descriptions of each function**:
 
-Descriptions of each function, roughly in the order in which they should be used:
+1. `combine_raw_data_per_sensor`: Combine raw data collected over time into a single spreadsheet per sensor type (RFID, beam breakers, video recording events, as well as temperature) and experimental setup.
 
-1. `combine_raw_data_per_sensor`: Combine raw data collected over time into a single spreadsheet per sensor type (RFID, beam breakers, video recording events, temperature).
+2. `find_rfid_perching_events`: Identify bouts of perching events in the raw RFID or infrared beam breaker data.
 
-2. `find_rfid_perching_events`: Identify bouts of perching events in the raw RFID data.
+3. `preprocess_detections`: Pre-process the raw RFID or beam breaker data using two possible filtering modes based on temporal rules, or pre-process video data by using the magnitude of movement (e.g. the number of pixels that triggered video recording) to filter detections.
 
-3. `preprocess_detections`: Pre-process the raw data by thinning the detections collected by polling (RFID) or edge detection (beam breakers), or by using the magnitude of movement to filter detections (video).
+4. `find_detectionClusters`: Identify clusters of detections across one or more sensors that occurred close together in time.
 
-4. `find_detectionClusters`: Use temporal differences between pre-processed detections for the outer and inner pair of beam breakers to infer unique movement events with directionality.
+5. `score_detectionClusters`: Score directionality of movement events represented by clusters of detections, and integrate perching events from RFID and/or beam breaker data as needed.
 
-5. `score_detectionClusters`: Integrate RFID and beam breaker datasets by matching pre-processed RFID detections to outer beam breaker timestamps in the pre-processed and labeled beam breaker dataset.
+See the documentation of each function for more details. The 5 functions above are numbered by the order in which they should be used for data processing and analysis. All of these functions must be implemented across experimental setups if `ABISSMAL` was used to collect data across serial or parallel experimental replicates. The majority of these functions were written to process data collected across movement sensors. The function `combine_raw_data_per_sensor` concatenates raw temperature data over time, but this temperature data should not be used as input for subsequent functions. Finally, the file `utilities.R` contains utility functions that are used to check formal arguments and data in each of the functions above. 
 
-See the documentation of each function for more details. The file `utilities.R` contains utility functions that are used to check formal arguments and data in each of the functions above.
+**Automated unit testing**: The directory `~/tests/testthat` holds automated tests of function behavior and error handling for each of the functions above. These automated tests should be run across functions using the script `run_all_testthat_tests.Rmd` whenever one or more functions are updated. This unit testing relies on simulated datasets in order to ensure that the functions are performing as expected.
 
-# Then ~/tests/testhat
+**Assumptions about sensor triggering events and behavioral inferences**: In the hardware setup above, the outer pair of beam breakers and the camera should be the first and last sensors to trigger when an animal enters the nest container, respectively. When an animal leaves the nest container, this order should be reversed. However, these assumptions are complicated by the fact that individuals can sit inside the circular entrance for longer periods of time (triggering not only the RFID antenna but also the beam breakers and camera with fine-scale movements). In addition, individuals can also come enter and exit the nest container with individual variation in the speed and angle at which they enter, which can lead to failure to detect movement by one or more sensors. Finally, since multiple individuals can be inside the container at any point in time, video recording events may be triggered by movements from more than one individual.
+
+**Using sensor triggering events to score direction**: The `score_detectionClusters` function scores the direction of movement by detecting edges or transitions in sequences of sensor labels in each cluster. For the first edge in each detection cluster, the function uses rules about which sensor triggered first in order to label direction. For instance, if a detection cluster contains the sequence of events "RFID", "RFID", "RFID", "Outer Beam Breaker", then the edge "RFID-Outer Beam Breaker" would be scored as an exit, since the RFID antenna triggered first. This directional scoring by edge detection imposes minimal assumptions about how sensor triggering events map onto the direction of movements, but still requires validation with datasets of known movement direction. 
