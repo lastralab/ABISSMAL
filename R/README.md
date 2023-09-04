@@ -1,7 +1,7 @@
 ## Grace Smith-Vidaurre
 ## 19 June 2023
 
-# General documentation for data processing and integration functions"
+# General documentation for data processing and integration functions
 
 <style type="text/css">
 
@@ -59,16 +59,10 @@ Descriptions of each function, roughly in the order in which they should be used
 
 3. `preprocess_detections`: Pre-process the raw data by thinning the detections collected by polling (RFID) or edge detection (beam breakers), or by using the magnitude of movement to filter detections (video).
 
-4. `label_beamBreaker_events`: Use temporal differences between pre-processed detections for the outer and inner pair of beam breakers to infer unique movement events with directionality.
+4. `find_detectionClusters`: Use temporal differences between pre-processed detections for the outer and inner pair of beam breakers to infer unique movement events with directionality.
 
-5. `integrate_rfid_breamBreakers`: Integrate RFID and beam breaker datasets by matching pre-processed RFID detections to outer beam breaker timestamps in the pre-processed and labeled beam breaker dataset.
+5. `score_detectionClusters`: Integrate RFID and beam breaker datasets by matching pre-processed RFID detections to outer beam breaker timestamps in the pre-processed and labeled beam breaker dataset.
 
-6. `integrate_rfid_video`: Integrate RFID and video datasets by matching pre-processed RFID detections to pre-processed video detections.
+See the documentation of each function for more details. The file `utilities.R` contains utility functions that are used to check formal arguments and data in each of the functions above.
 
-7. `integrate_beamBreakers_video`: Integrate beam breaker and video detection datasets by matching inner beam breaker timestamps in the pre-processed, labeled beam breaker dataset to pre-processed video timestamps.
-
-8. `integrate_rfid_beamBreakers_video`: Integrate datasets across the three different types of movement sensors (RFID, beam breakers, video recordings). The RFID and beam breaker integration is done first (by matching the RFID and outer beam breaker timestamps). Then the video integration is performed by matching video timestamps to either the RFID timestamps or to the inner beam breaker beam breaker timestamps.
-
-9. `detect_rfid_activityBouts`: Detect bouts of RFID activity in an integrated dataset with RFID timestamps.
-
-See the documentation of each function for more details. The file `validators.R` contains utility functions that are used to check formal arguments and data in each of the functions above.
+# Then ~/tests/testhat

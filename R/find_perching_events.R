@@ -5,40 +5,22 @@
 #' @param threshold A single numeric value. This argument represents a temporal threshold in seconds that will be used to identify detections that occurred in close succession (e.g. within 1 or 2 seconds) as perching events.
 #' @param run_length A single numeric value. This argument indicates the minimum number of consecutive detections used to label a perching event. The default setting is 2. 
 #' @param sensor_id_col_nm A character string. This is the name of the metadata column that contains information about the data type (e.g. "sensor_id").
-#' @param timestamps_col_nm A character string. This argument is the column name that will be used to create a new column containing timestamps for the given sensor. These timestamps will be converted to POSIXct or POSIXt format with millisecond resolution (e.g. format = "%Y-%m-%d %H:%M:%OS", see `POSIXct_format` below).
+#' @param timestamps_col_nm A character string. This argument is the column name that will be given to a new column containing timestamps for the given sensor in the correct format. These timestamps will be converted to POSIXct or POSIXt format with millisecond resolution (e.g. format = "%Y-%m-%d %H:%M:%OS", see `POSIXct_format` below).
 #' @param PIT_tag_col_nm A character string. This argument is the name of the metadata column that contains information about the PIT tags detected by the RFID antenna when RFID data is used as input (e.g. "PIT_tag_ID"). The default is NULL, since the function also accepts beam breaker data that does not contain PIT tag information.
 #' @param rfid_label A character string. This argument is the label for the RFID sensor in the sensor_id_col_nm column in pre-processed data (e.g. "RFID"). The default is NULL, since the function also accepts beam breaker data
 #' @param outer_irbb_label A character string. This argument is the label for the outer pair of beam breakers in the sensor_id_col_nm column in pre-processed data (e.g. "Outer Beam Breaker"). The default is NULL, since the function also accepts RFID data. This argument must be specified even when IRBB data from 1 pair of beam breakers is used as input.
 #' @param inner_irbb_label A character string. This argument is the label for the inner pair of beam breakers in the sensor_id_col_nm column in pre-processed data (e.g. "Inner Beam Breaker"). The default is NULL, since the function also accepts RFID data. This argument must be specified even when IRBB data from 1 pair of beam breakers is used as input.
 #' @param general_metadata_cols A character vector. This should be a string of the general metadata column names that will be carried through into the resulting spreadsheet. For this particular function, these metadata columns should be general to the experiment and not specific to individuals or dates. For instance: `c("chamber_id", "sensor_id")`. These columns will be added as the first columns in the resulting spreadsheet, in the same order in which they are provided.
-#' @param path A character string. This argument should be the path specifying the overall directory where data is saved for a given experimental setup. For instance, "/media/gsvidaurre/Anodorhynchus/Data_Testing/Box_02_31Dec2022/Data".
-#' @param data_dir A character string. This argument should be the name of directory where the spreadsheet of perching events should be saved inside the path above. For instance, "pre-processed".
-#' @param out_dir A character string. This argument should be the name of a directory inside the path above specifying where the resulting .csv file of perching events should be saved (e.g. "pre-processed"). This folder will be created as a new directory if it doesn't already exist.
-#' @param out_file_prefix A character string. The name (plus extension) of the resulting file that will be written to out_dir. The default prefix is "perching_events". The function will automatically add the sensor type to this default file name as a suffix before the .csv extension.
+#' @param path A character string. This argument should be the path specifying the overall directory where data is saved for a given experimental setup. For instance, "/media/gsvidaurre/Anodorhynchus/Data_Testing/Box_02_31Dec2022".
+#' @param data_dir A character string. This argument should be the name of directory where the combined raw data per sensor type is saved inside the path above. For instance, "raw_combined".
+#' @param out_dir A character string. This argument should be the name of a directory inside the path above specifying where the resulting .csv file of perching events should be saved (e.g. "processed"). This folder will be created as a new directory if it doesn't already exist.
+#' @param out_file_prefix A character string. The name (plus extension) of the resulting file that will be written to out_dir. The default prefix is "perching_events". The function will automatically add the sensor type of the data used as input to this default file name as a suffix before the .csv extension.
 #' @param tz A character string. This argument should contain the timezone used for converting timestamps to POSIXct format. For instance, "America/New York". See the base function `as.POSIXct` for more information.
 #' @param POSIXct_format A character string. This argument should contain the format used to converting timestamps to POSIXct format. The default is "%Y-%m-%d %H:%M:%OS6" to return timestamps with milliseconds in decimal format. See the base function `as.POSIXct` for more information.
 #'
-#' @details This function parses raw radio frequency identification (RFID) or infrared beam breaker data to identify perching events (e.g. periods of time when an individual was perched in the entrance of the nest container around which the movement sensors are mounted). When RFID data is used as input, this function identifies perching events for each unique passive integrated transponder (PIT) tag and date in the dataset. When beam breaker data is used as input, the function identifies perching events for each pair of beam breakers and date in the dataset. `find_perching_events` identifies runs of sensor detections separated by the given temporal threshold or less. The function then takes the first and last detection of each run and returns these timestamps as the start and end of each perching event. `find_perching_events` was written to process data for 1 RFID antenna or 2 pairs of beam breakers that were mounted around the entrance of a nest container in a particular way (see the README for more information).
+#' @details This function parses raw radio frequency identification (RFID) or infrared beam breaker data to identify perching events (e.g. periods of time when an individual was perched in the entrance of the nest container around which the movement sensors are mounted). When RFID data is used as input, this function identifies perching events for each unique passive integrated transponder (PIT) tag and date in the dataset. When beam breaker data is used as input, the function identifies perching events for each pair of beam breakers and date in the dataset. `find_perching_events` identifies runs of sensor detections separated by the given temporal threshold or less. The function then takes the first and last detection of each run and returns these timestamps as the start and end of each perching event.
 #' 
 #' @return `find_perching_events` returns a .csv file with all metadata columns in the original data frame, as well as the start and end timestamps of each perching period identified in the raw data per sensor type. When beam breaker data is used as input, the resulting spreadsheet contains perching events detected across both pairs of beam breakers. Each row in the resulting spreadsheet is a perching event. The function also returns information about parameters used for this data processing.
-#' 
-
-# file_nm = "combined_raw_data_RFID.csv"
-# threshold = th
-# run_length = run_length
-# sensor_id_col_nm = "sensor_id"
-# timestamps_col_nm = "timestamp_ms"
-# PIT_tag_col_nm = "PIT_tag_ID"
-# rfid_label = "RFID"
-# outer_irbb_label = NULL
-# inner_irbb_label = NULL
-# general_metadata_cols = c("chamber_id", "sensor_id")
-# path = path
-# data_dir = file.path(data_dir, "raw_combined")
-# out_dir = file.path(data_dir, "processed")
-# out_file_prefix = "perching_events.csv"
-# tz = "America/New York"
-# POSIXct_format = "%Y-%m-%d %H:%M:%OS"
 
 find_perching_events <- function(file_nm, threshold, run_length = 2, sensor_id_col_nm, timestamps_col_nm, PIT_tag_col_nm = NULL, rfid_label = NULL, outer_irbb_label = NULL, inner_irbb_label = NULL, general_metadata_cols, path, data_dir, out_dir, out_file_prefix = "perching_events", tz, POSIXct_format = "%Y-%m-%d %H:%M:%OS"){
   
@@ -151,11 +133,20 @@ find_perching_events <- function(file_nm, threshold, run_length = 2, sensor_id_c
     check_cols_nas(expected_cols[i], raw_data)
   }))
   
+  # Then use the year, month, and day columns to make a new timestamps column in the right format
   raw_data <- raw_data %>% 
-    # Make sure that the timestamps are in the right format
     dplyr::mutate(
-      !!timestamps_col_nm := as.POSIXct(format(as.POSIXct(!!sym(timestamps_col_nm), tz = "America/New York"), "%Y-%m-%d %H:%M:%OS6"))
-    )
+      timestamp_ms = as.POSIXct(paste(paste(year, month, day, sep = "-"), original_timestamp, sep = " "), tz = tz, format = POSIXct_format)
+    ) %>% 
+    # Drop columns that aren't needed here
+    dplyr::select(-c("original_timestamp", "data_stage", "date_combined"))
+  
+  # Check that columns with timestamps are in the right format
+  tstmps_cols <- f_args[grep("time", names(f_args))]
+  
+  invisible(sapply(1:length(tstmps_cols), function(i){
+    check_tstmps_cols(tstmps_cols[[i]], raw_data, "%Y-%m-%d %H:%M:%OS6")
+  }))
   
   # If RFID data is used as input, then group by PIT tag ID and date
   if(!is.null(rfid_label)){
