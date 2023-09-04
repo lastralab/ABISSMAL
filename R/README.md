@@ -1,42 +1,5 @@
 # General documentation for data processing and integration functions
 
-<style type="text/css">
-
-h1.title { /* Document title */
-  font-size: 32px;
-  color: black;
-  font-weight: normal;
-  text-align: center;
-}
-
-h1 {
-   color: #0E0E7D;
-   font-size: 26px;
-   font-weight: normal;
-}
-
-h2 {
-   color: #0E0E7D;
-   font-size: 24px;
-   font-weight: bold;
-}
-
-h3 { /* Document subtitle */
-   color: #0E0E7D;
-   font-size: 28px;
-   font-weight: normal;
-   text-align: center;
-}
-
-body{ /* Normal */
-      font-size: 20px;
-  }
-  
-code.r{ /* Code block */
-    font-size: 20px;
-}
-</style>
-
 `ABISSMAL` includes a set of functions to process raw data and integrate pre-processed data across movement sensors in order to make behavioral inferences about movement events. 
 
 **Hardware requirements**: These functions were written for a specific hardware setup in which 3 types of movement sensors are mounted around the entrance of a nest container in the following order:
