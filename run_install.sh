@@ -26,13 +26,13 @@ echo -e "${Green}
            ____ _____  _____ _____ __  __          _
      /\   |  _ \_   _|/ ____/ ____|  \/  |   /\   | |
     /  \  | |_) || | | (___| (___ | \  / |  /  \  | |
-   / /\ \ |  _ < | |  \___ \\___ \| |\/| | / /\ \ | |
+   / /\ \ |  _ < | |  \___  \___ \| |\/| | / /\ \ | |
   / ____ \| |_) || |_ ____) |___) | |  | |/ ____ \| |____
  /_/    \_\____/_____|_____/_____/|_|  |_/_/    \_\______|
 
 ${NC}"
 echo -e "${Green}Automated behavioral tracking by integrating sensors that survey movements around a target location${NC}"
-echo -e "${Blue}Repository:${NC}  https://github.com/lastralab/parentalcaretracking"
+echo -e "${Blue}Repository:${NC}  https://github.com/lastralab/abissmal"
 echo -e "${Blue}Authors:${NC}     ${Cyan}Molina-Medrano, T. & Smith-Vidaurre, G.${NC}"
 echo ""
 echo -e "${Yellow}Setting permissions for ${user_name}...${NC}"
@@ -76,6 +76,7 @@ then
   chmod +x Main.sh
   apt install nmap
   apt-get install -y gpac
+  mv get-pip.py ../
   echo ""
 else
 	echo -e "${Yellow}Skipped.${NC}"
@@ -137,15 +138,15 @@ else
 	echo ""
 fi
 
+sed -i "s#^location=.*#location=\"${location}\"#" "${cron_path}"
+sed -i "s#^python_v=.*#python_v=\"${python_v}\"#" "${cron_path}"
+chmod +x cron.sh
 echo -e "${Green}Insert 'Y/y' to configure Cron or press 'Enter' to skip.${NC}"
 read -r cron
 if [ -n "$cron" ]
 then
   sed -i -e "\$a0 0  * * *   pi ${bash_v} ${location}/cron.sh >> /home/pi/log/abissmal_cron.log" "/etc/crontab"
-  sed -i "s#^location=.*#location=\"${location}\"#" "${cron_path}"
-  sed -i "s#^python_v=.*#python_v=\"${python_v}\"#" "${cron_path}"
   service cron reload
-  chmod +x cron.sh
   echo -e "${Purple}Configured Cron Job to run every day at midnight${NC}"
   echo -e "Abissmal Cron jobs will be logged in ${Cyan}/home/pi/log/abissmal_cron.log${NC}"
 else

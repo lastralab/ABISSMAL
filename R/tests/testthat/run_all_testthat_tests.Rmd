@@ -1,0 +1,29 @@
+---
+title: "Run all testthat tests"
+author: "Grace Smith-Vidaurre"
+date: "2023-01-05"
+output: html_document
+---
+
+See more info on the testthat package: https://r-pkgs.org/testing-basics.html. See examples at: https://www.r-bloggers.com/2019/11/automated-testing-with-testthat-in-practice/.
+
+```{r}
+
+if (!require(testthat)) install.packages('testthat')
+library(testthat)
+
+testing_path <- "/home/gsvidaurre/Desktop/GitHub_repos/Abissmal/R/tests/testthat/"
+
+# Run the testthat tests for each function
+
+test_file(file.path(testing_path, "test_combine_raw_data_across_sensors.R"))
+
+test_file(file.path(testing_path, "test_find_perching_events.R"))
+
+test_file(file.path(testing_path, "test_preprocess_detections.R"))
+
+test_file(file.path(testing_path, "test_find_detectionClusters.R"))
+
+test_file(file.path(testing_path, "test_score_detectionClusters.R"))
+
+```
