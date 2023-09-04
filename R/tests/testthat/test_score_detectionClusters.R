@@ -6,6 +6,8 @@
 # See examples on: 
 # https://www.r-bloggers.com/2019/11/automated-testing-with-testthat-in-practice/
 
+rm(list = ls())
+
 if (!require(testthat)) install.packages('testthat')
 library(testthat)
 
@@ -89,14 +91,7 @@ test_that("The function labels entrances and exits as expected using data from 2
   test_res <- read.csv(file.path(tmp_path, "processed", "scored_detectionClusters.csv"))
   
   # Test that the results are 3 entrance events and 3 exit events, in that order
-  event_labels <- sapply(1:nrow(test_res), function(i){
-    
-    wh <- which(!is.na(test_res[i, grep("direction", names(test_res))]))
-    test_res[i, grep("direction", names(test_res))][[wh]]
-    
-  })
-  
-  expect_equal(event_labels, rep(c("entrance", "exit"), each = 3))
+  expect_equal(test_res$direction_scored, rep(c("entrance", "exit"), each = 3))
   
   # Test that the number of detection clusters in the input and output data are the same
   expect_equal(nrow(sim_dats), nrow(test_res))
@@ -193,14 +188,7 @@ test_that("The function labels entrances and exits as expected using data from R
   test_res <- read.csv(file.path(tmp_path, "processed", "scored_detectionClusters.csv"))
   
   # Test that the results are 3 entrance events and 3 exit events, in that order
-  event_labels <- sapply(1:nrow(test_res), function(i){
-    
-    wh <- which(!is.na(test_res[i, grep("direction", names(test_res))]))
-    test_res[i, grep("direction", names(test_res))][[wh]]
-
-  })
-  
-  expect_equal(event_labels, rep(c("entrance", "exit"), each = 3))
+  expect_equal(test_res$direction_scored, rep(c("entrance", "exit"), each = 3))
   
   # Test that the number of detection clusters in the input and output data are the same
   expect_equal(nrow(sim_dats), nrow(test_res))
@@ -228,7 +216,6 @@ test_that("The function labels entrances and exits as expected using data from R
   
 })
 
-# TKTK error
 test_that("The function labels entrances and exits as expected using data from RFID, 2 beam breaker pairs, and a camera (no perching integration)", {
   
   # Avoid library calls and other changes to the virtual environment
@@ -302,29 +289,13 @@ test_that("The function labels entrances and exits as expected using data from R
 
   write.csv(sim_dats, file.path(tmp_path, "processed", "detection_clusters.csv"), row.names = FALSE)
   
-  # Needs line by line troubleshooting
-  
-  # In argument:
-  #   `outer_inner_irbb_direction
-  # =
-  #   outer_inner_irbb_direction`.
-  # Caused by error:
-  #   ! object 'outer_inner_irbb_direction' not found
-  
   score_detectionClusters(file_nm = "detection_clusters.csv", sensor_id_col_nm = NULL, PIT_tag_col_nm = NULL, rfid_label = "RFID", camera_label = "Camera", outer_irbb_label = "Outer Beam Breaker", inner_irbb_label = "Inner Beam Breaker", video_metadata_col_nms = c("total_pixels_motionTrigger", "pixel_threshold", "video_file_name"), integrate_perching = FALSE, perching_dataset = NULL, perching_prefix = NULL, path = path, data_dir = file.path(data_dir, "processed"), out_dir = file.path(data_dir, "processed"), out_file_nm = "scored_detectionClusters.csv", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS")
   
   # Read in the output, check the output, then delete all files
   test_res <- read.csv(file.path(tmp_path, "processed", "scored_detectionClusters.csv"))
   
   # Test that the results are 3 entrance events and 3 exit events, in that order
-  event_labels <- sapply(1:nrow(test_res), function(i){
-    
-    wh <- which(!is.na(test_res[i, grep("direction", names(test_res))]))
-    test_res[i, grep("direction", names(test_res))][[wh]]
-    
-  })
-  
-  expect_equal(event_labels, rep(c("entrance", "exit"), each = 3))
+  expect_equal(test_res$direction_scored, rep(c("entrance", "exit"), each = 3))
   
   # Test that the number of detection clusters in the input and output data are the same
   expect_equal(nrow(sim_dats), nrow(test_res))
@@ -446,14 +417,7 @@ test_that("The function labels entrances and exits as expected using data from 2
   test_res <- read.csv(file.path(tmp_path, "processed", "scored_detectionClusters.csv"))
   
   # Test that the results are 3 entrance events and 3 exit events, in that order
-  event_labels <- sapply(1:nrow(test_res), function(i){
-    
-    wh <- which(!is.na(test_res[i, grep("direction", names(test_res))]))
-    test_res[i, grep("direction", names(test_res))][[wh]]
-    
-  })
-  
-  expect_equal(event_labels, rep(c("entrance", "exit"), each = 3))
+  expect_equal(test_res$direction_scored, rep(c("entrance", "exit"), each = 3))
   
   # Test that the number of detection clusters in the input and output data are the same
   expect_equal(nrow(sim_dats), nrow(test_res))
@@ -581,14 +545,7 @@ test_that("The function labels entrances and exits as expected using data from R
   test_res <- read.csv(file.path(tmp_path, "processed", "scored_detectionClusters.csv"))
   
   # Test that the results are 3 entrance events and 3 exit events, in that order
-  event_labels <- sapply(1:nrow(test_res), function(i){
-    
-    wh <- which(!is.na(test_res[i, grep("direction", names(test_res))]))
-    test_res[i, grep("direction", names(test_res))][[wh]]
-    
-  })
-  
-  expect_equal(event_labels, rep(c("entrance", "exit"), each = 3))
+  expect_equal(test_res$direction_scored, rep(c("entrance", "exit"), each = 3))
   
   # Test that the number of detection clusters in the input and output data are the same
   expect_equal(nrow(sim_dats), nrow(test_res))
@@ -725,14 +682,7 @@ test_that("The function labels entrances and exits as expected using data from R
   test_res <- read.csv(file.path(tmp_path, "processed", "scored_detectionClusters.csv"))
   
   # Test that the results are 3 entrance events and 3 exit events, in that order
-  event_labels <- sapply(1:nrow(test_res), function(i){
-    
-    wh <- which(!is.na(test_res[i, grep("direction", names(test_res))]))
-    test_res[i, grep("direction", names(test_res))][[wh]]
-    
-  })
-  
-  expect_equal(event_labels, rep(c("entrance", "exit"), each = 3))
+  expect_equal(test_res$direction_scored, rep(c("entrance", "exit"), each = 3))
   
   # Test that the number of detection clusters in the input and output data are the same
   expect_equal(nrow(sim_dats), nrow(test_res))
@@ -864,14 +814,7 @@ test_that("The function labels entrances and exits as expected using data from 2
   test_res <- read.csv(file.path(tmp_path, "processed", "scored_detectionClusters.csv"))
   
   # Test that the results are 3 entrance events and 3 exit events, in that order
-  event_labels <- sapply(1:nrow(test_res), function(i){
-    
-    wh <- which(!is.na(test_res[i, grep("direction", names(test_res))]))
-    test_res[i, grep("direction", names(test_res))][[wh]]
-    
-  })
-  
-  expect_equal(event_labels, rep(c("entrance", "exit"), each = 3))
+  expect_equal(test_res$direction_scored, rep(c("entrance", "exit"), each = 3))
   
   # Test that the number of detection clusters in the input and output data are the same
   expect_equal(nrow(sim_dats), nrow(test_res))
@@ -998,14 +941,7 @@ test_that("The function labels entrances and exits as expected using data from R
   test_res <- read.csv(file.path(tmp_path, "processed", "scored_detectionClusters.csv"))
   
   # Test that the results are 3 entrance events and 3 exit events, in that order
-  event_labels <- sapply(1:nrow(test_res), function(i){
-    
-    wh <- which(!is.na(test_res[i, grep("direction", names(test_res))]))
-    test_res[i, grep("direction", names(test_res))][[wh]]
-    
-  })
-  
-  expect_equal(event_labels, rep(c("entrance", "exit"), each = 3))
+  expect_equal(test_res$direction_scored, rep(c("entrance", "exit"), each = 3))
   
   # Test that the number of detection clusters in the input and output data are the same
   expect_equal(nrow(sim_dats), nrow(test_res))
@@ -1141,14 +1077,7 @@ test_that("The function labels entrances and exits as expected using data from R
   test_res <- read.csv(file.path(tmp_path, "processed", "scored_detectionClusters.csv"))
   
   # Test that the results are 3 entrance events and 3 exit events, in that order
-  event_labels <- sapply(1:nrow(test_res), function(i){
-    
-    wh <- which(!is.na(test_res[i, grep("direction", names(test_res))]))
-    test_res[i, grep("direction", names(test_res))][[wh]]
-    
-  })
-  
-  expect_equal(event_labels, rep(c("entrance", "exit"), each = 3))
+  expect_equal(test_res$direction_scored, rep(c("entrance", "exit"), each = 3))
   
   # Test that the number of detection clusters in the input and output data are the same
   expect_equal(nrow(sim_dats), nrow(test_res))
@@ -1296,14 +1225,7 @@ test_that("The function labels entrances and exits as expected using data from 2
   test_res <- read.csv(file.path(tmp_path, "processed", "scored_detectionClusters.csv"))
   
   # Test that the results are 3 entrance events and 3 exit events, in that order
-  event_labels <- sapply(1:nrow(test_res), function(i){
-    
-    wh <- which(!is.na(test_res[i, grep("direction", names(test_res))]))
-    test_res[i, grep("direction", names(test_res))][[wh]]
-    
-  })
-  
-  expect_equal(event_labels, rep(c("entrance", "exit"), each = 3))
+  expect_equal(test_res$direction_scored, rep(c("entrance", "exit"), each = 3))
   
   # Test that the number of detection clusters in the input and output data are the same
   expect_equal(nrow(sim_dats), nrow(test_res))
@@ -1450,14 +1372,7 @@ test_that("The function labels entrances and exits as expected using data from R
   test_res <- read.csv(file.path(tmp_path, "processed", "scored_detectionClusters.csv"))
   
   # Test that the results are 3 entrance events and 3 exit events, in that order
-  event_labels <- sapply(1:nrow(test_res), function(i){
-    
-    wh <- which(!is.na(test_res[i, grep("direction", names(test_res))]))
-    test_res[i, grep("direction", names(test_res))][[wh]]
-    
-  })
-  
-  expect_equal(event_labels, rep(c("entrance", "exit"), each = 3))
+  expect_equal(test_res$direction_scored, rep(c("entrance", "exit"), each = 3))
   
   # Test that the number of detection clusters in the input and output data are the same
   expect_equal(nrow(sim_dats), nrow(test_res))
@@ -1613,14 +1528,7 @@ test_that("The function labels entrances and exits as expected using data from R
   test_res <- read.csv(file.path(tmp_path, "processed", "scored_detectionClusters.csv"))
   
   # Test that the results are 3 entrance events and 3 exit events, in that order
-  event_labels <- sapply(1:nrow(test_res), function(i){
-    
-    wh <- which(!is.na(test_res[i, grep("direction", names(test_res))]))
-    test_res[i, grep("direction", names(test_res))][[wh]]
-    
-  })
-  
-  expect_equal(event_labels, rep(c("entrance", "exit"), each = 3))
+  expect_equal(test_res$direction_scored, rep(c("entrance", "exit"), each = 3))
   
   # Test that the number of detection clusters in the input and output data are the same
   expect_equal(nrow(sim_dats), nrow(test_res))
