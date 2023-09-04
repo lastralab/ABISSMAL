@@ -4,47 +4,26 @@
 #' @param file_nm A character vector of length 1. This argument should be the name and extension of one .csv file that contains clusters detected using the function `find_detectionClusters`. For instance, c("detection_clusters.csv"). In this spreadsheet, each row should be a unique cluster of detections. The spreadsheet must contain all the columns specified in the subsequent arguments.
 #' @param rfid_label A character string. This argument is the label for the RFID sensor in the sensor_id_col_nm column in pre-processed data (e.g. "RFID"). Set this argument to NULL if RFID data is not present in the input dataset. The default is NULL.
 #' @param camera_label A character string. This argument is the label for the camera sensor that records video in the sensor_id_col_nm column in pre-processed data (e.g. "Camera"). Set this argument to NULL if video data is not present in the input dataset. The default is NULL.
-#' @param outer_irbb_label A character string. This argument is the label for the outer pair of beam breakers in the sensor_id_col_nm column in pre-processed data (e.g. "Outer Beam Breaker"). Set this argument to NULL if outer beam breaker data is not present in the input dataset.  The default is NULL.
-#' @param inner_irbb_label A character string. This argument is the label for the inner pair of beam breakers in the sensor_id_col_nm column in pre-processed data (e.g. "Inner Beam Breaker"). Set this argument to NULL if inner beam breaker data is not present in the input dataset.  The default is NULL.
+#' @param outer_irbb_label A character string. This argument is the label for the outer pair of beam breakers in the sensor_id_col_nm column in pre-processed data (e.g. "Outer Beam Breaker"). Set this argument to NULL if outer beam breaker data is not present in the input dataset. The default is NULL.
+#' @param inner_irbb_label A character string. This argument is the label for the inner pair of beam breakers in the sensor_id_col_nm column in pre-processed data (e.g. "Inner Beam Breaker"). Set this argument to NULL if inner beam breaker data is not present in the input dataset. The default is NULL.
 #' @param video_metadata_col_nms A character vector. This argument should be a string of the video metadata column names that will be carried through into the resulting data frame representing the integrated data. For instance: c("total_pixels_motionTrigger", "pixel_threshold", "video_file_name"). These columns will be added as later columns in resulting data frame, in the same order in which they were specified. The default is NULL.
-#' @param integrate_perching Boolean. If TRUE, then the perching events identified using `find_perching_events` with either RFID or beam breaker data will be integrated with this dataset. This integration is done by finding detection clusters that occurred within the duration of a perching event. If FALSE, then perching events will not be integrated.
+#' @param integrate_perching Boolean. If TRUE, then the perching events identified using `find_perching_events` with either RFID and/or beam breaker data will be integrated with this dataset. This integration is done by finding detection clusters that occurred within the duration of a perching event. If FALSE, then perching events will not be integrated.
+#' @param perching_dataset A character string. Use "RFID", "IRBB", or "RFID-IRBB" to specify which dataset of perching events to integrate. Specifying "RFID-IRBB" means that perching events detected using both sensor types will be integrated. The default is NULL.
+#' @param perching_prefix A character string. The prefix for the file name of the perching events spreadsheet(s). This character string needs to contain all of the symbols in the file name(s) up until the sensor label and extension (e.g. "perching_events_"). The default is NULL.
 #' @param sensor_id_col_nm A character string. This argument is the name of the metadata column in the perching event data to be integrated that contains information about the data type (e.g. "sensor_id"). The default is NULL, since integrating perching data is not a requirement.
 #' @param PIT_tag_col_nm A character string. This argument is the name of the metadata column in the perching event data to be integrated that contains information about the PIT tags detected by the RFID antenna (e.g. "PIT_tag_ID"). The default is NULL, since integrating perching data is not a requirement.
-#' @param perching_dataset A character string. Use "RFID", "IRBB", or "RFID-IRBB" to specify which dataset of perching events to integrate. Specifying "RFID-IRBB" means that perching events detected using both sensor types will be integrated, resulting in triple the number of columns for perching event data in the resulting spreadsheet (RFID, outer beam breaker pair, inner beam breaker pair). The default is NULL.
-#' @param perching_prefix A character string. The prefix for the file name of the perching events spreadsheet. This character string needs to contain all of the symbols in the file name up until the sensor label and extension (e.g. "perching_events_"). The default is NULL.
-#' @param path A character string. This argument should be the path on the local computer or external hard drive specifying where the data is saved across sensors for a given experimental setup. For instance, "/media/gsvidaurre/Anodorhynchus/Data_Testing/Box_02_31Dec2022/Data".
+#' @param path A character string. This argument should be the path on the local computer or external hard drive specifying where the data is saved across sensors for a given experimental setup. For instance, "/media/gsvidaurre/Anodorhynchus/Data_Testing/Box_02_31Dec2022".
 #' @param data_dir A character string. This argument should be the name of the directory where the pre-processed data that is used as input is saved inside the path above. For instance, "processed".
-#' @param out_dir A character string. This argument should be the name of a directory specifying where the .csv file of integrated data should be saved. For instance, "integrated". This folder will be appended to the data_path and created as a new directory if it doesn't already exist.
+#' @param out_dir A character string. This argument should be the name of a directory specifying where the .csv file of integrated data should be saved. For instance, "processed". This folder will be appended to the path and created as a new directory if it doesn't already exist.
 #' @param out_file_nm A character string. The name (plus extension) of the resulting file that will be written to out_dir. The default is "scored_detectionClusters.csv"
 #' @param tz A character string. This argument should contain the timezone used for converting timestamps to POSIXct format. For instance, "America/New York". See the base function `as.POSIXct` for more information.
 #' @param POSIXct_format A character string. This argument should contain the format used to converting timestamps to POSIXct format. The default is "%Y-%m-%d %H:%M:%OS6" to return timestamps with milliseconds in decimal format. See the base function `as.POSIXct` for more information.
 #' 
-#' @details `score_detectionClusters` uses the order in which sensors triggered within clusters of detections identified by `find_detectionCusters`. The function finds edges or transitions between sensor labels in the sequence of detections for each cluster detected. Then, the function uses the order of the sensor labels in the first edge to label the directionality of movement events. `score_detectionClusters` was written for a hardware setup with multiple movement sensors (1 RFID antenna, two pairs of infrared beam breakers, and 1 camera that records video by motion detection) mounted around the entrance of a nest container (see the README for more information). This function can also integrate clusters of detections with perching events identified by the function `find_perching_events` (e.g. when an individual was perched in the entrance of the nest container). Note that the function requires data from at least two sensor types (or two beam breaker pairs). When using beam breaker data, the function expects data from two pairs of these sensors.
+#' @details `score_detectionClusters` uses the order in which sensors triggered within clusters of detections identified by `find_detectionCusters` to score the direction of movement events. The function finds edges or transitions between sensor labels in the sequence of detections for each cluster. Then the function uses the order of the sensor labels in the first edge to label the directionality of movement events. Note that the function requires data from at least two sensor types (or two beam breaker pairs). When using beam breaker data, the function expects data from two pairs of these sensors. This function can also integrate clusters of detections with perching events identified by the function `find_perching_events` (e.g. when an individual was perched in the entrance of the nest container).
 #' 
-#' @return A spreadsheet in .csv format with the metadata columns from the original pre-processed data used as input (including individual identity information from RFID data), columns indicating the start and end time of each detection cluster, all the possible edges or transitions detected in the sequence of sensor events, and the inferred directionality of sensor events. Each row in the .csv file is detection cluster identified by the function. Information about the date of integration is also contained in the resulting spreadsheet.
-#' 
-#' 
+#' @return A spreadsheet in .csv format with the metadata columns from the original pre-processed data used as input (including individual identity information from RFID data), columns indicating the start and end time of each detection cluster, all the possible edges or transitions detected in the sequence of sensor events, and the inferred directionality of sensor events (using the first edge only). Each row in the .csv file is a unique detection cluster. Information about the date of processing is also contained in the resulting spreadsheet.
 
-# file_nm = "simulated_detectionClusters.csv"
-# sensor_id_col_nm = NULL
-# PIT_tag_col_nm = NULL
-# rfid_label = "RFID"
-# camera_label = NULL
-# outer_irbb_label = "Outer Beam Breaker"
-# inner_irbb_label = "Inner Beam Breaker"
-# video_metadata_col_nms = NULL
-# integrate_perching = FALSE
-# perching_dataset = NULL
-# perching_prefix = NULL
-# path = path
-# data_dir = data_dir
-# out_dir = data_dir
-# out_file_nm = "scored_detectionClusters.csv"
-# tz = "America/New York"
-# POSIXct_format = "%Y-%m-%d %H:%M:%OS"
-
-
-score_detectionClusters <- function(file_nm, rfid_label = NULL, camera_label = NULL, outer_irbb_label = NULL, inner_irbb_label = NULL, video_metadata_col_nms, integrate_perching, sensor_id_col_nm = NULL, PIT_tag_col_nm = NULL, perching_dataset = NULL, perching_prefix = NULL, path, data_dir, out_dir, out_file_nm = "scored_detectionClusters.csv", tz, POSIXct_format = "%Y-%m-%d %H:%M:%OS"){
+score_detectionClusters <- function(file_nm, rfid_label = NULL, camera_label = NULL, outer_irbb_label = NULL, inner_irbb_label = NULL, video_metadata_col_nms, integrate_perching, perching_dataset = NULL, perching_prefix = NULL, sensor_id_col_nm = NULL, PIT_tag_col_nm = NULL, path, data_dir, out_dir, out_file_nm = "scored_detectionClusters.csv", tz, POSIXct_format = "%Y-%m-%d %H:%M:%OS"){
   
   # Get the current global options
   orig_opts <- options()
@@ -274,7 +253,6 @@ score_detectionClusters <- function(file_nm, rfid_label = NULL, camera_label = N
       edges = map(
         .x = data,
         # Get the edges for each burst of detections
-        # TKTK in testing, need to check that the correct number of columns are returned even when edges very in length across bouts
         .f = ~ dplyr::select(.x, start, end, event_seq) %>% 
           pmap_dfr(., function(start, end, event_seq){
             
@@ -499,7 +477,6 @@ score_detectionClusters <- function(file_nm, rfid_label = NULL, camera_label = N
     if(nrow(perch_df) > 0 & !is.null(perching_dataset)){
       
       # For each detection cluster, figure out whether it occurred during a perching event and add that perching event to the final dataset
-      
       if(perching_dataset %in% c("RFID", "RFID-IRBB")){
         
         tmp_df <- detectns_edges2 %>% 
@@ -614,8 +591,6 @@ score_detectionClusters <- function(file_nm, rfid_label = NULL, camera_label = N
       date_processed = paste(Sys.Date(), Sys.time(), sep = " ")
     ) %>% 
     dplyr::select(-c("rowid"))
-  
-  
   
   write.csv(detectns_edges_p, file.path(path, out_dir, out_file_nm), row.names = FALSE)
   
