@@ -1,10 +1,7 @@
 # G. Smith-Vidaurre
 # 03 January 2023
 
-# See more info on the testthat package: https://r-pkgs.org/testing-basics.html
-
-# See examples on: 
-# https://www.r-bloggers.com/2019/11/automated-testing-with-testthat-in-practice/
+rm(list = ls())
 
 if (!require(testthat)) install.packages('testthat')
 library(testthat)
