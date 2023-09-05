@@ -80,64 +80,65 @@ echo -e "To detach a screen press${Blue} Ctrl + A${NC} then type ${RED}:${NC} to
 echo ""
 
 echo -e "${Cyan}Enter first letter of the modules to track:${NC}"
-echo -e "${Cyan}Example: vitra ${NC}${Purple}(V/v)ideo/(R/r)fid/(I/i)rbb/(T/t)emp/V(A/a)lidation Video${NC}"
+echo -e "${Cyan}Example: virt ${NC}${Purple}(V/v)ideo/(R/r)fid/(I/i)rbb/(T/t)emp${NC}"
+echo -e "${RED}To run Validation Video only, enter (A/a)${NC}"
 read -r modules
 
 sed -i "s#^modules=.*#modules=\"$modules\"#" "${cron_path}"
 
-if [[ $modules == *"V"* || $modules == *"v"* ]];
+if [[ $modules == *"A"* || $modules == *"a"* ]];
 then
-  	modules_string="${modules_string}${v}${comma}"
-  	selected=true
-    echo -e "${Purple}Enabled Video${NC}"
-    echo -e "Starting screen name: ${Cyan}video${NC}..."
+    modules_string="${modules_string}${a}${comma}"
+    selected=true
+    echo -e "${Purple}Enabled Validation Videos${NC}"
+    echo -e "Starting screen name: ${Cyan}validation${NC}..."
     sleep 1s
-    screen -dmS video bash -c "${video_command}"
+    screen -dmS video bash -c "${validation_command}"
     echo ""
 else
-  if [[ $modules == *"A"* || $modules == *"a"* ]];
+  if [[ $modules == *"V"* || $modules == *"v"* ]];
   then
-      modules_string="${modules_string}${a}${comma}"
+      modules_string="${modules_string}${v}${comma}"
       selected=true
-      echo -e "${Purple}Enabled Validation Videos${NC}"
-      echo -e "Starting screen name: ${Cyan}validation${NC}..."
+      echo -e "${Purple}Enabled Video${NC}"
+      echo -e "Starting screen name: ${Cyan}video${NC}..."
       sleep 1s
-      screen -dmS video bash -c "${validation_command}"
+      screen -dmS video bash -c "${video_command}"
       echo ""
   fi
-fi
 
-if [[ $modules == *"I"* || $modules == *"i"* ]];
-then
-  	modules_string="${modules_string}${i}${comma}"
-  	selected=true
-    echo -e "${Purple}Enabled IRBB${NC}"
-    echo -e "Starting screen name: ${Cyan}irbb${NC}..."
-    sleep 1s
-    screen -dmS irbb bash -c "${irbb_command}"
-    echo ""
-fi
+  if [[ $modules == *"I"* || $modules == *"i"* ]];
+  then
+      modules_string="${modules_string}${i}${comma}"
+      selected=true
+      echo -e "${Purple}Enabled IRBB${NC}"
+      echo -e "Starting screen name: ${Cyan}irbb${NC}..."
+      sleep 1s
+      screen -dmS irbb bash -c "${irbb_command}"
+      echo ""
+  fi
 
-if [[ $modules == *"R"* || $modules == *"r"* ]];
-then
-  	modules_string="${modules_string}${r}${comma}"
-  	selected=true
-    echo -e "${Purple}Enabled RFID${NC}"
-    echo -e "Starting screen name: ${Cyan}rfid${NC}..."
-    sleep 1s
-    screen -dmS rfid bash -c "${rfid_command}"
-    echo ""
-fi
+  if [[ $modules == *"R"* || $modules == *"r"* ]];
+  then
+      modules_string="${modules_string}${r}${comma}"
+      selected=true
+      echo -e "${Purple}Enabled RFID${NC}"
+      echo -e "Starting screen name: ${Cyan}rfid${NC}..."
+      sleep 1s
+      screen -dmS rfid bash -c "${rfid_command}"
+      echo ""
+  fi
 
-if [[ $modules == *"T"* || $modules == *"t"* ]];
-then
-  	modules_string="${modules_string}${t}${comma}"
-  	selected=true
-    echo -e "${Purple}Enabled Temp${NC}"
-    echo -e "Starting screen name: ${Cyan}temp${NC}..."
-    sleep 1s
-    screen -dmS temp bash -c "${temp_command}"
-    echo ""
+  if [[ $modules == *"T"* || $modules == *"t"* ]];
+  then
+      modules_string="${modules_string}${t}${comma}"
+      selected=true
+      echo -e "${Purple}Enabled Temp${NC}"
+      echo -e "Starting screen name: ${Cyan}temp${NC}..."
+      sleep 1s
+      screen -dmS temp bash -c "${temp_command}"
+      echo ""
+  fi
 fi
 
 if [[ $selected == true ]];
