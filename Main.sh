@@ -94,17 +94,17 @@ then
     sleep 1s
     screen -dmS video bash -c "${video_command}"
     echo ""
-fi
-
-if [[ $modules == *"A"* || $modules == *"a"* ]];
-then
-  	modules_string="${modules_string}${a}${comma}"
-  	selected=true
-    echo -e "${Purple}Enabled Validation Videos${NC}"
-    echo -e "Starting screen name: ${Cyan}validation${NC}..."
-    sleep 1s
-    screen -dmS video bash -c "${validation_command}"
-    echo ""
+else
+  if [[ $modules == *"A"* || $modules == *"a"* ]];
+  then
+      modules_string="${modules_string}${a}${comma}"
+      selected=true
+      echo -e "${Purple}Enabled Validation Videos${NC}"
+      echo -e "Starting screen name: ${Cyan}validation${NC}..."
+      sleep 1s
+      screen -dmS video bash -c "${validation_command}"
+      echo ""
+  fi
 fi
 
 if [[ $modules == *"I"* || $modules == *"i"* ]];
