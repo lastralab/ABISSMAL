@@ -63,7 +63,7 @@ echo -e "${Green}
 ${NC}"
 echo -e "${Green}Automated behavioral tracking by integrating sensors that survey movements around a target location${NC}"
 echo -e "${Blue}Repository:${NC}  ${Blue}https://github.com/lastralab/abissmal"${NC}
-echo -e "${Blue}Date:${NC}        ${Blue}November 2021${NC}"
+echo -e "${Blue}Date:${NC}        ${Blue}November 2021 - 2023${NC}"
 echo -e "${Blue}Authors:${NC}     ${Cyan}Molina, T.${NC} & ${Cyan}Smith-Vidaurre, G.${NC}"
 echo ""
 
@@ -90,10 +90,29 @@ if [[ $modules == *"A"* || $modules == *"a"* ]];
 then
     modules_string="${modules_string}${a}${comma}"
     selected=true
+
+    echo -e "${Cyan}Enter starting hour of the day to record validation videos (in 24hrs format)${NC}"
+    echo -e "${Cyan}Example: 7:00am = 7 / 11:00pm = 23${NC}"
+    read -r start_video
+    echo -e "${Cyan}Enter finishing hour of the day to record validation videos (in 24hrs format)${NC}"
+    echo -e "${Cyan}Example: 7:00am = 7 / 11:00pm = 23${NC}"
+    read -r end_video
+    sed -i "s#^video_time_range =.*#video_time_range = \"[$start_video, $end_video]\"#" "${validation_file}"
+    echo -e "${Green}Recording time set from $start_video:00 to $end_video:00hrs${NC}"
+
+    echo -e "${Cyan}Enter starting hour of the day to use LED light indicator (in 24hrs format)${NC}"
+    echo -e "${Cyan}Example: 7:00am = 7 / 11:00pm = 23${NC}"
+    read -r start_led
+    echo -e "${Cyan}Enter finishing hour of the day to stop LED light indicator (in 24hrs format)${NC}"
+    echo -e "${Cyan}Example: 7:00am = 7 / 11:00pm = 23${NC}"
+    read -r end_led
+    echo -e "${Green}LED recording indicator set from $start_led:00 to $end_led:00hrs${NC}"
+    sed -i "s#^LED_time_range =.*#LED_time_range = \"[$start_led, $end_led]\"#" "${validation_file}"
+
     echo -e "${Purple}Enabled Validation Videos${NC}"
     echo -e "Starting screen name: ${Cyan}validation${NC}..."
     sleep 1s
-    screen -dmS video bash -c "${validation_command}"
+    screen -dmS validation bash -c "${validation_command}"
     echo ""
 else
   if [[ $modules == *"V"* || $modules == *"v"* ]];
