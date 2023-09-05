@@ -60,7 +60,7 @@ ${NC}"
 echo -e "${Green}Automated behavioral tracking by integrating sensors that survey movements around a target location${NC}"
 echo -e "${Blue}Repository:${NC}  ${Blue}https://github.com/lastralab/abissmal"${NC}
 echo -e "${Blue}Date:${NC}        ${Blue}November 2021${NC}"
-echo -e "${Blue}Authors:${NC}     ${Cyan}Molina-Medrano, T.${NC} & ${Cyan}Smith-Vidaurre, G.${NC}"
+echo -e "${Blue}Authors:${NC}     ${Cyan}Molina, T.${NC} & ${Cyan}Smith-Vidaurre, G.${NC}"
 echo ""
 
 echo -e "${Yellow}Setting permissions for user:${NC} ${user_name}"
