@@ -8,6 +8,7 @@
 #' @param mode A character string. This argument determines how raw RFID or beam breaker detections will be filtered during pre-processing. If set to `retain_first`, then only the first detection per cluster (in which a cluster is a run of detections separated by gaps less than or equal to the temporal threshold) will be retained and all other detections will be dropped. If set to `thin`, then every other detection will be dropped in a thinning approach, which yields a longer sequence of detections per cluster separated by more than the given temporal threshold. The default is NULL, since this argument is not needed to pre-process video data.
 #' @param thin_threshold A single numeric value. This argument is the temporal threshold in seconds that will be used to thin the raw data. The default is `NULL`, since this argument is not needed to pre-process the video data.
 #' @param pixel_threshold A single numeric value. This argument is a numeric threshold (number of pixels) that will be used to filter out video recording events with a total number of pixels (that triggered video recording via motion detection) below this threshold. The default is `NULL`, since this argument is not needed to process the RFID or beam breaker data.
+#' @param drop_tag A character vector of length 1 or more. This argument should be specified whenever you want to exclude a given PIT tag from the cluster detection process (e.g. when a different PIT is used to test the system setup during a dry run without live animals). The argument should contain one or more PIT tag codes that should be excluded (for instance, "01-10-16-B8-7F"). The default is NULL since this argument is not required.
 #' @param path A character string. This should be the path on the local computer or external hard drive specifying where the data is saved across sensors for a given experimental setup. For instance, "/media/gsvidaurre/Anodorhynchus/Data_Testing/Box_02_31Dec2022/Data".
 #' @param data_dir A character string. This should be the name of directory where the raw data is saved across sensors inside the path above. For instance, "raw_combined".
 #' @param out_dir A character string. This should be the name of a directory within the path above specifying where the .csv file of pre-processed data should be saved for each type of movement sensor. For instance, "processed". This folder will be created as a new directory if it doesn't already exist.
@@ -18,7 +19,7 @@
 #' 
 #' @return This function returns a spreadsheet in .csv format with the pre-processed detections per sensor and all metadata columns in the original data frame. Each spreadsheet also contains a column indicating the temporal threshold used for pre-processing (in seconds) for the RFID and beam breaker data, or a column indicating the threshold used to filter detections by the number of pixels that changed for the video data. Each row of this data frame is a pre-processed detection or movement event from the raw data collected by the given sensor type.
 
-preprocess_detections <- function(sensor, timestamps_col_nm, group_col_nm = NULL, pixel_col_nm = NULL, mode = NULL, thin_threshold = NULL, pixel_threshold = NULL, path, data_dir, out_dir, tz, POSIXct_format = "%Y-%m-%d %H:%M:%OS"){
+preprocess_detections <- function(sensor, timestamps_col_nm, group_col_nm = NULL, pixel_col_nm = NULL, mode = NULL, thin_threshold = NULL, pixel_threshold = NULL, drop_tag = NULL, path, data_dir, out_dir, tz, POSIXct_format = "%Y-%m-%d %H:%M:%OS"){
   
   # Get the current global options
   orig_opts <- options()
@@ -40,21 +41,19 @@ preprocess_detections <- function(sensor, timestamps_col_nm, group_col_nm = NULL
   check_sensor_spelling("sensor", f_args[grep(paste(paste("^", "sensor", "$", sep = ""), collapse = "|"), names(f_args))])
   
   # Check that the formal arguments that should be NULL under certain conditions are NULL given the current user-specified arguments
-  if(sensor == "RFID" | sensor == "IRBB"){
+  if(sensor == "RFID"){
     
-    expect_null <- c("pixel_col_nm", "pixel_threshold")
+    expect_nulls <- c("pixel_col_nm", "pixel_threshold")
+    
+  } else if(sensor == "IRBB"){
+    
+    expect_nulls <- c("pixel_col_nm", "pixel_threshold", "drop_tag") 
     
   } else if(sensor == "Video"){
     
-    expect_null <- c("group_col_nm", "thin_threshold", "mode")
+    expect_nulls <- c("group_col_nm", "thin_threshold", "mode", "drop_tag")
     
   }
-  
-  expect_nulls <- f_args[grep(paste(paste("^", expect_null, "$", sep = ""), collapse = "|"), names(f_args))]
-  
-  invisible(sapply(1:length(expect_nulls), function(i){
-    check_null(names(expect_nulls[i]), expect_nulls[[i]])
-  }))
   
   # Check that all formal arguments that cannot be NULL depending on which sensor is specified are not NULL:
   
@@ -88,18 +87,28 @@ preprocess_detections <- function(sensor, timestamps_col_nm, group_col_nm = NULL
     
   }
   
-  expect_strings <- f_args[-grep(paste(paste("^", expect_numeric, "$", sep = ""), collapse = "|"), names(f_args))]
-  
   # Remove any columns that should be NULL
-  if(length(expect_null) > 0){
+  if(length(expect_nulls) > 0){
     
-    expect_strings <- expect_strings[-grep(paste(paste("^", expect_null, "$", sep = ""), collapse = "|"), names(expect_strings))]
+    if(is.null(drop_tag)){
+      
+      expect_nulls <- c(expect_nulls, "drop_tag")
+      
+    }
+    
+    expect_strings <- f_args[-grep(paste(paste("^", c(expect_numeric, expect_nulls), "$", sep = ""), collapse = "|"), names(f_args))]
+    
+    expect_nulls <- f_args[grep(paste(paste("^", expect_nulls, "$", sep = ""), collapse = "|"), names(f_args))]
+    
+    invisible(sapply(1:length(expect_nulls), function(i){
+      check_null(names(expect_nulls[i]), expect_nulls[[i]])
+    }))
+    
+    invisible(sapply(1:length(expect_strings), function(i){
+      check_string(names(expect_strings[i]), expect_strings[[i]])
+    }))
     
   }
-  
-  invisible(sapply(1:length(expect_strings), function(i){
-    check_string(names(expect_strings[i]), expect_strings[[i]])
-  }))
   
   # Check that the formal arguments that should be numeric are numeric
   invisible(sapply(1:length(expect_numeric), function(i){
@@ -161,6 +170,14 @@ preprocess_detections <- function(sensor, timestamps_col_nm, group_col_nm = NULL
   invisible(sapply(1:length(tstmps_cols), function(i){
     check_tstmps_cols(tstmps_cols[[i]], raw_data, "%Y-%m-%d %H:%M:%OS6")
   }))
+  
+  # Drop extra tags as needed for RFID data
+  if(grepl("RFID", sensor) & !is.null(drop_tag)){
+    
+    raw_data <- raw_data %>% 
+      dplyr::filter(!(!!sym(PIT_tag_col_nm)) %in% drop_tag)
+    
+  }
   
   if(grepl("RFID|IRBB", sensor)){
     
