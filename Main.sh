@@ -26,6 +26,9 @@ irbb_command="${python_v} ${location}${irbb_file}"
 video_file="/Modules/Video.py"
 video_command="${python_v} ${location}${video_file}"
 
+validation_file="/Modules/alt_video.py"
+validation_command="${python_v} ${location}${validation_file}"
+
 temp_file="/Modules/Temp.py"
 temp_command="${python_v} ${location}${temp_file}"
 
@@ -41,6 +44,7 @@ monitor_command="${python_v} ${location}${monitor_file}"
 helper_file="Modules/helper.py"
 
 v='"Video"'
+a='"Validation"'
 r='"RFID"'
 i='"IRBB"'
 t='"Temp"'
@@ -76,7 +80,7 @@ echo -e "To detach a screen press${Blue} Ctrl + A${NC} then type ${RED}:${NC} to
 echo ""
 
 echo -e "${Cyan}Enter first letter of the modules to track:${NC}"
-echo -e "${Cyan}Example: virt ${NC}${Purple}(V/v)ideo/(R/r)fid/(I/i)rbb/(T/t)emp${NC}"
+echo -e "${Cyan}Example: vitra ${NC}${Purple}(V/v)ideo/(R/r)fid/(I/i)rbb/(T/t)emp/V(A/a)lidation Video${NC}"
 read -r modules
 
 sed -i "s#^modules=.*#modules=\"$modules\"#" "${cron_path}"
@@ -89,6 +93,17 @@ then
     echo -e "Starting screen name: ${Cyan}video${NC}..."
     sleep 1s
     screen -dmS video bash -c "${video_command}"
+    echo ""
+fi
+
+if [[ $modules == *"A"* || $modules == *"a"* ]];
+then
+  	modules_string="${modules_string}${a}${comma}"
+  	selected=true
+    echo -e "${Purple}Enabled Validation Videos${NC}"
+    echo -e "Starting screen name: ${Cyan}validation${NC}..."
+    sleep 1s
+    screen -dmS video bash -c "${validation_command}"
     echo ""
 fi
 

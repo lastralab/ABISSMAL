@@ -28,23 +28,23 @@ from helper import get_logger
 
 dir_setup('/home/pi/')
 logging = get_logger(datetime.today())
-logging.info('Starting Video script')
-print('Started Video script')
+logging.info('Starting Validation Video script')
+print('Started Validation Video script')
 
 path = "/home/pi/Data_Abissmal/Video/"
-header = ['chamber_id', 'sensor_id', 'year', 'month', 'day', 'time_video_started', 'video_file_name', 'total_pixels_motionTrigger']
+header = ['chamber_id', 'sensor_id', 'year', 'month', 'day', 'time_video_started', 'video_file_name']
 prior_image = None
-video_time_range = [0, 23]
+video_time_range = [7, 12]
 video_width = 1280
 video_height = 720
 iso = 400
 fr = 30
-stream_duration = 6
-record_duration = 9
+stream_duration = 1
+record_duration = 4
 threshold = 50
 sensitivity = 9000
 REC_LED = 16
-LED_time_range = [6, 18]
+LED_time_range = video_time_range
 GPIO.setmode(GPIO.BCM)
 GPIO.setwarnings(False)
 GPIO.setup(REC_LED, GPIO.OUT)
@@ -59,49 +59,16 @@ def set_prior_image(current_image):
     prior_image = current_image
 
 
-def detect_motion(cam):
-    global prior_image
-    streaming = io.BytesIO()
-    cam.capture(streaming, format='jpeg', use_video_port=True)
-    streaming.seek(0)
-    if prior_image is None:
-        prior_image = Image.open(streaming)
-        return [False]
-    else:
-        buffer1 = prior_image.load()
-        current_image = Image.open(streaming)
-        buffer2 = current_image.load()
-        pixels = 0
-        for x in range(0, video_width):
-            for y in range(0, video_height):
-                pixdiff1 = abs(buffer1[x, y][0] - buffer2[x, y][0])
-                pixdiff2 = abs(buffer1[x, y][1] - buffer2[x, y][1])
-                pixdiff3 = abs(buffer1[x, y][2] - buffer2[x, y][2])
-                if (pixdiff1 + pixdiff2 + pixdiff3) > (threshold * 3):
-                    pixels += 1
-        if pixels > sensitivity:
-            date = datetime.now()
-            logging.debug('Video: sensitivity = ' + str(sensitivity) + ' < ' + str(pixels) + ' pixels')
-            result = [True, pixels, date]
-        else:
-            result = [False, None, None]
-        set_prior_image(current_image)
-        return result
-
-
-def convert_video(filename, pixels, dt):
+def convert_video(filename):
     try:
         file_mp4 = path + Path(filename).stem + '.mp4'
         command = "MP4Box -add " + filename + " " + file_mp4
         call([command], shell=True)
         print('Converted video')
         os.remove(filename)
-        csv_writer(str(box_id), 'Video', path, f"{dt.year}_{dt.month}_{dt.day}",
-                   header,
-                   [box_id, 'Camera', f"{dt.year}", f"{dt.month}", f"{dt.day}", f"{dt:%H:%M:%S.%f}", Path(filename).stem + '.mp4', pixels])
     except Exception as Err:
-        logging.error('Converting video error: ' + str(Err))
-        sms_alert('Video', 'Convert Error: ' + str(Err))
+        logging.error('Converting validation video error: ' + str(Err))
+        sms_alert('Video', 'Conversion Error: ' + str(Err))
 
 
 with picamera.PiCamera() as camera:
@@ -110,46 +77,41 @@ with picamera.PiCamera() as camera:
         camera.iso = iso
         camera.framerate = fr
         stream = picamera.PiCameraCircularIO(camera, seconds=stream_duration)
-        camera.start_recording(stream, format='h264')
         while True:
             general_time = datetime.now()
             logging = get_logger(general_time)
             hour_int = int(f"{general_time:%H}")
-            motion = detect_motion(camera)
-            if (int(video_time_range[0]) <= hour_int <= int(video_time_range[1])) and motion[0]:
-                dt = motion[2]
-                print('Motion detected; Recording started')
-                logging.info("Motion detected. Starting video recordings")
+            if int(video_time_range[0]) <= hour_int <= int(video_time_range[1]):
+                dt = general_time
+                print('Validation recording started')
+                logging.info("Starting validation video recordings")
                 dt_str = str(f"{dt.year}_{dt.month}_{dt.day}_{dt:%H}_{dt:%M}_{dt:%S}")
-                file1_h264 = path + str(box_id) + "_" + dt_str + "_pre_trigger" + '.h264'
-                file2_h264 = path + str(box_id) + "_" + dt_str + "_post_trigger" + '.h264'
+                file1_h264 = path + str(box_id) + "_validation" + dt_str + '.h264'
                 if int(LED_time_range[0]) <= hour_int <= int(LED_time_range[1]):
                     GPIO.output(REC_LED, GPIO.HIGH)
-                camera.split_recording(file2_h264)
+                camera.start_recording(stream, format='h264')
                 camera.wait_recording(record_duration)
-                camera.split_recording(stream)
                 stream.copy_to(file1_h264, seconds=stream_duration)
                 stream.clear()
-                streaming = io.BytesIO()
-                camera.capture(streaming, format='jpeg', use_video_port=True)
-                streaming.seek(0)
-                set_prior_image(Image.open(streaming))
+                # streaming = io.BytesIO()
+                # camera.capture(streaming, format='jpeg', use_video_port=True)
+                # streaming.seek(0)
+                # set_prior_image(Image.open(streaming))
                 print('Recording finished')
-                logging.info("Videos recorded")
+                logging.info("Video recorded")
                 if int(LED_time_range[0]) <= hour_int <= int(LED_time_range[1]):
                     GPIO.output(REC_LED, GPIO.LOW)
-                convert_video(file1_h264, motion[1], dt)
-                convert_video(file2_h264, motion[1], dt)
-                print('Converted videos to mp4')
-                logging.info("Converted videos to mp4")
+                convert_video(file1_h264)
+                print('Converted video to mp4')
+                logging.info("Converted video to mp4")
     except Exception as E:
         print('Video error: ' + str(E))
         logging.error('Video: ' + str(E))
         sms_alert('Video', 'Error: ' + str(E))
         camera.close()
-        logger.info("Camera closed")
+        logging.info("Camera closed")
     finally:
         camera.stop_recording()
         camera.close()
         GPIO.output(REC_LED, GPIO.LOW)
-        logger.info("Camera closed")
+        logging.info("Camera closed")
