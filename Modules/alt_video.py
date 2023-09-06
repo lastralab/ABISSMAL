@@ -39,10 +39,7 @@ video_width = 1280
 video_height = 720
 iso = 400
 fr = 30
-stream_duration = 1
-record_duration = 4
-threshold = 50
-sensitivity = 9000
+record_duration = 5
 REC_LED = 16
 LED_time_range = [7, 20]
 GPIO.setmode(GPIO.BCM)
@@ -80,7 +77,6 @@ with picamera.PiCamera() as camera:
         camera.resolution = (video_width, video_height)
         camera.iso = iso
         camera.framerate = fr
-        stream = picamera.PiCameraCircularIO(camera, seconds=stream_duration)
         while True:
             general_time = datetime.now()
             logging = get_logger(general_time)
@@ -90,17 +86,13 @@ with picamera.PiCamera() as camera:
                 print('Validation recording started')
                 logging.info("Starting validation video recordings")
                 dt_str = str(f"{dt.year}_{dt.month}_{dt.day}_{dt:%H}_{dt:%M}_{dt:%S}")
-                file1_h264 = path + str(box_id) + "_validation" + dt_str + '.h264'
+                file1_h264 = path + str(box_id) + "_validation_" + dt_str + '.h264'
                 if int(LED_time_range[0]) <= hour_int <= int(LED_time_range[1]):
                     GPIO.output(REC_LED, GPIO.HIGH)
-                camera.start_recording(stream, format='h264')
+
+                camera.start_recording(file1_h264)
                 camera.wait_recording(record_duration)
-                stream.copy_to(file1_h264, seconds=stream_duration)
-                stream.clear()
-                # streaming = io.BytesIO()
-                # camera.capture(streaming, format='jpeg', use_video_port=True)
-                # streaming.seek(0)
-                # set_prior_image(Image.open(streaming))
+                camera.stop_recording()
                 print('Recording finished')
                 logging.info("Video recorded")
                 if int(LED_time_range[0]) <= hour_int <= int(LED_time_range[1]):
