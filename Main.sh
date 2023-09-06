@@ -75,8 +75,6 @@ mkdir -p /home/pi/log/
 filename="/home/pi/log/abissmal_cron.log"
 [[ -f ${filename} ]] || touch ${filename}
 echo -e "${Yellow}/home/pi/log/abissmal_cron.log ready to log cron jobs as${NC} ${user_name}"
-echo -e "To access a screen run:${Green} screen -r ${NC}${Purple}{name}${NC}"
-echo -e "To detach a screen press${Blue} Ctrl + A${NC} then type ${RED}:${NC} to enter command mode and use command ${RED}detach${NC}"
 echo ""
 
 echo -e "${Cyan}Enter first letter of the modules to track:${NC}"
@@ -92,19 +90,17 @@ then
     selected=true
 
     echo -e "${Cyan}Enter starting hour of the day to record validation videos (in 24hrs format)${NC}"
-    echo -e "${Cyan}Example: 7:00am = 7 / 11:00pm = 23${NC}"
+    echo -e "${Cyan}Example: 7:00am = 7 / 11:00pm = 23. Minutes not allowed.${NC}"
     read -r start_video
     echo -e "${Cyan}Enter finishing hour of the day to record validation videos (in 24hrs format)${NC}"
-    echo -e "${Cyan}Example: 7:00am = 7 / 11:00pm = 23${NC}"
     read -r end_video
     sed -i "s#^video_time_range =.*#video_time_range = [$start_video, $end_video]#" "${location}${validation_file}"
     echo -e "${Green}Recording time set from $start_video:00 to $end_video:00hrs${NC}"
 
     echo -e "${Cyan}Enter starting hour of the day to use LED light indicator (in 24hrs format)${NC}"
-    echo -e "${Cyan}Example: 7:00am = 7 / 11:00pm = 23${NC}"
+    echo -e "${Cyan}Example: 7:00am = 7 / 11:00pm = 23. Minutes not allowed.${NC}"
     read -r start_led
     echo -e "${Cyan}Enter finishing hour of the day to stop LED light indicator (in 24hrs format)${NC}"
-    echo -e "${Cyan}Example: 7:00am = 7 / 11:00pm = 23${NC}"
     read -r end_led
     echo -e "${Green}LED recording indicator set from $start_led:00 to $end_led:00hrs${NC}"
     sed -i "s#^LED_time_range =.*#LED_time_range = [$start_led, $end_led]#" "${location}${validation_file}"
@@ -175,6 +171,8 @@ then
     echo ""
     echo -e "To kill all detached screens, run:"
     echo -e "${BIGreen}screen -ls | grep Detached | cut -d. -f1 | awk '{print \$1}' | xargs kill${NC}"
+    echo -e "To access a screen run:${Green} screen -r ${NC}${Purple}{name}${NC}"
+    echo -e "To detach a screen press${Blue} Ctrl + A${NC} then type ${RED}:${NC} to enter command mode and use command ${RED}detach${NC}"
     echo ""
 else
     echo ""
