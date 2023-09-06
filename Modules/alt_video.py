@@ -84,7 +84,7 @@ with picamera.PiCamera() as camera:
             if int(video_time_range[0]) <= hour_int <= int(video_time_range[1]):
                 dt = general_time
                 print('Validation recording started')
-                logging.info("Starting validation video recordings")
+                logging.info("Starting validation video")
                 dt_str = str(f"{dt.year}_{dt.month}_{dt.day}_{dt:%H}_{dt:%M}_{dt:%S}")
                 file1_h264 = path + str(box_id) + "_validation_" + dt_str + '.h264'
                 if int(LED_time_range[0]) <= hour_int <= int(LED_time_range[1]):
@@ -94,12 +94,11 @@ with picamera.PiCamera() as camera:
                 camera.wait_recording(record_duration)
                 camera.stop_recording()
                 print('Recording finished')
-                logging.info("Video recorded")
                 if int(LED_time_range[0]) <= hour_int <= int(LED_time_range[1]):
                     GPIO.output(REC_LED, GPIO.LOW)
                 convert_video(file1_h264)
                 print('Converted video to mp4')
-                logging.info("Converted video to mp4")
+                logging.info("Finished and converted video to mp4")
     except Exception as E:
         print('Video error: ' + str(E))
         logging.error('Video: ' + str(E))
