@@ -30,8 +30,7 @@ Please refer to our Wiki [Installation Overview](https://github.com/lastralab/Ab
 1. Run `sudo apt-get install git` in your RaspberryPi.
 2. Go to desired directory to download this project.
 3. Clone this repository `git clone https://github.com/lastralab/Abissmal.git`
-4. Checkout the main branch (most stable) `git checkout origin main`
-5. From root directory `/path/to/Abissmal/` run:
+4. From root directory `/path/to/Abissmal/` run:
 
    1. `sudo bash run_install.sh`
    2. Enter your password (we recommend to set a password for your raspberry pi)
