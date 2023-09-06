@@ -26,6 +26,9 @@ irbb_command="${python_v} ${location}${irbb_file}"
 video_file="/Modules/Video.py"
 video_command="${python_v} ${location}${video_file}"
 
+validation_file="/Modules/alt_video.py"
+validation_command="${python_v} ${location}${validation_file}"
+
 temp_file="/Modules/Temp.py"
 temp_command="${python_v} ${location}${temp_file}"
 
@@ -41,6 +44,7 @@ monitor_command="${python_v} ${location}${monitor_file}"
 helper_file="Modules/helper.py"
 
 v='"Video"'
+a='"Validation"'
 r='"RFID"'
 i='"IRBB"'
 t='"Temp"'
@@ -59,8 +63,8 @@ echo -e "${Green}
 ${NC}"
 echo -e "${Green}Automated behavioral tracking by integrating sensors that survey movements around a target location${NC}"
 echo -e "${Blue}Repository:${NC}  ${Blue}https://github.com/lastralab/abissmal"${NC}
-echo -e "${Blue}Date:${NC}        ${Blue}November 2021${NC}"
-echo -e "${Blue}Authors:${NC}     ${Cyan}Molina-Medrano, T.${NC} & ${Cyan}Smith-Vidaurre, G.${NC}"
+echo -e "${Blue}Date:${NC}        ${Blue}November 2021 - 2023${NC}"
+echo -e "${Blue}Authors:${NC}     ${Cyan}Molina, T.${NC} & ${Cyan}Smith-Vidaurre, G.${NC}"
 echo ""
 
 echo -e "${Yellow}Setting permissions for user:${NC} ${user_name}"
@@ -77,52 +81,83 @@ echo ""
 
 echo -e "${Cyan}Enter first letter of the modules to track:${NC}"
 echo -e "${Cyan}Example: virt ${NC}${Purple}(V/v)ideo/(R/r)fid/(I/i)rbb/(T/t)emp${NC}"
+echo -e "${RED}To run Validation Video only, enter (A/a)${NC}"
 read -r modules
 
 sed -i "s#^modules=.*#modules=\"$modules\"#" "${cron_path}"
 
-if [[ $modules == *"V"* || $modules == *"v"* ]];
+if [[ $modules == *"A"* || $modules == *"a"* ]];
 then
-  	modules_string="${modules_string}${v}${comma}"
-  	selected=true
-    echo -e "${Purple}Enabled Video${NC}"
-    echo -e "Starting screen name: ${Cyan}video${NC}..."
-    sleep 1s
-    screen -dmS video bash -c "${video_command}"
-    echo ""
-fi
+    modules_string="${modules_string}${a}${comma}"
+    selected=true
 
-if [[ $modules == *"I"* || $modules == *"i"* ]];
-then
-  	modules_string="${modules_string}${i}${comma}"
-  	selected=true
-    echo -e "${Purple}Enabled IRBB${NC}"
-    echo -e "Starting screen name: ${Cyan}irbb${NC}..."
-    sleep 1s
-    screen -dmS irbb bash -c "${irbb_command}"
-    echo ""
-fi
+    echo -e "${Cyan}Enter starting hour of the day to record validation videos (in 24hrs format)${NC}"
+    echo -e "${Cyan}Example: 7:00am = 7 / 11:00pm = 23${NC}"
+    read -r start_video
+    echo -e "${Cyan}Enter finishing hour of the day to record validation videos (in 24hrs format)${NC}"
+    echo -e "${Cyan}Example: 7:00am = 7 / 11:00pm = 23${NC}"
+    read -r end_video
+    sed -i "s#^video_time_range =.*#video_time_range = \"[$start_video, $end_video]\"#" "${validation_file}"
+    echo -e "${Green}Recording time set from $start_video:00 to $end_video:00hrs${NC}"
 
-if [[ $modules == *"R"* || $modules == *"r"* ]];
-then
-  	modules_string="${modules_string}${r}${comma}"
-  	selected=true
-    echo -e "${Purple}Enabled RFID${NC}"
-    echo -e "Starting screen name: ${Cyan}rfid${NC}..."
-    sleep 1s
-    screen -dmS rfid bash -c "${rfid_command}"
-    echo ""
-fi
+    echo -e "${Cyan}Enter starting hour of the day to use LED light indicator (in 24hrs format)${NC}"
+    echo -e "${Cyan}Example: 7:00am = 7 / 11:00pm = 23${NC}"
+    read -r start_led
+    echo -e "${Cyan}Enter finishing hour of the day to stop LED light indicator (in 24hrs format)${NC}"
+    echo -e "${Cyan}Example: 7:00am = 7 / 11:00pm = 23${NC}"
+    read -r end_led
+    echo -e "${Green}LED recording indicator set from $start_led:00 to $end_led:00hrs${NC}"
+    sed -i "s#^LED_time_range =.*#LED_time_range = \"[$start_led, $end_led]\"#" "${validation_file}"
 
-if [[ $modules == *"T"* || $modules == *"t"* ]];
-then
-  	modules_string="${modules_string}${t}${comma}"
-  	selected=true
-    echo -e "${Purple}Enabled Temp${NC}"
-    echo -e "Starting screen name: ${Cyan}temp${NC}..."
+    echo -e "${Purple}Enabled Validation Videos${NC}"
+    echo -e "Starting screen name: ${Cyan}validation${NC}..."
     sleep 1s
-    screen -dmS temp bash -c "${temp_command}"
+    screen -dmS validation bash -c "${validation_command}"
     echo ""
+else
+  if [[ $modules == *"V"* || $modules == *"v"* ]];
+  then
+      modules_string="${modules_string}${v}${comma}"
+      selected=true
+      echo -e "${Purple}Enabled Video${NC}"
+      echo -e "Starting screen name: ${Cyan}video${NC}..."
+      sleep 1s
+      screen -dmS video bash -c "${video_command}"
+      echo ""
+  fi
+
+  if [[ $modules == *"I"* || $modules == *"i"* ]];
+  then
+      modules_string="${modules_string}${i}${comma}"
+      selected=true
+      echo -e "${Purple}Enabled IRBB${NC}"
+      echo -e "Starting screen name: ${Cyan}irbb${NC}..."
+      sleep 1s
+      screen -dmS irbb bash -c "${irbb_command}"
+      echo ""
+  fi
+
+  if [[ $modules == *"R"* || $modules == *"r"* ]];
+  then
+      modules_string="${modules_string}${r}${comma}"
+      selected=true
+      echo -e "${Purple}Enabled RFID${NC}"
+      echo -e "Starting screen name: ${Cyan}rfid${NC}..."
+      sleep 1s
+      screen -dmS rfid bash -c "${rfid_command}"
+      echo ""
+  fi
+
+  if [[ $modules == *"T"* || $modules == *"t"* ]];
+  then
+      modules_string="${modules_string}${t}${comma}"
+      selected=true
+      echo -e "${Purple}Enabled Temp${NC}"
+      echo -e "Starting screen name: ${Cyan}temp${NC}..."
+      sleep 1s
+      screen -dmS temp bash -c "${temp_command}"
+      echo ""
+  fi
 fi
 
 if [[ $selected == true ]];
