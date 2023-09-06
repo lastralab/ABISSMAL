@@ -81,15 +81,14 @@ with picamera.PiCamera() as camera:
             general_time = datetime.now()
             logging = get_logger(general_time)
             hour_int = int(f"{general_time:%H}")
-            if int(video_time_range[0]) <= hour_int <= int(video_time_range[1]):
+            if int(video_time_range[0]) <= hour_int < int(video_time_range[1]):
                 dt = general_time
                 print('Validation recording started')
                 logging.info("Starting validation video")
                 dt_str = str(f"{dt.year}_{dt.month}_{dt.day}_{dt:%H}_{dt:%M}_{dt:%S}")
                 file1_h264 = path + str(box_id) + "_validation_" + dt_str + '.h264'
-                if int(LED_time_range[0]) <= hour_int <= int(LED_time_range[1]):
+                if int(LED_time_range[0]) <= hour_int < int(LED_time_range[1]):
                     GPIO.output(REC_LED, GPIO.HIGH)
-
                 camera.start_recording(file1_h264)
                 camera.wait_recording(record_duration)
                 camera.stop_recording()
