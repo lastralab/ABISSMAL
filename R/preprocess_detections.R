@@ -213,12 +213,11 @@ preprocess_detections <- function(sensor, timestamps_col_nm, group_col_nm = NULL
     lags <- tmp_df %>% 
       dplyr::mutate(
         shift = dplyr::lag(!!sym(timestamps_col_nm), default = first(!!sym(timestamps_col_nm)))
-      ) %>% 
-      # Convert differences to boolean based on the thinning threshold to be able to remove stretches of detection events very close together
+      ) %>%
+      # Convert differences to Boolean based on the thinning threshold to be able to remove stretches of detection events very close together
       dplyr::mutate(
-        diff = floor(!!sym(timestamps_col_nm) - shift),
-        diff = as.numeric(diff),
-        binary_diff = (diff > thin_threshold & diff > 0)
+        diff = as.numeric(!!sym(timestamps_col_nm) - shift),
+        binary_diff = (diff <= thin_threshold & diff > 0)
       ) 
     
     if(!is.null(group_col_nm)){
@@ -240,7 +239,7 @@ preprocess_detections <- function(sensor, timestamps_col_nm, group_col_nm = NULL
         run_values = rle(binary_diff)[["values"]],
         run_lengths = rle(binary_diff)[["lengths"]]
       ) %>% 
-      dplyr::filter(!run_values) 
+      dplyr::filter(run_values) 
     
     if(!is.null(group_col_nm)){
       
@@ -249,11 +248,22 @@ preprocess_detections <- function(sensor, timestamps_col_nm, group_col_nm = NULL
         lags_runs2 <- lags_runs %>% 
           dplyr::select(group_col, run_values, run_lengths, run_indices) %>% 
           pmap_dfr(., function(group_col, run_values, run_lengths, run_indices){
-            # In the runs of FALSE values (e.g. cluster), remove all including the first index. Should work for all runs with length == 1 or > 1
+            # In the runs of TRUE values (e.g. cluster), remove all including the first index. Should work for all runs with length == 1 or > 1
+            
+            if(run_lengths == 1){
+              
+              rem_indices <- run_indices
+              
+            } else if(run_lengths > 1){
+            
+              rem_indices <- seq((run_indices - (run_lengths - 1)), run_indices, 1)
+              
+            }
+            
             return(
               data.frame(
                 group_col = group_col,
-                rem_indices = seq((run_indices - (run_lengths - 1)), run_indices, 1)
+                rem_indices = rem_indices
               )
             )
           }) %>% 
@@ -262,31 +272,39 @@ preprocess_detections <- function(sensor, timestamps_col_nm, group_col_nm = NULL
         
       } else if(mode == "thin"){
         
-        lags_runs2 <- lags_runs %>% 
+        lags_runs2 <- lags_runs %>%
           dplyr::select(group_col, run_values, run_lengths, run_indices) %>% 
           pmap_dfr(., function(group_col, run_values, run_lengths, run_indices){
-            # For each run of FALSE values (e.g. cluster), retain every other detection (starting with the first detection) in order to thin the cluster
+            # For each run of TRUE values (e.g. cluster), retain every other detection (starting with the first detection) in order to thin the cluster
             
-            if(run_indices == run_lengths & run_lengths %% 2 != 0){
+            if(run_lengths == 1){
               
-              rem_indices <- seq((run_indices - (run_lengths - 2)), run_indices - 1, 2)
+              rem_indices <- run_indices
               
-            } else if(run_indices == run_lengths & run_lengths %% 2 == 0){
+            } else if(run_lengths > 1){
               
-              rem_indices <- seq((run_indices - (run_lengths - 2)), run_indices, 2)
-              
-            } else if(run_indices != run_lengths & length(1:run_indices) %% 2 != 0){
-              
-              # If the total number of indices is odd, then make sure the last index is flagged for removal
-              rem_indices <- seq((run_indices - (run_lengths - 1)), run_indices - 1, 2)
-              
-            } else if(run_indices != run_lengths & length(1:run_indices) %% 2 == 0){
-              
-              # If the total number of indices is even, then make sure the last index will be retained
-              rem_indices <- seq((run_indices - (run_lengths - 1)), run_indices, 2)
+              if(run_indices == run_lengths & run_lengths %% 2 != 0){
+                
+                rem_indices <- seq((run_indices - (run_lengths - 2)), run_indices - 1, 2)
+                
+              } else if(run_indices == run_lengths & run_lengths %% 2 == 0){
+                
+                rem_indices <- seq((run_indices - (run_lengths - 2)), run_indices, 2)
+                
+              } else if(run_indices != run_lengths & length(1:run_indices) %% 2 != 0){
+                
+                # If the total number of indices is odd, then make sure the last index is flagged for removal
+                rem_indices <- seq((run_indices - (run_lengths - 1)), run_indices - 1, 2)
+                
+              } else if(run_indices != run_lengths & length(1:run_indices) %% 2 == 0){
+                
+                # If the total number of indices is even, then make sure the last index will be retained
+                rem_indices <- seq((run_indices - (run_lengths - 1)), run_indices, 2)
+                
+              }
               
             }
-            
+
             return(
               data.frame(
                 group_col = group_col,
