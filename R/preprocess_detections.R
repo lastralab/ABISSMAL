@@ -175,7 +175,7 @@ preprocess_detections <- function(sensor, timestamps_col_nm, group_col_nm = NULL
   if(grepl("RFID", sensor) & !is.null(drop_tag)){
     
     raw_data <- raw_data %>% 
-      dplyr::filter(!(!!sym(PIT_tag_col_nm)) %in% drop_tag)
+      dplyr::filter(!(!!sym(group_col_nm)) %in% drop_tag)
     
   }
   
