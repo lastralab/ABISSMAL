@@ -172,7 +172,7 @@ find_detectionClusters <- function(file_nms, threshold, run_length = 2, sensor_i
       names(vid_cols) <- video_metadata_col_nms
       
       tmp <- tmp %>% 
-        bind_cols(
+        dplyr::bind_cols(
           vid_cols
         )
       
@@ -222,7 +222,7 @@ find_detectionClusters <- function(file_nms, threshold, run_length = 2, sensor_i
       
       tag_ids <- all_sensors %>%
         dplyr::filter(sensor_id == rfid_label) %>%
-        pull(!!sym(PIT_tag_col_nm)) %>%
+        dplyr::pull(!!sym(PIT_tag_col_nm)) %>%
         unique()
       
     }
@@ -234,11 +234,11 @@ find_detectionClusters <- function(file_nms, threshold, run_length = 2, sensor_i
     dplyr::mutate(
       dates = paste(year, month, day, sep = "-")
     ) %>%
-    group_by(dates) %>% 
+    dplyr::group_by(dates) %>% 
     dplyr::arrange(!!sym(timestamps_col_nm), .by_group = TRUE) %>% 
     # Make unique row indices within groups
     dplyr::mutate(
-      group_row_id = row_number()
+      group_row_id = dplyr::row_number()
     ) %>% 
     nest() %>% 
     dplyr::mutate(
@@ -270,7 +270,7 @@ find_detectionClusters <- function(file_nms, threshold, run_length = 2, sensor_i
                               .groups = "keep"
         ) %>% 
           dplyr::filter(run_values & run_lengths >= run_length) %>% 
-          ungroup()
+          dplyr::ungroup()
       )
     ) %>% 
     
@@ -281,21 +281,21 @@ find_detectionClusters <- function(file_nms, threshold, run_length = 2, sensor_i
         .y = data,
         # For each unique date, retain the first and last indices of sensor detections flagged as clusters
         # Use pmap_dfr to iterate over rows in each nested data frame, in which each row represents a unique cluster of detections by date
-        .f = ~ dplyr::select(.x, first_indices, last_indices) %>% 
+        .f = ~ dplyr::select(.x, first_indices, last_indices) %>%
           pmap_dfr(., function(first_indices, last_indices){
             
             tmp <- data.frame(
               start = .y[[1]] %>%
                 dplyr::filter(group_row_id == first_indices) %>%
-                pull(all_of(timestamps_col_nm)),
+                dplyr::pull(all_of(timestamps_col_nm)),
               end = .y[[1]] %>%
                 dplyr::filter(group_row_id == last_indices) %>%
-                pull(all_of(timestamps_col_nm))
+                dplyr::pull(all_of(timestamps_col_nm))
             ) %>% 
               dplyr::mutate(
                 event_seq = .y[[1]] %>%
                   dplyr::filter(group_row_id >= first_indices & group_row_id <= last_indices) %>%
-                  pull(sensor_id) %>% 
+                  dplyr::pull(sensor_id) %>% 
                   paste(., collapse = "; ")
               )
             
@@ -306,7 +306,7 @@ find_detectionClusters <- function(file_nms, threshold, run_length = 2, sensor_i
                 
                 PIT_tag_seq <- .y[[1]] %>%
                   dplyr::filter(group_row_id >= first_indices & group_row_id <= last_indices) %>%
-                  pull(all_of(PIT_tag_col_nm))
+                  dplyr::pull(all_of(PIT_tag_col_nm))
                 
                 # Drop NA values in the sequence
                 PIT_tag_seq <- PIT_tag_seq[!is.na(PIT_tag_seq)]
@@ -344,7 +344,7 @@ find_detectionClusters <- function(file_nms, threshold, run_length = 2, sensor_i
                   dplyr::select(all_of(video_metadata_col_nms)) %>%
                   # Drop rows that have NAs in these columns
                   dplyr::filter(complete.cases(.))
-
+                
                 # If multiple videos occurred within a detection cluster, then concatenate these file names together
                 if(nrow(vid_cols_tmp) > 1){
 
@@ -354,7 +354,7 @@ find_detectionClusters <- function(file_nms, threshold, run_length = 2, sensor_i
                     dplyr::reframe(
                       tmp_col_nm = str_c(tmp_col_nm, collapse = "; ")
                     ) %>%
-                    pull(tmp_col_nm)
+                    dplyr::pull(tmp_col_nm)
 
                   vid_cols_tmp[[tmp_col_nm]] <- vid_file_nms
 
@@ -364,7 +364,7 @@ find_detectionClusters <- function(file_nms, threshold, run_length = 2, sensor_i
                 }
 
                 tmp <- tmp %>%
-                  bind_cols(
+                  dplyr::bind_cols(
                     vid_cols_tmp
                   )
 
@@ -376,12 +376,12 @@ find_detectionClusters <- function(file_nms, threshold, run_length = 2, sensor_i
             
           })
       ) 
-    ) 
-
+    )
+  
   detectns2 <- detectns %>%
     dplyr::select(-c(data, lags, lags_runs)) %>% 
     unnest(`cols` = c(bouts)) %>%
-    ungroup() %>% 
+    dplyr::ungroup() %>% 
     dplyr::select(-c(dates))
   
   if(nrow(detectns) > 0){
@@ -413,7 +413,7 @@ find_detectionClusters <- function(file_nms, threshold, run_length = 2, sensor_i
       individual_initiated = NA,
       individual_ended = NA
     ) %>% 
-      bind_cols(
+      dplyr::bind_cols(
         all_sensors %>% 
           dplyr::select(all_of(general_metadata_col_nms), all_of(timestamps_col_nm)) %>% 
           distinct()
