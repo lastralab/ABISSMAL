@@ -243,77 +243,85 @@ preprocess_detections <- function(sensor, timestamps_col_nm, group_col_nm = NULL
     
     if(!is.null(group_col_nm)){
       
-      if(mode == "retain_first"){
+      if(nrow(lags_runs) > 0){
         
-        lags_runs2 <- lags_runs %>% 
-          dplyr::select(group_col, run_values, run_lengths, run_indices) %>% 
-          pmap_dfr(., function(group_col, run_values, run_lengths, run_indices){
-            # In the runs of TRUE values (e.g. cluster), remove all including the first index. Should work for all runs with length == 1 or > 1
-            
-            if(run_lengths == 1){
+        if(mode == "retain_first"){
+          
+          lags_runs2 <- lags_runs %>% 
+            dplyr::select(group_col, run_values, run_lengths, run_indices) %>% 
+            pmap_dfr(., function(group_col, run_values, run_lengths, run_indices){
+              # In the runs of TRUE values (e.g. cluster), remove all including the first index. Should work for all runs with length == 1 or > 1
               
-              rem_indices <- run_indices
-              
-            } else if(run_lengths > 1){
-            
-              rem_indices <- seq((run_indices - (run_lengths - 1)), run_indices, 1)
-              
-            }
-            
-            return(
-              data.frame(
-                group_col = group_col,
-                rem_indices = rem_indices
-              )
-            )
-          }) %>% 
-          # Make sure to drop the first index per group, since these first observations should be retained
-          dplyr::filter(rem_indices != 1)
-        
-      } else if(mode == "thin"){
-        
-        lags_runs2 <- lags_runs %>%
-          dplyr::select(group_col, run_values, run_lengths, run_indices) %>% 
-          pmap_dfr(., function(group_col, run_values, run_lengths, run_indices){
-            # For each run of TRUE values (e.g. cluster), retain every other detection (starting with the first detection) in order to thin the cluster
-            
-            if(run_lengths == 1){
-              
-              rem_indices <- run_indices
-              
-            } else if(run_lengths > 1){
-              
-              if(run_indices == run_lengths & run_lengths %% 2 != 0){
+              if(run_lengths == 1){
                 
-                rem_indices <- seq((run_indices - (run_lengths - 2)), run_indices - 1, 2)
+                rem_indices <- run_indices
                 
-              } else if(run_indices == run_lengths & run_lengths %% 2 == 0){
+              } else if(run_lengths > 1){
                 
-                rem_indices <- seq((run_indices - (run_lengths - 2)), run_indices, 2)
-                
-              } else if(run_indices != run_lengths & length(1:run_indices) %% 2 != 0){
-                
-                # If the total number of indices is odd, then make sure the last index is flagged for removal
-                rem_indices <- seq((run_indices - (run_lengths - 1)), run_indices - 1, 2)
-                
-              } else if(run_indices != run_lengths & length(1:run_indices) %% 2 == 0){
-                
-                # If the total number of indices is even, then make sure the last index will be retained
-                rem_indices <- seq((run_indices - (run_lengths - 1)), run_indices, 2)
+                rem_indices <- seq((run_indices - (run_lengths - 1)), run_indices, 1)
                 
               }
               
-            }
-
-            return(
-              data.frame(
-                group_col = group_col,
-                rem_indices = rem_indices
+              return(
+                data.frame(
+                  group_col = group_col,
+                  rem_indices = rem_indices
+                )
               )
-            )
-          }) %>% 
-          # Make sure to drop the first index per group, since these first observations should be retained
-          dplyr::filter(rem_indices != 1)
+            }) %>% 
+            # Make sure to drop the first index per group, since these first observations should be retained
+            dplyr::filter(rem_indices != 1)
+          
+        } else if(mode == "thin"){
+          
+          lags_runs2 <- lags_runs %>%
+            dplyr::select(group_col, run_values, run_lengths, run_indices) %>% 
+            pmap_dfr(., function(group_col, run_values, run_lengths, run_indices){
+              # For each run of TRUE values (e.g. cluster), retain every other detection (starting with the first detection) in order to thin the cluster
+              
+              if(run_lengths == 1){
+                
+                rem_indices <- run_indices
+                
+              } else if(run_lengths > 1){
+                
+                if(run_indices == run_lengths & run_lengths %% 2 != 0){
+                  
+                  rem_indices <- seq((run_indices - (run_lengths - 2)), run_indices - 1, 2)
+                  
+                } else if(run_indices == run_lengths & run_lengths %% 2 == 0){
+                  
+                  rem_indices <- seq((run_indices - (run_lengths - 2)), run_indices, 2)
+                  
+                } else if(run_indices != run_lengths & length(1:run_indices) %% 2 != 0){
+                  
+                  # If the total number of indices is odd, then make sure the last index is flagged for removal
+                  rem_indices <- seq((run_indices - (run_lengths - 1)), run_indices - 1, 2)
+                  
+                } else if(run_indices != run_lengths & length(1:run_indices) %% 2 == 0){
+                  
+                  # If the total number of indices is even, then make sure the last index will be retained
+                  rem_indices <- seq((run_indices - (run_lengths - 1)), run_indices, 2)
+                  
+                }
+                
+              }
+              
+              return(
+                data.frame(
+                  group_col = group_col,
+                  rem_indices = rem_indices
+                )
+              )
+            }) %>% 
+            # Make sure to drop the first index per group, since these first observations should be retained
+            dplyr::filter(rem_indices != 1)
+          
+        }
+        
+      } else {
+        
+        stop("Try changing the thin_threshold or consider whether pre-processing is necessary. The current thin_threshold value did not yield clusters of detections that were very close together")
         
       }
       
