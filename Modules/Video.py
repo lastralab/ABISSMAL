@@ -116,14 +116,14 @@ with picamera.PiCamera() as camera:
             logging = get_logger(general_time)
             hour_int = int(f"{general_time:%H}")
             motion = detect_motion(camera)
-            if (int(video_time_range[0]) <= hour_int <= int(video_time_range[1])) and motion[0]:
+            if (int(video_time_range[0]) <= hour_int < int(video_time_range[1])) and motion[0]:
                 dt = [motion[2]]
                 print('Motion detected; Recording started')
                 logging.info("Motion detected. Starting video recordings")
                 dt_str = str(f"{dt.year}_{dt.month}_{dt.day}_{dt:%H}_{dt:%M}_{dt:%S}")
                 file1_h264 = path + str(box_id) + "_" + dt_str + "_pre_trigger" + '.h264'
                 file2_h264 = path + str(box_id) + "_" + dt_str + "_post_trigger" + '.h264'
-                if int(LED_time_range[0]) <= hour_int <= int(LED_time_range[1]):
+                if int(LED_time_range[0]) <= hour_int < int(LED_time_range[1]):
                     GPIO.output(REC_LED, GPIO.HIGH)
                 camera.split_recording(file2_h264)
                 camera.wait_recording(record_duration)
