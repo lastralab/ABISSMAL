@@ -117,7 +117,7 @@ with picamera.PiCamera() as camera:
             hour_int = int(f"{general_time:%H}")
             motion = detect_motion(camera)
             if (int(video_time_range[0]) <= hour_int <= int(video_time_range[1])) and motion[0]:
-                dt = motion[2]
+                dt = [motion[2]]
                 print('Motion detected; Recording started')
                 logging.info("Motion detected. Starting video recordings")
                 dt_str = str(f"{dt.year}_{dt.month}_{dt.day}_{dt:%H}_{dt:%M}_{dt:%S}")
@@ -147,9 +147,9 @@ with picamera.PiCamera() as camera:
         logging.error('Video: ' + str(E))
         sms_alert('Video', 'Error: ' + str(E))
         camera.close()
-        logger.info("Camera closed")
+        logging.info("Camera closed")
     finally:
         camera.stop_recording()
         camera.close()
         GPIO.output(REC_LED, GPIO.LOW)
-        logger.info("Camera closed")
+        logging.info("Camera closed")
