@@ -155,12 +155,16 @@ find_detectionClusters <- function(file_nms, threshold, run_length = 2, sensor_i
     }
     
     # If a given data frame does not have the column PIT_tag_col_nm, then create a column named like this but with NAs
-    if(!any(grepl(PIT_tag_col_nm, names(tmp)))){
+    if(!is.null(PIT_tag_col_nm)){
       
-      tmp <- tmp %>% 
-        dplyr::mutate(
-          !!PIT_tag_col_nm := NA
-        )
+      if(!any(grepl(PIT_tag_col_nm, names(tmp)))){
+        
+        tmp <- tmp %>% 
+          dplyr::mutate(
+            !!PIT_tag_col_nm := NA
+          )
+        
+      }
       
     }
     
@@ -322,17 +326,17 @@ find_detectionClusters <- function(file_nms, threshold, run_length = 2, sensor_i
                 
               }
               
+              tmp <- tmp %>%
+                dplyr::mutate(
+                  indiv1_id = tag_ids[1],
+                  indiv2_id = tag_ids[2],
+                  total_indiv1_detections = total_indiv1_detections,
+                  total_indiv2_detections = total_indiv2_detections,
+                  individual_initiated = individual_initiated,
+                  individual_ended = individual_ended
+                )
+              
             }
-            
-            tmp <- tmp %>%
-              dplyr::mutate(
-                indiv1_id = tag_ids[1],
-                indiv2_id = tag_ids[2],
-                total_indiv1_detections = total_indiv1_detections,
-                total_indiv2_detections = total_indiv2_detections,
-                individual_initiated = individual_initiated,
-                individual_ended = individual_ended
-              )
             
             # If video data is present, then add back video-related information
             if(!is.null(camera_label) & !is.null(video_metadata_col_nms)){
