@@ -59,7 +59,6 @@ preprocess_detections <- function(sensor, timestamps_col_nm, group_col_nm = NULL
   
   # When sensor = RFID|IRBB, the arguments group_col_nm, thin_threshold, mode cannot be NULL
   # When sensor = Video, the arguments pixel_col_nm, pixel_threshold cannot be NULL
-  
   if(sensor == "RFID" | sensor == "IRBB"){
     
     expect_nonNull <- c("group_col_nm", "thin_threshold", "mode")
@@ -187,11 +186,11 @@ preprocess_detections <- function(sensor, timestamps_col_nm, group_col_nm = NULL
     if(!is.null(group_col_nm)){
       
       tmp_df <- raw_data %>%
-        group_by(!!sym(group_col_nm)) %>%
+        dplyr::group_by(!!sym(group_col_nm)) %>%
         dplyr::arrange(!!sym(timestamps_col_nm), .by_group = TRUE) %>% 
         # Make unique row indices within groups
         dplyr::mutate(
-          group_row_id = row_number()
+          group_row_id = dplyr::row_number()
         ) %>% 
         dplyr::rename(
           `group_col` = all_of(group_col_nm)
