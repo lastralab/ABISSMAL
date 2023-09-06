@@ -1,6 +1,10 @@
 #' @title combine_raw_data_per_sensor
 #' @description Combine raw data files for each sensor
 #' 
+#' 
+
+sensors = c("IRBB", "RFID", "Video", "Temp"), path, data_dir, out_dir, tz, POSIXct_format = "%Y-%m-%d %H:%M:%OS"
+
 #' @param sensors A character vector of length 1 or more. This vector should contain the names of the sensors across which raw data files will be combined into a single spreadsheet. The default is all sensors, or c("IRBB", "RFID", "Video", "Temp"). Note that for the beam breakers, the raw data contains data collected from each of the 2 pairs of beam breakers included in the current hardware setup.
 #' @param path A character string. This argument should be the path on the local computer or external hard drive specifying where the data is saved across sensors for a given experimental setup. For instance, "/media/gsvidaurre/Anodorhynchus/Data_Testing/Box_02_31Dec2022".
 #' @param data_dir A character string. This argument should be the directory inside the path above that holds the folders of raw data per sensor. For instance, "Data".

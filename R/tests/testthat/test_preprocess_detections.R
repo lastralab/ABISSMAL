@@ -81,7 +81,7 @@ test_that("The correct number and timing of discrete movement events are retaine
   th <- 1
   
   ####### `retain_first` mode #######
-  preprocess_detections(sensor = "RFID", timestamps_col_nm = "timestamp_ms", group_col_nm = "PIT_tag_ID", pixel_col_nm = NULL, thin_threshold = th, mode = "retain_first", pixel_threshold = NULL, drop_tag = NULL, path = path, data_dir = file.path(data_dir, "raw_combined"), out_dir = file.path(data_dir, "processed"), tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS")
+  preprocess_detections(sensor = "RFID", timestamps_col_nm = "timestamp_ms", group_col_nm = "PIT_tag_ID", pixel_col_nm = NULL, thin_threshold = th, mode = "retain_first", pixel_threshold = NULL, path = path, data_dir = file.path(data_dir, "raw_combined"), out_dir = file.path(data_dir, "processed"), tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS")
   
   # Read in the output, check the output, then delete all files
   test_res <- read.csv(file.path(tmp_path, "processed", "pre_processed_data_RFID.csv")) %>% 
@@ -109,7 +109,7 @@ test_that("The correct number and timing of discrete movement events are retaine
   }))
   
   ####### `thin` mode #######
-  preprocess_detections(sensor = "RFID", timestamps_col_nm = "timestamp_ms", group_col_nm = "PIT_tag_ID", pixel_col_nm = NULL, thin_threshold = th, mode = "thin", pixel_threshold = NULL, drop_tag = NULL, path = path, data_dir = file.path(data_dir, "raw_combined"), out_dir = file.path(data_dir, "processed"), tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS")
+  preprocess_detections(sensor = "RFID", timestamps_col_nm = "timestamp_ms", group_col_nm = "PIT_tag_ID", pixel_col_nm = NULL, thin_threshold = th, mode = "thin", pixel_threshold = NULL, path = path, data_dir = file.path(data_dir, "raw_combined"), out_dir = file.path(data_dir, "processed"), tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS")
   
   # Read in the output, check the output, then delete all files
   test_res <- read.csv(file.path(tmp_path, "processed", "pre_processed_data_RFID.csv")) %>% 
@@ -215,7 +215,7 @@ test_that("The correct number and timing of discrete movement events are retaine
     
     ####### `retain_first` mode #######
     
-    preprocess_detections(sensor = "RFID", timestamps_col_nm = "timestamp_ms", group_col_nm = "PIT_tag_ID", pixel_col_nm = NULL, thin_threshold = ths[x], mode = "retain_first", pixel_threshold = NULL, drop_tag = NULL, path = path, data_dir = file.path(data_dir, "raw_combined"), out_dir = file.path(data_dir, "processed"), tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS")
+    preprocess_detections(sensor = "RFID", timestamps_col_nm = "timestamp_ms", group_col_nm = "PIT_tag_ID", pixel_col_nm = NULL, thin_threshold = ths[x], mode = "retain_first", pixel_threshold = NULL, path = path, data_dir = file.path(data_dir, "raw_combined"), out_dir = file.path(data_dir, "processed"), tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS")
     
     # Read in the output, check the output, then delete all files
     test_res <- read.csv(file.path(tmp_path, "processed", "pre_processed_data_RFID.csv")) %>% 
@@ -243,7 +243,7 @@ test_that("The correct number and timing of discrete movement events are retaine
     }))
     
     ####### `thin` mode #######
-    preprocess_detections(sensor = "RFID", timestamps_col_nm = "timestamp_ms", group_col_nm = "PIT_tag_ID", pixel_col_nm = NULL, thin_threshold = ths[x], mode = "thin", pixel_threshold = NULL, drop_tag = NULL, path = path, data_dir = file.path(data_dir, "raw_combined"), out_dir = file.path(data_dir, "processed"), tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS")
+    preprocess_detections(sensor = "RFID", timestamps_col_nm = "timestamp_ms", group_col_nm = "PIT_tag_ID", pixel_col_nm = NULL, thin_threshold = ths[x], mode = "thin", pixel_threshold = NULL, path = path, data_dir = file.path(data_dir, "raw_combined"), out_dir = file.path(data_dir, "processed"), tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS")
     
     # Read in the output, check the output, then delete all files
     test_res <- read.csv(file.path(tmp_path, "processed", "pre_processed_data_RFID.csv")) %>% 
@@ -365,7 +365,7 @@ test_that("The correct number and timing of discrete movement events are retaine
   th <- 1
   
   ####### `retain_first` mode #######
-  preprocess_detections(sensor = "IRBB", timestamps_col_nm = "timestamp_ms", group_col_nm = "sensor_id", pixel_col_nm = NULL, thin_threshold = th, mode = "retain_first", pixel_threshold = NULL, drop_tag = NULL, path = path, data_dir = file.path(data_dir, "raw_combined"), out_dir = file.path(data_dir, "processed"), tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS")
+  preprocess_detections(sensor = "IRBB", timestamps_col_nm = "timestamp_ms", group_col_nm = "sensor_id", pixel_col_nm = NULL, thin_threshold = th, mode = "retain_first", pixel_threshold = NULL, path = path, data_dir = file.path(data_dir, "raw_combined"), out_dir = file.path(data_dir, "processed"), tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS")
   
   # Read in the output, check the output, then delete all files
   test_res <- read.csv(file.path(tmp_path, "processed", "pre_processed_data_IRBB.csv")) %>% 
@@ -398,7 +398,7 @@ test_that("The correct number and timing of discrete movement events are retaine
   }))
   
   ####### `thin` mode #######
-  preprocess_detections(sensor = "IRBB", timestamps_col_nm = "timestamp_ms", group_col_nm = "sensor_id", pixel_col_nm = NULL, thin_threshold = th, mode = "thin", pixel_threshold = NULL, drop_tag = NULL, path = path, data_dir = file.path(data_dir, "raw_combined"), out_dir = file.path(data_dir, "processed"), tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS")
+  preprocess_detections(sensor = "IRBB", timestamps_col_nm = "timestamp_ms", group_col_nm = "sensor_id", pixel_col_nm = NULL, thin_threshold = th, mode = "thin", pixel_threshold = NULL, path = path, data_dir = file.path(data_dir, "raw_combined"), out_dir = file.path(data_dir, "processed"), tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS")
   
   # Read in the output, check the output, then delete all files
   test_res <- read.csv(file.path(tmp_path, "processed", "pre_processed_data_IRBB.csv")) %>% 
@@ -523,7 +523,7 @@ test_that("The correct number and timing of discrete movement events are retaine
     write.csv(sim_ts, file.path(tmp_path, "raw_combined", "combined_raw_data_IRBB.csv"), row.names = FALSE)
     
     ####### `retain_first` mode #######
-    preprocess_detections(sensor = "IRBB", timestamps_col_nm = "timestamp_ms", group_col_nm = "sensor_id", pixel_col_nm = NULL, thin_threshold = ths[x], mode = "retain_first", pixel_threshold = NULL, drop_tag = NULL, path = path, data_dir = file.path(data_dir, "raw_combined"), out_dir = file.path(data_dir, "processed"), tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS")
+    preprocess_detections(sensor = "IRBB", timestamps_col_nm = "timestamp_ms", group_col_nm = "sensor_id", pixel_col_nm = NULL, thin_threshold = ths[x], mode = "retain_first", pixel_threshold = NULL, path = path, data_dir = file.path(data_dir, "raw_combined"), out_dir = file.path(data_dir, "processed"), tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS")
     
     # Read in the output, check the output, then delete all files
     test_res <- read.csv(file.path(tmp_path, "processed", "pre_processed_data_IRBB.csv")) %>% 
@@ -556,7 +556,7 @@ test_that("The correct number and timing of discrete movement events are retaine
     }))
     
     ####### `thin` mode #######
-    preprocess_detections(sensor = "IRBB", timestamps_col_nm = "timestamp_ms", group_col_nm = "sensor_id", pixel_col_nm = NULL, thin_threshold = ths[x], mode = "thin", pixel_threshold = NULL, drop_tag = NULL, path = path, data_dir = file.path(data_dir, "raw_combined"), out_dir = file.path(data_dir, "processed"), tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS")
+    preprocess_detections(sensor = "IRBB", timestamps_col_nm = "timestamp_ms", group_col_nm = "sensor_id", pixel_col_nm = NULL, thin_threshold = ths[x], mode = "thin", pixel_threshold = NULL, path = path, data_dir = file.path(data_dir, "raw_combined"), out_dir = file.path(data_dir, "processed"), tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS")
     
     # Read in the output, check the output, then delete all files
     test_res <- read.csv(file.path(tmp_path, "processed", "pre_processed_data_IRBB.csv")) %>% 
@@ -681,7 +681,7 @@ test_that("The correct number and timing of discrete movement events are retaine
   
   write.csv(sim_ts, file.path(tmp_path, "raw_combined", "combined_raw_data_Video.csv"), row.names = FALSE)
   
-  preprocess_detections(sensor = "Video", timestamps_col_nm = "timestamp_ms", group_col_nm = NULL, pixel_col_nm = "total_pixels_motionTrigger", thin_threshold = NULL, mode = NULL, pixel_threshold = px, drop_tag = NULL, path = path, data_dir = file.path(data_dir, "raw_combined"), out_dir = file.path(data_dir, "processed"), tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS")
+  preprocess_detections(sensor = "Video", timestamps_col_nm = "timestamp_ms", group_col_nm = NULL, pixel_col_nm = "total_pixels_motionTrigger", thin_threshold = NULL, mode = NULL, pixel_threshold = px, path = path, data_dir = file.path(data_dir, "raw_combined"), out_dir = file.path(data_dir, "processed"), tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS")
   
   # Read in the output, check the output, then delete all files
   test_res <- read.csv(file.path(tmp_path, "processed", "pre_processed_data_Video.csv")) %>% 
@@ -730,7 +730,7 @@ test_that("The correct number and timing of discrete movement events are retaine
   
   write.csv(sim_ts, file.path(tmp_path, "raw_combined", "combined_raw_data_Video.csv"), row.names = FALSE)
   
-  preprocess_detections(sensor = "Video", timestamps_col_nm = "timestamp_ms", group_col_nm = NULL, pixel_col_nm = "total_pixels_motionTrigger", thin_threshold = NULL, mode = NULL, pixel_threshold = px, drop_tag = NULL, path = path, data_dir = file.path(data_dir, "raw_combined"), out_dir = file.path(data_dir, "processed"), tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS")
+  preprocess_detections(sensor = "Video", timestamps_col_nm = "timestamp_ms", group_col_nm = NULL, pixel_col_nm = "total_pixels_motionTrigger", thin_threshold = NULL, mode = NULL, pixel_threshold = px, path = path, data_dir = file.path(data_dir, "raw_combined"), out_dir = file.path(data_dir, "processed"), tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS")
   
   # Read in the output, check the output, then delete all files
   test_res <- read.csv(file.path(tmp_path, "processed", "pre_processed_data_Video.csv")) %>% 
@@ -872,7 +872,7 @@ test_that("the function catches when non-NULL arguments are NULL", {
     args[arg_nms[i]] <- list(NULL)
     
     expect_error(
-      preprocess_detections(sensor = "RFID", timestamps_col_nm = "timestamps_col_nm", group_col_nm = args[["group_col_nm"]], pixel_col_nm = NULL, thin_threshold = args[["thin_threshold"]], mode = args[["mode"]], pixel_threshold = NULL, drop_tag = NULL, path = path, data_dir = file.path(data_dir, "raw_combined"), out_dir = file.path(data_dir, "processed"), tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
+      preprocess_detections(sensor = "RFID", timestamps_col_nm = "timestamps_col_nm", group_col_nm = args[["group_col_nm"]], pixel_col_nm = NULL, thin_threshold = args[["thin_threshold"]], mode = args[["mode"]], pixel_threshold = NULL, path = path, data_dir = file.path(data_dir, "raw_combined"), out_dir = file.path(data_dir, "processed"), tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
       regexp = paste("Expected a non-NULL value but the argument", arg_nms[i], "is NULL", sep = " ")
     )
     
@@ -892,7 +892,7 @@ test_that("the function catches when non-NULL arguments are NULL", {
     args[arg_nms[i]] <- list(NULL)
     
     expect_error(
-      preprocess_detections(sensor = "Video", timestamps_col_nm = "timestamps_col_nm", group_col_nm = NULL, pixel_col_nm = args[["pixel_col_nm"]], thin_threshold = NULL, mode = NULL, pixel_threshold = args[["pixel_threshold"]], drop_tag = NULL, path = path, data_dir = file.path(data_dir, "raw_combined"), out_dir = file.path(data_dir, "processed"), tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
+      preprocess_detections(sensor = "Video", timestamps_col_nm = "timestamps_col_nm", group_col_nm = NULL, pixel_col_nm = args[["pixel_col_nm"]], thin_threshold = NULL, mode = NULL, pixel_threshold = args[["pixel_threshold"]], path = path, data_dir = file.path(data_dir, "raw_combined"), out_dir = file.path(data_dir, "processed"), tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
       regexp = paste("Expected a non-NULL value but the argument", arg_nms[i], "is NULL", sep = " ")
     )
     
@@ -970,17 +970,17 @@ test_that("the function catches when the sensor argument is not RFID, IRBB, or V
   th <- 1
   
   expect_error(
-    preprocess_detections(sensor = 1, timestamps_col_nm = "timestamps_col_nm", group_col_nm = "PIT_tag_ID", pixel_col_nm = NULL, thin_threshold = th, mode = "retain_first", pixel_threshold = NULL, drop_tag = NULL, path = path, data_dir = file.path(data_dir, "raw_combined"), out_dir = file.path(data_dir, "processed"), tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
+    preprocess_detections(sensor = 1, timestamps_col_nm = "timestamps_col_nm", group_col_nm = "PIT_tag_ID", pixel_col_nm = NULL, thin_threshold = th, mode = "retain_first", pixel_threshold = NULL, path = path, data_dir = file.path(data_dir, "raw_combined"), out_dir = file.path(data_dir, "processed"), tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
     regexp = "The value provided for the argument, sensor, is not correct. Check your spelling or captialization"
   )
   
   expect_error(
-    preprocess_detections(sensor = "RFD", timestamps_col_nm = "timestamps_col_nm", group_col_nm = "PIT_tag_ID", pixel_col_nm = NULL, thin_threshold = th, mode = "retain_first", pixel_threshold = NULL, drop_tag = NULL, path = path, data_dir = file.path(data_dir, "raw_combined"), out_dir = file.path(data_dir, "processed"), tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
+    preprocess_detections(sensor = "RFD", timestamps_col_nm = "timestamps_col_nm", group_col_nm = "PIT_tag_ID", pixel_col_nm = NULL, thin_threshold = th, mode = "retain_first", pixel_threshold = NULL, path = path, data_dir = file.path(data_dir, "raw_combined"), out_dir = file.path(data_dir, "processed"), tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
     regexp = "The value provided for the argument, sensor, is not correct. Check your spelling or captialization"
   )
   
   expect_error(
-    preprocess_detections(sensor = "rfid", timestamps_col_nm = "timestamps_col_nm", group_col_nm = "PIT_tag_ID", pixel_col_nm = NULL, thin_threshold = th, mode = "retain_first", pixel_threshold = NULL, drop_tag = NULL, path = path, data_dir = file.path(data_dir, "raw_combined"), out_dir = file.path(data_dir, "processed"), tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
+    preprocess_detections(sensor = "rfid", timestamps_col_nm = "timestamps_col_nm", group_col_nm = "PIT_tag_ID", pixel_col_nm = NULL, thin_threshold = th, mode = "retain_first", pixel_threshold = NULL, path = path, data_dir = file.path(data_dir, "raw_combined"), out_dir = file.path(data_dir, "processed"), tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
     regexp = "The value provided for the argument, sensor, is not correct. Check your spelling or captialization"
   )
   
@@ -1068,7 +1068,7 @@ test_that("the function catches when NULL arguments are non-NULL", {
     args[arg_nms[i]] <- "test"
     
     expect_error(
-      preprocess_detections(sensor = "RFID", timestamps_col_nm = "timestamps_col_nm", group_col_nm = "PIT_tag_ID", pixel_col_nm = args[["pixel_col_nm"]], thin_threshold = th, mode = "thin", pixel_threshold = args[["pixel_threshold"]], drop_tag = NULL, path = path, data_dir = file.path(data_dir, "raw_combined"), out_dir = file.path(data_dir, "processed"), tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
+      preprocess_detections(sensor = "RFID", timestamps_col_nm = "timestamps_col_nm", group_col_nm = "PIT_tag_ID", pixel_col_nm = args[["pixel_col_nm"]], thin_threshold = th, mode = "thin", pixel_threshold = args[["pixel_threshold"]], path = path, data_dir = file.path(data_dir, "raw_combined"), out_dir = file.path(data_dir, "processed"), tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
       regexp = paste("Expected a NULL value but the argument", arg_nms[i], "is not NULL", sep = " ")
     )
     
@@ -1104,13 +1104,12 @@ test_that("the function catches when NULL arguments are non-NULL", {
   write.csv(sim_ts, file.path(tmp_path, "raw_combined", "combined_raw_data_Video.csv"), row.names = FALSE)
   
   # Arguments that should be NULL when sensor = Video:
-  arg_nms <- c("group_col_nm", "thin_threshold", "mode", "drop_tag")
+  arg_nms <- c("group_col_nm", "thin_threshold", "mode")
   
   args <- list(
     `group_col_nm` = NULL,
     `thin_threshold` = NULL,
-    `mode` = NULL,
-    `drop_tag` = NULL
+    `mode` = NULL
   )
   
   invisible(lapply(1:length(arg_nms), function(i){
@@ -1118,7 +1117,7 @@ test_that("the function catches when NULL arguments are non-NULL", {
     args[arg_nms[i]] <- "test"
     
     expect_error(
-      preprocess_detections(sensor = "Video", timestamps_col_nm = "timestamps_col_nm", group_col_nm = args[["group_col_nm"]], pixel_col_nm = "total_pixels_motionTrigger", thin_threshold = args[["thin_threshold"]], mode = args[["mode"]], pixel_threshold = "pixel_threshold", drop_tag = args[["drop_tag"]], path = path, data_dir = file.path(data_dir, "raw_combined"), out_dir = file.path(data_dir, "processed"), tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
+      preprocess_detections(sensor = "Video", timestamps_col_nm = "timestamps_col_nm", group_col_nm = args[["group_col_nm"]], pixel_col_nm = "total_pixels_motionTrigger", thin_threshold = args[["thin_threshold"]], mode = args[["mode"]], pixel_threshold = "pixel_threshold", path = path, data_dir = file.path(data_dir, "raw_combined"), out_dir = file.path(data_dir, "processed"), tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
       regexp = paste("Expected a NULL value but the argument", arg_nms[i], "is not NULL", sep = " ")
     )
     
@@ -1231,7 +1230,7 @@ test_that("the function catches when character string arguments are not strings"
     args[arg_nms[i]] <- 1
     
     expect_error(
-      preprocess_detections(sensor = "RFID", timestamps_col_nm = "timestamps_col_nm", group_col_nm = args[["group_col_nm"]], pixel_col_nm = NULL, thin_threshold = th, mode = args[["mode"]], pixel_threshold = NULL, drop_tag = NULL, path = path, data_dir = file.path(data_dir, "raw_combined"), out_dir = file.path(data_dir, "processed"), tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
+      preprocess_detections(sensor = "RFID", timestamps_col_nm = "timestamps_col_nm", group_col_nm = args[["group_col_nm"]], pixel_col_nm = NULL, thin_threshold = th, mode = args[["mode"]], pixel_threshold = NULL, path = path, data_dir = file.path(data_dir, "raw_combined"), out_dir = file.path(data_dir, "processed"), tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
       regexp = paste("Expected a string but the argument", arg_nms[i], "is not a string", sep = " ")
     )
     
@@ -1278,7 +1277,7 @@ test_that("the function catches when character string arguments are not strings"
     args[arg_nms[i]] <- 1
     
     expect_error(
-      preprocess_detections(sensor = "Video", timestamps_col_nm = "timestamps_col_nm", group_col_nm = NULL, pixel_col_nm = args[["pixel_col_nm"]], thin_threshold = NULL, mode = NULL, pixel_threshold = px, drop_tag = NULL, path = path, data_dir = file.path(data_dir, "raw_combined"), out_dir = file.path(data_dir, "processed"), tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
+      preprocess_detections(sensor = "Video", timestamps_col_nm = "timestamps_col_nm", group_col_nm = NULL, pixel_col_nm = args[["pixel_col_nm"]], thin_threshold = NULL, mode = NULL, pixel_threshold = px, path = path, data_dir = file.path(data_dir, "raw_combined"), out_dir = file.path(data_dir, "processed"), tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
       regexp = paste("Expected a string but the argument", arg_nms[i], "is not a string", sep = " ")
     )
     
@@ -1358,7 +1357,7 @@ test_that("the function catches when numeric arguments are non-numeric", {
   th <- 1
   
   expect_error(
-    preprocess_detections(sensor = "RFID", timestamps_col_nm = "timestamp_ms", group_col_nm = "PIT_tag_ID", pixel_col_nm = NULL, thin_threshold = as.character(th), mode = "retain_first", pixel_threshold = NULL, drop_tag = NULL, path = path, data_dir = file.path(data_dir, "raw_combined"), out_dir = file.path(data_dir, "processed"), tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
+    preprocess_detections(sensor = "RFID", timestamps_col_nm = "timestamp_ms", group_col_nm = "PIT_tag_ID", pixel_col_nm = NULL, thin_threshold = as.character(th), mode = "retain_first", pixel_threshold = NULL, path = path, data_dir = file.path(data_dir, "raw_combined"), out_dir = file.path(data_dir, "processed"), tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
     regexp = "Expected a numeric value but the argument thin_threshold is not numeric"
   )
   
@@ -1392,7 +1391,7 @@ test_that("the function catches when numeric arguments are non-numeric", {
   write.csv(sim_ts, file.path(tmp_path, "raw_combined", "combined_raw_data_Video.csv"), row.names = FALSE)
   
   expect_error(
-    preprocess_detections(sensor = "Video", timestamps_col_nm = "timestamp_ms", group_col_nm = NULL, pixel_col_nm = "total_pixels_motionTrigger", thin_threshold = NULL, mode = NULL, pixel_threshold = as.character(px), drop_tag = NULL, path = path, data_dir = file.path(data_dir, "raw_combined"), out_dir = file.path(data_dir, "processed"), tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
+    preprocess_detections(sensor = "Video", timestamps_col_nm = "timestamp_ms", group_col_nm = NULL, pixel_col_nm = "total_pixels_motionTrigger", thin_threshold = NULL, mode = NULL, pixel_threshold = as.character(px), path = path, data_dir = file.path(data_dir, "raw_combined"), out_dir = file.path(data_dir, "processed"), tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
     regexp = paste("Expected a numeric value but the argument pixel_threshold is not numeric", sep = " ")
   )
   
@@ -1471,7 +1470,7 @@ test_that("the function catches when paths don't exist", {
   file.remove(file.path(tmp_path, "raw_combined", "combined_raw_data_RFID.csv"))
   
   expect_error(
-    preprocess_detections(sensor = "RFID", timestamps_col_nm = "timestamp_ms", group_col_nm = "PIT_tag_ID", pixel_col_nm = NULL, thin_threshold = th, mode = "retain_first", pixel_threshold = NULL, drop_tag = NULL, path = path, data_dir = file.path(data_dir, "raw_combined"), out_dir = file.path(data_dir, "processed"), tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
+    preprocess_detections(sensor = "RFID", timestamps_col_nm = "timestamp_ms", group_col_nm = "PIT_tag_ID", pixel_col_nm = NULL, thin_threshold = th, mode = "retain_first", pixel_threshold = NULL, path = path, data_dir = file.path(data_dir, "raw_combined"), out_dir = file.path(data_dir, "processed"), tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
     regexp = paste("The file combined_raw_data_RFID.csv does not exist in the directory", file.path(tmp_path, "raw_combined"), sep = " ")
   )
   
@@ -1484,7 +1483,7 @@ test_that("the function catches when paths don't exist", {
   }
   
   expect_error(
-    preprocess_detections(sensor = "RFID", timestamps_col_nm = "timestamp_ms", group_col_nm = "PIT_tag_ID", pixel_col_nm = NULL, thin_threshold = th, mode = "retain_first", pixel_threshold = NULL, drop_tag = NULL, path = path, data_dir = file.path(data_dir, "raw_combined"), out_dir = file.path(data_dir, "processed"), tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
+    preprocess_detections(sensor = "RFID", timestamps_col_nm = "timestamp_ms", group_col_nm = "PIT_tag_ID", pixel_col_nm = NULL, thin_threshold = th, mode = "retain_first", pixel_threshold = NULL, path = path, data_dir = file.path(data_dir, "raw_combined"), out_dir = file.path(data_dir, "processed"), tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
     regexp = paste("The directory", file.path(path, data_dir, "raw_combined"), "does not exist", sep = " ")
   )
   
@@ -1563,7 +1562,7 @@ test_that("the input dataset has all of the expected columns", {
     write.csv(sim_ts, file.path(tmp_path, "raw_combined", "combined_raw_data_RFID.csv"), row.names = FALSE)
     
     expect_error(
-      preprocess_detections(sensor = "RFID", timestamps_col_nm = "timestamp_ms", group_col_nm = "PIT_tag_ID", pixel_col_nm = NULL, thin_threshold = th, mode = "retain_first", pixel_threshold = NULL, drop_tag = NULL, path = path, data_dir = file.path(data_dir, "raw_combined"), out_dir = file.path(data_dir, "processed"), tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
+      preprocess_detections(sensor = "RFID", timestamps_col_nm = "timestamp_ms", group_col_nm = "PIT_tag_ID", pixel_col_nm = NULL, thin_threshold = th, mode = "retain_first", pixel_threshold = NULL, path = path, data_dir = file.path(data_dir, "raw_combined"), out_dir = file.path(data_dir, "processed"), tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
       regexp = paste("The column", col_nms[i], "was not found in the data frame", sep = " ")
     )
     
@@ -1589,7 +1588,7 @@ test_that("the input dataset has all of the expected columns", {
   write.csv(sim_ts, file.path(tmp_path, "raw_combined", "combined_raw_data_RFID.csv"), row.names = FALSE)
   
   expect_error(
-    preprocess_detections(sensor = "RFID", timestamps_col_nm = "timestamp_ms", group_col_nm = "PIT_tag_ID", pixel_col_nm = NULL, thin_threshold = th, mode = "retain_first", pixel_threshold = NULL, drop_tag = NULL, path = path, data_dir = file.path(data_dir, "raw_combined"), out_dir = file.path(data_dir, "processed"), tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
+    preprocess_detections(sensor = "RFID", timestamps_col_nm = "timestamp_ms", group_col_nm = "PIT_tag_ID", pixel_col_nm = NULL, thin_threshold = th, mode = "retain_first", pixel_threshold = NULL, path = path, data_dir = file.path(data_dir, "raw_combined"), out_dir = file.path(data_dir, "processed"), tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
     regexp = paste("The column PIT_tag_ID was not found in the data frame")
   )
   
@@ -1619,7 +1618,7 @@ test_that("the input dataset has all of the expected columns", {
   write.csv(sim_ts, file.path(tmp_path, "raw_combined", "combined_raw_data_Video.csv"), row.names = FALSE)
   
   expect_error(
-    preprocess_detections(sensor = "Video", timestamps_col_nm = "timestamp_ms", group_col_nm = NULL, pixel_col_nm = "total_pixels_motionTrigger", thin_threshold = NULL, mode = NULL, pixel_threshold = px, drop_tag = NULL, path = path, data_dir = file.path(data_dir, "raw_combined"), out_dir = file.path(data_dir, "processed"), tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
+    preprocess_detections(sensor = "Video", timestamps_col_nm = "timestamp_ms", group_col_nm = NULL, pixel_col_nm = "total_pixels_motionTrigger", thin_threshold = NULL, mode = NULL, pixel_threshold = px, path = path, data_dir = file.path(data_dir, "raw_combined"), out_dir = file.path(data_dir, "processed"), tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
     regexp = paste("The column total_pixels_motionTrigger was not found in the data frame")
   )
   
@@ -1703,7 +1702,7 @@ test_that("the input dataset has no NAs in columns that cannot have NAs", {
     write.csv(sim_ts, file.path(tmp_path, "raw_combined", "combined_raw_data_RFID.csv"), row.names = FALSE)
     
     expect_error(
-      preprocess_detections(sensor = "RFID", timestamps_col_nm = "timestamp_ms", group_col_nm = "PIT_tag_ID", pixel_col_nm = NULL, thin_threshold = th, mode = "retain_first", pixel_threshold = NULL, drop_tag = NULL, path = path, data_dir = file.path(data_dir, "raw_combined"), out_dir = file.path(data_dir, "processed"), tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
+      preprocess_detections(sensor = "RFID", timestamps_col_nm = "timestamp_ms", group_col_nm = "PIT_tag_ID", pixel_col_nm = NULL, thin_threshold = th, mode = "retain_first", pixel_threshold = NULL, path = path, data_dir = file.path(data_dir, "raw_combined"), out_dir = file.path(data_dir, "processed"), tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
       regexp = paste("The column", col_nms[i], "has NA values", sep = " ")
     )
     
@@ -1729,7 +1728,7 @@ test_that("the input dataset has no NAs in columns that cannot have NAs", {
   write.csv(sim_ts, file.path(tmp_path, "raw_combined", "combined_raw_data_RFID.csv"), row.names = FALSE)
   
   expect_error(
-    preprocess_detections(sensor = "RFID", timestamps_col_nm = "timestamp_ms", group_col_nm = "PIT_tag_ID", pixel_col_nm = NULL, thin_threshold = th, mode = "retain_first", pixel_threshold = NULL, drop_tag = NULL, path = path, data_dir = file.path(data_dir, "raw_combined"), out_dir = file.path(data_dir, "processed"), tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
+    preprocess_detections(sensor = "RFID", timestamps_col_nm = "timestamp_ms", group_col_nm = "PIT_tag_ID", pixel_col_nm = NULL, thin_threshold = th, mode = "retain_first", pixel_threshold = NULL, path = path, data_dir = file.path(data_dir, "raw_combined"), out_dir = file.path(data_dir, "processed"), tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
     regexp = paste("The column PIT_tag_ID has NA values")
   )
   
@@ -1759,7 +1758,7 @@ test_that("the input dataset has no NAs in columns that cannot have NAs", {
   write.csv(sim_ts, file.path(tmp_path, "raw_combined", "combined_raw_data_Video.csv"), row.names = FALSE)
   
   expect_error(
-    preprocess_detections(sensor = "Video", timestamps_col_nm = "timestamp_ms", group_col_nm = NULL, pixel_col_nm = "total_pixels_motionTrigger", thin_threshold = NULL, mode = NULL, pixel_threshold = px, drop_tag = NULL, path = path, data_dir = file.path(data_dir, "raw_combined"), out_dir = file.path(data_dir, "processed"), tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
+    preprocess_detections(sensor = "Video", timestamps_col_nm = "timestamp_ms", group_col_nm = NULL, pixel_col_nm = "total_pixels_motionTrigger", thin_threshold = NULL, mode = NULL, pixel_threshold = px, path = path, data_dir = file.path(data_dir, "raw_combined"), out_dir = file.path(data_dir, "processed"), tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
     regexp = paste("The column total_pixels_motionTrigger has NA values")
   )
   

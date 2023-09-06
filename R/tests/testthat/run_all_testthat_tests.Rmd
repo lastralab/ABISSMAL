@@ -9,8 +9,6 @@ See more info on the testthat package: https://r-pkgs.org/testing-basics.html. S
 
 ```{r}
 
-rm(list = ls())
-
 if (!require(testthat)) install.packages('testthat')
 library(testthat)
 
