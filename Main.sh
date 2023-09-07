@@ -90,25 +90,25 @@ then
     selected=true
 
     echo -e "${Cyan}Enter time slot(s) using 24hr format and including all the brackets and commas.${NC}"
-    echo -e "${Cyan}Examples: 1 slot from 7-10am = [7,10] / 3 slots: [7,10], [18,20], [23,3]${NC}"
+    echo -e "${Cyan}Examples: 1 slot from 7-10am =${NC} ${Blue}[7,10]${NC} ${Cyan}/ 3 slots:${NC} ${Blue}[7,10], [18,20], [23,3]${NC}"
     read -r slots_video
     sed -i "s#^video_time_range =.*#video_time_range = [$slots_video]#" "${location}${validation_file}"
     echo -e "${Green}Recording time slot(s) set successfully${NC}"
 
     echo -e "${Cyan}Enter duration of each video in seconds${NC}"
-    echo -e "${Cyan}Example: 5 seconds = 5 / 2 minutes = 120${NC}"
+    echo -e "${Cyan}Example: 5 seconds =${NC}${Blue} 5 ${NC}${Cyan}/ 2 minutes =${NC}${Blue} 120${NC}"
     read -r duration
     sed -i "s#^record_duration =.*#record_duration = $duration#" "${location}${validation_file}"
     echo -e "${Green}Set video duration to $duration seconds${NC}"
 
     echo -e "${Cyan}Enter seconds to pause between each video${NC}"
-    echo -e "${Cyan}Example: 5 seconds = 5 / 1 minute = 60 / No pause = 0${NC}"
+    echo -e "${Cyan}Example: 5 seconds =${NC} ${Blue}5${NC} ${Cyan}/ 1 minute =${NC} ${Blue}60 ${NC}${Cyan}/ No pause =${NC}${Blue} 0${NC}"
     read -r pause
     sed -i "s#^pause =.*#pause = $pause#" "${location}${validation_file}"
     echo -e "${Green}Set pause duration to $pause seconds${NC}"
 
     echo -e "${Cyan}Enter hours to use the LED recording indicator, separated by a comma (24hrs format)${NC}"
-    echo -e "${Cyan}Example: from 7:00am to 11:00pm = 7,23. Minutes not allowed.${NC}"
+    echo -e "${Cyan}Example: from 7:00am to 11:00pm =${NC}${Blue} 7,23${NC}${Cyan}. Minutes not supported.${NC}"
     read -r rec_led
     echo -e "${Green}LED recording indicator set to $rec_led${NC}"
     sed -i "s#^LED_time_range =.*#LED_time_range = [$rec_led]#" "${location}${validation_file}"
