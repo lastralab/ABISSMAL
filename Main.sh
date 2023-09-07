@@ -101,13 +101,11 @@ then
     sed -i "s#^record_duration =.*#record_duration = $duration#" "${location}${validation_file}"
     echo -e "${Green}Set video duration to $duration seconds${NC}"
 
-    echo -e "${Cyan}Enter hour to start the LED recording indicator (in 24hrs format)${NC}"
-    echo -e "${Cyan}Example: 7:00am = 7 / 11:00pm = 23. Minutes not allowed.${NC}"
-    read -r start_led
-    echo -e "${Cyan}Enter hour to stop LED indicator${NC}"
-    read -r end_led
-    echo -e "${Green}LED recording indicator set from $start_led:00 to $end_led:00hrs${NC}"
-    sed -i "s#^LED_time_range =.*#LED_time_range = [$start_led, $end_led]#" "${location}${validation_file}"
+    echo -e "${Cyan}Enter hours to use the LED recording indicator, separated by a comma (24hrs format)${NC}"
+    echo -e "${Cyan}Example: from 7:00am to 11:00pm = 7,23. Minutes not allowed.${NC}"
+    read -r rec_led
+    echo -e "${Green}LED recording indicator set to $rec_led${NC}"
+    sed -i "s#^LED_time_range =.*#LED_time_range = [$rec_led]#" "${location}${validation_file}"
 
     echo -e "${Purple}Enabled Validation Videos${NC}"
     echo -e "Starting screen name: ${Cyan}validation${NC}..."
