@@ -98,7 +98,7 @@ then
     echo -e "${Cyan}Enter duration of each video in seconds${NC}"
     echo -e "${Cyan}Example: 5 seconds = 5 / 2 minutes = 120${NC}"
     read -r duration
-    sed -i "s#^record_duration =.*#record_duration = $duration" "${location}${validation_file}"
+    sed -i "s#^record_duration =.*#record_duration = $duration#" "${location}${validation_file}"
     echo -e "${Green}Set video duration to $duration seconds${NC}"
 
     echo -e "${Cyan}Enter hour to start the LED recording indicator (in 24hrs format)${NC}"
