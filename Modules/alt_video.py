@@ -86,6 +86,7 @@ with picamera.PiCamera() as camera:
             general_time = datetime.now()
             logging = get_logger(general_time)
             hour_int = int(f"{general_time:%H}")
+            x = 0
             for slot in video_time_range:
                 if int(slot[0]) <= hour_int < int(slot[1]):
                     dt = general_time
@@ -97,12 +98,13 @@ with picamera.PiCamera() as camera:
                     camera.start_recording(file1_h264)
                     camera.wait_recording(record_duration)
                     camera.stop_recording()
+                    x = x + 1
                     print('Recorded video starting at ' + "{dt:%H}:{dt:%M}:{dt:%S}")
                     if int(LED_time_range[0]) <= hour_int <= int(LED_time_range[1]):
                         GPIO.output(REC_LED, GPIO.LOW)
                     convert_video(file1_h264)
-                    print('Converted video to mp4')
-                    logging.info("Recorded and converted video to mp4")
+                    print('Recorded and converted video to mp4')
+            logging.info("Recorded " + str(x) + " videos")
     except Exception as E:
         print('Video error: ' + str(E))
         logging.error('Video: ' + str(E))
