@@ -88,6 +88,7 @@ with picamera.PiCamera() as camera:
             general_time = datetime.now()
             logging = get_logger(general_time)
             hour_int = int(f"{general_time:%H}")
+            minute_int = int(f"{general_time:%M}")
             for slot in video_time_range:
                 if int(slot[0]) <= hour_int < int(slot[1]):
                     dt = general_time
@@ -107,7 +108,7 @@ with picamera.PiCamera() as camera:
                     print('Recorded and converted video to mp4')
                     if pause > 0:
                         sleep(pause)
-                if hour_int == 12 or hour_int == 20:
+                if (hour_int == 12 or hour_int == 20) and minute_int == 0:
                     logging.info("Recorded " + str(x) + " videos for validation")
     except Exception as E:
         print('Video error: ' + str(E))
