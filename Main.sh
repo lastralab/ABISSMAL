@@ -89,13 +89,11 @@ then
     modules_string="${modules_string}${a}${comma}"
     selected=true
 
-    echo -e "${Cyan}Enter hour number to start validation videos (in 24hrs format)${NC}"
-    echo -e "${Cyan}Example: 7:00am = 7 / 11:00pm = 23. Minutes not allowed.${NC}"
-    read -r start_video
-    echo -e "${Cyan}Enter hour to stop validation videos${NC}"
-    read -r end_video
-    sed -i "s#^video_time_range =.*#video_time_range = [$start_video, $end_video]#" "${location}${validation_file}"
-    echo -e "${Green}Recording time set from $start_video:00 to $end_video:00hrs${NC}"
+    echo -e "${Cyan}Enter time slot(s) using 24hr format and including all the brackets and separating each hour by a comma.${NC}"
+    echo -e "${Cyan}Examples: 1 slot from 7-10am = [[7,10]] / 3 slots: [[7,10], [18,20], [23,3]]${NC}"
+    read -r slots_video
+    sed -i "s#^video_time_range =.*#video_time_range = $slots_video#" "${location}${validation_file}"
+    echo -e "${Green}Recording time slot(s) set successfully${NC}"
 
     echo -e "${Cyan}Enter duration of each video in seconds${NC}"
     echo -e "${Cyan}Example: 5 seconds = 5 / 2 minutes = 120${NC}"

@@ -34,7 +34,8 @@ print('Started Validation Video script')
 path = "/home/pi/Data_Abissmal/Video/"
 header = ['chamber_id', 'sensor_id', 'year', 'month', 'day', 'time_video_started', 'video_file_name']
 prior_image = None
-video_time_range = [7, 12]
+video_time_range = [[7, 10]]
+count = video_time_range.__len__()
 video_width = 1280
 video_height = 720
 iso = 400
@@ -47,8 +48,12 @@ GPIO.setwarnings(False)
 GPIO.setup(REC_LED, GPIO.OUT)
 GPIO.PWM(REC_LED, 40)
 
-logging.info('Validation videos will be recorded between ' + str(video_time_range[0]) + ' and ' + str(video_time_range[1] + 1) + ' hours')
-print('Validation videos will be recorded between ' + str(video_time_range[0]) + ' and ' + str(video_time_range[1] + 1) + ' hours')
+logging.info('Detected ' + str(count) + ' time slots')
+print('Detected ' + str(count) + ' time slots')
+
+for times in video_time_range:
+    logging.info('Validation videos will be recorded between ' + str(times[0]) + ' and ' + str(times[1]) + ' hours')
+    print('Validation videos will be recorded between ' + str(times[0]) + ' and ' + str(times[1]) + ' hours')
 
 
 def set_prior_image(current_image):
@@ -81,22 +86,23 @@ with picamera.PiCamera() as camera:
             general_time = datetime.now()
             logging = get_logger(general_time)
             hour_int = int(f"{general_time:%H}")
-            if int(video_time_range[0]) <= hour_int < int(video_time_range[1]):
-                dt = general_time
-                print('Validation recording started')
-                dt_str = str(f"{dt.year}_{dt.month}_{dt.day}_{dt:%H}_{dt:%M}_{dt:%S}")
-                file1_h264 = path + str(box_id) + "_validation_" + dt_str + '.h264'
-                if int(LED_time_range[0]) <= hour_int < int(LED_time_range[1]):
-                    GPIO.output(REC_LED, GPIO.HIGH)
-                camera.start_recording(file1_h264)
-                camera.wait_recording(record_duration)
-                camera.stop_recording()
-                print('Recorded video starting at ' + "{dt:%H}:{dt:%M}:{dt:%S}")
-                if int(LED_time_range[0]) <= hour_int <= int(LED_time_range[1]):
-                    GPIO.output(REC_LED, GPIO.LOW)
-                convert_video(file1_h264)
-                print('Converted video to mp4')
-                logging.info("Recorded and converted video to mp4")
+            for slot in video_time_range:
+                if int(slot[0]) <= hour_int < int(slot[1]):
+                    dt = general_time
+                    print('Validation recording started')
+                    dt_str = str(f"{dt.year}_{dt.month}_{dt.day}_{dt:%H}_{dt:%M}_{dt:%S}")
+                    file1_h264 = path + str(box_id) + "_validation_" + dt_str + '.h264'
+                    if int(LED_time_range[0]) <= hour_int < int(LED_time_range[1]):
+                        GPIO.output(REC_LED, GPIO.HIGH)
+                    camera.start_recording(file1_h264)
+                    camera.wait_recording(record_duration)
+                    camera.stop_recording()
+                    print('Recorded video starting at ' + "{dt:%H}:{dt:%M}:{dt:%S}")
+                    if int(LED_time_range[0]) <= hour_int <= int(LED_time_range[1]):
+                        GPIO.output(REC_LED, GPIO.LOW)
+                    convert_video(file1_h264)
+                    print('Converted video to mp4')
+                    logging.info("Recorded and converted video to mp4")
     except Exception as E:
         print('Video error: ' + str(E))
         logging.error('Video: ' + str(E))
