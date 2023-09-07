@@ -36,6 +36,7 @@ header = ['chamber_id', 'sensor_id', 'year', 'month', 'day', 'time_video_started
 prior_image = None
 video_time_range = [[7, 10]]
 count = video_time_range.__len__()
+pause = 0
 video_width = 1280
 video_height = 720
 iso = 400
@@ -82,11 +83,11 @@ with picamera.PiCamera() as camera:
         camera.resolution = (video_width, video_height)
         camera.iso = iso
         camera.framerate = fr
+        x = 0
         while True:
             general_time = datetime.now()
             logging = get_logger(general_time)
             hour_int = int(f"{general_time:%H}")
-            x = 0
             for slot in video_time_range:
                 if int(slot[0]) <= hour_int < int(slot[1]):
                     dt = general_time
@@ -104,7 +105,10 @@ with picamera.PiCamera() as camera:
                         GPIO.output(REC_LED, GPIO.LOW)
                     convert_video(file1_h264)
                     print('Recorded and converted video to mp4')
-            logging.info("Recorded " + str(x) + " videos")
+                    if pause > 0:
+                        sleep(pause)
+                if hour_int == 12 or hour_int == 20:
+                    logging.info("Recorded " + str(x) + " videos for validation")
     except Exception as E:
         print('Video error: ' + str(E))
         logging.error('Video: ' + str(E))
