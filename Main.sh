@@ -107,7 +107,7 @@ then
     sed -i "s#^pause =.*#pause = $pause#" "${location}${validation_file}"
     echo -e "${Green}Set pause duration to $pause seconds${NC}"
 
-    echo -e "${Cyan}Enter hours to use the LED recording indicator, separated by a comma (24hrs format)${NC}"
+    echo -e "${Cyan}Enter hours to use the LED recording indicator, separated by a comma.${NC}"
     echo -e "${Cyan}Example: from 7:00am to 11:00pm =${NC}${Blue} 7,23${NC}${Cyan}. Minutes not supported.${NC}"
     read -r rec_led
     echo -e "${Green}LED recording indicator set to $rec_led${NC}"
