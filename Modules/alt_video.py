@@ -101,7 +101,7 @@ with picamera.PiCamera() as camera:
                     camera.wait_recording(record_duration)
                     camera.stop_recording()
                     x = x + 1
-                    print('Recorded video starting at ' + "{dt:%H}:{dt:%M}:{dt:%S}")
+                    print('Recorded video starting at ' + f"{dt:%H}:{dt:%M}:{dt:%S}")
                     if int(LED_time_range[0]) <= hour_int <= int(LED_time_range[1]):
                         GPIO.output(REC_LED, GPIO.LOW)
                     convert_video(file1_h264)
