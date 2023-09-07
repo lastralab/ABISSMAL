@@ -101,6 +101,12 @@ then
     sed -i "s#^record_duration =.*#record_duration = $duration#" "${location}${validation_file}"
     echo -e "${Green}Set video duration to $duration seconds${NC}"
 
+    echo -e "${Cyan}Enter seconds to pause between each video${NC}"
+    echo -e "${Cyan}Example: 5 seconds = 5 / 1 minute = 60 / No pause = 0${NC}"
+    read -r pause
+    sed -i "s#^pause =.*#pause = $pause#" "${location}${validation_file}"
+    echo -e "${Green}Set pause duration to $pause seconds${NC}"
+
     echo -e "${Cyan}Enter hours to use the LED recording indicator, separated by a comma (24hrs format)${NC}"
     echo -e "${Cyan}Example: from 7:00am to 11:00pm = 7,23. Minutes not allowed.${NC}"
     read -r rec_led
