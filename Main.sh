@@ -89,10 +89,10 @@ then
     modules_string="${modules_string}${a}${comma}"
     selected=true
 
-    echo -e "${Cyan}Enter time slot(s) using 24hr format and including all the brackets and separating each hour by a comma.${NC}"
-    echo -e "${Cyan}Examples: 1 slot from 7-10am = [[7,10]] / 3 slots: [[7,10], [18,20], [23,3]]${NC}"
+    echo -e "${Cyan}Enter time slot(s) using 24hr format and including all the brackets and commas.${NC}"
+    echo -e "${Cyan}Examples: 1 slot from 7-10am = [7,10] / 3 slots: [7,10], [18,20], [23,3]${NC}"
     read -r slots_video
-    sed -i "s#^video_time_range =.*#video_time_range = $slots_video#" "${location}${validation_file}"
+    sed -i "s#^video_time_range =.*#video_time_range = [$slots_video]#" "${location}${validation_file}"
     echo -e "${Green}Recording time slot(s) set successfully${NC}"
 
     echo -e "${Cyan}Enter duration of each video in seconds${NC}"
