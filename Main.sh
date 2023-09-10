@@ -94,24 +94,28 @@ then
     read -r slots_video
     sed -i "s#^video_time_range =.*#video_time_range = [$slots_video]#" "${location}${validation_file}"
     echo -e "${Green}Recording time slot(s) set successfully${NC}"
+    echo ""
 
     echo -e "${Cyan}Enter duration of each video in seconds${NC}"
     echo -e "${Cyan}Example: 5 seconds =${NC}${Blue} 5 ${NC}${Cyan}/ 2 minutes =${NC}${Blue} 120${NC}"
     read -r duration
     sed -i "s#^record_duration =.*#record_duration = $duration#" "${location}${validation_file}"
     echo -e "${Green}Set video duration to $duration seconds${NC}"
+    echo ""
 
     echo -e "${Cyan}Enter seconds to pause between each video${NC}"
     echo -e "${Cyan}Example: 5 seconds =${NC} ${Blue}5${NC} ${Cyan}/ 1 minute =${NC} ${Blue}60 ${NC}${Cyan}/ No pause =${NC}${Blue} 0${NC}"
     read -r pause
     sed -i "s#^pause =.*#pause = $pause#" "${location}${validation_file}"
     echo -e "${Green}Set pause duration to $pause seconds${NC}"
+    echo ""
 
     echo -e "${Cyan}Enter hours to use the LED recording indicator, separated by a comma.${NC}"
     echo -e "${Cyan}Example: from 7:00am to 11:00pm =${NC}${Blue} 7,23${NC}${Cyan}. Minutes not supported.${NC}"
     read -r rec_led
     echo -e "${Green}LED recording indicator set to $rec_led${NC}"
     sed -i "s#^LED_time_range =.*#LED_time_range = [$rec_led]#" "${location}${validation_file}"
+    echo ""
 
     echo -e "${Purple}Enabled Validation Videos${NC}"
     echo -e "Starting screen name: ${Cyan}validation${NC}..."
