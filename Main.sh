@@ -44,7 +44,7 @@ monitor_command="${python_v} ${location}${monitor_file}"
 helper_file="Modules/helper.py"
 
 v='"Video"'
-a='"Validation"'
+a='"Video"'
 r='"RFID"'
 i='"IRBB"'
 t='"Temp"'
