@@ -109,8 +109,8 @@ with picamera.PiCamera() as camera:
                     print('Recorded and converted video to mp4')
                     if pause > 0:
                         sleep(pause)
-                if ((hour_int == 8 or hour_int == 14 or hour_int == 20) and (minute_int == 0 and sec_int == 0)):
-                    logging.info("Recorded " + str(x) + " videos for validation")
+            if (hour_int == 12 or hour_int == 19) and (minute_int == 0 and sec_int == 0):
+                logging.info("Recorded " + str(x) + " videos for validation")
     except Exception as E:
         print('Video error: ' + str(E))
         logging.error('Video: ' + str(E))
