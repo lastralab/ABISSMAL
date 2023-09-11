@@ -75,7 +75,7 @@ def convert_video(filename):
                     Path(filename).stem + '.mp4'])
     except Exception as Err:
         logging.error('Converting validation video error: ' + str(Err))
-        sms_alert('Validation', 'Conversion Error: ' + str(Err))
+        sms_alert('Video', 'Validation Conversion Error: ' + str(Err))
 
 
 with picamera.PiCamera() as camera:
