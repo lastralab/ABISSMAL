@@ -69,7 +69,7 @@ def convert_video(filename):
         call([command], shell=True)
         print('Converted video')
         os.remove(filename)
-        csv_writer(str(box_id), 'Validation', path, f"{dt.year}_{dt.month}_{dt.day}",
+        csv_writer(str(box_id), 'Video', path, f"{dt.year}_{dt.month}_{dt.day}",
                    header,
                    [box_id, 'Camera', f"{dt.year}", f"{dt.month}", f"{dt.day}", f"{dt:%H:%M:%S.%f}",
                     Path(filename).stem + '.mp4'])
