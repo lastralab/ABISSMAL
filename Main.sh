@@ -76,6 +76,13 @@ filename="/home/pi/log/abissmal_cron.log"
 [[ -f ${filename} ]] || touch ${filename}
 echo -e "${Yellow}/home/pi/log/abissmal_cron.log ready to log cron jobs as${NC} ${user_name}"
 echo ""
+if screen -ls
+then
+  screen -ls | grep Detached | cut -d. -f1 | awk '{print $1}' | xargs kill
+  echo -e "${Yellow}Killed all the screens running for user${NC} ${user_name}"
+  screen -ls
+  echo ""
+fi
 
 echo -e "${Cyan}Enter first letter of the modules to track:${NC}"
 echo -e "${Cyan}Example: virt ${NC}${Purple}(V/v)ideo/(R/r)fid/(I/i)rbb/(T/t)emp${NC}"
