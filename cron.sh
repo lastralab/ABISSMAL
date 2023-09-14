@@ -1,7 +1,7 @@
 #!/bin/bash
 ##
  # Created by PyCharm
- # Author: nmoltta
+ # Author: tanismo
  # Project: Abissmal
  # Date: 03/08/2022
 ##

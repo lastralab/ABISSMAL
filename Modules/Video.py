@@ -1,5 +1,5 @@
 # Created by PyCharm
-# Author: nmoltta, gsvidaurre
+# Author: tanismo, gsvidaurre
 # Project: Abissmal
 # Date: 12/21/21
 
@@ -50,8 +50,8 @@ GPIO.setwarnings(False)
 GPIO.setup(REC_LED, GPIO.OUT)
 GPIO.PWM(REC_LED, 40)
 
-logging.info('Video will be recorded between ' + str(video_time_range[0]) + ' and ' + str(video_time_range[1] + 1) + ' hours')
-print('Video will be recorded between ' + str(video_time_range[0]) + ' and ' + str(video_time_range[1] + 1) + ' hours')
+logging.info('Video will be recorded between ' + str(video_time_range[0]) + ' and ' + str(video_time_range[1]) + ' hours')
+print('Video will be recorded between ' + str(video_time_range[0]) + ' and ' + str(video_time_range[1]) + ' hours')
 
 
 def set_prior_image(current_image):

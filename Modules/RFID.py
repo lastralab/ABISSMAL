@@ -1,5 +1,5 @@
 # Created by PyCharm
-# Author: nmoltta, gsvidaurre
+# Author: tanismo, gsvidaurre
 # Project: Abissmal
 # Date: 11/13/21
 
