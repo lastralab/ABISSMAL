@@ -34,7 +34,7 @@ print('Started Video script')
 path = "/home/pi/Data_Abissmal/Video/"
 header = ['chamber_id', 'sensor_id', 'year', 'month', 'day', 'time_video_started', 'video_file_name', 'total_pixels_motionTrigger']
 prior_image = None
-video_time_range = [0, 23]
+video_time_range = [0, 24]
 video_width = 1280
 video_height = 720
 iso = 400
