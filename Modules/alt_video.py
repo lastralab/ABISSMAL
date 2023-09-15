@@ -93,7 +93,7 @@ with picamera.PiCamera() as camera:
                 if int(slot[0]) <= hour_int < int(slot[1]):
                     dt = general_time
                     print('Validation recording started')
-                    dt_str = str(f"{dt.year}_{dt.month}_{dt.day}_{dt:%H}_{dt:%M}_{dt:%S}")
+                    dt_str = dt.strftime("%Y_%m_%d_%H_%M_%S")
                     file1_h264 = path + str(box_id) + "_validation_" + dt_str + '.h264'
                     if int(LED_time_range[0]) <= hour_int < int(LED_time_range[1]):
                         GPIO.output(REC_LED, GPIO.HIGH)
