@@ -70,6 +70,13 @@ def video_backup_init(foldername, destination, source):
                 shutil.move(os.path.join(src, filename), os.path.join(path, filename))
                 print('Backed-up video ' + filename)
                 videos = videos + 1
+            elif filename.endswith(video_extension) and foldername not in filename:
+                path = destination + '/Data/Video/Older'
+                if not os.path.exists(path):
+                    os.makedirs(path)
+                shutil.move(os.path.join(src, filename), os.path.join(path, filename))
+                print('Backed-up older video ' + filename)
+                videos = videos + 1
             else:
                 pass
         print('Backed-up ' + str(videos) + ' videos')
@@ -157,7 +164,8 @@ try:
         if usb_connected():
             now = datetime.now()
             if now.hour == backup_hour and now.minute == backup_minute:
-                folder = now.strftime("%Y_%m_%d")
+                yday = now - timedelta(days=1)
+                folder = yday.strftime("%Y_%m_%d")
                 video_backup_init(folder, media_path + volume_id, data_path)
                 csv_backup_init(now, media_path + volume_id, data_path)
                 time.sleep(61)
