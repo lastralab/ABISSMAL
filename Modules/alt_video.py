@@ -11,7 +11,6 @@ from datetime import datetime
 import sys
 import csv
 import re
-import RPi.GPIO as GPIO
 import io
 import random
 import picamera
@@ -42,12 +41,6 @@ video_height = 720
 iso = 400
 fr = 30
 record_duration = 5
-REC_LED = 16
-LED_time_range = [7, 20]
-GPIO.setmode(GPIO.BCM)
-GPIO.setwarnings(False)
-GPIO.setup(REC_LED, GPIO.OUT)
-GPIO.PWM(REC_LED, 40)
 
 logging.info('Detected ' + str(count) + ' time slots')
 print('Detected ' + str(count) + ' time slots')
@@ -95,14 +88,10 @@ with picamera.PiCamera() as camera:
                     print('Validation recording started')
                     dt_str = dt.strftime("%Y_%m_%d_%H_%M_%S")
                     file1_h264 = path + str(box_id) + "_validation_" + dt_str + '.h264'
-                    if int(LED_time_range[0]) <= hour_int < int(LED_time_range[1]):
-                        GPIO.output(REC_LED, GPIO.HIGH)
                     camera.start_recording(file1_h264)
                     camera.wait_recording(record_duration)
                     camera.stop_recording()
                     print('Recorded video starting at ' + f"{dt:%H}:{dt:%M}:{dt:%S}")
-                    if int(LED_time_range[0]) <= hour_int <= int(LED_time_range[1]):
-                        GPIO.output(REC_LED, GPIO.LOW)
                     convert_video(file1_h264)
                     print('Recorded and converted video to mp4')
                     if pause > 0:
@@ -116,5 +105,4 @@ with picamera.PiCamera() as camera:
     finally:
         camera.stop_recording()
         camera.close()
-        GPIO.output(REC_LED, GPIO.LOW)
         logging.info("Camera closed")

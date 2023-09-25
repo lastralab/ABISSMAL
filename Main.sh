@@ -117,13 +117,6 @@ then
     echo -e "${Green}Set pause duration to $pause seconds${NC}"
     echo ""
 
-    echo -e "${Cyan}Enter hours to use the LED recording indicator, separated by a comma.${NC}"
-    echo -e "${Cyan}Example: from 7:00am to 11:00pm =${NC}${Blue} 7,23${NC}${Cyan}. Minutes not supported.${NC}"
-    read -r rec_led
-    echo -e "${Green}LED recording indicator set to $rec_led${NC}"
-    sed -i "s#^LED_time_range =.*#LED_time_range = [$rec_led]#" "${location}${validation_file}"
-    echo ""
-
     echo -e "${Purple}Enabled Validation Videos${NC}"
     echo -e "Starting screen name: ${Cyan}validation${NC}..."
     sleep 1s
