@@ -117,7 +117,7 @@ then
     echo ""
 
     echo -e "${Purple}Enabled Validation Videos${NC}"
-    echo -e "Starting screen name: ${Cyan}validation${NC}..."
+    echo -e "Starting screen name: ${Cyan}video${NC}..."
     sleep 1s
     screen -dmS video bash -c "${validation_command}"
     echo ""
