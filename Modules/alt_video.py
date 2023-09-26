@@ -50,11 +50,6 @@ for times in video_time_range:
     print('Validation videos will be recorded between ' + str(times[0]) + ' and ' + str(times[1]) + ' hours')
 
 
-def set_prior_image(current_image):
-    global prior_image
-    prior_image = current_image
-
-
 def convert_video(filename):
     try:
         file_mp4 = path + Path(filename).stem + '.mp4'
