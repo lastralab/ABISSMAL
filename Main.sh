@@ -81,6 +81,9 @@ then
   echo -e "${Yellow}Killed all the screens running for user${NC} ${user_name}"
   screen -ls
   echo ""
+else
+  echo -e "${Green}No screens running for user ${user_name}, ready to continue${NC}"
+  echo ""
 fi
 
 echo -e "${Cyan}Enter first letter of the modules to track:${NC}"
