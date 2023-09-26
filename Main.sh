@@ -44,7 +44,6 @@ monitor_command="${python_v} ${location}${monitor_file}"
 helper_file="Modules/helper.py"
 
 v='"Video"'
-a='"Video"'
 r='"RFID"'
 i='"IRBB"'
 t='"Temp"'
@@ -93,7 +92,7 @@ sed -i "s#^modules=.*#modules=\"$modules\"#" "${cron_path}"
 
 if [[ $modules == *"A"* || $modules == *"a"* ]];
 then
-    modules_string="${modules_string}${a}${comma}"
+    modules_string="${modules_string}${v}${comma}"
     selected=true
 
     echo -e "${Cyan}Enter time slot(s) using 24hr format and including all the brackets and commas.${NC}"
@@ -120,7 +119,7 @@ then
     echo -e "${Purple}Enabled Validation Videos${NC}"
     echo -e "Starting screen name: ${Cyan}validation${NC}..."
     sleep 1s
-    screen -dmS validation bash -c "${validation_command}"
+    screen -dmS video bash -c "${validation_command}"
     echo ""
 else
   if [[ $modules == *"V"* || $modules == *"v"* ]];
