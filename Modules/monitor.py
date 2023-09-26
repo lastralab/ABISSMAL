@@ -32,7 +32,6 @@ print('Started Monitor script')
 
 
 def monitor_screens():
-    global modules
     screens = str(subprocess.getoutput("screen -list"))
     for screen in modules:
         if screens.find(screen) == -1:
