@@ -82,7 +82,7 @@ then
   screen -ls
   echo ""
 else
-  echo -e "${Green}No screens running for user ${user_name}, ready to continue${NC}"
+  echo -e "${Green}If no sockets found, it means no screens are running for user ${user_name}, which is expected${NC}"
   echo ""
 fi
 
