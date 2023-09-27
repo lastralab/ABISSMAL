@@ -19,5 +19,5 @@
 
 5. Camera template
    * Location: 3D/assets/camera_template.dwg
-   * AutoCAD format ready to manipulate and build your own camera holders depending on your needs
+   * AutoCAD format .dwg ready to be manipulated according to your needs
    * ![Screen Shot 2023-09-27 at 12.37.19 PM.png](assets%2FScreen%20Shot%202023-09-27%20at%2012.37.19%20PM.png)
