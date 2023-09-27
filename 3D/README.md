@@ -16,8 +16,12 @@
 
 4. IR Camera Holder
    * <img alt="Screen Shot 2022-04-29 at 3 28 15 PM" src="https://user-images.githubusercontent.com/22894897/166057998-3aedb9f1-c979-45f8-99fa-16c62fa10818.png">
-
-5. IR Camera holder template
+   
+5. IR Camera holder for validation videos
+   * Camera can be zip-tied to the cage
+   * ![Screen Shot 2023-09-27 at 6.09.44 PM.png](assets%2FScreen%20Shot%202023-09-27%20at%206.09.44%20PM.png)
+   
+6. IR Camera holder template
    * Location: 3D/assets/camera_template.dwg
    * AutoCAD format .dwg ready to be manipulated according to your needs
-   * ![Screen Shot 2023-09-27 at 12.37.19 PM.png](assets%2FScreen%20Shot%202023-09-27%20at%2012.37.19%20PM.png)
+   * ![Screen Shot 2023-09-27 at 6.09.58 PM.png](assets%2FScreen%20Shot%202023-09-27%20at%206.09.58%20PM.png)
