@@ -64,8 +64,8 @@ try:
             F = str(round(temp[1], 2))
             logging.info('Temperature reading: ' + C + u'\N{DEGREE SIGN}' + 'C, ' + F + u'\N{DEGREE SIGN}' + 'F')
             print('Temperature registered')
-            csv_writer(str(box_id), module, temp_data, f"{dt.year}_{dt.month}_{dt.day}", header,
-                       [box_id, 'Temperature', f"{dt.year}", f"{dt.month}", f"{dt.day}", f"{dt:%H:%M:%S.%f}", temp[0], temp[1]])
+            csv_writer(str(box_id), module, temp_data, dt.strftime("%Y_%m_%d"), header,
+                       [box_id, 'Temperature', dt.strftime("%Y"), dt.strftime("%m"), dt.strftime("%d"), f"{dt:%H:%M:%S.%f}", temp[0], temp[1]])
             time.sleep(60)
         else:
             C = str("N/A")
@@ -73,8 +73,8 @@ try:
             logging.info('Temperature reading: N/A')
             sms_alert('Temp', 'Warning: Sensor reading returned N/A, run cron.sh if it you get this warning again.')
             print('Temperature registered as N/A')
-            csv_writer(str(box_id), module, temp_data, f"{dt.year}_{dt.month}_{dt.day}", header,
-                       [box_id, f"{dt.year}", f"{dt.month}", f"{dt.day}", f"{dt:%H:%M:%S.%f}", C, F])
+            csv_writer(str(box_id), module, temp_data, dt.strftime("%Y_%m_%d"), header,
+                       [box_id, dt.strftime("%Y"), dt.strftime("%m"), dt.strftime("%d"), f"{dt:%H:%M:%S.%f}", C, F])
             time.sleep(60)
 except KeyboardInterrupt:
     logging.info('Exiting Temperature')

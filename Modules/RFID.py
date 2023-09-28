@@ -94,7 +94,7 @@ def ReadTagPageZero(fd):
                 dt = datetime.now()
                 logging.info('RFID read proximity: ' + ans)
                 print('RFID activity detected')
-                csv_writer(str(box_id), module, rfid_data, f"{dt.year}_{dt.month}_{dt.day}", header, [box_id, 'RFID', f"{dt.year}", f"{dt.month}", f"{dt.day}", f"{dt:%H:%M:%S.%f}", ans])
+                csv_writer(str(box_id), module, rfid_data, dt.strftime("%Y_%m_%d"), header, [box_id, 'RFID', dt.strftime("%Y"), dt.strftime("%m"), dt.strftime("%d"), f"{dt:%H:%M:%S.%f}", ans])
                 time.sleep(1)
     except KeyboardInterrupt:
         logging.info('Exiting RFID')

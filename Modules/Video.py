@@ -96,9 +96,9 @@ def convert_video(filename, pixels, dt):
         call([command], shell=True)
         print('Converted video')
         os.remove(filename)
-        csv_writer(str(box_id), 'Video', path, f"{dt.year}_{dt.month}_{dt.day}",
+        csv_writer(str(box_id), 'Video', path, dt.strftime("%Y_%m_%d"),
                    header,
-                   [box_id, 'Camera', f"{dt.year}", f"{dt.month}", f"{dt.day}", f"{dt:%H:%M:%S.%f}", Path(filename).stem + '.mp4', pixels])
+                   [box_id, 'Camera', dt.strftime("%Y"), dt.strftime("%m"), dt.strftime("%d"), f"{dt:%H:%M:%S.%f}", Path(filename).stem + '.mp4', pixels])
     except Exception as Err:
         logging.error('Converting video error: ' + str(Err))
         sms_alert('Video', 'Convert Error: ' + str(Err))
