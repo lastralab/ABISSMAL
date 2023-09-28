@@ -66,17 +66,20 @@ def video_backup_init(foldername, destination, source):
         if not os.path.exists(path):
             os.makedirs(path)
         for filename in files:
-            if filename.endswith(video_extension) and foldername in filename:
-                shutil.move(os.path.join(src, filename), os.path.join(path, filename))
-                print('Backed-up video ' + filename)
-                videos = videos + 1
-            elif filename.endswith(video_extension) and foldername not in filename:
-                path = destination + '/Data/Video/Older'
-                if not os.path.exists(path):
-                    os.makedirs(path)
-                shutil.move(os.path.join(src, filename), os.path.join(path, filename))
-                print('Backed-up older video ' + filename)
-                videos = videos + 1
+            if filename.endswith(video_extension):
+                if foldername in filename:
+                    shutil.move(os.path.join(src, filename), os.path.join(path, filename))
+                    print('Backed-up video ' + filename)
+                    videos = videos + 1
+                else:
+                    index = filename.find(box_id + '_') + len(box_id + '_')
+                    older = filename[index:index + 10]
+                    path = destination + '/Data/Video/' + older
+                    if not os.path.exists(path):
+                        os.makedirs(path)
+                    shutil.move(os.path.join(src, filename), os.path.join(path, filename))
+                    print('Backed-up older video ' + filename)
+                    videos = videos + 1
             else:
                 pass
         print('Backed-up ' + str(videos) + ' videos')
