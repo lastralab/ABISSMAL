@@ -28,7 +28,7 @@ file_extension = '.csv'
 
 
 def get_logger(day):
-    name = str(day.year) + '_' + str(day.month) + '_' + str(day.day) + '_abissmal_' + box_id + '.log'
+    name = day.strftime("%Y_%m_%d") + '_abissmal_' + box_id + '.log'
     logger = log.setup_custom_logger(name)
     return logger
 
