@@ -82,7 +82,7 @@ with picamera.PiCamera() as camera:
                     dt = general_time
                     print('Validation recording started')
                     dt_str = dt.strftime("%Y_%m_%d_%H_%M_%S")
-                    file1_h264 = path + str(box_id) + dt_str + "_validation.h264"
+                    file1_h264 = path + str(box_id) + "_" + dt_str + "_validation.h264"
                     camera.start_recording(file1_h264)
                     camera.wait_recording(record_duration)
                     camera.stop_recording()
