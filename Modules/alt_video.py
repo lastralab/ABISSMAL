@@ -57,9 +57,9 @@ def convert_video(filename):
         call([command], shell=True)
         print('Converted video')
         os.remove(filename)
-        csv_writer(str(box_id), 'Video', path, f"{dt.year}_{dt.month}_{dt.day}",
+        csv_writer(str(box_id), 'Video', path, dt.strftime("%Y_%m_%d"),
                    header,
-                   [box_id, 'Camera', f"{dt.year}", f"{dt.month}", f"{dt.day}", f"{dt:%H:%M:%S.%f}",
+                   [box_id, 'Camera', dt.strftime("%Y"), dt.strftime("%m"), dt.strftime("%d"), f"{dt:%H:%M:%S.%f}",
                     Path(filename).stem + '.mp4'])
     except Exception as Err:
         logging.error('Converting validation video error: ' + str(Err))
@@ -82,7 +82,7 @@ with picamera.PiCamera() as camera:
                     dt = general_time
                     print('Validation recording started')
                     dt_str = dt.strftime("%Y_%m_%d_%H_%M_%S")
-                    file1_h264 = path + str(box_id) + "_validation_" + dt_str + '.h264'
+                    file1_h264 = path + str(box_id) + "_" + dt_str + "_validation.h264"
                     camera.start_recording(file1_h264)
                     camera.wait_recording(record_duration)
                     camera.stop_recording()

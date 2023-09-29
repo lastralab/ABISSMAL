@@ -57,26 +57,33 @@ def usb_connected():
         sms_alert('Backups', 'Error: ' + exception)
 
 
-def video_backup_init(foldername, destination, source):
+def video_backup_init(yesterday, destination, source):
     src = source + 'Video'
-    path = destination + '/Data/Video/' + foldername
+    today = datetime.now().strftime("%Y_%m_%d")
+    path = destination + '/Data/Video/' + yesterday
     files = os.listdir(src)
     if len(files) > 0:
         videos = 0
         if not os.path.exists(path):
             os.makedirs(path)
         for filename in files:
-            if filename.endswith(video_extension) and foldername in filename:
-                shutil.move(os.path.join(src, filename), os.path.join(path, filename))
-                print('Backed-up video ' + filename)
-                videos = videos + 1
-            elif filename.endswith(video_extension) and foldername not in filename:
-                path = destination + '/Data/Video/Older'
-                if not os.path.exists(path):
-                    os.makedirs(path)
-                shutil.move(os.path.join(src, filename), os.path.join(path, filename))
-                print('Backed-up older video ' + filename)
-                videos = videos + 1
+            if filename.endswith(video_extension):
+                if yesterday in filename:
+                    shutil.move(os.path.join(src, filename), os.path.join(path, filename))
+                    print('Backed-up video ' + filename)
+                    videos = videos + 1
+                else:
+                    index = filename.find(box_id + '_') + len(box_id + '_')
+                    older = filename[index:index + 10]
+                    if older == today:
+                        pass
+                    else:
+                        path = destination + '/Data/Video/' + older
+                        if not os.path.exists(path):
+                            os.makedirs(path)
+                        shutil.move(os.path.join(src, filename), os.path.join(path, filename))
+                        print('Backed-up older video ' + filename)
+                        videos = videos + 1
             else:
                 pass
         print('Backed-up ' + str(videos) + ' videos')
@@ -89,7 +96,7 @@ def video_backup_init(foldername, destination, source):
 
 
 def csv_backup_init(today, destination, source):
-    today_string = str(today.year) + "_" + str(today.month) + "_" + str(today.day)
+    today_string = today.strftime("%Y_%m_%d")
     for module in modules:
         src = source + module
         files = os.listdir(src)
@@ -117,7 +124,7 @@ def csv_backup_init(today, destination, source):
 
 def logs_backup_init(day, destination, source):
     yday = day - timedelta(days=1)
-    today = str(yday.year) + "_" + str(yday.month) + "_" + str(yday.day)
+    today = yday.strftime("%Y_%m_%d")
     logs = os.listdir(source)
     if len(logs) > 0:
         logging = get_logger(datetime.today())

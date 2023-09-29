@@ -43,8 +43,8 @@ def detect_beam_breaks_callback(BEAM_PIN, sensor_id):
         dt = datetime.now()
         logging.info('IRBB activity detected in sensor: ' + sensor_id)
         print('IRBB activity detected in sensor: ' + sensor_id)
-        csv_writer(str(box_id), 'IRBB', irbb_data, f"{dt.year}_{dt.month}_{dt.day}",
-                   header, [box_id, sensor_id, f"{dt.year}", f"{dt.month}", f"{dt.day}", f"{dt:%H:%M:%S.%f}"])
+        csv_writer(str(box_id), 'IRBB', irbb_data, dt.strftime("%Y_%m_%d"),
+                   header, [box_id, sensor_id, dt.strftime("%Y"), dt.strftime("%m"), dt.strftime("%d"), f"{dt:%H:%M:%S.%f}"])
         time.sleep(0.5)
     
 
