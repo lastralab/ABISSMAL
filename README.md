@@ -38,6 +38,6 @@ Please refer to our Wiki [Set up Raspberry Pi and tracking system](https://githu
 
 ## Troubleshooting
 
-Please refer to our [Wiki](https://github.com/lastralab/Abbismal/wiki/Installation#troubleshooting)
+Please refer to our [Wiki](https://github.com/lastralab/Abissmal/wiki/5.-Troubleshooting)
 
 
