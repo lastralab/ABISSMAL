@@ -27,17 +27,16 @@ Please refer to our Wiki [Installation Overview](https://github.com/lastralab/Ab
  /_/    \_\____/_____|_____/_____/|_|  |_/_/    \_\______|
                                                   
 </pre>
-1. Run `sudo apt-get install git` in your RaspberryPi.
-2. Go to desired directory to download this project.
-3. Clone this repository `git clone https://github.com/lastralab/Abissmal.git`
-4. From root directory `/path/to/Abissmal/` run:
+1. Go to desired directory to download this project (Desktop recommended)
+2. Clone this repository `git clone https://github.com/lastralab/Abissmal.git`
+3. From root directory `~/Desktop/Abissmal/` run:
 
    1. `sudo bash run_install.sh`
    2. Enter your password (we recommend to set a password for your raspberry pi)
    3. Insert setup information accordingly
    4. Raspberry pi will be restarted automatically to apply changes
    5. If you are using ssh connection, you might need to <a href="https://github.com/lastralab/Abissmal/wiki/Installation#external-drive-not-found">mount the external drive</a> 
-   6. Run `bash Main.sh` without sudo to start collecting data
+   6. From .../Abissmal/ run `bash Main.sh` to start collecting data
 
 ## Troubleshooting
 
