@@ -12,6 +12,9 @@
 #' @param perching_prefix A character string. The prefix for the file name of the perching events spreadsheet(s). This character string needs to contain all of the symbols in the file name(s) up until the sensor label and extension (e.g. "perching_events_"). The default is NULL.
 #' @param sensor_id_col_nm A character string. This argument is the name of the metadata column in the perching event data to be integrated that contains information about the data type (e.g. "sensor_id"). The default is NULL, since integrating perching data is not a requirement.
 #' @param PIT_tag_col_nm A character string. This argument is the name of the metadata column in the perching event data to be integrated that contains information about the PIT tags detected by the RFID antenna (e.g. "PIT_tag_ID"). The default is NULL, since integrating perching data is not a requirement.
+#' @param pixel_col_nm A character string. This argument is the column name for the column that contains the number of pixels that triggered each unique video recording event and which will be used to calculate a magnitude of movement score. The default is `NULL`, since this argument is not needed for detection clusters without video recording events.
+#' @param video_width A numeric argument. The width of each video frame recorded by ABISSMAL specified as the number of pixels (for instance 1280, which is the default video width currently used by ABISSMAL). This argument is used to specify the total number of pixels in a given video frame in order to generate magnitude of movement calculations. The default argument is NULL.
+#' @param video_height A numeric argument. The height of each video frame recorded by ABISSMAL specified as the number of pixels. (for instance 720, which is the default video width currently used by ABISSMAL). This argument is used to specify the total number of pixels in a given video frame in order to generate magnitude of movement calculations. The default argument is NULL.
 #' @param path A character string. This argument should be the path on the local computer or external hard drive specifying where the data is saved across sensors for a given experimental setup. For instance, "/media/gsvidaurre/Anodorhynchus/Data_Testing/Box_02_31Dec2022".
 #' @param data_dir A character string. This argument should be the name of the directory where the pre-processed data that is used as input is saved inside the path above. For instance, "processed".
 #' @param out_dir A character string. This argument should be the name of a directory specifying where the .csv file of integrated data should be saved. For instance, "processed". This folder will be appended to the path and created as a new directory if it doesn't already exist.
@@ -21,9 +24,9 @@
 #' 
 #' @details `score_detectionClusters` uses the order in which sensors triggered within clusters of detections identified by `find_detectionCusters` to score the direction of movement events. The function finds edges or transitions between sensor labels in the sequence of detections for each cluster. Then the function uses the order of the sensor labels in the first edge to label the directionality of movement events. Note that the function requires data from at least two sensor types (or two beam breaker pairs). When using beam breaker data, the function expects data from two pairs of these sensors. This function can also integrate clusters of detections with perching events identified by the function `find_perching_events` (e.g. when an individual was perched in the entrance of the nest container).
 #' 
-#' @return A spreadsheet in .csv format with the metadata columns from the original pre-processed data used as input (including individual identity information from RFID data), columns indicating the start and end time of each detection cluster, all the possible edges or transitions detected in the sequence of sensor events, the inferred directionality of sensor events, and the rule used to score detection (using the first edge only). Each row in the .csv file is a unique detection cluster. Information about the date of processing is also contained in the resulting spreadsheet.
+#' @return A spreadsheet in .csv format with the metadata columns from the original pre-processed data used as input (including individual identity information from RFID data), columns indicating the start and end time of each detection cluster, all the possible edges or transitions detected in the sequence of sensor events, the inferred directionality of sensor events, the rule used to score detection (using the first edge only), and the magnitude of movement. Then magnitude of movement is calculated as the percentage of the observed pixels that changed color during motion detection with respect to the total number of pixels in a given video frame: ( observed number of pixels that changed / (video_width x video_height) ) * 100. Each row in the .csv file is a unique detection cluster. Information about the date of processing is also contained in the resulting spreadsheet.
 
-score_detectionClusters <- function(file_nm, rfid_label = NULL, camera_label = NULL, outer_irbb_label = NULL, inner_irbb_label = NULL, video_metadata_col_nms, integrate_perching, perching_dataset = NULL, perching_prefix = NULL, sensor_id_col_nm = NULL, PIT_tag_col_nm = NULL, path, data_dir, out_dir, out_file_nm = "scored_detectionClusters.csv", tz, POSIXct_format = "%Y-%m-%d %H:%M:%OS"){
+score_detectionClusters <- function(file_nm, rfid_label = NULL, camera_label = NULL, outer_irbb_label = NULL, inner_irbb_label = NULL, video_metadata_col_nms, integrate_perching, perching_dataset = NULL, perching_prefix = NULL, sensor_id_col_nm = NULL, PIT_tag_col_nm = NULL, pixel_col_nm = NULL, video_width = NULL, video_height = NULL, path, data_dir, out_dir, out_file_nm = "scored_detectionClusters.csv", tz, POSIXct_format = "%Y-%m-%d %H:%M:%OS"){
   
   # Get the current global options
   orig_opts <- options()
@@ -78,9 +81,26 @@ score_detectionClusters <- function(file_nm, rfid_label = NULL, camera_label = N
     stop("The inner beam breaker data must be accompanied by outer beam breaker data")
   }
   
-  # Check that if camera_label is not NULL, then video_metadata_cols is also not NULL
+  # Check that if camera_label is not NULL, then video_metadata_cols and columns for calculating the magnitude of movement are also not NULL
   if(!is.null(camera_label)){
+    
     check_not_null("video_metadata_col_nms", f_args[[grep(paste(paste("^", "video_metadata_col_nms", "$", sep = ""), collapse = "|"), names(f_args))]])
+    
+    vid_calc_cols <- c("pixel_col_nm", "video_width", "video_height")
+    
+    lapply(1:length(vid_calc_cols), function(i){
+      
+      check_not_null(vid_calc_cols[i], f_args[[grep(paste(paste("^", vid_calc_cols[i], "$", sep = ""), collapse = "|"), names(f_args))]])
+      
+    })
+    
+    # Check that arguments that should be numeric are numeric
+    expect_numeric <- c("video_width", "video_height")
+    
+    invisible(sapply(1:length(expect_numeric), function(i){
+      check_numeric(expect_numeric[i], f_args[[grep(paste(paste("^", expect_numeric[i], "$", sep = ""), collapse = "|"), names(f_args))]])
+    }))
+    
   }
   
   # Check that the formal arguments that should be NULL are NULL, and vice versa
@@ -108,8 +128,6 @@ score_detectionClusters <- function(file_nm, rfid_label = NULL, camera_label = N
       check_null(expect_nulls[i], f_args[[grep(paste(paste("^", expect_nulls[i], "$", sep = ""), collapse = "|"), names(f_args))]])
     }))
     
-    expect_strings <- f_args[-grep(paste(paste("^", c(expect_bool, expect_nulls), "$", sep = ""), collapse = "|"), names(f_args))]
-    
   }
   
   # Get all the NULL arguments (e.g. camera_label or sensor_id_col_nm may be NULL)
@@ -119,7 +137,15 @@ score_detectionClusters <- function(file_nm, rfid_label = NULL, camera_label = N
   
   if(length(wh_null) > 0){
     
-    expect_strings <- f_args[-grep(paste(paste("^", c(expect_bool, names(f_args)[wh_null]), "$", sep = ""), collapse = "|"), names(f_args))]
+    if(!exists("expect_numeric")){
+      
+      expect_strings <- f_args[-grep(paste(paste("^", c(expect_bool, names(f_args)[wh_null]), "$", sep = ""), collapse = "|"), names(f_args))]
+      
+    } else if(exists("expect_numeric")){
+      
+      expect_strings <- f_args[-grep(paste(paste("^", c(expect_bool, expect_numeric, names(f_args)[wh_null]), "$", sep = ""), collapse = "|"), names(f_args))]
+      
+    }
     
   }
   
@@ -332,7 +358,7 @@ score_detectionClusters <- function(file_nm, rfid_label = NULL, camera_label = N
           detectns %>% 
             dplyr::select("rowid", names(.)[grep("indiv", names(.))]),
           by = "rowid"
-        ) %>% 
+        ) %>%
         dplyr::select(rowid, start, end, sensor_ids, names(.)[grep("Edge", names(.))], names(.)[grep("direction", names(.))], names(.)[grep("indiv", names(.))])
       
     } else {
@@ -355,7 +381,10 @@ score_detectionClusters <- function(file_nm, rfid_label = NULL, camera_label = N
             dplyr::select("rowid", names(.)[grep(paste(video_metadata_col_nms, collapse = "|"), names(.))]),
           by = "rowid"
         ) %>% 
-        dplyr::select(rowid, start, end, sensor_ids, names(.)[grep("Edge", names(.))], names(.)[grep("direction", names(.))], names(.)[grep(paste(video_metadata_col_nms, collapse = "|"), names(.))])
+        dplyr::mutate(
+          magnitude_movement = round(( !!sym(pixel_col_nm) / (video_width * video_height) ) *100, 4)
+        ) %>% 
+        dplyr::select(rowid, start, end, sensor_ids, names(.)[grep("Edge", names(.))], names(.)[grep("direction", names(.))], names(.)[grep(paste(c(video_metadata_col_nms, "magnitude_movement"), collapse = "|"), names(.))])
       
     } else {
       
@@ -377,11 +406,14 @@ score_detectionClusters <- function(file_nm, rfid_label = NULL, camera_label = N
             dplyr::select("rowid", names(.)[grep("indiv", names(.))], names(.)[grep(paste(video_metadata_col_nms, collapse = "|"), names(.))]),
           by = "rowid"
         ) %>% 
-        dplyr::select(rowid, start, end, sensor_ids, names(.)[grep("Edge", names(.))], names(.)[grep("direction", names(.))], names(.)[grep("indiv", names(.))], names(.)[grep(paste(video_metadata_col_nms, collapse = "|"), names(.))])
+        dplyr::mutate(
+          magnitude_movement = round(( !!sym(pixel_col_nm) / (video_width * video_height) ) *100, 4)
+        ) %>% 
+        dplyr::select(rowid, start, end, sensor_ids, names(.)[grep("Edge", names(.))], names(.)[grep("direction", names(.))], names(.)[grep("indiv", names(.))], names(.)[grep(paste(c(video_metadata_col_nms, "magnitude_movement"), collapse = "|"), names(.))])
       
     } else {
       
-      detectns_edges2 <- detectns_edges %>% 
+      detectns_edges2 <- detectns_edges %>%
         dplyr::select(rowid, start, end, sensor_ids, names(.)[grep("Edge", names(.))], names(.)[grep("direction", names(.))])
       
     }
