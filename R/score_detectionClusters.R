@@ -30,33 +30,6 @@
 #' @return A spreadsheet in .csv format with the metadata columns from the original pre-processed data used as input (including individual identity information from RFID data), columns indicating the start and end time of each detection cluster, all the possible edges or transitions detected in the sequence of sensor events, the inferred directionality of sensor events, the rule used to score detection (using the first edge only), and the magnitude of movement. Then magnitude of movement is calculated as the percentage of the observed pixels that changed color during motion detection with respect to the total number of pixels in a given video frame: ( observed number of pixels that changed / (video_width x video_height) ) * 100. The function also integrates pre-processed video recording events that were dropped while searching for detection clusters. These video recording events can be added back to the detection cluster dataset using the arguments `integrate_preproc_video`, `video_file_nm`, and `timestamps_col_nm`. The function also adds a column of inferred location of movement, since these video recording events may represent movements inside of the container that were not picked up by other sensors. All detection clusters that were picked up by other sensors are scored as movements that likely occurred at the entance of the nest container.
 #' 
 #' Each row in the resulting .csv file is a unique detection cluster. Information about the date of processing is also contained in the resulting spreadsheet.
-# 
-# 
-# file_nm = "detection_clusters.csv"
-# sensor_id_col_nm = "sensor_id"
-# PIT_tag_col_nm = "PIT_tag_ID"
-# rfid_label = "RFID"
-# camera_label = "Camera"
-# outer_irbb_label = "Outer Beam Breaker"
-# inner_irbb_label = "Inner Beam Breaker"
-# video_metadata_col_nms = c("total_pixels_motionTrigger", "pixel_threshold", "video_file_name")
-# integrate_perching = TRUE
-# perching_dataset = "RFID"
-# perching_prefix = "perching_events_"
-# pixel_col_nm = "total_pixels_motionTrigger"
-# video_width = 1280
-# video_height = 720
-# path = path
-# data_dir = file.path(data_dir, "processed")
-# out_dir = file.path(data_dir, "processed")
-# out_file_nm = "scored_detectionClusters.csv"
-# tz = "America/New York"
-# POSIXct_format = "%Y-%m-%d %H:%M:%OS"
-# 
-# # NEW
-# integrate_preproc_video = TRUE
-# video_file_nm = "pre_processed_data_Video.csv"
-# timestamps_col_nm = "timestamp_ms"
 
 score_detectionClusters <- function(file_nm, rfid_label = NULL, camera_label = NULL, outer_irbb_label = NULL, inner_irbb_label = NULL, video_metadata_col_nms, integrate_perching, perching_dataset = NULL, perching_prefix = NULL, sensor_id_col_nm = NULL, PIT_tag_col_nm = NULL, pixel_col_nm = NULL, video_width = NULL, video_height = NULL, integrate_preproc_video, video_file_nm = NULL, timestamps_col_nm = NULL, path, data_dir, out_dir, out_file_nm = "scored_detectionClusters.csv", tz, POSIXct_format = "%Y-%m-%d %H:%M:%OS"){
   
