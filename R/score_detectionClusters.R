@@ -15,6 +15,9 @@
 #' @param pixel_col_nm A character string. This argument is the column name for the column that contains the number of pixels that triggered each unique video recording event and which will be used to calculate a magnitude of movement score. The default is `NULL`, since this argument is not needed for detection clusters without video recording events.
 #' @param video_width A numeric argument. The width of each video frame recorded by ABISSMAL specified as the number of pixels (for instance 1280, which is the default video width currently used by ABISSMAL). This argument is used to specify the total number of pixels in a given video frame in order to generate magnitude of movement calculations. The default argument is NULL.
 #' @param video_height A numeric argument. The height of each video frame recorded by ABISSMAL specified as the number of pixels. (for instance 720, which is the default video width currently used by ABISSMAL). This argument is used to specify the total number of pixels in a given video frame in order to generate magnitude of movement calculations. The default argument is NULL.
+#' @param integrate_proproc_video A Boolean argument. When TRUE, the dataset of pre-processed video recording events will be integrated back into the dataset of scored detection clusters. The purpose of this integration is to avoid dropping single video recording events that occurred when no other sensors triggered, since find_detectionClusters searches for sequences of triggering events and therefore ignores singlet video recordings. When this argument is FALSE, this integration will not be performed. 
+#' @param video_file_nm A character string. This argument should be the name (plus extension) of the spreadsheet that holds the pre-processed video recording events. The default is NULL, but this argument cannot be NULL when integrate_proproc_video is TRUE.
+#' @param timestamps_col_nm A character string. This argument is the column name that holds timestamps of video recording events in the pre-processed video data. The default is NULL, but this argument cannot be NULL when integrate_proproc_video is TRUE.
 #' @param path A character string. This argument should be the path on the local computer or external hard drive specifying where the data is saved across sensors for a given experimental setup. For instance, "/media/gsvidaurre/Anodorhynchus/Data_Testing/Box_02_31Dec2022".
 #' @param data_dir A character string. This argument should be the name of the directory where the pre-processed data that is used as input is saved inside the path above. For instance, "processed".
 #' @param out_dir A character string. This argument should be the name of a directory specifying where the .csv file of integrated data should be saved. For instance, "processed". This folder will be appended to the path and created as a new directory if it doesn't already exist.
@@ -24,9 +27,38 @@
 #' 
 #' @details `score_detectionClusters` uses the order in which sensors triggered within clusters of detections identified by `find_detectionCusters` to score the direction of movement events. The function finds edges or transitions between sensor labels in the sequence of detections for each cluster. Then the function uses the order of the sensor labels in the first edge to label the directionality of movement events. Note that the function requires data from at least two sensor types (or two beam breaker pairs). When using beam breaker data, the function expects data from two pairs of these sensors. This function can also integrate clusters of detections with perching events identified by the function `find_perching_events` (e.g. when an individual was perched in the entrance of the nest container).
 #' 
-#' @return A spreadsheet in .csv format with the metadata columns from the original pre-processed data used as input (including individual identity information from RFID data), columns indicating the start and end time of each detection cluster, all the possible edges or transitions detected in the sequence of sensor events, the inferred directionality of sensor events, the rule used to score detection (using the first edge only), and the magnitude of movement. Then magnitude of movement is calculated as the percentage of the observed pixels that changed color during motion detection with respect to the total number of pixels in a given video frame: ( observed number of pixels that changed / (video_width x video_height) ) * 100. Each row in the .csv file is a unique detection cluster. Information about the date of processing is also contained in the resulting spreadsheet.
+#' @return A spreadsheet in .csv format with the metadata columns from the original pre-processed data used as input (including individual identity information from RFID data), columns indicating the start and end time of each detection cluster, all the possible edges or transitions detected in the sequence of sensor events, the inferred directionality of sensor events, the rule used to score detection (using the first edge only), and the magnitude of movement. Then magnitude of movement is calculated as the percentage of the observed pixels that changed color during motion detection with respect to the total number of pixels in a given video frame: ( observed number of pixels that changed / (video_width x video_height) ) * 100. The function also integrates pre-processed video recording events that were dropped while searching for detection clusters. These video recording events can be added back to the detection cluster dataset using the arguments `integrate_preproc_video`, `video_file_nm`, and `timestamps_col_nm`. The function also adds a column of inferred location of movement, since these video recording events may represent movements inside of the container that were not picked up by other sensors. All detection clusters that were picked up by other sensors are scored as movements that likely occurred at the entance of the nest container.
+#' 
+#' Each row in the resulting .csv file is a unique detection cluster. Information about the date of processing is also contained in the resulting spreadsheet.
+# 
+# 
+# file_nm = "detection_clusters.csv"
+# sensor_id_col_nm = "sensor_id"
+# PIT_tag_col_nm = "PIT_tag_ID"
+# rfid_label = "RFID"
+# camera_label = "Camera"
+# outer_irbb_label = "Outer Beam Breaker"
+# inner_irbb_label = "Inner Beam Breaker"
+# video_metadata_col_nms = c("total_pixels_motionTrigger", "pixel_threshold", "video_file_name")
+# integrate_perching = TRUE
+# perching_dataset = "RFID"
+# perching_prefix = "perching_events_"
+# pixel_col_nm = "total_pixels_motionTrigger"
+# video_width = 1280
+# video_height = 720
+# path = path
+# data_dir = file.path(data_dir, "processed")
+# out_dir = file.path(data_dir, "processed")
+# out_file_nm = "scored_detectionClusters.csv"
+# tz = "America/New York"
+# POSIXct_format = "%Y-%m-%d %H:%M:%OS"
+# 
+# # NEW
+# integrate_preproc_video = TRUE
+# video_file_nm = "pre_processed_data_Video.csv"
+# timestamps_col_nm = "timestamp_ms"
 
-score_detectionClusters <- function(file_nm, rfid_label = NULL, camera_label = NULL, outer_irbb_label = NULL, inner_irbb_label = NULL, video_metadata_col_nms, integrate_perching, perching_dataset = NULL, perching_prefix = NULL, sensor_id_col_nm = NULL, PIT_tag_col_nm = NULL, pixel_col_nm = NULL, video_width = NULL, video_height = NULL, path, data_dir, out_dir, out_file_nm = "scored_detectionClusters.csv", tz, POSIXct_format = "%Y-%m-%d %H:%M:%OS"){
+score_detectionClusters <- function(file_nm, rfid_label = NULL, camera_label = NULL, outer_irbb_label = NULL, inner_irbb_label = NULL, video_metadata_col_nms, integrate_perching, perching_dataset = NULL, perching_prefix = NULL, sensor_id_col_nm = NULL, PIT_tag_col_nm = NULL, pixel_col_nm = NULL, video_width = NULL, video_height = NULL, integrate_preproc_video, video_file_nm = NULL, timestamps_col_nm = NULL, path, data_dir, out_dir, out_file_nm = "scored_detectionClusters.csv", tz, POSIXct_format = "%Y-%m-%d %H:%M:%OS"){
   
   # Get the current global options
   orig_opts <- options()
@@ -38,13 +70,13 @@ score_detectionClusters <- function(file_nm, rfid_label = NULL, camera_label = N
   f_args <- getFunctionParameters()
   
   # Check that arguments that cannot ever be non-NULL are not NULL
-  expect_nonNulls <- f_args[grep(paste(paste("^", c("file_nm", "integrate_perching", "path", "data_dir", "out_dir", "out_file_nm", "tz", "POSIXct_format"), "$", sep = ""), collapse = "|"), names(f_args))]
+  expect_nonNulls <- f_args[grep(paste(paste("^", c("file_nm", "integrate_perching", "integrate_preproc_video", "path", "data_dir", "out_dir", "out_file_nm", "tz", "POSIXct_format"), "$", sep = ""), collapse = "|"), names(f_args))]
   
   invisible(sapply(1:length(expect_nonNulls), function(i){
     check_not_null(names(expect_nonNulls[i]), expect_nonNulls[[i]])
   }))
   
-  expect_bool <- c("integrate_perching")
+  expect_bool <- c("integrate_perching", "integrate_preproc_video")
   
   # Check that the formal arguments that should be Boolean are Boolean
   invisible(sapply(1:length(expect_bool), function(i){
@@ -100,6 +132,19 @@ score_detectionClusters <- function(file_nm, rfid_label = NULL, camera_label = N
     invisible(sapply(1:length(expect_numeric), function(i){
       check_numeric(expect_numeric[i], f_args[[grep(paste(paste("^", expect_numeric[i], "$", sep = ""), collapse = "|"), names(f_args))]])
     }))
+    
+  }
+  
+  # If integrate_preproc_video is TRUE, then check that the other two necessary arguments are not NULL
+  if(integrate_preproc_video){
+    
+    vid_int_cols <- c("video_file_nm", "timestamps_col_nm")
+    
+    lapply(1:length(vid_int_cols), function(i){
+      
+      check_not_null(vid_int_cols[i], f_args[[grep(paste(paste("^", vid_int_cols[i], "$", sep = ""), collapse = "|"), names(f_args))]])
+      
+    })
     
   }
   
@@ -381,10 +426,7 @@ score_detectionClusters <- function(file_nm, rfid_label = NULL, camera_label = N
             dplyr::select("rowid", names(.)[grep(paste(video_metadata_col_nms, collapse = "|"), names(.))]),
           by = "rowid"
         ) %>% 
-        dplyr::mutate(
-          magnitude_movement = round(( !!sym(pixel_col_nm) / (video_width * video_height) ) *100, 4)
-        ) %>% 
-        dplyr::select(rowid, start, end, sensor_ids, names(.)[grep("Edge", names(.))], names(.)[grep("direction", names(.))], names(.)[grep(paste(c(video_metadata_col_nms, "magnitude_movement"), collapse = "|"), names(.))])
+        dplyr::select(rowid, start, end, sensor_ids, names(.)[grep("Edge", names(.))], names(.)[grep("direction", names(.))], names(.)[grep(paste(video_metadata_col_nms, collapse = "|"), names(.))])
       
     } else {
       
@@ -406,10 +448,7 @@ score_detectionClusters <- function(file_nm, rfid_label = NULL, camera_label = N
             dplyr::select("rowid", names(.)[grep("indiv", names(.))], names(.)[grep(paste(video_metadata_col_nms, collapse = "|"), names(.))]),
           by = "rowid"
         ) %>% 
-        dplyr::mutate(
-          magnitude_movement = round(( !!sym(pixel_col_nm) / (video_width * video_height) ) *100, 4)
-        ) %>% 
-        dplyr::select(rowid, start, end, sensor_ids, names(.)[grep("Edge", names(.))], names(.)[grep("direction", names(.))], names(.)[grep("indiv", names(.))], names(.)[grep(paste(c(video_metadata_col_nms, "magnitude_movement"), collapse = "|"), names(.))])
+        dplyr::select(rowid, start, end, sensor_ids, names(.)[grep("Edge", names(.))], names(.)[grep("direction", names(.))], names(.)[grep("indiv", names(.))], names(.)[grep(paste(video_metadata_col_nms, collapse = "|"), names(.))])
       
     } else {
       
@@ -425,6 +464,116 @@ score_detectionClusters <- function(file_nm, rfid_label = NULL, camera_label = N
     
     detectns_edges2 <- detectns_edges %>% 
       dplyr::select(rowid, start, end, sensor_ids, names(.)[grep("Edge", names(.))], names(.)[grep("direction", names(.))])
+    
+  }
+  
+  # Integrate the prep-processed video recording events if specified, and if the camera is not NULL
+  if(integrate_preproc_video & !is.null(camera_label)){
+    
+    # Read in the pre-processed video data depending on which datasets were specified
+    # Drop all post-trigger video recordings (these have the same timestamp as the respective pre-trigger recordings)
+    video_pp <- read.csv(file.path(path, data_dir, video_file_nm))
+    
+    tmp_col_nm <- video_metadata_col_nms[grep("file_name", video_metadata_col_nms)]
+    
+    video_pp <- video_pp[-which(grepl("post_trigger", video_pp[[tmp_col_nm]])), ]
+    
+    video_pp <- video_pp %>% 
+      # Make sure that the timestamps are in the right format
+      dplyr::mutate(
+        !!timestamps_col_nm := as.POSIXct(format(as.POSIXct(!!sym(timestamps_col_nm), tz = "America/New York"), "%Y-%m-%d %H:%M:%OS6"))
+      )
+    
+    # Find all of the pre-processed video recording events that are not in the current dataset of detection clusters. Search for video recording events that do not fall within the start and end timestamps of the detection clusters
+    names(video_pp)[grep(timestamps_col_nm, names(video_pp))] <- "timestamp"
+    
+    video_pp2 <- video_pp %>% 
+      rowid_to_column() %>% 
+      dplyr::select(timestamp, rowid) %>% 
+      # For each pre-processed video recording event, figure out whether the recording timestamp occurred within the start and end of any detection cluster
+      pmap_dfr(., function(rowid, timestamp){
+        
+        tmp <- detectns_edges2 %>% 
+          dplyr::filter(
+            timestamp >= start & timestamp <= end
+          )
+        
+        if(nrow(tmp) > 0){
+          
+          return(data.frame(rowid, timestamp, captured = "Yes"))
+          
+        } else {
+          
+          return(data.frame(rowid, timestamp, captured = "No"))
+          
+        }
+        
+      })
+    
+    if(nrow(video_pp2) > 0){
+      
+      # Get the pre-processed video recording events that are not captured in the detection clusters and add these to the scored detection cluster dataset as new rows, with a metadata about the inferred local of movement
+      detectns_edges3 <- detectns_edges2 %>% 
+        dplyr::mutate(
+          inferredMovement_Location = "container_entrance"
+        ) 
+      
+      detectns_edges3 <- detectns_edges3 %>% 
+        bind_rows(
+          video_pp %>% 
+            rowid_to_column() %>% 
+            dplyr::full_join(
+              video_pp2 %>% 
+                dplyr::select(rowid, captured),
+              by = "rowid"
+            ) %>%
+            dplyr::filter(captured == "No") %>%
+            dplyr::select(timestamp, all_of(video_metadata_col_nms)) %>% 
+            dplyr::mutate(
+              start = timestamp,
+              end = timestamp,
+              sensor_ids = camera_label,
+              Edge_1 = NA,
+              Edge_2 = NA,
+              direction_scored = NA,
+              direction_rule = NA,
+              indiv1_id = NA,
+              indiv2_id = NA,
+              total_indiv1_detections = NA,
+              total_indiv2_detections = NA,
+              individual_initiated = NA,
+              individual_ended = NA,
+              inferredMovement_Location = "inside_container"
+            ) %>% 
+            rowid_to_column() %>% 
+            dplyr::select(names(detectns_edges3))
+        ) %>% 
+        # Fix the row IDs
+        dplyr::select(-c(rowid)) %>% 
+        rowid_to_column() 
+      
+    } else {
+      
+      detectns_edges3 <- detectns_edges2
+      
+      warning("All video recording events were already captured in the current set of detection clusters; skipping integration of pre-processed video recording events")
+      
+    }
+    
+  } else {
+    
+    detectns_edges3 <- detectns_edges2
+    
+  }
+  
+  # Perform the magnitude of movement calculations for video recording events if the camera label is not NULL
+  if(!is.null(camera_label)){
+    
+    detectns_edges3 <- detectns_edges3 %>% 
+      dplyr::mutate(
+        magnitude_movement = round(( !!sym(pixel_col_nm) / (video_width * video_height) ) *100, 4)
+      ) %>% 
+      dplyr::select(rowid, start, end, sensor_ids, names(.)[grep("Edge", names(.))], names(.)[grep("direction", names(.))], names(.)[grep("indiv", names(.))], names(.)[grep(paste(c(video_metadata_col_nms, "magnitude_movement", "inferredMovement_Location"), collapse = "|"), names(.))])
     
   }
   
@@ -511,7 +660,7 @@ score_detectionClusters <- function(file_nm, rfid_label = NULL, camera_label = N
       # For each detection cluster, figure out whether it occurred during a perching event and add that perching event to the final dataset
       if(perching_dataset %in% c("RFID", "RFID-IRBB")){
         
-        tmp_df <- detectns_edges2 %>% 
+        tmp_df <- detectns_edges3 %>% 
           dplyr::select(rowid, start, end) %>% 
           pmap_dfr(., function(rowid, start, end){
             
@@ -533,7 +682,7 @@ score_detectionClusters <- function(file_nm, rfid_label = NULL, camera_label = N
         
       } else if(perching_dataset == "IRBB"){
         
-        tmp_df <- detectns_edges2 %>% 
+        tmp_df <- detectns_edges3 %>% 
           dplyr::select(rowid, start, end) %>% 
           pmap_dfr(., function(rowid, start, end){
             
@@ -549,13 +698,13 @@ score_detectionClusters <- function(file_nm, rfid_label = NULL, camera_label = N
             return(tmp_perching)
             
           })
-
+        
       } 
       
       # Then add the perching event assignment for the given bout as new columns, depending on the perching datasets used as input
       if(perching_dataset %in% c("RFID", "IRBB")){
         
-        detectns_edges_p <- detectns_edges2 %>% 
+        detectns_edges_p <- detectns_edges3 %>% 
           dplyr::left_join(
             tmp_df %>% 
               dplyr::rename(
@@ -567,7 +716,7 @@ score_detectionClusters <- function(file_nm, rfid_label = NULL, camera_label = N
         # If both RFID and IRBB were specified as perching datasets, then add back perching events from each dataset as separate columns
       } else if(perching_dataset == "RFID-IRBB"){
         
-        detectns_edges_p <- detectns_edges2 %>% 
+        detectns_edges_p <- detectns_edges3 %>% 
           dplyr::left_join(
             tmp_df %>% 
               dplyr::filter(!!sym(sensor_id_col_nm) == "RFID") %>% 
@@ -607,13 +756,13 @@ score_detectionClusters <- function(file_nm, rfid_label = NULL, camera_label = N
     } else {
       
       warning("The perching events dataset was empty; skipping integration of perching events")
-      detectns_edges_p <- detectns_edges2
+      detectns_edges_p <- detectns_edges3
       
     }
     
   } else {
     
-    detectns_edges_p <- detectns_edges2
+    detectns_edges_p <- detectns_edges3
     
   }
   
