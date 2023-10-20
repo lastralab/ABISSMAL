@@ -12,6 +12,8 @@ source("/home/gsvidaurre/Desktop/GitHub_repos/Abissmal/R/utilities.R")
 
 # This testing file can be run by calling test_file("./path/to/this/file)
 
+# Another test that would be good to add is whether multiple video file names are concatenated if/when detection clusters have more than 1 camera event
+
 test_that("The function labels entrances and exits as expected using data from 2 beam breaker pairs", {
   
   # Avoid library calls and other changes to the virtual environment
