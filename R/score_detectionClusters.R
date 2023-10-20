@@ -31,6 +31,32 @@
 #' 
 #' Each row in the resulting .csv file is a unique detection cluster. Information about the date of processing is also contained in the resulting spreadsheet.
 
+p <- 1
+file_nm = "detection_clusters.csv"
+rfid_label = "RFID"
+camera_label = "Camera"
+outer_irbb_label = "Outer Beam Breaker"
+inner_irbb_label = "Inner Beam Breaker"
+video_metadata_col_nms = c("total_pixels_motionTrigger", "video_file_name")
+integrate_perching = TRUE
+perching_dataset = "RFID-IRBB"
+perching_prefix = "perching_events_"
+sensor_id_col_nm = "sensor_id"
+PIT_tag_col_nm = "PIT_tag_ID"
+pixel_col_nm = "total_pixels_motionTrigger"
+video_width = 1280
+video_height = 720
+integrate_preproc_video = TRUE
+video_file_nm = "pre_processed_data_Video.csv"
+timestamps_col_nm = "timestamp_ms"
+path = data_paths[p]
+data_dir = "processed"
+out_dir = "processed"
+out_file_nm = "scored_detectionClusters.csv"
+tz = "America/New York"
+POSIXct_format = "%Y-%m-%d %H:%M:%OS"
+
+
 score_detectionClusters <- function(file_nm, rfid_label = NULL, camera_label = NULL, outer_irbb_label = NULL, inner_irbb_label = NULL, video_metadata_col_nms, integrate_perching, perching_dataset = NULL, perching_prefix = NULL, sensor_id_col_nm = NULL, PIT_tag_col_nm = NULL, pixel_col_nm = NULL, video_width = NULL, video_height = NULL, integrate_preproc_video, video_file_nm = NULL, timestamps_col_nm = NULL, path, data_dir, out_dir, out_file_nm = "scored_detectionClusters.csv", tz, POSIXct_format = "%Y-%m-%d %H:%M:%OS"){
   
   # Get the current global options
@@ -491,34 +517,44 @@ score_detectionClusters <- function(file_nm, rfid_label = NULL, camera_label = N
           inferredMovement_Location = "container_entrance"
         ) 
       
+      # Modify the pre-processed video recordings object to have the same number of Edge columns as detections_edges3, as well as other columns (fill these with NAs)
+      video_pp3 <- video_pp %>% 
+        rowid_to_column() %>% 
+        dplyr::full_join(
+          video_pp2 %>% 
+            dplyr::select(rowid, captured),
+          by = "rowid"
+        ) %>%
+        dplyr::filter(captured == "No") %>%
+        dplyr::select(timestamp, all_of(video_metadata_col_nms)) %>% 
+        dplyr::mutate(
+          start = timestamp,
+          end = timestamp,
+          sensor_ids = camera_label,
+          direction_scored = NA,
+          direction_rule = NA,
+          indiv1_id = NA,
+          indiv2_id = NA,
+          total_indiv1_detections = NA,
+          total_indiv2_detections = NA,
+          individual_initiated = NA,
+          individual_ended = NA,
+          inferredMovement_Location = "inside_container"
+        ) %>% 
+        rowid_to_column()
+      
+      edge_cols <- names(detectns_edges3)[grep("Edge", names(detectns_edges3))]
+      edge_nas <- data.frame(matrix(ncol = length(edge_cols), nrow = nrow(video_pp3)))
+      names(edge_nas) <- edge_cols
+      
+      video_pp3 <- video_pp3 %>% 
+        bind_cols(
+          edge_nas
+        )
+      
       detectns_edges3 <- detectns_edges3 %>% 
         bind_rows(
-          video_pp %>% 
-            rowid_to_column() %>% 
-            dplyr::full_join(
-              video_pp2 %>% 
-                dplyr::select(rowid, captured),
-              by = "rowid"
-            ) %>%
-            dplyr::filter(captured == "No") %>%
-            dplyr::select(timestamp, all_of(video_metadata_col_nms)) %>% 
-            dplyr::mutate(
-              start = timestamp,
-              end = timestamp,
-              sensor_ids = camera_label,
-              Edge_1 = NA,
-              Edge_2 = NA,
-              direction_scored = NA,
-              direction_rule = NA,
-              indiv1_id = NA,
-              indiv2_id = NA,
-              total_indiv1_detections = NA,
-              total_indiv2_detections = NA,
-              individual_initiated = NA,
-              individual_ended = NA,
-              inferredMovement_Location = "inside_container"
-            ) %>% 
-            rowid_to_column() %>% 
+          video_pp3 %>% 
             dplyr::select(names(detectns_edges3))
         ) %>% 
         # Fix the row IDs
@@ -739,14 +775,18 @@ score_detectionClusters <- function(file_nm, rfid_label = NULL, camera_label = N
     
   }
   
-  detectns_edges_p <- detectns_edges_p %>% 
+  detectns_edges_p2 <- detectns_edges_p %>% 
+    # Order by the timestamps
+    dplyr::arrange(
+      -desc(start)
+    ) %>% 
+    dplyr::select(-c(rowid)) %>%
     dplyr::mutate(
       data_stage = "integrated",
       date_processed = paste(Sys.Date(), Sys.time(), sep = " ")
-    ) %>% 
-    dplyr::select(-c("rowid"))
+    )
   
-  write.csv(detectns_edges_p, file.path(path, out_dir, out_file_nm), row.names = FALSE)
+  write.csv(detectns_edges_p2, file.path(path, out_dir, out_file_nm), row.names = FALSE)
   
   # Reset the current global options
   options(orig_opts) 
