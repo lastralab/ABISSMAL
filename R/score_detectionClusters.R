@@ -31,32 +31,6 @@
 #' 
 #' Each row in the resulting .csv file is a unique detection cluster. Information about the date of processing is also contained in the resulting spreadsheet.
 
-p <- 1
-file_nm = "detection_clusters.csv"
-rfid_label = "RFID"
-camera_label = "Camera"
-outer_irbb_label = "Outer Beam Breaker"
-inner_irbb_label = "Inner Beam Breaker"
-video_metadata_col_nms = c("total_pixels_motionTrigger", "video_file_name")
-integrate_perching = TRUE
-perching_dataset = "RFID-IRBB"
-perching_prefix = "perching_events_"
-sensor_id_col_nm = "sensor_id"
-PIT_tag_col_nm = "PIT_tag_ID"
-pixel_col_nm = "total_pixels_motionTrigger"
-video_width = 1280
-video_height = 720
-integrate_preproc_video = TRUE
-video_file_nm = "pre_processed_data_Video.csv"
-timestamps_col_nm = "timestamp_ms"
-path = data_paths[p]
-data_dir = "processed"
-out_dir = "processed"
-out_file_nm = "scored_detectionClusters.csv"
-tz = "America/New York"
-POSIXct_format = "%Y-%m-%d %H:%M:%OS"
-
-
 score_detectionClusters <- function(file_nm, rfid_label = NULL, camera_label = NULL, outer_irbb_label = NULL, inner_irbb_label = NULL, video_metadata_col_nms, integrate_perching, perching_dataset = NULL, perching_prefix = NULL, sensor_id_col_nm = NULL, PIT_tag_col_nm = NULL, pixel_col_nm = NULL, video_width = NULL, video_height = NULL, integrate_preproc_video, video_file_nm = NULL, timestamps_col_nm = NULL, path, data_dir, out_dir, out_file_nm = "scored_detectionClusters.csv", tz, POSIXct_format = "%Y-%m-%d %H:%M:%OS"){
   
   # Get the current global options
@@ -330,7 +304,6 @@ score_detectionClusters <- function(file_nm, rfid_label = NULL, camera_label = N
             
             li <- cumsum(rle(sensor_events)[["lengths"]])
             
-            # Get edges using dyads of the last indices
             edges <- unlist(lapply(1:length(li), function(i){
               if(i < length(li)){
                 return(paste(sensor_events[li[i]], sensor_events[li[i + 1]], sep = " - "))
