@@ -18,14 +18,14 @@ testing_path <- "/home/gsvidaurre/Desktop/GitHub_repos/Abissmal/R/tests/testthat
 
 # Run the testthat tests for each function
 
-test_file(file.path(testing_path, "test_combine_raw_data_across_sensors.R"))
+test_file(file.path(testing_path, "test_combine_raw_data.R"))
 
-test_file(file.path(testing_path, "test_find_perching_events.R"))
+test_file(file.path(testing_path, "test_detect_perching_events.R"))
 
 test_file(file.path(testing_path, "test_preprocess_detections.R"))
 
-test_file(file.path(testing_path, "test_find_detectionClusters.R"))
+test_file(file.path(testing_path, "test_detect_clusters.R"))
 
-test_file(file.path(testing_path, "test_score_detectionClusters.R"))
+test_file(file.path(testing_path, "test_score_clusters.R"))
 
 ```

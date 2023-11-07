@@ -6,7 +6,7 @@ rm(list = ls())
 if (!require(testthat)) install.packages('testthat')
 library(testthat)
 
-source("/home/gsvidaurre/Desktop/GitHub_repos/Abissmal/R/find_perching_events.R")
+source("/home/gsvidaurre/Desktop/GitHub_repos/Abissmal/R/detect_perching_events.R")
 
 source("/home/gsvidaurre/Desktop/GitHub_repos/Abissmal/R/utilities.R")
 
@@ -84,7 +84,7 @@ test_that("The correct number and timing of perching events are identified for R
   
   write.csv(sim_ts, file.path(tmp_path, "raw_combined", "combined_raw_data_RFID.csv"), row.names = FALSE)
   
-  find_perching_events(file_nm = "combined_raw_data_RFID.csv", threshold = th, run_length = run_length, sensor_id_col_nm = "sensor_id", timestamps_col_nm = "timestamp_ms", PIT_tag_col_nm = "PIT_tag_ID", rfid_label = "RFID", outer_irbb_label = NULL, inner_irbb_label = NULL, general_metadata_cols = c("chamber_id", "sensor_id"), path = path, data_dir = file.path(data_dir, "raw_combined"), out_dir = file.path(data_dir, "processed"), out_file_prefix = "perching_events", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS")
+  detect_perching_events(file_nm = "combined_raw_data_RFID.csv", threshold = th, run_length = run_length, sensor_id_col_nm = "sensor_id", timestamps_col_nm = "timestamp_ms", PIT_tag_col_nm = "PIT_tag_ID", rfid_label = "RFID", outer_irbb_label = NULL, inner_irbb_label = NULL, general_metadata_cols = c("chamber_id", "sensor_id"), path = path, data_dir = file.path(data_dir, "raw_combined"), out_dir = file.path(data_dir, "processed"), out_file_prefix = "perching_events", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS")
   
   # Read in the output, check the output, then delete all files
   test_res <- read.csv(file.path(tmp_path, "processed", "perching_events_RFID.csv")) %>% 
@@ -195,7 +195,7 @@ test_that("The correct number and timing of discrete perching events are identif
     
     write.csv(sim_ts, file.path(tmp_path, "raw_combined", "combined_raw_data_RFID.csv"), row.names = FALSE)
     
-    find_perching_events(file_nm = "combined_raw_data_RFID.csv", threshold = ths[x], run_length = rls[x], sensor_id_col_nm = "sensor_id", timestamps_col_nm = "timestamp_ms", PIT_tag_col_nm = "PIT_tag_ID", rfid_label = "RFID", outer_irbb_label = NULL, inner_irbb_label = NULL, general_metadata_cols = c("chamber_id", "sensor_id"), path = path, data_dir = file.path(data_dir, "raw_combined"), out_dir = file.path(data_dir, "processed"), out_file_prefix = "perching_events", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS")
+    detect_perching_events(file_nm = "combined_raw_data_RFID.csv", threshold = ths[x], run_length = rls[x], sensor_id_col_nm = "sensor_id", timestamps_col_nm = "timestamp_ms", PIT_tag_col_nm = "PIT_tag_ID", rfid_label = "RFID", outer_irbb_label = NULL, inner_irbb_label = NULL, general_metadata_cols = c("chamber_id", "sensor_id"), path = path, data_dir = file.path(data_dir, "raw_combined"), out_dir = file.path(data_dir, "processed"), out_file_prefix = "perching_events", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS")
     
     # Read in the output, check the output, then delete all files
     test_res <- read.csv(file.path(tmp_path, "processed", "perching_events_RFID.csv")) %>% 
@@ -307,7 +307,7 @@ test_that("The correct number and timing of perching events are identified for t
   
   write.csv(sim_ts, file.path(tmp_path, "raw_combined", "combined_raw_data_IRBB.csv"), row.names = FALSE)
   
-  find_perching_events(file_nm = "combined_raw_data_IRBB.csv", threshold = th, run_length = run_length, sensor_id_col_nm = "sensor_id", timestamps_col_nm = "timestamp_ms", PIT_tag_col_nm = NULL, rfid_label = NULL, outer_irbb_label = "Outer Beam Breaker", inner_irbb_label = "Inner Beam Breaker", general_metadata_cols = c("chamber_id", "sensor_id"), path = path, data_dir = file.path(data_dir, "raw_combined"), out_dir = file.path(data_dir, "processed"), out_file_prefix = "perching_events", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS")
+  detect_perching_events(file_nm = "combined_raw_data_IRBB.csv", threshold = th, run_length = run_length, sensor_id_col_nm = "sensor_id", timestamps_col_nm = "timestamp_ms", PIT_tag_col_nm = NULL, rfid_label = NULL, outer_irbb_label = "Outer Beam Breaker", inner_irbb_label = "Inner Beam Breaker", general_metadata_cols = c("chamber_id", "sensor_id"), path = path, data_dir = file.path(data_dir, "raw_combined"), out_dir = file.path(data_dir, "processed"), out_file_prefix = "perching_events", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS")
   
   # Read in the output, check the output, then delete all files
   test_res <- read.csv(file.path(tmp_path, "processed", "perching_events_IRBB.csv")) %>% 
@@ -417,7 +417,7 @@ test_that("The correct number and timing of discrete perching events are identif
     
     write.csv(sim_ts, file.path(tmp_path, "raw_combined", "combined_raw_data_IRBB.csv"), row.names = FALSE)
     
-    find_perching_events(file_nm = "combined_raw_data_IRBB.csv", threshold = ths[x], run_length = rls[x], sensor_id_col_nm = "sensor_id", timestamps_col_nm = "timestamp_ms", PIT_tag_col_nm = NULL, rfid_label = NULL, outer_irbb_label = "Outer Beam Breaker", inner_irbb_label = "Inner Beam Breaker", general_metadata_cols = c("chamber_id", "sensor_id"), path = path, data_dir = file.path(data_dir, "raw_combined"), out_dir = file.path(data_dir, "processed"), out_file_prefix = "perching_events", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS")
+    detect_perching_events(file_nm = "combined_raw_data_IRBB.csv", threshold = ths[x], run_length = rls[x], sensor_id_col_nm = "sensor_id", timestamps_col_nm = "timestamp_ms", PIT_tag_col_nm = NULL, rfid_label = NULL, outer_irbb_label = "Outer Beam Breaker", inner_irbb_label = "Inner Beam Breaker", general_metadata_cols = c("chamber_id", "sensor_id"), path = path, data_dir = file.path(data_dir, "raw_combined"), out_dir = file.path(data_dir, "processed"), out_file_prefix = "perching_events", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS")
     
     # Read in the output, check the output, then delete all files
     test_res <- read.csv(file.path(tmp_path, "processed", "perching_events_IRBB.csv")) %>% 
@@ -532,7 +532,7 @@ test_that("The correct number and timing of perching events are identified for t
   
   write.csv(sim_ts, file.path(tmp_path, "raw_combined", "combined_raw_data_IRBB.csv"), row.names = FALSE)
   
-  find_perching_events(file_nm = "combined_raw_data_IRBB.csv", threshold = th, run_length = run_length, sensor_id_col_nm = "sensor_id", timestamps_col_nm = "timestamp_ms", PIT_tag_col_nm = NULL, rfid_label = NULL, outer_irbb_label = "Outer Beam Breaker", inner_irbb_label = "Inner Beam Breaker", general_metadata_cols = c("chamber_id", "sensor_id"), path = path, data_dir = file.path(data_dir, "raw_combined"), out_dir = file.path(data_dir, "processed"), out_file_prefix = "perching_events", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS")
+  detect_perching_events(file_nm = "combined_raw_data_IRBB.csv", threshold = th, run_length = run_length, sensor_id_col_nm = "sensor_id", timestamps_col_nm = "timestamp_ms", PIT_tag_col_nm = NULL, rfid_label = NULL, outer_irbb_label = "Outer Beam Breaker", inner_irbb_label = "Inner Beam Breaker", general_metadata_cols = c("chamber_id", "sensor_id"), path = path, data_dir = file.path(data_dir, "raw_combined"), out_dir = file.path(data_dir, "processed"), out_file_prefix = "perching_events", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS")
   
   # Read in the output, check the output, then delete all files
   test_res <- read.csv(file.path(tmp_path, "processed", "perching_events_IRBB.csv")) %>% 
@@ -642,7 +642,7 @@ test_that("The correct number and timing of discrete perching events are identif
     
     write.csv(sim_ts, file.path(tmp_path, "raw_combined", "combined_raw_data_IRBB.csv"), row.names = FALSE)
     
-    find_perching_events(file_nm = "combined_raw_data_IRBB.csv", threshold = ths[x], run_length = rls[x], sensor_id_col_nm = "sensor_id", timestamps_col_nm = "timestamp_ms", PIT_tag_col_nm = NULL, rfid_label = NULL, outer_irbb_label = "Outer Beam Breaker", inner_irbb_label = "Inner Beam Breaker", general_metadata_cols = c("chamber_id", "sensor_id"), path = path, data_dir = file.path(data_dir, "raw_combined"), out_dir = file.path(data_dir, "processed"), out_file_prefix = "perching_events", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS")
+    detect_perching_events(file_nm = "combined_raw_data_IRBB.csv", threshold = ths[x], run_length = rls[x], sensor_id_col_nm = "sensor_id", timestamps_col_nm = "timestamp_ms", PIT_tag_col_nm = NULL, rfid_label = NULL, outer_irbb_label = "Outer Beam Breaker", inner_irbb_label = "Inner Beam Breaker", general_metadata_cols = c("chamber_id", "sensor_id"), path = path, data_dir = file.path(data_dir, "raw_combined"), out_dir = file.path(data_dir, "processed"), out_file_prefix = "perching_events", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS")
     
     # Read in the output, check the output, then delete all files
     test_res <- read.csv(file.path(tmp_path, "processed", "perching_events_IRBB.csv")) %>% 
@@ -757,7 +757,7 @@ test_that("The correct number and timing of perching events are identified for 2
   
   write.csv(sim_ts, file.path(tmp_path, "raw_combined", "combined_raw_data_IRBB.csv"), row.names = FALSE)
   
-  find_perching_events(file_nm = "combined_raw_data_IRBB.csv", threshold = th, run_length = run_length, sensor_id_col_nm = "sensor_id", timestamps_col_nm = "timestamp_ms", PIT_tag_col_nm = NULL, rfid_label = NULL, outer_irbb_label = "Outer Beam Breaker", inner_irbb_label = "Inner Beam Breaker", general_metadata_cols = c("chamber_id", "sensor_id"), path = path, data_dir = file.path(data_dir, "raw_combined"), out_dir = file.path(data_dir, "processed"), out_file_prefix = "perching_events", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS")
+  detect_perching_events(file_nm = "combined_raw_data_IRBB.csv", threshold = th, run_length = run_length, sensor_id_col_nm = "sensor_id", timestamps_col_nm = "timestamp_ms", PIT_tag_col_nm = NULL, rfid_label = NULL, outer_irbb_label = "Outer Beam Breaker", inner_irbb_label = "Inner Beam Breaker", general_metadata_cols = c("chamber_id", "sensor_id"), path = path, data_dir = file.path(data_dir, "raw_combined"), out_dir = file.path(data_dir, "processed"), out_file_prefix = "perching_events", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS")
   
   # Read in the output, check the output, then delete all files
   test_res <- read.csv(file.path(tmp_path, "processed", "perching_events_IRBB.csv")) %>% 
@@ -867,7 +867,7 @@ test_that("The correct number and timing of discrete perching events are identif
     
     write.csv(sim_ts, file.path(tmp_path, "raw_combined", "combined_raw_data_IRBB.csv"), row.names = FALSE)
     
-    find_perching_events(file_nm = "combined_raw_data_IRBB.csv", threshold = ths[x], run_length = rls[x], sensor_id_col_nm = "sensor_id", timestamps_col_nm = "timestamp_ms", PIT_tag_col_nm = NULL, rfid_label = NULL, outer_irbb_label = "Outer Beam Breaker", inner_irbb_label = "Inner Beam Breaker", general_metadata_cols = c("chamber_id", "sensor_id"), path = path, data_dir = file.path(data_dir, "raw_combined"), out_dir = file.path(data_dir, "processed"), out_file_prefix = "perching_events", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS")
+    detect_perching_events(file_nm = "combined_raw_data_IRBB.csv", threshold = ths[x], run_length = rls[x], sensor_id_col_nm = "sensor_id", timestamps_col_nm = "timestamp_ms", PIT_tag_col_nm = NULL, rfid_label = NULL, outer_irbb_label = "Outer Beam Breaker", inner_irbb_label = "Inner Beam Breaker", general_metadata_cols = c("chamber_id", "sensor_id"), path = path, data_dir = file.path(data_dir, "raw_combined"), out_dir = file.path(data_dir, "processed"), out_file_prefix = "perching_events", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS")
     
     # Read in the output, check the output, then delete all files
     test_res <- read.csv(file.path(tmp_path, "processed", "perching_events_IRBB.csv")) %>% 
@@ -982,17 +982,17 @@ test_that("the function catches when the input file name does not contain the pa
   rl <- 2
   
   expect_error(
-    find_perching_events(file_nm = "combined_raw_data_RFD.csv", threshold = th, run_length = rl, sensor_id_col_nm = "sensor_id", timestamps_col_nm = "timestamp_ms", PIT_tag_col_nm = "PIT_tag_ID", rfid_label = "RFID", outer_irbb_label = NULL, inner_irbb_label = NULL, general_metadata_cols = c("chamber_id", "sensor_id"), path = path, data_dir = file.path(data_dir, "raw_combined"), out_dir = file.path(data_dir, "processed"), out_file_prefix = "perching_events", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
+    detect_perching_events(file_nm = "combined_raw_data_RFD.csv", threshold = th, run_length = rl, sensor_id_col_nm = "sensor_id", timestamps_col_nm = "timestamp_ms", PIT_tag_col_nm = "PIT_tag_ID", rfid_label = "RFID", outer_irbb_label = NULL, inner_irbb_label = NULL, general_metadata_cols = c("chamber_id", "sensor_id"), path = path, data_dir = file.path(data_dir, "raw_combined"), out_dir = file.path(data_dir, "processed"), out_file_prefix = "perching_events", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
     regexp = "The input file name does not contain the correct sensor suffix"
   )
   
   expect_error(
-    find_perching_events(file_nm = "combined_raw_data_irbb.csv", threshold = th, run_length = rl, sensor_id_col_nm = "sensor_id", timestamps_col_nm = "timestamp_ms", PIT_tag_col_nm = NULL, rfid_label = NULL, outer_irbb_label = "Outer Beam Breaker", inner_irbb_label = "Outer Beam Breaker", general_metadata_cols = c("chamber_id", "sensor_id"), path = path, data_dir = file.path(data_dir, "raw_combined"), out_dir = file.path(data_dir, "processed"), out_file_prefix = "perching_events", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
+    detect_perching_events(file_nm = "combined_raw_data_irbb.csv", threshold = th, run_length = rl, sensor_id_col_nm = "sensor_id", timestamps_col_nm = "timestamp_ms", PIT_tag_col_nm = NULL, rfid_label = NULL, outer_irbb_label = "Outer Beam Breaker", inner_irbb_label = "Outer Beam Breaker", general_metadata_cols = c("chamber_id", "sensor_id"), path = path, data_dir = file.path(data_dir, "raw_combined"), out_dir = file.path(data_dir, "processed"), out_file_prefix = "perching_events", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
     regexp = "The input file name does not contain the correct sensor suffix"
   )
   
   expect_error(
-    find_perching_events(file_nm = "combined_raw_data.csv", threshold = th, run_length = rl, sensor_id_col_nm = "sensor_id", timestamps_col_nm = "timestamp_ms", PIT_tag_col_nm = "PIT_tag_ID", rfid_label = "RFID", outer_irbb_label = NULL, inner_irbb_label = NULL, general_metadata_cols = c("chamber_id", "sensor_id"), path = path, data_dir = file.path(data_dir, "raw_combined"), out_dir = file.path(data_dir, "processed"), out_file_prefix = "perching_events", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
+    detect_perching_events(file_nm = "combined_raw_data.csv", threshold = th, run_length = rl, sensor_id_col_nm = "sensor_id", timestamps_col_nm = "timestamp_ms", PIT_tag_col_nm = "PIT_tag_ID", rfid_label = "RFID", outer_irbb_label = NULL, inner_irbb_label = NULL, general_metadata_cols = c("chamber_id", "sensor_id"), path = path, data_dir = file.path(data_dir, "raw_combined"), out_dir = file.path(data_dir, "processed"), out_file_prefix = "perching_events", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
     regexp = "The input file name does not contain the correct sensor suffix"
   )
  
@@ -1091,7 +1091,7 @@ test_that("the function catches when non-NULL arguments are NULL", {
     args[arg_nms[i]] <- list(NULL)
     
     expect_error(
-      find_perching_events(file_nm = args[["file_nm"]], threshold = th, run_length = rl, sensor_id_col_nm = args[["sensor_id_col_nm"]], timestamps_col_nm = args[["timestamps_col_nm"]], PIT_tag_col_nm = args[["PIT_tag_col_nm"]], rfid_label = "RFID", outer_irbb_label = NULL, inner_irbb_label = NULL, general_metadata_cols = args[["general_metadata_cols"]], path = args[["path"]], data_dir = args[["data_dir"]], out_dir = args[["out_dir"]], out_file_prefix = args[["out_file_prefix"]], tz = args[["tz"]], POSIXct_format = args[["POSIXct_format"]]),
+      detect_perching_events(file_nm = args[["file_nm"]], threshold = th, run_length = rl, sensor_id_col_nm = args[["sensor_id_col_nm"]], timestamps_col_nm = args[["timestamps_col_nm"]], PIT_tag_col_nm = args[["PIT_tag_col_nm"]], rfid_label = "RFID", outer_irbb_label = NULL, inner_irbb_label = NULL, general_metadata_cols = args[["general_metadata_cols"]], path = args[["path"]], data_dir = args[["data_dir"]], out_dir = args[["out_dir"]], out_file_prefix = args[["out_file_prefix"]], tz = args[["tz"]], POSIXct_format = args[["POSIXct_format"]]),
       regexp = paste("Expected a non-NULL value but the argument", arg_nms[i], "is NULL", sep = " ")
     )
     
@@ -1112,7 +1112,7 @@ test_that("the function catches when non-NULL arguments are NULL", {
     args[arg_nms[i]] <- list(NULL)
   
     expect_error(
-      find_perching_events(file_nm = "combined_raw_data_RFID.csv", threshold = th, run_length = rl, sensor_id_col_nm = "sensor_id", timestamps_col_nm = "timestamp_ms", PIT_tag_col_nm = args[["PIT_tag_col_nm"]], rfid_label = args[["rfid_label"]], outer_irbb_label = NULL, inner_irbb_label = NULL, general_metadata_cols = c("chamber_id", "sensor_id"), path = path, data_dir = file.path(data_dir, "raw_combined"), out_dir = file.path(data_dir, "processed"), out_file_prefix = "perching_events", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
+      detect_perching_events(file_nm = "combined_raw_data_RFID.csv", threshold = th, run_length = rl, sensor_id_col_nm = "sensor_id", timestamps_col_nm = "timestamp_ms", PIT_tag_col_nm = args[["PIT_tag_col_nm"]], rfid_label = args[["rfid_label"]], outer_irbb_label = NULL, inner_irbb_label = NULL, general_metadata_cols = c("chamber_id", "sensor_id"), path = path, data_dir = file.path(data_dir, "raw_combined"), out_dir = file.path(data_dir, "processed"), out_file_prefix = "perching_events", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
       regexp = paste("Expected a non-NULL value but the argument", arg_nms[i], "is NULL", sep = " ")
     )
     
@@ -1147,7 +1147,7 @@ test_that("the function catches when non-NULL arguments are NULL", {
     args[arg_nms[i]] <- list(NULL)
     
     expect_error(
-      find_perching_events(file_nm = "combined_raw_data_IRBB.csv", threshold = th, run_length = rl, sensor_id_col_nm = "sensor_id", timestamps_col_nm = "timestamp_ms", PIT_tag_col_nm = NULL, rfid_label = NULL, outer_irbb_label = args[["outer_irbb_label"]], inner_irbb_label = args[["inner_irbb_label"]], general_metadata_cols = c("chamber_id", "sensor_id"), path = path, data_dir = file.path(data_dir, "raw_combined"), out_dir = file.path(data_dir, "processed"), out_file_prefix = "perching_events", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
+      detect_perching_events(file_nm = "combined_raw_data_IRBB.csv", threshold = th, run_length = rl, sensor_id_col_nm = "sensor_id", timestamps_col_nm = "timestamp_ms", PIT_tag_col_nm = NULL, rfid_label = NULL, outer_irbb_label = args[["outer_irbb_label"]], inner_irbb_label = args[["inner_irbb_label"]], general_metadata_cols = c("chamber_id", "sensor_id"), path = path, data_dir = file.path(data_dir, "raw_combined"), out_dir = file.path(data_dir, "processed"), out_file_prefix = "perching_events", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
       regexp = paste("Expected a non-NULL value but the argument", arg_nms[i], "is NULL", sep = " ")
     )
     
@@ -1238,7 +1238,7 @@ test_that("the function catches when NULL arguments are non-NULL", {
     args[arg_nms[i]] <- "irbb"
     
     expect_error(
-      find_perching_events(file_nm = "combined_raw_data_RFID.csv", threshold = th, run_length = rl, sensor_id_col_nm = "sensor_id", timestamps_col_nm = "timestamp_ms", PIT_tag_col_nm = "PIT_tag_ID", rfid_label = "RFID", outer_irbb_label = args[["outer_irbb_label"]], inner_irbb_label = args[["inner_irbb_label"]], general_metadata_cols = c("chamber_id", "sensor_id"), path = path, data_dir = file.path(data_dir, "raw_combined"), out_dir = file.path(data_dir, "processed"), out_file_prefix = "perching_events", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
+      detect_perching_events(file_nm = "combined_raw_data_RFID.csv", threshold = th, run_length = rl, sensor_id_col_nm = "sensor_id", timestamps_col_nm = "timestamp_ms", PIT_tag_col_nm = "PIT_tag_ID", rfid_label = "RFID", outer_irbb_label = args[["outer_irbb_label"]], inner_irbb_label = args[["inner_irbb_label"]], general_metadata_cols = c("chamber_id", "sensor_id"), path = path, data_dir = file.path(data_dir, "raw_combined"), out_dir = file.path(data_dir, "processed"), out_file_prefix = "perching_events", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
       regexp = paste("Expected a NULL value but the argument", arg_nms[i], "is not NULL", sep = " ")
     )
     
@@ -1259,7 +1259,7 @@ test_that("the function catches when NULL arguments are non-NULL", {
     args[arg_nms[i]] <- "test"
     
     expect_error(
-      find_perching_events(file_nm = "combined_raw_data_IRBB.csv", threshold = th, run_length = rl, sensor_id_col_nm = "sensor_id", timestamps_col_nm = "timestamp_ms", PIT_tag_col_nm = args[["PIT_tag_col_nm"]], rfid_label = args[["rfid_label"]], outer_irbb_label = "Outer Beam Breaker", inner_irbb_label = "Inner Beam Breaker", general_metadata_cols = c("chamber_id", "sensor_id"), path = path, data_dir = file.path(data_dir, "raw_combined"), out_dir = file.path(data_dir, "processed"), out_file_prefix = "perching_events", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
+      detect_perching_events(file_nm = "combined_raw_data_IRBB.csv", threshold = th, run_length = rl, sensor_id_col_nm = "sensor_id", timestamps_col_nm = "timestamp_ms", PIT_tag_col_nm = args[["PIT_tag_col_nm"]], rfid_label = args[["rfid_label"]], outer_irbb_label = "Outer Beam Breaker", inner_irbb_label = "Inner Beam Breaker", general_metadata_cols = c("chamber_id", "sensor_id"), path = path, data_dir = file.path(data_dir, "raw_combined"), out_dir = file.path(data_dir, "processed"), out_file_prefix = "perching_events", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
       regexp = paste("Expected a NULL value but the argument", arg_nms[i], "is not NULL", sep = " ")
     )
     
@@ -1357,7 +1357,7 @@ test_that("the function catches when character string arguments are not strings"
     args[arg_nms[i]] <- 1
     
     expect_error(
-      find_perching_events(file_nm = "combined_raw_data_RFID.csv", threshold = th, run_length = rl, sensor_id_col_nm = args[["sensor_id_col_nm"]], timestamps_col_nm = args[["timestamps_col_nm"]], PIT_tag_col_nm = "PIT_tag_ID", rfid_label = "RFID", outer_irbb_label = NULL, inner_irbb_label = NULL, general_metadata_cols = args[["general_metadata_cols"]], path = args[["path"]], data_dir = args[["data_dir"]], out_dir = args[["out_dir"]], out_file_prefix = args[["out_file_prefix"]], tz = args[["tz"]], POSIXct_format = args[["POSIXct_format"]]),
+      detect_perching_events(file_nm = "combined_raw_data_RFID.csv", threshold = th, run_length = rl, sensor_id_col_nm = args[["sensor_id_col_nm"]], timestamps_col_nm = args[["timestamps_col_nm"]], PIT_tag_col_nm = "PIT_tag_ID", rfid_label = "RFID", outer_irbb_label = NULL, inner_irbb_label = NULL, general_metadata_cols = args[["general_metadata_cols"]], path = args[["path"]], data_dir = args[["data_dir"]], out_dir = args[["out_dir"]], out_file_prefix = args[["out_file_prefix"]], tz = args[["tz"]], POSIXct_format = args[["POSIXct_format"]]),
       regexp = paste("Expected a string but the argument", arg_nms[i], "is not a string", sep = " ")
     )
     
@@ -1376,7 +1376,7 @@ test_that("the function catches when character string arguments are not strings"
     args[arg_nms[i]] <- 1
     
     expect_error(
-      find_perching_events(file_nm = "combined_raw_data_RFID.csv", threshold = th, run_length = rl, sensor_id_col_nm = "sensor_id", timestamps_col_nm = "timestamp_ms", PIT_tag_col_nm = args[["PIT_tag_col_nm"]], rfid_label = args[["rfid_label"]], outer_irbb_label = NULL, inner_irbb_label = NULL, general_metadata_cols = c("chamber_id", "sensor_id"), path = path, data_dir = file.path(data_dir, "raw_combined"), out_dir = file.path(data_dir, "processed"), out_file_prefix = "perching_events", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
+      detect_perching_events(file_nm = "combined_raw_data_RFID.csv", threshold = th, run_length = rl, sensor_id_col_nm = "sensor_id", timestamps_col_nm = "timestamp_ms", PIT_tag_col_nm = args[["PIT_tag_col_nm"]], rfid_label = args[["rfid_label"]], outer_irbb_label = NULL, inner_irbb_label = NULL, general_metadata_cols = c("chamber_id", "sensor_id"), path = path, data_dir = file.path(data_dir, "raw_combined"), out_dir = file.path(data_dir, "processed"), out_file_prefix = "perching_events", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
       regexp = paste("Expected a string but the argument", arg_nms[i], "is not a string", sep = " ")
     )
     
@@ -1395,7 +1395,7 @@ test_that("the function catches when character string arguments are not strings"
     args[arg_nms[i]] <- 1
     
     expect_error(
-      find_perching_events(file_nm = "combined_raw_data_IRBB.csv", threshold = th, run_length = rl, sensor_id_col_nm = "sensor_id", timestamps_col_nm = "timestamp_ms", PIT_tag_col_nm = NULL, rfid_label = NULL, outer_irbb_label = args[["outer_irbb_label"]], inner_irbb_label = args[["inner_irbb_label"]], general_metadata_cols = c("chamber_id", "sensor_id"), path = path, data_dir = file.path(data_dir, "raw_combined"), out_dir = file.path(data_dir, "processed"), out_file_prefix = "perching_events", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
+      detect_perching_events(file_nm = "combined_raw_data_IRBB.csv", threshold = th, run_length = rl, sensor_id_col_nm = "sensor_id", timestamps_col_nm = "timestamp_ms", PIT_tag_col_nm = NULL, rfid_label = NULL, outer_irbb_label = args[["outer_irbb_label"]], inner_irbb_label = args[["inner_irbb_label"]], general_metadata_cols = c("chamber_id", "sensor_id"), path = path, data_dir = file.path(data_dir, "raw_combined"), out_dir = file.path(data_dir, "processed"), out_file_prefix = "perching_events", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
       regexp = paste("Expected a string but the argument", arg_nms[i], "is not a string", sep = " ")
     )
     
@@ -1474,12 +1474,12 @@ test_that("the function catches when numeric arguments are non-numeric", {
   rl <- 2
   
   expect_error(
-    find_perching_events(file_nm = "combined_raw_data_RFID.csv", threshold = as.character(th), run_length = rl, sensor_id_col_nm = "sensor_id", timestamps_col_nm = "timestamp_ms", PIT_tag_col_nm = "PIT_tag_ID", rfid_label = "RFID", outer_irbb_label = NULL, inner_irbb_label = NULL, general_metadata_cols = c("chamber_id", "sensor_id"), path = path, data_dir = file.path(data_dir, "raw_combined"), out_dir = file.path(data_dir, "processed"), out_file_prefix = "perching_events", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
+    detect_perching_events(file_nm = "combined_raw_data_RFID.csv", threshold = as.character(th), run_length = rl, sensor_id_col_nm = "sensor_id", timestamps_col_nm = "timestamp_ms", PIT_tag_col_nm = "PIT_tag_ID", rfid_label = "RFID", outer_irbb_label = NULL, inner_irbb_label = NULL, general_metadata_cols = c("chamber_id", "sensor_id"), path = path, data_dir = file.path(data_dir, "raw_combined"), out_dir = file.path(data_dir, "processed"), out_file_prefix = "perching_events", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
     regexp = "Expected a numeric value but the argument threshold is not numeric"
   )
   
   expect_error(
-    find_perching_events(file_nm = "combined_raw_data_RFID.csv", threshold = th, run_length = as.character(rl), sensor_id_col_nm = "sensor_id", timestamps_col_nm = "timestamp_ms", PIT_tag_col_nm = "PIT_tag_ID", rfid_label = "RFID", outer_irbb_label = NULL, inner_irbb_label = NULL, general_metadata_cols = c("chamber_id", "sensor_id"), path = path, data_dir = file.path(data_dir, "raw_combined"), out_dir = file.path(data_dir, "processed"), out_file_prefix = "perching_events", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
+    detect_perching_events(file_nm = "combined_raw_data_RFID.csv", threshold = th, run_length = as.character(rl), sensor_id_col_nm = "sensor_id", timestamps_col_nm = "timestamp_ms", PIT_tag_col_nm = "PIT_tag_ID", rfid_label = "RFID", outer_irbb_label = NULL, inner_irbb_label = NULL, general_metadata_cols = c("chamber_id", "sensor_id"), path = path, data_dir = file.path(data_dir, "raw_combined"), out_dir = file.path(data_dir, "processed"), out_file_prefix = "perching_events", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
     regexp = "Expected a numeric value but the argument run_length is not numeric"
   )
   
@@ -1559,7 +1559,7 @@ test_that("the function catches when paths don't exist", {
   file.remove(file.path(tmp_path, "raw_combined", "combined_raw_data_RFID.csv"))
   
   expect_error(
-    find_perching_events(file_nm = "combined_raw_data_RFID.csv", threshold = th, run_length = rl, sensor_id_col_nm = "sensor_id", timestamps_col_nm = "timestamp_ms", PIT_tag_col_nm = "PIT_tag_ID", rfid_label = "RFID", outer_irbb_label = NULL, inner_irbb_label = NULL, general_metadata_cols = c("chamber_id", "sensor_id"), path = path, data_dir = file.path(data_dir, "raw_combined"), out_dir = file.path(data_dir, "processed"), out_file_prefix = "perching_events", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
+    detect_perching_events(file_nm = "combined_raw_data_RFID.csv", threshold = th, run_length = rl, sensor_id_col_nm = "sensor_id", timestamps_col_nm = "timestamp_ms", PIT_tag_col_nm = "PIT_tag_ID", rfid_label = "RFID", outer_irbb_label = NULL, inner_irbb_label = NULL, general_metadata_cols = c("chamber_id", "sensor_id"), path = path, data_dir = file.path(data_dir, "raw_combined"), out_dir = file.path(data_dir, "processed"), out_file_prefix = "perching_events", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
     regexp = paste("The file combined_raw_data_RFID.csv does not exist in the directory", file.path(tmp_path, "raw_combined"), sep = " ")
   )
   
@@ -1572,7 +1572,7 @@ test_that("the function catches when paths don't exist", {
   }
   
   expect_error(
-    find_perching_events(file_nm = "combined_raw_data_RFID.csv", threshold = th, run_length = rl, sensor_id_col_nm = "sensor_id", timestamps_col_nm = "timestamp_ms", PIT_tag_col_nm = "PIT_tag_ID", rfid_label = "RFID", outer_irbb_label = NULL, inner_irbb_label = NULL, general_metadata_cols = c("chamber_id", "sensor_id"), path = path, data_dir = file.path(data_dir, "raw_combined"), out_dir = file.path(data_dir, "processed"), out_file_prefix = "perching_events", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
+    detect_perching_events(file_nm = "combined_raw_data_RFID.csv", threshold = th, run_length = rl, sensor_id_col_nm = "sensor_id", timestamps_col_nm = "timestamp_ms", PIT_tag_col_nm = "PIT_tag_ID", rfid_label = "RFID", outer_irbb_label = NULL, inner_irbb_label = NULL, general_metadata_cols = c("chamber_id", "sensor_id"), path = path, data_dir = file.path(data_dir, "raw_combined"), out_dir = file.path(data_dir, "processed"), out_file_prefix = "perching_events", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
     regexp = paste("The directory", file.path(path, data_dir, "raw_combined"), "does not exist", sep = " ")
   )
   
@@ -1651,7 +1651,7 @@ test_that("the input dataset has all of the expected columns", {
     write.csv(sim_ts, file.path(tmp_path, "raw_combined", "combined_raw_data_RFID.csv"), row.names = FALSE)
 
     expect_error(
-      find_perching_events(file_nm = "combined_raw_data_RFID.csv", threshold = th, run_length = rl, sensor_id_col_nm = "sensor_id", timestamps_col_nm = "timestamp_ms", PIT_tag_col_nm = "PIT_tag_ID", rfid_label = "RFID", outer_irbb_label = NULL, inner_irbb_label = NULL, general_metadata_cols = c("chamber_id", "sensor_id"), path = path, data_dir = file.path(data_dir, "raw_combined"), out_dir = file.path(data_dir, "processed"), out_file_prefix = "perching_events", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
+      detect_perching_events(file_nm = "combined_raw_data_RFID.csv", threshold = th, run_length = rl, sensor_id_col_nm = "sensor_id", timestamps_col_nm = "timestamp_ms", PIT_tag_col_nm = "PIT_tag_ID", rfid_label = "RFID", outer_irbb_label = NULL, inner_irbb_label = NULL, general_metadata_cols = c("chamber_id", "sensor_id"), path = path, data_dir = file.path(data_dir, "raw_combined"), out_dir = file.path(data_dir, "processed"), out_file_prefix = "perching_events", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
       regexp = paste("The column", col_nms[i], "was not found in the data frame", sep = " ")
     )
     
@@ -1737,7 +1737,7 @@ test_that("the input dataset has no NAs in columns that cannot have NAs", {
     write.csv(sim_ts, file.path(tmp_path, "raw_combined", "combined_raw_data_RFID.csv"), row.names = FALSE)
     
     expect_error(
-      find_perching_events(file_nm = "combined_raw_data_RFID.csv", threshold = th, run_length = rl, sensor_id_col_nm = "sensor_id", timestamps_col_nm = "timestamp_ms", PIT_tag_col_nm = "PIT_tag_ID", rfid_label = "RFID", outer_irbb_label = NULL, inner_irbb_label = NULL, general_metadata_cols = c("chamber_id", "sensor_id"), path = path, data_dir = file.path(data_dir, "raw_combined"), out_dir = file.path(data_dir, "processed"), out_file_prefix = "perching_events", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
+      detect_perching_events(file_nm = "combined_raw_data_RFID.csv", threshold = th, run_length = rl, sensor_id_col_nm = "sensor_id", timestamps_col_nm = "timestamp_ms", PIT_tag_col_nm = "PIT_tag_ID", rfid_label = "RFID", outer_irbb_label = NULL, inner_irbb_label = NULL, general_metadata_cols = c("chamber_id", "sensor_id"), path = path, data_dir = file.path(data_dir, "raw_combined"), out_dir = file.path(data_dir, "processed"), out_file_prefix = "perching_events", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
       regexp = paste("The column", col_nms[i], "has NA values", sep = " ")
     )
     
