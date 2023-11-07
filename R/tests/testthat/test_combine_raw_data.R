@@ -6,7 +6,7 @@ rm(list = ls())
 if (!require(testthat)) install.packages('testthat')
 library(testthat)
 
-source("/home/gsvidaurre/Desktop/GitHub_repos/Abissmal/R/combine_raw_data_per_sensor.R")
+source("/home/gsvidaurre/Desktop/GitHub_repos/Abissmal/R/combine_raw_data.R")
 
 source("/home/gsvidaurre/Desktop/GitHub_repos/Abissmal/R/utilities.R")
 
@@ -73,7 +73,7 @@ test_that("The function combines RFID data collected across dates", {
     
   }))
   
-  combine_raw_data_per_sensor(sensors = "RFID", path = path, data_dir = data_dir, out_dir = file.path(data_dir, "raw_combined"), tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS")
+  combine_raw_data(sensors = "RFID", path = path, data_dir = data_dir, out_dir = file.path(data_dir, "raw_combined"), tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS")
   
   # Read in the output, check the output, then delete all files
   test_res <- read.csv(file.path(tmp_path, "raw_combined", "combined_raw_data_RFID.csv"))
@@ -156,7 +156,7 @@ test_that("The function combines IRBB data collected across dates", {
     
   }))
   
-  combine_raw_data_per_sensor(sensors = "IRBB", path = path, data_dir = data_dir, out_dir = file.path(data_dir, "raw_combined"), tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS")
+  combine_raw_data(sensors = "IRBB", path = path, data_dir = data_dir, out_dir = file.path(data_dir, "raw_combined"), tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS")
   
   # Read in the output, check the output, then delete all files
   test_res <- read.csv(file.path(tmp_path, "raw_combined", "combined_raw_data_IRBB.csv"))
@@ -236,7 +236,7 @@ test_that("The function combines Video data collected across dates", {
     
   }))
   
-  combine_raw_data_per_sensor(sensors = "Video", path = path, data_dir = data_dir, out_dir = file.path(data_dir, "raw_combined"), tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS")
+  combine_raw_data(sensors = "Video", path = path, data_dir = data_dir, out_dir = file.path(data_dir, "raw_combined"), tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS")
   
   # Read in the output, check the output, then delete all files
   test_res <- read.csv(file.path(tmp_path, "raw_combined", "combined_raw_data_Video.csv"))
@@ -314,7 +314,7 @@ test_that("The function combines temperature data collected across dates", {
     
   }))
   
-  combine_raw_data_per_sensor(sensors = "Temp", path = path, data_dir = data_dir, out_dir = file.path(data_dir, "raw_combined"), tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS")
+  combine_raw_data(sensors = "Temp", path = path, data_dir = data_dir, out_dir = file.path(data_dir, "raw_combined"), tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS")
   
   # Read in the output, check the output, then delete all files
   test_res <- read.csv(file.path(tmp_path, "raw_combined", "combined_raw_data_Temp.csv"))
@@ -490,7 +490,7 @@ test_that("The function combines data from all 4 sensor types collected across d
     
   }))
   
-  combine_raw_data_per_sensor(sensors = sensrs, path = path, data_dir = data_dir, out_dir = file.path(data_dir, "raw_combined"), tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS")
+  combine_raw_data(sensors = sensrs, path = path, data_dir = data_dir, out_dir = file.path(data_dir, "raw_combined"), tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS")
   
   # For each sensor type, read in and check the output before deleting temporary files
   invisible(lapply(1:length(sensrs), function(i){
@@ -605,7 +605,7 @@ test_that("the function catches when non-NULL arguments are NULL", {
     args[arg_nms[i]] <- list(NULL)
 
     expect_error(
-      combine_raw_data_per_sensor(sensors = args[["sensors"]], path = args[["path"]], data_dir = args[["data_dir"]], out_dir = args[["out_dir"]], tz = args[["tz"]], POSIXct_format = args[["POSIXct_format"]]),
+      combine_raw_data(sensors = args[["sensors"]], path = args[["path"]], data_dir = args[["data_dir"]], out_dir = args[["out_dir"]], tz = args[["tz"]], POSIXct_format = args[["POSIXct_format"]]),
       regexp = paste("Expected a non-NULL value but the argument", arg_nms[i], "is NULL", sep = " ")
     )
     
@@ -677,27 +677,27 @@ test_that("the function catches when the sensor argument vector is not RFID, IRB
   }))
   
   expect_error(
-    combine_raw_data_per_sensor(sensors = 1, path = path, data_dir = data_dir, out_dir = file.path(data_dir, "raw_combined"), tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
+    combine_raw_data(sensors = 1, path = path, data_dir = data_dir, out_dir = file.path(data_dir, "raw_combined"), tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
     regexp = "One or more values provided for the argument, sensors, are not correct. Check your spelling or captialization"
   )
   
   expect_error(
-    combine_raw_data_per_sensor(sensors = "RFD", path = path, data_dir = data_dir, out_dir = file.path(data_dir, "raw_combined"), tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
+    combine_raw_data(sensors = "RFD", path = path, data_dir = data_dir, out_dir = file.path(data_dir, "raw_combined"), tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
     regexp = "One or more values provided for the argument, sensors, are not correct. Check your spelling or captialization"
   )
   
   expect_error(
-    combine_raw_data_per_sensor(sensors = "rfid", path = path, data_dir = data_dir, out_dir = file.path(data_dir, "raw_combined"), tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
+    combine_raw_data(sensors = "rfid", path = path, data_dir = data_dir, out_dir = file.path(data_dir, "raw_combined"), tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
     regexp = "One or more values provided for the argument, sensors, are not correct. Check your spelling or captialization"
   )
   
   expect_error(
-    combine_raw_data_per_sensor(sensors = c("rfid", "IRBB", "Video", "Temp"), path = path, data_dir = data_dir, out_dir = file.path(data_dir, "raw_combined"), tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
+    combine_raw_data(sensors = c("rfid", "IRBB", "Video", "Temp"), path = path, data_dir = data_dir, out_dir = file.path(data_dir, "raw_combined"), tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
     regexp = "One or more values provided for the argument, sensors, are not correct. Check your spelling or captialization"
   )
   
   expect_error(
-    combine_raw_data_per_sensor(sensors = c("rfid", "IRBB", "Video", "tmp"), path = path, data_dir = data_dir, out_dir = file.path(data_dir, "raw_combined"), tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
+    combine_raw_data(sensors = c("rfid", "IRBB", "Video", "tmp"), path = path, data_dir = data_dir, out_dir = file.path(data_dir, "raw_combined"), tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
     regexp = "One or more values provided for the argument, sensors, are not correct. Check your spelling or captialization"
   )
   
@@ -782,7 +782,7 @@ test_that("the function catches when character string arguments are not strings"
     args[arg_nms[i]] <- 1
     
     expect_error(
-      combine_raw_data_per_sensor(sensors = "RFID", path = args[["path"]], data_dir = args[["data_dir"]], out_dir = args[["out_dir"]], tz = args[["tz"]], POSIXct_format = args[["POSIXct_format"]]),
+      combine_raw_data(sensors = "RFID", path = args[["path"]], data_dir = args[["data_dir"]], out_dir = args[["out_dir"]], tz = args[["tz"]], POSIXct_format = args[["POSIXct_format"]]),
       regexp = paste("Expected a string but the argument", arg_nms[i], "is not a string", sep = " ")
     )  
     
@@ -857,7 +857,7 @@ test_that("the function catches when paths don't exist", {
   invisible(file.remove(list.files(path = file.path(tmp_path, "RFID"), pattern = ".csv$", full.names = TRUE)))
   
   expect_error(
-    combine_raw_data_per_sensor(sensors = "RFID", path = path, data_dir = data_dir, out_dir = file.path(data_dir, "raw_combined"), tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
+    combine_raw_data(sensors = "RFID", path = path, data_dir = data_dir, out_dir = file.path(data_dir, "raw_combined"), tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
     regexp = paste("The directory", file.path(tmp_path, "RFID"), "does not have the correct files", sep = " ")
   )
   
@@ -884,7 +884,7 @@ test_that("the function catches when paths don't exist", {
   }
   
   expect_error(
-    combine_raw_data_per_sensor(sensors = "RFID", path = path, data_dir = data_dir, out_dir = file.path(data_dir, "raw_combined"), tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
+    combine_raw_data(sensors = "RFID", path = path, data_dir = data_dir, out_dir = file.path(data_dir, "raw_combined"), tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
     regexp = paste("The directory", file.path(tmp_path, "RFID"), "does not exist", sep = " ")
   )
   
