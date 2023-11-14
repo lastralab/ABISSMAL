@@ -35,8 +35,8 @@ This repository holds the following directories and files. See the README files 
 
 <h2>Additional Documentation</h2> The Issues tab holds open issues (bugs, new features, documentation update requests) that are in progress. You can also check out issues that were closed over time. The Projects tab has a Kanban-board style timeline that we are using for project management. The Wiki tab has 5 major sections with detailed documentation: 1) project management, 2) setting up Raspberry Pi computers and ABISSMAL software, 3) building a custom nest container, 4) setting up sensors and other hardware, and 5) troubleshooting software and hardware issues. 
 
-
-<h2>Pre-requisites</h2> Please refer to our Wiki [2. Set up Raspberry Pi and tracking system software](https://github.com/lastralab/Abissmal/wiki/2.-Set-up-Raspberry-Pi-and-tracking-system-software) for pre-requisites before running the installation script or following the installation overview below.
+# Pre-requisites
+Please refer to our Wiki [Set up Raspberry Pi and tracking system](https://github.com/lastralab/Abissmal/wiki/2.-Set-up-Raspberry-Pi-and-tracking-system-software) before proceeding. There are a few pre-requisites to consider before running the installation script.
 
 
 <h2>Installing ABISSMAL</h2>
@@ -68,9 +68,10 @@ This repository holds the following directories and files. See the README files 
 
 </ol>
 
+
 <h2>Troubleshooting</h2>
 
-Please refer to our [Wiki Troubleshooting page](https://github.com/lastralab/Abissmal/wiki/5.--Troubleshooting) for more information.
+Please refer to our [Wiki Troubleshooting page](https://github.com/lastralab/Abissmal/wiki/5.-Troubleshooting) for more information.
 
 
 <h2>Reporting issues while using ABISSMAL</h2>

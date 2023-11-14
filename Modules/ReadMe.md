@@ -45,3 +45,6 @@ The main setup sets up a pull up resistor to detect a falling edge that represen
 **Notes on usage**: Since video data is computationally intensive to record, and expensive both to store and score, videos will be recorded using a high sensitivity threshold for motion detection. We ran some tests by placing the camera on a desk and walking and sitting nearby. In Video.py line 77, the sensitivity vs pixel difference is getting logged every time the pixel difference gets higher than the sensitivity threshold. Our test results provided an ideal sensitivity value of 18000, which will only detect motion when there's movement in front of the camera, but not when vibrations around it are slightly moving the camera. For dark spaces the value might need to decrease so the pixel difference gets detected more easily. You can trace that debug logs and modify the sensitivity according to your needs.
 
 **Data structure**: The function in Video.py "detect_motion(cam)" should return videos that contain the recording chamber number, and the year, month, day, and timestamp (HH:MM:SS) in the file name of each video.
+
+*Validation videos*: 
+To configure validation videos you can skip steps 1.7 and 1.9 from the Wiki - Raspberry Pi Setup, since it won't be using GPIO and it will only use the camera.
