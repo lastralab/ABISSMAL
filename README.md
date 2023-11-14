@@ -1,8 +1,8 @@
 <h1>ABISSMAL: Automated Behavioral tracking by Integrating Sensors that Survey Movements Around a target Location
 </h1>
 <b>Developers:</b><br>
-Tania Molina: <span style="pointer-events:none;">tanismo&#64;l<span style="display:none">&nbsp;</span>astralab.com</span><br>
-Grace Smith-Vidaurre, PhD: <span style="pointer-events:none">gsvidaurre[at]<span style="display:none">&nbsp;</span>gmail.com</span>
+Tania Molina: <span style="pointer-events:none;">tanismo&#64;l<span style="display:none"></span>astralab.com</span><br>
+Grace Smith-Vidaurre, PhD: <span style="pointer-events:none">gsvidaurre[at]<span style="display:none"></span>gmail.com</span>
 <br>
 <br>
 
