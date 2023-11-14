@@ -32,5 +32,5 @@
 
 **Data structure**: Video.py returns a spreadsheet of metadata about the videos recorded each day. The metadata includes the nest container identifier, as well as the year, month, day, and timestamp (HH_MM_SS) of the moment that motion was detected, whether the video was recorded pre or post-motion detection, the video file names, the pixel sensitivity threshold, and the number of pixels that changed during motion detection. This script will also return videos in .mp4 format as described above.
 
-<h2>Validation videos (alt_video.py)</h2>: 
+<h2>Validation videos (alt_video.py)</h2> 
 **Description**: The file alt_video.py was written to provide video recording for validating ABISSMAL. This script provides the capacity to record videos continuously throughout a given time period without motion detection. This code was written for use on a Raspberry Pi computer that is connected to a camera only. Currently alt_video.py cannot be run on a Raspberry Pi computer that is also collecting beam breaker, RFID, and/or motion-detection video recordings. To configure validation videos you can skip steps 1.7 and 1.9 from the Wiki page "Set up Raspberry Pi and tracking system software", since alt_video.py will not use GPIO connections.
