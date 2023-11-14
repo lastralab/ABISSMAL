@@ -40,6 +40,8 @@ Please refer to our Wiki page [Set up Raspberry Pi and tracking system](https://
 
 
 <h2>Installing ABISSMAL</h2>
+<br>
+
 
 
            ____ _____  _____ _____ __  __          _      
@@ -51,7 +53,9 @@ Please refer to our Wiki page [Set up Raspberry Pi and tracking system](https://
                                                   
 
 
-\_<ol>
+
+
+\_ <ol>
 
 <li>Once you have the suite of sensors set up and connected to a Raspberry Pi, open a terminal window on your Pi</li>
 <li>If you do not have Git already installed on the Pi, then run `sudo apt-get install git`</li>
@@ -79,7 +83,10 @@ Please refer to our [Wiki Troubleshooting page](https://github.com/lastralab/Abi
 
 
 <h2>Reporting issues while using ABISSMAL</h2>
-Anyone using ABISSMAL is welcome to post issues about bugs. We will do our best to respond and help with bugs, but our top priority will be to fix bugs that hinder data collection, system monitoring, error logging, data cleaning, and processing for the current version of ABISSMAL. This tracking system can be modified for different questions that require behavioral tracking, as well as for different species and/or research settings. Those interested in modifying the system for other purposes are welcome to do so independently, as long as you cite both the associated methods paper (currently a preprint), and this GitHub repository. Unless we have come to an agreement with collaborators who are adapting ABISSMAL, we will not have time to help individuals or research teams modify the tracking system. 
+Anyone using ABISSMAL is welcome to post issues about bugs. We will do our best to respond and help with bugs, but our top priority will be to fix bugs that hinder data collection, system monitoring, error logging, data cleaning, and processing for the current version of ABISSMAL. 
+
+<br>
+This tracking system can be modified for different questions that require behavioral tracking, as well as for different species and/or research settings. Those interested in modifying the system for other purposes are welcome to do so independently, as long as you cite both the associated methods paper (currently a preprint), and this GitHub repository. Unless we have come to an agreement with collaborators who are adapting ABISSMAL, we will not have time to help individuals or research teams modify the tracking system. 
 
 
 <h2>Contributing to ABISSMAL as an open-access tool</h2>
