@@ -82,6 +82,16 @@ Please refer to our Wiki page [Set up Raspberry Pi and tracking system](https://
 Please refer to our [Wiki Troubleshooting page](https://github.com/lastralab/Abissmal/wiki/5.-Troubleshooting) for more information.
 
 
+<h2>Citing ABISSMAL</h2>
+If you are using or modifying one or more components of the ABISSMAL tracking system, then please cite the associated methods paper (the citation will be updated when the manuscript is accepted for publication) as well as this repository:
+
+<br>
+Paper citation: TKTK
+
+<br>
+Repository citation: TKTK
+
+
 <h2>Reporting issues while using ABISSMAL</h2>
 Anyone using ABISSMAL is welcome to post issues about bugs. We will do our best to respond and help with bugs, but our top priority will be to fix bugs that hinder data collection, system monitoring, error logging, data cleaning, and processing for the current version of ABISSMAL. 
 
