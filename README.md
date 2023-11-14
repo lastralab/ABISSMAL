@@ -25,21 +25,23 @@ This repository holds the following directories and files. See the README files 
 
 <h3>Main.sh:</h3> The main script that initiates the ABISSMAL tracking system. See the Wiki page for more information.
 
-<h3>cron.sh:</h3> A script for task scheduling through cron jobs. This script is automatically used by ABISSMAL in order for data collection, system monitoring, and error logging to run continously over time.
+<h3>cron.sh:</h3> A script for task scheduling through cron jobs. This script is automatically used by ABISSMAL for data collection, system monitoring, and error logging to run continuously over time.
 
-<h3>run_install.sh:</h3> A script for automated installation of software dependencies, setting up cron jobs, and setting up automated text alerts through twilio (optional, and users will need to create their own Twilio account). See the Wiki page for more information. 
+<h3>run_install.sh:</h3> A script for automated installation of software dependencies, setting up cron jobs, and setting up automated text alerts through Twilio (optional, and users will need to create their own Twilio account). See the Wiki page for more information. 
 
-<h3>Other files:</h3> The directory .github/ISSUE_TEMPLATE contains templates for different types of issues. The file .gitignore contains information about whwhich files should be ignored (not tracked) by Git. The LICENSE file holds information about the open-access license for this repository. The README.md file holds this documentation for the main repository.
+<h3>Other files:</h3> The directory .github/ISSUE_TEMPLATE contains templates for different types of issues. The file .gitignore contains information about which files should be ignored (not tracked) by Git. The LICENSE file holds information about the open-access license for this repository. The README.md file holds this documentation for the main repository.
 
 <br>
 
 <h2>Additional Documentation</h2> The Issues tab holds open issues (bugs, new features, documentation update requests) that are in progress. You can also check out issues that were closed over time. The Projects tab has a Kanban-board style timeline that we are using for project management. The Wiki tab has 5 major sections with detailed documentation: 1) project management, 2) setting up Raspberry Pi computers and ABISSMAL software, 3) building a custom nest container, 4) setting up sensors and other hardware, and 5) troubleshooting software and hardware issues. 
 
 # Pre-requisites
-Please refer to our Wiki [Set up Raspberry Pi and tracking system](https://github.com/lastralab/Abissmal/wiki/2.-Set-up-Raspberry-Pi-and-tracking-system-software) before proceeding. There are a few pre-requisites to consider before running the installation script.
+Please refer to our Wiki page [Set up Raspberry Pi and tracking system](https://github.com/lastralab/Abissmal/wiki/2.-Set-up-Raspberry-Pi-and-tracking-system-software) before proceeding. There are a few pre-requisites to consider before running the installation script.
 
 
 <h2>Installing ABISSMAL</h2>
+
+
            ____ _____  _____ _____ __  __          _      
      /\   |  _ \_   _|/ ____/ ____|  \/  |   /\   | |     
     /  \  | |_) || | | (___| (___ | \  / |  /  \  | |     
@@ -47,6 +49,8 @@ Please refer to our Wiki [Set up Raspberry Pi and tracking system](https://githu
   / ____ \| |_) || |_ ____) |___) | |  | |/ ____ \| |____ 
  /_/    \_\____/_____|_____/_____/|_|  |_/_/    \_\______|
                                                   
+
+
 \_<ol>
 
 <li>Once you have the suite of sensors set up and connected to a Raspberry Pi, open a terminal window on your Pi</li>
@@ -55,16 +59,16 @@ Please refer to our Wiki [Set up Raspberry Pi and tracking system](https://githu
 <li>Clone this repository to the Pi by running `git clone https://github.com/lastralab/Abissmal.git`</li>
 <li>From the root directory `/path/to/Abissmal/` run the following commands to install and run the ABISSMAL tracking system:</li>
 
-	<ol>
+   <ol>
 
-	<li>`sudo bash run_install.sh` will initiate the installation script, which will prompt you to enter information</li>
-	<li>Enter your Pi password (we recommend setting a password for your Raspberry Pi)</li>
-	<li>Insert additional ABISSMAL setup information accordingly</li>
-	<li>The Pi will restart automatically to apply changes</li>
-	<li>If you are using an ssh connection to connect to the Pi, then you will need to <a href="https://github.com/lastralab/Abissmal/wiki/5.-Troubleshooting">mount the external hard drive</a></li>
-	<li>Run `bash Main.sh` (without sudo) to initiate ABISSMAL and start collecting data</li>
+   <li>`sudo bash run_install.sh` will initiate the installation script, which will prompt you to enter information</li>
+   <li>Enter your Pi password (we recommend setting a password for your Raspberry Pi)</li>
+   <li>Insert additional ABISSMAL setup information accordingly</li>
+   <li>The Pi will restart automatically to apply changes</li>
+   <li>If you are using an ssh connection to connect to the Pi, then you will need to <a href="https://github.com/lastralab/Abissmal/wiki/5.-Troubleshooting">mount the external hard drive</a></li>
+   <li>Run `bash Main.sh` (without sudo) to initiate ABISSMAL and start collecting data</li>
 
-	</ol>
+   </ol>
 
 </ol>
 
@@ -75,15 +79,12 @@ Please refer to our [Wiki Troubleshooting page](https://github.com/lastralab/Abi
 
 
 <h2>Reporting issues while using ABISSMAL</h2>
-Anyone using ABISSMAL is welcome to post issues about bugs. We will do our best to respond and help with bugs, but our top priority will be to fix bugs that hinder data collection, system, monitoring, error logging, data cleaning, and processing for the current version of ABISSMAL. This tracking system can be modified for different questions that require behavioral tracking, as well as for different species and/or research settings. Those interested in modifying the system for other purposes are welcome to do so independently, as long as you cite both the associated methods paper (currently a preprint), and this GitHub repository. Unless we have come to an agreement with collaborators who are adapting ABISSMAL, we will not have time to help individuals or research teams modify the tracking system. 
+Anyone using ABISSMAL is welcome to post issues about bugs. We will do our best to respond and help with bugs, but our top priority will be to fix bugs that hinder data collection, system monitoring, error logging, data cleaning, and processing for the current version of ABISSMAL. This tracking system can be modified for different questions that require behavioral tracking, as well as for different species and/or research settings. Those interested in modifying the system for other purposes are welcome to do so independently, as long as you cite both the associated methods paper (currently a preprint), and this GitHub repository. Unless we have come to an agreement with collaborators who are adapting ABISSMAL, we will not have time to help individuals or research teams modify the tracking system. 
 
 
 <h2>Contributing to ABISSMAL as an open-access tool</h2>
-We have laid out collaborative roles for contributing to ABISSMAL code development in our [Wiki Project Management page](https://github.com/lastralab/Abissmal/wiki/1.-Project-Management). Contributing to ABISSMAL code development requires a local version of all components of the tracking system, including sensors and other hardware. As such, we are limiting ABISSMAL code contributions to the current developers (Tania Molina, Grace Smith-Vidaurre) and future members of the Smith-Vidaurre lab who will have access to the full set of hardware needed to test code. We're open to discussion about how to incorporate code contributions from others as well.    
+We have laid out collaborative roles for contributing to ABISSMAL code development in our [Wiki Project Management page](https://github.com/lastralab/Abissmal/wiki/1.-Project-Management). Contributing to ABISSMAL code development requires a local version of all components of the tracking system, including sensors and other hardware. As such, we are limiting ABISSMAL code contributions to the current developers (Tania Molina, Grace Smith-Vidaurre) and future members of the Smith-Vidaurre lab who will have access to the full set of hardware needed to test code. The lab may add additional layers of data collection and processing in future releases of ABISSMAL. We recommend that others who interested in modifying ABISSMAL fork this repository as a foundation for independent customization.
 
 <h2>Ethics Statement</h2>
 We developed and tested this tracking system with an institutional animal care and use (IACUC) protocol that was approved for captive zebra finches by Rockefeller University. If you plan to use this tracking system for research with live animals (captive or wild), then you must have your own approved institutional protocols and permits for ethical and responsible use of animals in research.
-
-Our system can be used for parental care or other behavioral tracking in different species. You may need to adapt the software and hardware we use here for different species and research settings. Anyone is welcome to post bugs. We will do our best to respond and help with issues as they arise, with the condition that our time for helping folks to adapt this tracking system will be limited. You can also reach us by email with questions.
-<br>
 
