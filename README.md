@@ -42,7 +42,7 @@ Please refer to our Wiki page [Set up Raspberry Pi and tracking system](https://
 <h2>Installing ABISSMAL</h2>
 <br>
 
-
+\_
 
            ____ _____  _____ _____ __  __          _      
      /\   |  _ \_   _|/ ____/ ____|  \/  |   /\   | |     
@@ -52,10 +52,10 @@ Please refer to our Wiki page [Set up Raspberry Pi and tracking system](https://
  /_/    \_\____/_____|_____/_____/|_|  |_/_/    \_\______|
                                                   
 
+\_
 
 
-
-\_ <ol>
+<ol>
 
 <li>Once you have the suite of sensors set up and connected to a Raspberry Pi, open a terminal window on your Pi</li>
 <li>If you do not have Git already installed on the Pi, then run `sudo apt-get install git`</li>
