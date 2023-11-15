@@ -41,10 +41,11 @@ Please refer to our Wiki page [Set up Raspberry Pi and tracking system](https://
    <li>When prompted, insert the additional ABISSMAL setup information accordingly</li>
    <li>The Pi will restart automatically to apply changes</li>
    <li>If you are using an ssh connection to connect to the Pi, then you will need to <a href="https://github.com/lastralab/Abissmal/wiki/5.-Troubleshooting">mount the external hard drive</a></li>
-   <li>Run command to initiate ABISSMAL and start collecting data (wihout sudo) <pre>bash Main.sh</pre></li>
-
    </ol>
-
+<li>Run command to initiate ABISSMAL and start collecting data (wihout sudo) <pre>bash Main.sh</pre></li>
+<ol>
+              <li>Follow instructions to setup the system accordingly</li>
+   </ol>
 </ol>
 
 
