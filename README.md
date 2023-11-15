@@ -12,28 +12,6 @@ https://github.com/lastralab/Abissmal/wiki
 <h2>Tracking System Overview</h2>
 ABISSMAL is a hardware and software platform for automated behavioral tracking with built-in system monitoring and error logging. ABISSMAL also provides the capacity to make behavioral inferences by integrating data across multiple types of movement sensors. We tested the tracking system by tracking parental care behaviors with captive zebra finches that raised young birds over 50 days. See the accompanying methods manuscript for more detailed information about ABISSMAL (TKTK add the preprint citation). Our Wiki page has detailed information about how to set up and build hardware, as well as software installation and troubleshooting.
 
-<h2>Repository Overview</h2>
-This repository holds the following directories and files. See the README files in each directory below for more detailed information:
-
-<h3>3D:</h3> A directory that holds 3D-printing designs for customized hardware in .stl format. Some of these files were used in earlier versions of ABISSMAL (RFID antenna holder) and are not currently used.
-
-<h3>Modules:</h3> A directory that holds software modules in Python 3 and the bash shell for automated data collection and system monitoring, as well as software for error logging. 
-
-<h3>R:</h3> A directory that contains a series of computational analyses as R functions, as well as code for unit-testing these functions.
-
-<h3>VideoConcatenation:</h3> A directory that holds scripts for video concatenation with ffmpeg. This code was originally written to merge pre- and post-motion detection videos but is currently not used in ABISSMAL.
-
-<h3>Main.sh:</h3> The main script that initiates the ABISSMAL tracking system. See the Wiki page for more information.
-
-<h3>cron.sh:</h3> A script for task scheduling through cron jobs. This script is automatically used by ABISSMAL for data collection, system monitoring, and error logging to run continuously over time.
-
-<h3>run_install.sh:</h3> A script for automated installation of software dependencies, setting up cron jobs, and setting up automated text alerts through Twilio (optional, and users will need to create their own Twilio account). See the Wiki page for more information. 
-
-<h3>Other files:</h3> The directory .github/ISSUE_TEMPLATE contains templates for different types of issues. The file .gitignore contains information about which files should be ignored (not tracked) by Git. The LICENSE file holds information about the open-access license for this repository. The README.md file holds this documentation for the main repository.
-
-<br>
-
-<h2>Additional Documentation</h2> The Issues tab holds open issues (bugs, new features, documentation update requests) that are in progress. You can also check out issues that were closed over time. The Projects tab has a Kanban-board style timeline that we are using for project management. The Wiki tab has 5 major sections with detailed documentation: 1) project management, 2) setting up Raspberry Pi computers and ABISSMAL software, 3) building a custom nest container, 4) setting up sensors and other hardware, and 5) troubleshooting software and hardware issues. 
 
 <h2>Pre-requisites</h2>
 Please refer to our Wiki page [Set up Raspberry Pi and tracking system](https://github.com/lastralab/Abissmal/wiki/2.-Set-up-Raspberry-Pi-and-tracking-system-software) before proceeding. There are a few pre-requisites to consider before running the installation script.
@@ -53,32 +31,53 @@ Please refer to our Wiki page [Set up Raspberry Pi and tracking system](https://
 </pre>
 
 <ol>
-
-<li>Once you have the suite of sensors set up and connected to a Raspberry Pi, open a terminal window on your Pi</li>
-<li>If you do not have Git already installed on the Pi, then run `sudo apt-get install git`</li>
-<li>Use the `cd` command to navigate to the directory on your Pi where you want to download this repository</li>
-<li>Clone this repository to the Pi by running `git clone https://github.com/lastralab/Abissmal.git`</li>
+<li>Clone this repository to the Pi by running <pre>git clone https://github.com/lastralab/Abissmal.git</pre></li>
 <li>From the root directory `/path/to/Abissmal/` run the following commands to install and run the ABISSMAL tracking system:</li>
 
    <ol>
 
-   <li>`sudo bash run_install.sh` will initiate the installation script, which will prompt you to enter information</li>
-   <li>Enter your Pi password (we recommend setting a password for your Raspberry Pi)</li>
-   <li>Insert additional ABISSMAL setup information accordingly</li>
+   <li>Initiate the installation script, which will prompt you to enter information <pre>sudo bash run_install.sh</pre></li>
+   <li>Enter your Pi password (we strongly recommend setting a password for your Raspberry Pi)</li>
+   <li>When prompted, insert the additional ABISSMAL setup information accordingly</li>
    <li>The Pi will restart automatically to apply changes</li>
    <li>If you are using an ssh connection to connect to the Pi, then you will need to <a href="https://github.com/lastralab/Abissmal/wiki/5.-Troubleshooting">mount the external hard drive</a></li>
-   <li>Run `bash Main.sh` (without sudo) to initiate ABISSMAL and start collecting data</li>
+   <li>Run command to initiate ABISSMAL and start collecting data (wihout sudo) <pre>bash Main.sh</pre></li>
 
    </ol>
 
 </ol>
 
 
-<h2>Troubleshooting</h2>
 
-Please refer to our [Wiki Troubleshooting page](https://github.com/lastralab/Abissmal/wiki/5.-Troubleshooting) for more information.
+<h2>File Structure Overview</h2>
+This repository holds the following directories and files. See the README files in each directory below for more detailed information:
 
+<h3>3D</h3> A directory that holds 3D-printing designs for customized hardware in .stl format. Some of these files were used in earlier versions of ABISSMAL (RFID antenna holder) and are not currently used.
 
+<h3>Modules</h3> A directory that holds software modules in Python 3 and the bash shell for automated data collection and system monitoring, as well as software for error logging. 
+
+<h3>R</h3> A directory that contains a series of computational analyses as R functions, as well as code for unit-testing these functions.
+
+<h3>Video Concatenation</h3> A directory that holds scripts for video concatenation with ffmpeg. This code was originally written to merge pre- and post-motion detection videos but is currently not used in ABISSMAL.
+
+<h3>Main.sh</h3> The main script that initiates the ABISSMAL tracking system. See the Wiki page for more information.
+
+<h3>cron.sh</h3> A script for task scheduling through cron jobs. This script is automatically used by ABISSMAL for data collection, system monitoring, and error logging to run continuously over time.
+
+<h3>run_install.sh</h3> A script for automated installation of software dependencies, setting up cron jobs, and setting up automated text alerts through Twilio (optional, and users will need to create their own Twilio account). See the Wiki page for more information. 
+
+<h3>Issue templates and other files</h3> The directory .github/ISSUE_TEMPLATE contains templates for different types of issues. The file .gitignore contains information about which files should be ignored (not tracked) by Git. The LICENSE file holds information about the open-access license for this repository. The README.md file holds this documentation for the main repository.
+
+<br>
+
+<h2>Additional Documentation</h2> The Issues tab holds open issues (bugs, new features, documentation update requests) that are in progress. You can also check out issues that were closed over time. The Projects tab has a Kanban-board style timeline that we are using for project management. The Wiki tab has 5 major sections with detailed documentation: <br />
+<ol>
+<li>Project Management</li>
+<li>Setting up Raspberry Pi computers and ABISSMAL software</li> 
+<li>Building a custom nest container</li> 
+<li>Setting up sensors and other hardware</li> 
+<li>Troubleshooting software and hardware issues</li>
+</ol>
 <h2>Citing ABISSMAL</h2>
 If you are using or modifying one or more components of the ABISSMAL tracking system, then please cite the associated methods paper (the citation will be updated when the manuscript is accepted for publication) as well as this repository:
 
