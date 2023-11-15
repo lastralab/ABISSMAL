@@ -1,47 +1,36 @@
-<h1>Automated behavioral tracking by integrating sensors that survey movements around a target location</h1>
-<pre>
-           ____ _____  _____ _____ __  __          _      
-     /\   |  _ \_   _|/ ____/ ____|  \/  |   /\   | |     
-    /  \  | |_) || | | (___| (___ | \  / |  /  \  | |     
-   / /\ \ |  _ < | |  \___ \\___ \| |\/| | / /\ \ | |     
-  / ____ \| |_) || |_ ____) |___) | |  | |/ ____ \| |____ 
- /_/    \_\____/_____|_____/_____/|_|  |_/_/    \_\______|
+<h1>Software documentation</h1>
 
-</pre>
-<h3>Helper functions</h3>
+<h2>System monitoring, error loggin, helper functions</h2>
 
-- CSV writer
-- SMS Alert Service
-- Logging setup
-- Directories setup
+**Description**: The files monitor.py and Backups.py are used for system monitoring and transferring data from the Pi to an external hard drive. Data transfers are performed at night for files created the day before. The file log.py is used for error logging, while helper.py contains functions for writing .csv files, setting up directories and logging, and setting up Twilio text alerts.
 
-<h1>Infrared beam breaker - IRBB</h1>
+<h2>Infrared beam breakers (IRBB.py)</h2>
 
-**Description**: This file contains code to run and collect data from infrared beam breakers on a Raspberry Pi computer. Each beam breaker is a receiver - emitter pair. The code contained in IRBB.py was modified from from https://simonprickett.dev/using-a-break-beam-sensor-with-python-and-raspberry-pi/. The nest container design holds 2 beam breaker pairs. The lead beam breaker is the first that will be broken when a bird enters the tunnel into the nest chamber (e.g. the furthest beam breaker from the nest chamber). The rear beam breaker is the second that will be broken when a bird enters the tunnel into the nest chamber (e.g. the beam breaker nearest to the nest chamber).
+**Description**: IRBB.py contains code to run and collect data from two pairs of infrared beam breakers. Each beam breaker is a receiver - emitter pair. The code contained in IRBB.py was modified from from https://simonprickett.dev/using-a-break-beam-sensor-with-python-and-raspberry-pi/. The outer beam breaker pair is the first that will be broken when a bird enters the nest container (this pair sits in front of the RFID antenna). The inner beam breaker pair should be the first beam that is broken when a bird leaves the nest chamber (this pair sits behind the RFID antenna, looking into the container).
 
-**Data structure**: The function in IRBB.py  "detect_beam_breaks_callback(BEAM_PIN, sensor_id)" should return the date and timestamp (HH:MM:SS) when an infrared beam is broken. The master script should return the recording chamber number, the beam breaker identity (lead or rear), the event label (e.g. "beam broken"), year, month, day, and timestamp (HH:MM:SS) of the event. Each of these fields will be written out as a new line of a .csv file generated per day.
+**Data structure**: The function `detect_beam_breaks_callback(BEAM_PIN, sensor_id)` returns the date and timestamp (HH:MM:SS) when an infrared beam is broken. The IRBB.py script returns the nest container identifier, the beam breaker identifier (outer or inner), and the year, month, day, and timestamp (HH:MM:SS) of the movement event. Each of these fields will be written out as a new line of a .csv file generated per day. The beam breakers detect beam breaking events through edge detection. This code sets up a pull up resistor to detect a falling edge that represents a beam break. Edges are detected by adding events rather than constant polling (to avoid missing edges). The bouncetime parameter ensures that only a single edge will be detected even when multiple beam break events occur close together in time.
 
-The main setup sets up a pull up resistor to detect a falling edge that represents a beam break. Edges are detected by adding events rather than polling to avoid missing edges, and a bouncetime parameter ensures that only a single edge will be detected even when multiple callbacks occur in a rapid fashion.
+<h2>Radio frequency identification (RFID.py)</h2>
 
+**Description**: RFID.py contains code to run and collect data from a 125kHz CognIot radio frequency identification (RFID) reader on a Raspberry Pi computer. The original code to control the RFID reader was obtained from https://github.com/CognIot/RFID_125kHz. The RFID reader is connected to an external circular antenna that sits at the entrance of the tunnel of the nest container (before both infrared beam breakers). The reader has been set to read EM4102 passive integrated transponder (PIT) tags held in a plastic leg bands made in sizes appropriate for different songbird species. This RFID system allows for identification of the individuals that enter and leave the nest container. We set up the RFID antenna in the center of the nest container entrance, between the two beam breaker pairs.
 
-<h1>Radio frequency identification - RFID</h1>
+**Data structure**: The function in RFID.py `ReadTagPageZero(comms)` returns the nest container identifier, the PIT tag code (a unique 16-bit alphanumeric string), and the year, month, day, and timestamp (HH:MM:SS) of the movement event. Each of these fields will be written out as a new line of a .csv file generated per day.
 
-**Description**: This file contains code to run and collect data from a 125kHz CognIot radio frequency identification (RFID) reader on a Raspberry Pi computer. The original code to control the RFID reader was obtained from https://github.com/CognIot/RFID_125kHz. The RFID reader is connected to an external circular antenna that sits at the entrance of the tunnel of the nest container (before both infrared beam breakers). The reader has been set to read EM4102 passive integrated transponder (PIT) tags held in a plastic leg bands made in sizes appropriate for different songbird species. This RFID system allows for identification of the individuals that enter and leave the nest chamber, and together with the infrared beam breakers, provides automated tracking of parental care behavior.
+<h2>Temperature sensor (Temp.py)</h2>
 
-**Data structure**: The function in RFID.py "ReadTagPageZero(comms)" should return the recording chamber number, the PIT tag identity (unique 16-bit string), year, month, day, and timestamp (HH:MM:SS). Each of these fields will be written out as a new line of a .csv file generated per day.
-
-<h1>Temperature sensor  - Temp</h1>
-
-**Description**: This file contains code to run and collect data from a waterproof 1-wire DS18B20 temperature sensor on a Raspberry Pi computer. The original code to control the temperature sensor was obtained from https://learn.adafruit.com/adafruits-raspberry-pi-lesson-11-ds18b20-temperature-sensing/software, a tutorial written by Simon Monk. The sensor will provide temperature data from inside the nest chamber, but will not provide incubation temperature unless strategically placed to do so (which may be complicated by the fact that some birds continue to add nesting material and can bury the sensor). Temperature data inside the nest chamber complements parental visits captured by the RFID antenna and infrared beam breakers.
+**Description**: Temp.py contains code to run and collect data from a waterproof 1-wire DS18B20 temperature sensor on a Raspberry Pi computer. The original code to control the temperature sensor was obtained from https://learn.adafruit.com/adafruits-raspberry-pi-lesson-11-ds18b20-temperature-sensing/software, a tutorial written by Simon Monk. The sensor will provide temperature data from inside the nest chamber, but will not provide incubation temperature unless strategically placed to do so (which may be complicated by the fact that some birds continue to add nesting material and can bury the sensor, and also by chicks leaning on the probe as they grow larger).
 
 **Notes on usage**: The sensor must be connected to 3.3V for power and GPIO pin 4 for 1-wire data transfer. A single sub-folder per device should appear inside /sys/bus/w1/devices that starts with 28 after initial setup (see link above), ptherwise something is not connected correctly (e.g. when multiple folders appear that start with 00-). The script Temp.py must be executed with python3, otherwise some code will fail (e.g. the file = f statement in the print calls). May need to rerun setup of /w1 folder as in https://pimylifeup.com/raspberry-pi-temperature-sensor/ every time the Raspberry Pi computer restarts.
 
-**Data structure**: The function in Temp.py "read_temp()" should return the recording chamber number, the temperature value in degrees Celsius and degrees Farenheit, year, month, day, and timestamp (HH:MM:SS). Each of these fields will be written out as a new line of a .csv file generated per day.
+**Data structure**: The function in `read_temp()` returns the nest container identifier, the temperature value in degrees Celsius and degrees Farenheit, and the year, month, day, and timestamp (HH:MM:SS). Each of these fields will be written out as a new line of a .csv file generated per day.
 
-<h1>Video</h1>
+<h2>Video (Video.py)</h2>
 
-**Description**: This file contains code to run and collect videos from a Raspberry Pi (G) fisheye lens camera. Videos will be strategically recorded in h264 format and converted to mp4 to capture parent-offspring interactions within several seconds of visits to the nest chamber. These videos are intended to be used in later projects, and complement automated tracking of parental visits to the nest chamber currently obtained by the RFID antenna and infrared beam breakers.
+**Description**: Video.py contains code to record videos by motion detection from a Raspberry Pi (H) infrared fisheye lens camera with infrared LEDs. Other cameras compatible with Raspberry Pis may also be used (we initially developed this code with a non-infrared Waveshare (G) camera). The camera is continuously streaming and monitoring the number of pixels that change color in all 3 color channels from one frame to another. Videos will be recorded when the number of pixels that changed color passes beyond a given sensitivity threshold. We use a ring buffer to record a video a few seconds before movement occurred, and another video immediately after movement occurred. The videos are recorded in h264 format and converted to mp4 format.
 
-**Notes on usage**: Since video data is computationally intensive to record, and expensive both to store and score, videos will be recorded using a high sensitivity threshold for motion detection. We ran some tests by placing the camera on a desk and walking and sitting nearby. In Video.py line 77, the sensitivity vs pixel difference is getting logged every time the pixel difference gets higher than the sensitivity threshold. Our test results provided an ideal sensitivity value of 18000, which will only detect motion when there's movement in front of the camera, but not when vibrations around it are slightly moving the camera. For dark spaces the value might need to decrease so the pixel difference gets detected more easily. You can trace that debug logs and modify the sensitivity according to your needs.
+**Notes on usage**: Since video data is computationally intensive to record, and expensive both to store and score, videos will be recorded using a high sensitivity threshold for motion detection. We ran some tests by placing the camera on a desk and walking and sitting nearby, and later with live birds. The sensitivity vs pixel difference is getting logged every time the pixel difference gets higher than the sensitivity threshold. Our test results provided an ideal sensitivity value of 9000 pixels (about 1% of all total pixels). You can trace pixel values that triggered video recordings in the daily log files and modify the sensitivity parameter according to your needs.
 
-**Data structure**: The function in Video.py "detect_motion(cam)" should return videos that contain the recording chamber number, and the year, month, day, and timestamp (HH:MM:SS) in the file name of each video.
+**Data structure**: Video.py returns a spreadsheet of metadata about the videos recorded each day. The metadata includes the nest container identifier, as well as the year, month, day, and timestamp (HH_MM_SS) of the moment that motion was detected, whether the video was recorded pre or post-motion detection, the video file names, the pixel sensitivity threshold, and the number of pixels that changed during motion detection. This script will also return videos in .mp4 format as described above.
+
+<h2>Validation videos (alt_video.py)</h2> 
+**Description**: The file alt_video.py was written to provide video recording for validating ABISSMAL. This script provides the capacity to record videos continuously throughout a given time period without motion detection. This code was written for use on a Raspberry Pi computer that is connected to a camera only. Currently alt_video.py cannot be run on a Raspberry Pi computer that is also collecting beam breaker, RFID, and/or motion-detection video recordings. To configure validation videos you can skip steps 1.7 and 1.9 from the Wiki page "Set up Raspberry Pi and tracking system software", since alt_video.py will not use GPIO connections.
