@@ -82,7 +82,7 @@ This repository holds the following directories and files. See the README files 
 <h2>Citing ABISSMAL</h2>
 If you are using or modifying one or more components of the ABISSMAL tracking system, then please cite the associated methods paper.
 
-<br><br>
+<br>
 Paper citation: <br>
    Smith-Vidaurre, G., Molina, T., Jarvis, E.D., and Hobson, E.A. (2023). Automated tracking of avian parental care behavior. Submitted. EcoEvoRxiv preprint: https://doi.org/10.32942/X2Z60C
 
