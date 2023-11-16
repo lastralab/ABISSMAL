@@ -10,7 +10,7 @@ Grace Smith-Vidaurre, PhD: <span style="pointer-events:none">gsvidaurre[at]<span
 https://github.com/lastralab/Abissmal/wiki
 
 <h2>Tracking System Overview</h2>
-ABISSMAL is a hardware and software platform for automated behavioral tracking with built-in system monitoring and error logging. ABISSMAL also provides the capacity to make behavioral inferences by integrating data across multiple types of movement sensors. We tested the tracking system by tracking parental care behaviors with captive zebra finches that raised young birds over 50 days. See the accompanying methods manuscript for more detailed information about ABISSMAL (TKTK add the preprint citation). Our Wiki page has detailed information about how to set up and build hardware, as well as software installation and troubleshooting.
+ABISSMAL is a hardware and software platform for automated behavioral tracking with built-in system monitoring and error logging. ABISSMAL also provides the capacity to make behavioral inferences by integrating data across multiple types of movement sensors. We tested the tracking system by tracking parental care behaviors with captive zebra finches that raised young birds over 50 days. See the accompanying methods manuscript for more detailed information about ABISSMAL. Our Wiki page has detailed information about how to set up and build hardware, as well as software installation and troubleshooting.
 
 
 <h2>Pre-requisites</h2>
