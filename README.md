@@ -14,7 +14,7 @@ ABISSMAL is a hardware and software platform for automated behavioral tracking w
 
 
 <h2>Pre-requisites</h2>
-Please refer to our Wiki page [Set up Raspberry Pi and tracking system](https://github.com/lastralab/Abissmal/wiki/2.-Set-up-Raspberry-Pi-and-tracking-system-software) before proceeding. There are a few pre-requisites to consider before running the installation script.
+Please refer to our Wiki page <a href="https://github.com/lastralab/Abissmal/wiki/2.-Set-up-Raspberry-Pi-and-tracking-system-software">Set up Raspberry Pi and tracking system</a> before proceeding. There are a few pre-requisites to consider before running the installation script.
 
 
 <h2>Installing ABISSMAL</h2>
@@ -47,7 +47,7 @@ Please refer to our Wiki page [Set up Raspberry Pi and tracking system](https://
               <li>Follow instructions to setup the system accordingly</li>
    </ol>
 </ol>
-
+<br>
 
 
 <h2>File Structure Overview</h2>
