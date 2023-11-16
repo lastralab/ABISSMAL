@@ -83,10 +83,8 @@ This repository holds the following directories and files. See the README files 
 If you are using or modifying one or more components of the ABISSMAL tracking system, then please cite the associated methods paper (the citation will be updated when the manuscript is accepted for publication) as well as this repository:
 
 <br>
-Paper citation: TKTK
-
-<br>
-Repository citation: TKTK
+Paper citation: <br>
+   Smith-Vidaurre, G., Molina, T., Jarvis, E.D., and Hobson, E.A. (2023). Automated tracking of avian parental care behavior. Submitted. EcoEvoRxiv preprint: https://doi.org/10.32942/X2Z60C
 
 
 <h2>Reporting issues while using ABISSMAL</h2>
