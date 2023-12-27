@@ -1,0 +1,36 @@
+---
+title: "Vignette_01_Introduction_SimulateData"
+author: "Grace Smith-Vidaurre"
+date: "2023-12-27"
+output: html_document
+---
+
+<h2>Vignette Overview and Learning Objectives</h2>
+
+This first vignette will take you through a brief introduction to RStudio, an introduction to the data analysis workflow provided by ABISSMAL, and downloading a local version of the ABISSMAL GitHub repository.
+
+and creating simulated data for the following vignettes. Through this tutorial, you will learn more about how to configure your RStudio session, the different data processing and analysis steps provided by each ABISSMAL R function, and how to write and read data in R.
+
+```{r}
+
+rm(list = ls())
+
+library(tidyverse)
+library(data.table)
+library(pbapply)
+library(tidyquant)
+
+path <- "/home/gsvidaurre/Desktop"
+tmp_path <- file.path(path, "tmp")
+
+code_path <- "/home/gsvidaurre/Desktop/GitHub_repos/Abissmal/R"
+code <- list.files(code_path, pattern = ".R$", full.names = TRUE)
+
+invisible(lapply(1:length(code), function(i){
+  source(code[i])
+}))
+
+```
+
+
+
