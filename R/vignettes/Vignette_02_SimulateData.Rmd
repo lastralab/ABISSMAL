@@ -1,36 +1,151 @@
 ---
-title: "Vignette_01_Introduction_SimulateData"
+title: "Vignette 02: Simulate Data"
 author: "Grace Smith-Vidaurre"
 date: "2023-12-27"
 output: html_document
 ---
 
+```{r setup, include = FALSE}
+
+knitr::opts_chunk$set(echo = TRUE, eval = FALSE)
+
+```
+
 <h2>Vignette Overview and Learning Objectives</h2>
 
-This first vignette will take you through a brief introduction to RStudio, an introduction to the data analysis workflow provided by ABISSMAL, and downloading a local version of the ABISSMAL GitHub repository.
+In this second vignette, we will create simulated datasets of animal movements detected by different sensors. Throughout the process of creating these simulated datasets, you will learn basic R programming skills and tips for writing code for open science, including:
 
-and creating simulated data for the following vignettes. Through this tutorial, you will learn more about how to configure your RStudio session, the different data processing and analysis steps provided by each ABISSMAL R function, and how to write and read data in R.
+1. Cleaning your global environment
+2. Running code inside an RMarkdown chunk
+3. Learning about R functions
+4. Searching for R function documentation
+5. Installing and loading packages
+6. Commenting code
+7. Setting and checking your working directory 
+8. Creating objects like vectors and data frames
+9. Data types
+10. Manipulating objects (e.g. adding columns to a data frame)
+11. Piping expressions through the tidyverse
+12. Writing out data to physical files and reading these files back into R
+13. Troubleshooting and fixing errors
 
+<h2>Clean your global environment</h2>
+
+Your global environment is your virtual workspace in R, and can hold different packages and objects to facilitate your data analysis and programming objectives. You can see the different packages and objects currently loaded in your environment by clicking on the tab "Environment" in the pane that also includes the "History" and "Connections" tab. 
+
+If you just started a new RStudio session then your global environment will likely be empty. But if you're working in an older session or maybe in an RProject workspace, then your global environment will likely have packages and objects already loaded. Cleaning your global environment can be good practice to ensure that you're starting a new coding session with a fresh workspace. If you don't clean your global environment, even when using the same code between sessions, then you risk using old versions of objects that don't reflect your newest changes to the code.
+
+You can clean your global environment directly from the RStudio interface by clicking on the broom icon below the "Environment" tab (hit "Yes" with "hidden objects" selected). 
+
+You can also clean your global environment by running the code below. You can run the code inside this chunk in different ways:
+
+* Click on the small green arrow icon on the top right side of the chunk to run the code in this chunk only
+
+* Place your cursor anywhere within the line of code, then go up to the "Run" icon on the top right of the Source pane that has a white square and green arrow. In the dropdown menu that appears, select "Run Selected Lines" or "Run Current Chunk" (see the keyboard shortcuts next to each)
+
+* Place your cursor anywhere within the line of code and use the keyboard shortcut Ctrl + Enter to run the current line of code
+
+* Place your cursor anywhere within the line of code and use the keyboard shortcut Ctrl + Shift + Enter to run all code in the current chunk
+
+The first keyboard shortcut to run one line of code at a time can be helpful to see the output of each line of code at a time and check for errors.
 ```{r}
 
 rm(list = ls())
 
-library(tidyverse)
-library(data.table)
-library(pbapply)
-library(tidyquant)
+```
 
-path <- "/home/gsvidaurre/Desktop"
-tmp_path <- file.path(path, "tmp")
+The code above to clean your global environment is a nested expression with 2 functions: `rm()` and `ls()`. The `()` notation is used for functions. Functions are operations that you can apply in your own code by using the name of a specific function. R has a set of base functions that you can access without loading any additional packages, including the two functions above. 
 
-code_path <- "/home/gsvidaurre/Desktop/GitHub_repos/Abissmal/R"
-code <- list.files(code_path, pattern = ".R$", full.names = TRUE)
+<h2>Access R function documentation</h2>
 
-invisible(lapply(1:length(code), function(i){
-  source(code[i])
-}))
+You can access the documentation for these functions by clicking on the "Help" tab in the pane that also has "Files" and "Plots", and typing the name of the function in the search bar. You can also access function documentation by running the following code:
+```{r}
+
+?rm
 
 ```
 
+```{r}
 
+?ls
 
+```
+
+For each function, the documentation holds specific sections that can be useful for understanding how the function works, especially the function's arguments. A function's arguments are the values that it expects the user to provide in order to customize the operation. Many functions will have preset default values for some arguments that will be used when you don't provide specific values. 
+
+For instance, the function `rm()` has an argument called `list` (followed by an `=`). In order for `rm()` to clean your global environment in the way that you want, you need to provide information after the argument `list`. To remove everything in your global environment, we're using the output of the function `ls()`, which lists the names of all of the objects in your global environment.
+
+<h2>Install and load packages</h2>
+
+After cleaning the global environment, you still need to set up your virtual workspace for the upcoming coding session. One important setup step is to make sure you have access to functions that you need but which aren't accessible through the base R functions. For instance, [the `tidyverse`](https://www.tidyverse.org/) is a set of R packages that provide useful functions and expressions for data science purposes. 
+
+If you don't already have tidyverse installed on your local computer, then you need to install the tidyverse in order to access these functions. The code below installs the tidyverse from [CRAN](https://cran.r-project.org/), the Comprehensive R Archive Network that holds thousands of R packages online.
+```{r}
+
+# Install the tidyverse from CRAN
+install.packages("tidyverse")
+
+```
+
+In the chunk above, I added a comment using the `#` symbol. Any text that you write after a `#` symbol will be treated as text and will not be run as code. It's good practice to comment your code, especially as you're learning more about how to code in R. For biologists, continuing to comment your code even when you're a coding expert can also be good practice. Commenting and documenting your work makes the code that you publish with manuscripts or software tools more accessible to others in the community.
+
+Once you've installed the tidyverse on your computer, you do not need to install it again. But you do need to load the package into your global environment in order to access functions across the tidyverse packages:
+```{r}
+
+library(tidyverse)
+
+```
+
+<h2>Set your working directory</h2>
+
+The next important step for setting up your virtual workspace is to set your working directory. A directory is a location (like a folder) on your computer, and a working directory is the directory where R will search for files to read in, and also where the program will save files that you write out. 
+
+You can use the function `getwd()` to check your current working directory.
+```{r eval = TRUE}
+
+getwd()
+
+```
+
+My working directory is set by default to the folder on my computer where I saved this Rmd file. To work in a separate directory that holds only data generated while working on these vignettes, you can create a new directory or folder on your computer:
+
+```{r}
+
+?dir.create
+
+dir.create("/home/gsvidaurre/Desktop/ABISSMAL_vignettes")
+
+```
+
+In the code above, you'll need to replace the path (or the list of folder names) to reflect where you want to save the new folder called `ABISSMAL_vignettes` (or another name of your choice) on your own computer. For those using Windows, if you copy and paste a path into R directly from your computer then you may need to change the direction of the slashes.
+
+In basic R coding courses, it's very common to formally set your working directory before a coding session by using the function `setwd()`. It's good practice to avoid using `setwd()` in code that that you want to share with collaborators or in the spirit of open science (e.g. accompanying a publication or new tool). When you use `setwd()` and share the code with others, you're assuming that someone else has the same working directory on their computer. There are other ways in which you can specify your working directory throughout your code without using `setwd()`.
+
+For instance, let's say we want to make a copy of the first vignette and save that copy inside the directory we just created above. We can use some base R functions to copy and save the file to the correct working directory (you will need to update these paths to reflect where the vignettes are saved on your computer as well as your working directory):
+```{r}
+
+file.copy(
+  from = "/home/gsvidaurre/Desktop/GitHub_repos/ABISSMAL/R/vignettes/Vignette_01_Introduction.Rmd",
+  to = "/home/gsvidaurre/Desktop/ABISSMAL_vignettes/Vignette_01_Introduction_copy.Rmd"
+    )
+
+```
+
+In the code above, we're specifying 2 arguments to the function `file.copy`. The first argument specifies the location of the file we want to copy ("/home/gsvidaurre/Desktop/GitHub_repos/ABISSMAL/R/vignettes/") and the name of the file ("Vignette_01_Introduction.Rmd"). The second argument specifies the location where we want to save this copy ("/home/gsvidaurre/Desktop/ABISSMAL_vignettes/"), and a new file name for the copied file ("Vignette_01_Introduction_copy.Rmd"). When you run this line of code, the output in the console should read "[1] TRUE" if the file was successfully copied and saved.
+
+You can check that the function worked correctly by opening a file window on your computer in this new directory. We can also use another base function to check whether the copied file exists in the working directory. The output of this function is a list of all of the files contained within the new directory:
+```{r}
+
+list.files(path = "/home/gsvidaurre/Desktop/ABISSMAL_vignettes")
+
+```
+
+This is just an example of how you can specify your working directory in the code that you write without needing to use `setwd()`. In the following vignettes, you will see other examples of how to continue specifying your working directory in a similar way. Before moving on to the next vignette, you can remove the file that you just copied to your working directory:
+
+```{r}
+
+file.remove("/home/gsvidaurre/Desktop/ABISSMAL_vignettes/Vignette_01_Introduction_copy.Rmd")
+
+```
+
+In the next vignette, you will start creating and manipulating objects in R that can be used in the ABISSMAL data processing and analysis pipeline.

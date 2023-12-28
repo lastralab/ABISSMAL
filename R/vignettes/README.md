@@ -11,14 +11,22 @@ The goal of these tutorials is to disseminate basic R coding skills in a biologi
 
 1. Introduction to RStudio, download ABISSMAL GitHub repository, introduction to the ABISSMAL data processing / analysis workflow
 
+TKTK to the Intro vignette I need to add more information about Rmd files and knitted output...
+Also shortcuts for running code in Rmarkdown files
+And tips for following along with these vignettes (run code inside the Rmd files themselves, or start fresh with a new Rmd writing the code yourself and your own commments, which is preferred)
+
 2. Create simulated data and working directories
+
+TKTK add searching for errors...
 
 3. Combine the raw data, detect perching events and pre-process the raw data
 
 4. Detect clusters, score clusters
 
-5. Run steps 2-4 with simulated data from 3 experimental replicates
+5. Run steps 2-4 with simulated data from 3 experimental replicates TKTK consider dropping...and split 2 into 2 vignettes
 
 6. Make a visualization with results from the 3 simulated replicates
 
 Note that code for processing and analzying biological data collected from zebra finches, and code to make figures, is published online as part of a submitted manuscript for the ABISSMAL tracking system.
+
+Also note that the knitted output for these tutorials must be visible from the ABISSMAL website. This is especially important for accessibility of the Introduction for people who haven't downloaded the ABISSMAL repo yet

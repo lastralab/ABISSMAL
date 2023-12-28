@@ -17,15 +17,27 @@ This first vignette will take you through a brief introduction to RStudio, downl
 
 If you are new to using R (a programming language for statistical analysis) and RStudio (a graphical user interface for R), then I recommend checking out the introductory lesson [R for Reproducible Scientific Analysis](https://swcarpentry.github.io/r-novice-gapminder/) provided by [Software Carpentry](https://software-carpentry.org/).
 
-Once you have R and RStudio installed on your computer, you can open RStudio by clicking on the software icon. The default pane configuration for RStudio should look like this:
+Once you have R and RStudio installed on your computer, you can open RStudio by clicking on the software icon. The default pane configuration for RStudio should look like this (the background color will probably be different):
 
 <br>
-![A screenshot of the default RStudio pane configuration, with the console pane below the source pane](/home/gsvidaurre/Desktop/GitHub_repos/Abissmal/R/vignettes/images/RStudio_01.png)
+![A screenshot of the default RStudio pane configuration, with the console pane below the source pane](/home/gsvidaurre/Desktop/GitHub_repos/ABISSMAL/R/vignettes/images/RStudio_01.png)
 
-This pane layout makes it difficult to see the code that you're writing and saving in a physical file in the source pane, and the output of that code in the console pane. You can reconfigure the panes so that the source and console panes are horizontally adjacent to one another, which makes it easier to immediately check the output of any code that you run. To reconfigure the pane layout, go to the menu along the top bar of the RStudio window and select the option "Tools", then "Global Options" in the pop-up menu. In the next pop-up menu, select the option "Pane Layout" along the lefthand side, then use the dropdown menus to select "Source" as the top right pane and "Console" as the top left pane. You can select "Apply" to apply those changes, then "Ok" to exit this window. The RStudio pane layout should now look like this:
+This pane layout makes it difficult to see the code that you're writing and saving in a physical file in the source pane, and the output of that code in the console pane. You can reconfigure the panes so that the source and console panes are horizontally adjacent to one another, which makes it easier to immediately check the output of any code that you run. To reconfigure the pane layout:
+
+* Go to the menu along the top bar of the RStudio window and select the option "Tools"
+
+* Select "Global Options" in the pop-up menu
+
+* In the next pop-up menu, select the option "Pane Layout" along the lefthand side
+
+* Use the dropdown menus to select "Source" as the top right pane and "Console" as the top left pane
+
+* You can select "Apply" to apply those changes, then "Ok" to exit this window 
+
+The RStudio pane layout should now look like this:
 
 <br>
-![A screenshot of the updated RStudio pane configuration, with the console pane to the right of the source pane](/home/gsvidaurre/Desktop/GitHub_repos/Abissmal/R/vignettes/images/RStudio_02.png)
+![A screenshot of the updated RStudio pane configuration, with the console pane to the right of the source pane](/home/gsvidaurre/Desktop/GitHub_repos/ABISSMAL/R/vignettes/images/RStudio_02.png)
 
 Another useful change to the RStudio configuration is soft-wrapping lines of text and code, so that you don't have to scroll horizontally to see long lines of text in your Source pane. To do this, go to "Tools", then "Global Options", then "Code", and check the box next to the option "Soft-wrap R source files", then select "Apply" and "Ok".
 
@@ -33,12 +45,32 @@ You can also play with the font size, font color, and background color of your R
 
 <h2>2. Create a local version of an existing GitHub repository</h2>
 
-If you are new to using GitHub, then I recommend downloading [GitHub Desktop](https://desktop.github.com/). This software is a graphical user interface for the GitHub version control platform and makes GitHub a more accessible tool. We will work through how to download the GitHub repository for ABISSMAL so that you can access the ABISSMAL R functions on your local computer. If you're already familiar with GitHub and using Git through the command line, then check out the installation instructions on the [ABISSMAL README](https://github.com/lastralab/ABISSMAL).
+If you are new to using GitHub, then I recommend downloading [GitHub Desktop](https://desktop.github.com/). This software is a graphical user interface for the GitHub version control platform. We will work through how to download the GitHub repository for ABISSMAL so that you can access the ABISSMAL R functions on your local computer. If you are already familiar with GitHub and using Git through the command line, then check out the installation instructions on the [ABISSMAL README](https://github.com/lastralab/ABISSMAL).
 
-Once you have installed GitHub Desktop, open the software by clicking on the icon. Then open your default Internet browser and navigate to the ABISSMAL GitHub repository: https://github.com/lastralab/ABISSMAL. Click on the green "Code" button and copy the web URL under the HTTPS option in the dropdown menu. Go back to the GitHub Desktop window, go to the top menu and select "File", then "Clone repository", then select the tab "URL". Paste the web URL for ABISSMAL into the text box under "Repository URL or GitHub username and repository", and check that the directory in the text box under "Local path" is the correct place to install the ABISSMAL GitHub repository on your computer. For instance, if "Local path" is "/home/User/Desktop/ABISSMAL", then the ABISSMAL repository will be installed directly to your Desktop. Select "Clone" once you're ready to clone a local version of the remote ABISSMAL repository to your computer. Once the repository has been installed on your computer, you should see the following directory and file structure inside the folder labeled "Abissmal":
+Once you have installed GitHub Desktop:
+
+* Open GitHub Desktop by clicking on the icon
+
+* Open your default Internet browser and navigate to the ABISSMAL GitHub repository: https://github.com/lastralab/ABISSMAL
+
+* Click on the green "Code" button and copy the web URL under the HTTPS option in the dropdown menu
+
+* In the GitHub Desktop window, go to the top menu and select "File"
+
+* Select "Clone repository", 
+
+* Select the tab "URL"
+
+* Paste the web URL for ABISSMAL into the text box under "Repository URL or GitHub username and repository"
+
+* Check that the directory in the text box under "Local path" is the correct place to install the ABISSMAL GitHub repository on your computer. For instance, if "Local path" is "/home/User/Desktop/ABISSMAL", then the ABISSMAL repository will be installed directly to your Desktop
+
+* Select "Clone" once you're ready to create a local version of the remote ABISSMAL repository on your computer
+
+Once the repository has been installed on your computer, you should see the following directory and file structure inside the folder labeled "ABISSMAL" that looks similar to this:
 
 <br>
-![A screenshot of the directory that is the local ABISSMAL repository](/home/gsvidaurre/Desktop/GitHub_repos/Abissmal/R/vignettes/images/ABISSMAL_localrepo.png)
+![A screenshot of the directory that is the local ABISSMAL repository](/home/gsvidaurre/Desktop/GitHub_repos/ABISSMAL/R/vignettes/images/ABISSMAL_localrepo.png)
 
 The files that we'll be working with throughout the following vignettes are inside of the "R" folder. This folder contains 6 R files (extension ".R"), a README file that contains more information about each R file, and folders with the R vignettes as well as automated unit testing scripts.
 
@@ -57,7 +89,7 @@ ABISSMAL provides 5 different R functions for data processing and analysis. Thes
 5. `score_clusters` uses the output of `detect_clusters` as the main input. This function can also use the output of `detect_perching_events` to integrate perching events detected in the raw RFID or infrared beam breaker datasets. It can also use the output of `preprocess_detections` to integrate video recording events that were not detected by `detect_clusters`. This function serves to make behavioral inferences about each movement event, including the direction of movement, the magnitude of movement, individual identity when RFID data was present in a cluster, and where the beginning of the movement event likely occurred (at the container entrance or inside of the container). This function returns a spreadsheet of behavioral inferences and other metadata about each movement event that can be used for subsequent analyses and visualization
 
 <br>
-![Figure 4 from the ABISSMAL methods manuscript under review, that shows a general workflow across these 5 functions](/home/gsvidaurre/Desktop/GitHub_repos/Abissmal/R/vignettes/images/Figure4_ComputationalAnalyses.png)
+![Figure 4 from the ABISSMAL methods manuscript under review, that shows a general workflow across these 5 functions](/home/gsvidaurre/Desktop/GitHub_repos/ABISSMAL/R/vignettes/images/Figure4_ComputationalAnalyses.png)
 * Figure from Smith-Vidaurre, G., Molina, T., Jarvis, E.D., and E.A. Hobson. 2023. Automated tracking of avian parental care. Under review.
 
 In the next vignette, we will create simulated datasets of raw movement data to learn how to use the different functions described above.
