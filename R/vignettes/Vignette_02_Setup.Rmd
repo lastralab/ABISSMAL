@@ -41,7 +41,7 @@ However, the best way to work through these vignettes will be to create a new RM
 
 Your global environment is your virtual workspace in R, and can hold different packages and objects to facilitate your data analysis and programming objectives. You can see the different packages and objects currently loaded in your environment by clicking on the tab "Environment" in the pane that also includes the "History" and "Connections" tab. 
 
-If you just started a new RStudio session then your global environment will likely be empty. But if you're working in an older session or maybe in an RProject workspace, then your global environment will likely have packages and objects already loaded. Cleaning your global environment can be good practice to ensure that you're starting a new coding session with a fresh workspace. If you don't clean your global environment, even when using the same code between sessions, then you risk using old versions of objects that don't reflect your newest changes to the code.
+If you started a new RStudio session then your global environment will likely be empty. But if you're working in an older session or maybe in an RProject workspace, then your global environment will likely have packages and objects already loaded. Cleaning your global environment can be good practice to ensure that you're starting a new coding session with a fresh workspace. If you don't clean your global environment, even when using the same code between sessions, then you risk using old versions of objects that don't reflect your newest changes to the code.
 
 You can clean your global environment directly from the RStudio interface by clicking on the broom icon below the "Environment" tab (hit "Yes" with "hidden objects" selected). 
 
@@ -147,7 +147,7 @@ list.files(path = "/home/gsvidaurre/Desktop/ABISSMAL_vignettes")
 
 ```
 
-This is an example of how you can specify your working directory in the code that you write without needing to use `setwd()`. In the following vignettes, you will see other examples of how to specify your working directory without `setwd()`. Before moving on to the next vignette, you can remove the file that you just copied to your working directory:
+This is an example of how you can specify your working directory in the code that you write without needing to use `setwd()`. In the following vignettes, you will see other examples of how to specify your working directory without `setwd()`. Before moving on to the next vignette, you can remove the file that you copied to your working directory:
 
 ```{r}
 

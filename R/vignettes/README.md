@@ -19,7 +19,11 @@ The goal of these tutorials is to disseminate basic R coding skills in a biologi
 
 5. Make barcode style visualizations of the raw and per-processed data
 
-6. Detect clusters, score clusters, generate summary statistics
+6. Detect clusters, score clusters, generate summary statistics. 
+
+Things that would be important to add:
+- Loops
+- Errors and troubleshooting online
 
 Note that code for processing and analyzing biological data collected from zebra finches, and code to make figures, is published online as part of a submitted manuscript for the ABISSMAL tracking system.
 
