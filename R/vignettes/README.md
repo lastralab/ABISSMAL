@@ -11,6 +11,9 @@ The goal of these tutorials is to disseminate basic R coding skills in a biologi
 
 1. Introduction to RStudio, download ABISSMAL GitHub repository, introduction to the ABISSMAL data processing / analysis workflow
 
+- Need to add to the Intro how to report bugs in vignettes as GitHub issues
+- Also add how to troubleshoot when an expression isn't complete in the console
+
 2. Setup a virtual workspace (global environment, package installation, working directory, RMarkdown files)
 
 3. Create simulated data, including entrances, exits, and perching events
@@ -19,11 +22,15 @@ The goal of these tutorials is to disseminate basic R coding skills in a biologi
 
 5. Make barcode style visualizations of the raw and per-processed data
 
-6. Detect clusters, score clusters, generate summary statistics. 
+- For vignette 05, I want to make 3 barcode style visuals: 1) the raw combined RFID data, perching events and RFID pre-processed,2) IRBB raw combined and pre-processed, then 3) pre-processed RFID and IRBB together. All of these will be faceted plots with ggplot 
+
+6. Detect clusters, score clusters, generate summary statistics
 
 Things that would be important to add:
 - Loops
 - Errors and troubleshooting online
+
+I want to make a pre- and post-vignette Google form to asses the content and style of the vignettes for disseminating basic R coding skills in a biological context
 
 Note that code for processing and analyzing biological data collected from zebra finches, and code to make figures, is published online as part of a submitted manuscript for the ABISSMAL tracking system.
 

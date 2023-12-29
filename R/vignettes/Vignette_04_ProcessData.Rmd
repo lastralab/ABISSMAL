@@ -1,0 +1,58 @@
+---
+title: "Vignette 04: Process Data"
+author: "Grace Smith-Vidaurre"
+date: "2023-12-27"
+output: html_document
+---
+
+```{r setup, include = FALSE}
+
+knitr::opts_chunk$set(echo = TRUE, eval = TRUE)
+
+```
+
+<h2>Vignette Overview and Learning Objectives</h2>
+
+In this fourth vignette, you will pre-process the simulated datasets of animal movements detected by different sensors. Throughout the process of data pre-processing, you will continue to use coding skills that you learned in the previous vignettes, and you will learn additional skills that include:
+
+1. Sourcing custom functions
+2. Using custom functions
+2. Reading files from your computer into R
+
+<h2>Load packages and your working directory path</h2>
+
+```{r message = FALSE, warning = FALSE}
+
+rm(list = ls()) # Clean global environment
+
+library(tidyverse) # Load the set of tidyverse packages
+
+path <- "/home/gsvidaurre/Desktop/ABISSMAL_vignettes" # Initialize an object with the path that is your working directory
+
+```
+
+<h2>Load ABISSMAL functions</h2>
+
+In this vignette, you will use the the R functions available through the ABISSMAL GitHub repository. These functions are stored in physical files (extension .R) inside the local version of the ABISSMAL repository on your computer. You need to load these files into R so that the functions you want to use are available in your global environment.
+
+TKTK In the previous script I really should make data across days...so that combining the raw data actually does something
+```{r}
+
+# Load the function that combines raw data
+source("/home/gsvidaurre/Desktop/GitHub_repos/ABISSMAL/R/combine_raw_data.R")
+
+# Load the function that detects perching events in the raw data
+source("/home/gsvidaurre/Desktop/GitHub_repos/ABISSMAL/R/detect_perching_events.R")
+
+# Load the function that pre-processes raw data
+source("/home/gsvidaurre/Desktop/GitHub_repos/ABISSMAL/R/preprocess_detections.R")
+
+# Load a script with utility functions that each function above requires
+source("/home/gsvidaurre/Desktop/GitHub_repos/ABISSMAL/R/utilities.R")
+
+```
+
+After running the lines of code above, you should see that a whole set of functions have been loaded into your global environment (check the `Environment` pane). Many of these functions start with `check_`, and those are utility functions. If you scroll down, you'll see that the three main functions above (`combine_raw_data`, `detect_perching_events`, `preprocess_detections`) are all loaded in your global environment. In the column to the right of the function names you can also see a preview of each function's arguments. 
+
+To get more information about each of these three main functions, you can click the white square icon to the very right of each function in the `Environment` pane, or run the code `View(function_name)`. This will open the script for the given function a new tab in your Source pane. In each script for each function, you'll see lines of documentation starting with the symbols "`# @". You'll see the function name and description first, and then a description of each argument (parameter) for the function. If you keep scrolling down, you'll see a section with details about how the given function works, and the information that it returns. After the lines of documentation, you'll see the code that makes up the function itself. 
+
