@@ -15,9 +15,10 @@ knitr::opts_chunk$set(echo = TRUE, eval = TRUE)
 
 In this fourth vignette, you will pre-process the simulated datasets of animal movements detected by different sensors. Throughout the process of data pre-processing, you will continue to use coding skills that you learned in the previous vignettes, and you will learn additional skills that include:
 
-1. Sourcing custom functions
-2. Using custom functions
+1. Saving objects from R as physical files on your computer 
 2. Reading files from your computer into R
+3. Sourcing custom functions
+4. Using custom functions
 
 <h2>Load packages and your working directory path</h2>
 

@@ -4,6 +4,7 @@ author: "Grace Smith-Vidaurre"
 date: "2023-12-27"
 output: 
   html_document:
+    css: "styles.css"
     toc: true
     toc_float: true
     toc_depth: 4
@@ -16,80 +17,6 @@ knitr::opts_chunk$set(echo = TRUE, eval = TRUE)
 
 ```
 
-```{css, echo = FALSE}
-
-/* Header 1 */
-h1 {
-
-  font-size: 25px;
-  font-weight: bold;
-
-}
-
-/* Header 2 */
-h2 {
-
-  font-size: 24px;
-  font-weight: bold;
-
-}
-
-/* Header 3 */
-h2 {
-
-  font-size: 22px;
-  font-weight: bold;
-
-}
-
-/* Header 4 */
-h3 {
-
-  font-size: 20px;
-  font-weight: bold;
-
-}
-
-/* Body text */
-body {
-
-  font-size: 16px;
-
-}
-
-/* Code inside of chunks (including output) */
-pre code {
-
-  font-size: 16px;
-  /* color: #708090; /* 
-  /* background-color: #F8F8FF; /* 
-
-}
-
-/* Code inside of text (wrapped in ``)*/
-code {
-
-  font-size: 16px;
-
-}
-
-/* Unordered list */
-ul {
-
-  font-size: 16px;
-
-}
-
-/* Ordered list */
-ol {
-
-  font-size: 16px;
-
-}
-
-```
-
-
 <h2>Vignette Overview and Learning Objectives</h2>
 
 In this third vignette, we will create simulated datasets of animal movements detected by different sensors. Throughout the process of creating these simulated datasets, you will continue to use coding skills that you learned in vignette 02, and you will learn additional skills that include:
@@ -99,7 +26,6 @@ In this third vignette, we will create simulated datasets of animal movements de
 3. Indexing and manipulating objects
 4. Using conditional statements
 5. Piping expressions through the tidyverse
-6. Saving objects manipulated in R as physical files on your computer
 
 <h2>Load packages</h2>
 

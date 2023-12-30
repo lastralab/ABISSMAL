@@ -1,0 +1,69 @@
+
+/* Header 1 */
+h1 {
+
+  font-size: 25px;
+  font-weight: bold;
+
+}
+
+/* Header 2 */
+h2 {
+
+  font-size: 24px;
+  font-weight: bold;
+
+}
+
+/* Header 3 */
+h2 {
+
+  font-size: 22px;
+  font-weight: bold;
+
+}
+
+/* Header 4 */
+h3 {
+
+  font-size: 20px;
+  font-weight: bold;
+
+}
+
+/* Body text */
+body {
+
+  font-size: 16px;
+
+}
+
+/* Code inside of chunks (including output) */
+pre code {
+
+  font-size: 16px;
+  /* color: #708090; /*
+  /* background-color: #F8F8FF; /*
+
+}
+
+/* Code inside of text (wrapped in ``)*/
+code {
+
+  font-size: 16px;
+
+}
+
+/* Unordered list */
+ul {
+
+  font-size: 16px;
+
+}
+
+/* Ordered list */
+ol {
+
+  font-size: 16px;
+
+}

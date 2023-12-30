@@ -1346,6 +1346,47 @@ if (window.hljs) {
 
 
 
+<style type="text/css">
+
+h1 {
+font-size: 25px;
+font-weight: bold;
+}
+
+h2 {
+font-size: 24px;
+font-weight: bold;
+}
+
+h2 {
+font-size: 22px;
+font-weight: bold;
+}
+
+h3 {
+font-size: 20px;
+font-weight: bold;
+}
+
+body {
+font-size: 16px;
+}
+
+pre code {
+font-size: 16px;
+
+code {
+font-size: 16px;
+}
+
+ul {
+font-size: 16px;
+}
+
+ol {
+font-size: 16px;
+}
+</style>
 
 
 
@@ -1510,47 +1551,6 @@ border-radius: 0px;
 </div>
 
 
-<style type="text/css">
-
-h1 {
-font-size: 25px;
-font-weight: bold;
-}
-
-h2 {
-font-size: 24px;
-font-weight: bold;
-}
-
-h2 {
-font-size: 22px;
-font-weight: bold;
-}
-
-h3 {
-font-size: 20px;
-font-weight: bold;
-}
-
-body {
-font-size: 16px;
-}
-
-pre code {
-font-size: 16px;
-
-code {
-font-size: 16px;
-}
-
-ul {
-font-size: 16px;
-}
-
-ol {
-font-size: 16px;
-}
-</style>
 <h2>
 Vignette Overview and Learning Objectives
 </h2>
@@ -1565,8 +1565,6 @@ skills that include:</p>
 <li>Indexing and manipulating objects</li>
 <li>Using conditional statements</li>
 <li>Piping expressions through the tidyverse</li>
-<li>Saving objects manipulated in R as physical files on your
-computer</li>
 </ol>
 <h2>
 Load packages
@@ -1987,251 +1985,9 @@ repeated to fill the total rows in the data frame. Specifying a single
 value for a new column can help reduce the amount of code that you
 write, but only when you truly want the same value repeated across all
 rows of a data frame.</p>
-<h3>
-Create a final data frame for the RFID data
-</h3>
-<p>In the chunks of code above that inserted <code>glimpse()</code>
-between piping operations, you did not save the modifications that you
-made to <code>sim_dats</code> in an object (the output was printed to
-the console only). You can create an object with the updated data frame
-now. You’ll also add another column with 2 unique PIT tag identifiers (1
-for each simulated individual), and a column with the sensor type:</p>
-<pre class="r"><code># Make a vector for the experimental replicate
-exp_rep &lt;- rep(x = &quot;Pair_01&quot;, times = length(rfid_ts))
-
-# Make the data frame with the experimental replicate metadata and the timestamps
-sim_dats_rfid &lt;- data.frame(replicate = exp_rep, timestamps = rfid_ts)
-
-# Overwrite the data frame with the modified version that has columns for the year, month, and day
-sim_dats_rfid &lt;- sim_dats_rfid %&gt;%
-  dplyr::mutate(
-    year = 2023
-  ) %&gt;%
-  dplyr::mutate(
-    month = 08,
-    day = 01
-  ) %&gt;%
-  # Allocate the first half of the detections to the first individual using nrow(.)/2, and the second half of the detctions to the second individual using nrow(.)/2 again. Both of the rep() expressions are combined into a single vector using the c() function
-  dplyr::mutate(
-    PIT_tag = c(rep(&quot;1357aabbcc&quot;, nrow(.)/2), rep(&quot;2468zzyyxx&quot;, nrow(.)/2))
-  ) %&gt;% 
-  dplyr::mutate(
-    sensor_id = &quot;RFID&quot;
-  )
-
-glimpse(sim_dats_rfid)</code></pre>
-<pre><code>## Rows: 14
-## Columns: 7
-## $ replicate  &lt;chr&gt; &quot;Pair_01&quot;, &quot;Pair_01&quot;, &quot;Pair_01&quot;, &quot;Pair_01&quot;, &quot;Pair_01&quot;, &quot;Pai…
-## $ timestamps &lt;chr&gt; &quot;10:00:00&quot;, &quot;10:05:00&quot;, &quot;11:00:00&quot;, &quot;11:05:00&quot;, &quot;08:00:00&quot;,…
-## $ year       &lt;dbl&gt; 2023, 2023, 2023, 2023, 2023, 2023, 2023, 2023, 2023, 2023,…
-## $ month      &lt;dbl&gt; 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8
-## $ day        &lt;dbl&gt; 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1
-## $ PIT_tag    &lt;chr&gt; &quot;1357aabbcc&quot;, &quot;1357aabbcc&quot;, &quot;1357aabbcc&quot;, &quot;1357aabbcc&quot;, &quot;13…
-## $ sensor_id  &lt;chr&gt; &quot;RFID&quot;, &quot;RFID&quot;, &quot;RFID&quot;, &quot;RFID&quot;, &quot;RFID&quot;, &quot;RFID&quot;, &quot;RFID&quot;, &quot;RF…</code></pre>
-<p>You can simulate data collection over more than one day as well. To
-create more observations (rows) for two additional days, you can append
-rows from a modified copy of <code>sim_dats_rfid</code> to itself. In
-the code below, you’re piping <code>sim_dats_rfid</code> into
-<code>bind_rows()</code>, which indicates that this is the object to
-which you want to append rows. Then the code inside of
-<code>bind_rows()</code> indicates the data frame (rows) that will be
-appended to <code>sim_dats_rfid</code>. In this case, the code inside of
-<code>bind_rows()</code> pipes <code>sim_dats_rfid</code> into
-<code>dplyr::mutate()</code>, which you’re using to modify the
-<code>day</code> column to reflect a subsequent day of data
-collection.</p>
-<pre class="r"><code>sim_dats_rfid &lt;- sim_dats_rfid %&gt;% 
-  bind_rows(
-    sim_dats_rfid %&gt;% 
-      dplyr::mutate(
-        day = 02
-      )
-  )
-
-glimpse(sim_dats_rfid) # Double the number of rows, looks good</code></pre>
-<pre><code>## Rows: 28
-## Columns: 7
-## $ replicate  &lt;chr&gt; &quot;Pair_01&quot;, &quot;Pair_01&quot;, &quot;Pair_01&quot;, &quot;Pair_01&quot;, &quot;Pair_01&quot;, &quot;Pai…
-## $ timestamps &lt;chr&gt; &quot;10:00:00&quot;, &quot;10:05:00&quot;, &quot;11:00:00&quot;, &quot;11:05:00&quot;, &quot;08:00:00&quot;,…
-## $ year       &lt;dbl&gt; 2023, 2023, 2023, 2023, 2023, 2023, 2023, 2023, 2023, 2023,…
-## $ month      &lt;dbl&gt; 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,…
-## $ day        &lt;dbl&gt; 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2,…
-## $ PIT_tag    &lt;chr&gt; &quot;1357aabbcc&quot;, &quot;1357aabbcc&quot;, &quot;1357aabbcc&quot;, &quot;1357aabbcc&quot;, &quot;13…
-## $ sensor_id  &lt;chr&gt; &quot;RFID&quot;, &quot;RFID&quot;, &quot;RFID&quot;, &quot;RFID&quot;, &quot;RFID&quot;, &quot;RFID&quot;, &quot;RFID&quot;, &quot;RF…</code></pre>
-<h3>
-Check data frame columns with base R
-</h3>
-<p>You checked that simulated data frame has data collected over two
-days looking at the structure of the new object. You can also check the
-unique values present in the column <code>day</code>. Below is a way of
-checking the unique values contained in a column of a data frame, using
-two different examples of base R notation for accessing columns:</p>
-<pre class="r"><code># The name of a data frame object, followed by a $ sign and then the name of a column allows you to pull out one column at a time from a data frame. A data frame column is a vector, so when you run this code you will see a vector of values print to the console
-sim_dats_rfid$day</code></pre>
-<pre><code>##  [1] 1 1 1 1 1 1 1 1 1 1 1 1 1 1 2 2 2 2 2 2 2 2 2 2 2 2 2 2</code></pre>
-<pre class="r"><code># You can also access a column in a data frame by using double square brackets after the name of the data frame, and placing the column name in quotes inside of the inner brackets
-sim_dats_rfid[[&quot;day&quot;]]</code></pre>
-<pre><code>##  [1] 1 1 1 1 1 1 1 1 1 1 1 1 1 1 2 2 2 2 2 2 2 2 2 2 2 2 2 2</code></pre>
-<pre class="r"><code># You can use the function unique() to see the unique values of any vector, including a column of a data frame
-unique(sim_dats_rfid$day) # Two days, looks good</code></pre>
-<pre><code>## [1] 1 2</code></pre>
-<pre class="r"><code>unique(sim_dats_rfid[[&quot;day&quot;]]) # Two days, looks good</code></pre>
-<pre><code>## [1] 1 2</code></pre>
-<h3>
-Check data frame columns with the tidyverse
-</h3>
-<p>You can also check the unique values in a column using functions from
-the tidyverse. In the expression below, you’re piping
-<code>sim_dats_rfid</code> into the function <code>pull()</code>, which
-lets you pull the column <code>day</code> out of the data frame as a
-vector, and then that vector is piped into the function
-<code>unique()</code> to check the unique values contained in the
-vector. The function <code>unique()</code> does not need an argument
-inside of the parentheses here because you’re already piping the output
-that it needs directly into the function.</p>
-<pre class="r"><code># Two days, looks good
-sim_dats_rfid %&gt;% 
-  pull(day) %&gt;% 
-  unique()</code></pre>
-<pre><code>## [1] 1 2</code></pre>
-<h3>
-Create a final data frame for the beam breaker data
-</h3>
-<p>Next, repeat this process of creating a data frame with metadata for
-the infrared beam breaker dataset. Since the beam breakers do not
-collect unique individual identity information, you will add columns for
-the year, month, day, and sensor type. You will also simulate data
-collection for the beam breakers over the same two days as the RFID
-system.</p>
-<pre class="r"><code># Overwrite the vector exp_rep with a new vector the same length as irbb_ts
-exp_rep &lt;- rep(x = &quot;Pair_01&quot;, times = length(irbb_ts))
-
-sim_dats_irbb &lt;- data.frame(replicate = exp_rep, timestamps = irbb_ts)
-
-sim_dats_irbb &lt;- sim_dats_irbb %&gt;%
-  dplyr::mutate(
-    year = 2023,
-    month = 08,
-    day = 01,
-    sensor_id = &quot;Beam breakers&quot;
-  )
-
-glimpse(sim_dats_irbb)</code></pre>
-<pre><code>## Rows: 19
-## Columns: 6
-## $ replicate  &lt;chr&gt; &quot;Pair_01&quot;, &quot;Pair_01&quot;, &quot;Pair_01&quot;, &quot;Pair_01&quot;, &quot;Pair_01&quot;, &quot;Pai…
-## $ timestamps &lt;chr&gt; &quot;09:59:59&quot;, &quot;10:05:01&quot;, &quot;10:59:59&quot;, &quot;11:05:01&quot;, &quot;06:05:05&quot;,…
-## $ year       &lt;dbl&gt; 2023, 2023, 2023, 2023, 2023, 2023, 2023, 2023, 2023, 2023,…
-## $ month      &lt;dbl&gt; 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8
-## $ day        &lt;dbl&gt; 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1
-## $ sensor_id  &lt;chr&gt; &quot;Beam breakers&quot;, &quot;Beam breakers&quot;, &quot;Beam breakers&quot;, &quot;Beam br…</code></pre>
-<pre class="r"><code>sim_dats_irbb &lt;- sim_dats_irbb %&gt;% 
-  bind_rows(
-    sim_dats_irbb %&gt;% 
-      dplyr::mutate(
-        day = 02
-      )
-  )
-
-glimpse(sim_dats_irbb) # Double the number of rows, looks good</code></pre>
-<pre><code>## Rows: 38
-## Columns: 6
-## $ replicate  &lt;chr&gt; &quot;Pair_01&quot;, &quot;Pair_01&quot;, &quot;Pair_01&quot;, &quot;Pair_01&quot;, &quot;Pair_01&quot;, &quot;Pai…
-## $ timestamps &lt;chr&gt; &quot;09:59:59&quot;, &quot;10:05:01&quot;, &quot;10:59:59&quot;, &quot;11:05:01&quot;, &quot;06:05:05&quot;,…
-## $ year       &lt;dbl&gt; 2023, 2023, 2023, 2023, 2023, 2023, 2023, 2023, 2023, 2023,…
-## $ month      &lt;dbl&gt; 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,…
-## $ day        &lt;dbl&gt; 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2,…
-## $ sensor_id  &lt;chr&gt; &quot;Beam breakers&quot;, &quot;Beam breakers&quot;, &quot;Beam breakers&quot;, &quot;Beam br…</code></pre>
-<pre class="r"><code># Two days, looks good
-sim_dats_irbb %&gt;% 
-  pull(day) %&gt;% 
-  unique()</code></pre>
-<pre><code>## [1] 1 2</code></pre>
-<h2>
-Save each data frame per day as a physical file
-</h2>
-<p>Now that you made data frames of the timestamps and metadata per
-sensor, you can write out or save these data frames as physical files in
-your working directory. You have many different file type options, but I
-recommend using .csv format for data frames since this file type is
-compatible with R as well as Microsoft Word and other programs like
-LibreOffice.</p>
-<p>In the code below, you’ll write out a spreadsheet per sensor for each
-day of data collection. In order to write out a spreadsheet per day, you
-need to filter the rows of the full data frame for each sensor by date.
-To do this filtering, you’ll use a conditional statement inside of the
-function <code>dplyr::filter()</code>:</p>
-<pre class="r"><code># Pipe the data frame into the filter() function
-sim_dats_rfid %&gt;% 
-  # Filter the data frame by pulling out all rows in which the day column was equal to 1
-  dplyr::filter(day == 1) %&gt;%
-  glimpse()</code></pre>
-<pre><code>## Rows: 14
-## Columns: 7
-## $ replicate  &lt;chr&gt; &quot;Pair_01&quot;, &quot;Pair_01&quot;, &quot;Pair_01&quot;, &quot;Pair_01&quot;, &quot;Pair_01&quot;, &quot;Pai…
-## $ timestamps &lt;chr&gt; &quot;10:00:00&quot;, &quot;10:05:00&quot;, &quot;11:00:00&quot;, &quot;11:05:00&quot;, &quot;08:00:00&quot;,…
-## $ year       &lt;dbl&gt; 2023, 2023, 2023, 2023, 2023, 2023, 2023, 2023, 2023, 2023,…
-## $ month      &lt;dbl&gt; 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8
-## $ day        &lt;dbl&gt; 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1
-## $ PIT_tag    &lt;chr&gt; &quot;1357aabbcc&quot;, &quot;1357aabbcc&quot;, &quot;1357aabbcc&quot;, &quot;1357aabbcc&quot;, &quot;13…
-## $ sensor_id  &lt;chr&gt; &quot;RFID&quot;, &quot;RFID&quot;, &quot;RFID&quot;, &quot;RFID&quot;, &quot;RFID&quot;, &quot;RFID&quot;, &quot;RFID&quot;, &quot;RF…</code></pre>
-<pre class="r"><code># One day, looks good
-sim_dats_rfid %&gt;% 
-  dplyr::filter(day == 1) %&gt;%
-  pull(day) %&gt;% 
-  unique()</code></pre>
-<pre><code>## [1] 1</code></pre>
-<p>You can now use this <code>dplyr::filter()</code> function as you
-write out a spreadsheet per day. In the code below, you will create a
-custom file name for the 1st day of RFID data, then you’ll filter the
-RFID data frame by the first day and write it out as a .csv file:</p>
-<pre class="r"><code>?write.csv
-
-# For the RFID data, create a vector of the working directory and the file name that you will use for the argument file in write.csv()
-# The function file.path() will combine both pieces of information into a single file path
-rfid_file &lt;- file.path(path, &quot;RFID_simulated_Pair-01_2023_08_01.csv&quot;)
-rfid_file
-
-sim_dats_rfid %&gt;% 
-  dplyr::filter(day == 1) %&gt;% 
-  # Write out the data frame as a .csv spreadsheet. Do not include row names
-  # Remember that the &quot;.&quot; means the function will use the object that is piped in, which here is the data frame filtered by day 1
-  write.csv(x = ., file = rfid_file, row.names = FALSE)</code></pre>
-<p>As specified in the function documentation for
-<code>write.csv()</code>, the function will include column names in the
-resulting spreadsheet by default. The function will also not append new
-information to the .csv if it already exists. If you already created
-this file then it will be overwritten when you run the function
-again.</p>
-<p>Repeat this process for the second day of RFID data:</p>
-<pre class="r"><code>rfid_file &lt;- file.path(path, &quot;RFID_simulated_Pair-01_2023_08_02.csv&quot;)
-rfid_file</code></pre>
-<pre><code>## [1] &quot;/home/gsvidaurre/Desktop/ABISSMAL_vignettes/RFID_simulated_Pair-01_2023_08_02.csv&quot;</code></pre>
-<pre class="r"><code>sim_dats_rfid %&gt;% 
-  dplyr::filter(day == 2) %&gt;% 
-  write.csv(x = ., file = rfid_file, row.names = FALSE)</code></pre>
-<p>You can also write out a spreadsheet per day for the infrared beam
-breaker dataset.</p>
-<pre class="r"><code>irbb_file &lt;- file.path(path, &quot;IRBB_simulated_Pair-01_2023_08_01.csv&quot;)
-irbb_file
-
-sim_dats_irbb %&gt;% 
-  dplyr::filter(day == 1) %&gt;% 
-  # By default, write.csv() will write out the object that is piped in, so you don&#39;t need to specify &quot;x = .&quot;
-  write.csv(irbb_file, row.names = FALSE)
-
-irbb_file &lt;- file.path(path, &quot;IRBB_simulated_Pair-01_2023_08_02.csv&quot;)
-irbb_file
-
-sim_dats_irbb %&gt;% 
-  dplyr::filter(day == 2) %&gt;% 
-  # By default, write.csv() will write out the object that is piped in, so you don&#39;t need to specify &quot;x = .&quot;
-  write.csv(irbb_file, row.names = FALSE)</code></pre>
-<p>Check that these 2 files now exist in your working directory.</p>
-<pre class="r"><code>list.files(path)</code></pre>
-<p>In the next vignette, you will use these spreadsheets of simulated
-data in the ABISSMAL data processing and analysis workflow.</p>
+<p>In the next vignette, you will write out the simulated RFID and IRBB
+data to spreadsheets and then you’ll use this data to start the ABISSMAL
+data processing and analysis workflow.</p>
 
 
 
