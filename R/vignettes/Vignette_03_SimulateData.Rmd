@@ -2,7 +2,12 @@
 title: "Vignette 03: Simulate Data"
 author: "Grace Smith-Vidaurre"
 date: "2023-12-27"
-output: html_document
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+    toc_depth: 4
+    theme: lumen
 ---
 
 ```{r setup, include = FALSE}
@@ -11,7 +16,81 @@ knitr::opts_chunk$set(echo = TRUE, eval = TRUE)
 
 ```
 
-<h2>Vignette Overview and Learning Objectives</h2>
+```{css, echo = FALSE}
+
+/* Header 1 */
+h1 {
+
+  font-size: 25px;
+  font-weight: bold;
+
+}
+
+/* Header 2 */
+h2 {
+
+  font-size: 24px;
+  font-weight: bold;
+
+}
+
+/* Header 3 */
+h3 {
+
+  font-size: 22px;
+  font-weight: bold;
+
+}
+
+/* Header 4 */
+h4 {
+
+  font-size: 20px;
+  font-weight: bold;
+
+}
+
+/*Body text */
+body {
+
+  font-size: 16px;
+
+}
+
+/* Code inside of chunks */
+pre code {
+
+  font-size: 16px;
+  color: #708090;
+  background-color: #F8F8FF;
+
+}
+
+/* Code inside of text (wrapped in ``)*/
+code {
+
+  font-size: 16px;
+
+}
+
+/* Unordered list */
+ul {
+
+  font-size: 16px;
+
+}
+
+/* Ordered list */
+ol {
+
+  font-size: 16px;
+
+}
+
+```
+
+
+<h3>Vignette Overview and Learning Objectives</h3>
 
 In this third vignette, we will create simulated datasets of animal movements detected by different sensors. Throughout the process of creating these simulated datasets, you will continue to use coding skills that you learned in vignette 02, and you will learn additional skills that include:
 
@@ -22,7 +101,7 @@ In this third vignette, we will create simulated datasets of animal movements de
 5. Piping expressions through the tidyverse
 6. Saving objects manipulated in R as physical files on your computer
 
-<h2>Load packages</h2>
+<h3>Load packages</h3>
 
 In the previous vignette, you installed a set of data science packages called the `tidyverse`. You also learned about working directories and created a directory on your computer to save data that you generate from this and subsequent vignettes.
 
@@ -35,7 +114,7 @@ library(tidyverse) # Load the set of tidyverse packages
 
 ```
 
-<h2>Create a path object</h2>
+<h3>Create a path object</h3>
 
 The next setup step is to specify your working directory. In vignette 02, you used a string (text contained in double quotes to indicate character information) to specify your working directory while using different functions. Using the same long character string over and over is not very efficient, so you can instead save the character string for your working directory inside a new object in R.
 
@@ -57,7 +136,7 @@ You can also see the contents of `path` by clicking on the "Environment" tab and
 
 You can practice removing the `path` object from your global environment by writing and running the code `rm(list = "path")`. After doing this, make sure to recreate `path` using the code above.
 
-<h2>Create timestamps of simulated detections of animal movements</h2>
+<h3>Create timestamps of simulated detections of animal movements</h3>
 
 The primary data collected by the ABISSMAL tracking system are timestamps indicating the moment of time when a movement sensor triggered. Many (but not all) of these detections can be attributed to one or more animals moving near a sensor, such as a bird moving through a radio frequency identification (RFID) antenna mounted in the entrance of a nest container. 
 
@@ -140,7 +219,7 @@ c(1, 1, TRUE, FALSE)
 
 When you try to combine character, numeric, and binary data types in the same vector, all vector elements will be forced to the character data type. A similar thing happens when you try to combine numeric and binary data types, but the vector is forced to numeric. Note that the binary values TRUE and FALSE are equivalent to the numeric values 1 and 0, respectively.
 
-<h2>Create data frames with primary data and metadata</h2>
+<h3>Create data frames with primary data and metadata</h3>
 
 You need to be able to create metadata of different data types that can accompany the timestamps for each sensor. To do this, you can rely on an object called a "data frame". Data frames are similar to spreadsheets. They have 2 dimensions (rows and columns), and you can store different data types in the same data frame. You can also write out data frames to spreadsheets that exist as physical files on your computer.
 
@@ -268,7 +347,7 @@ glimpse(sim_dats)
 
 ```
 
-<h2>Create data frames using the tidyverse</h2>
+<h3>Create data frames using the tidyverse</h3>
 
 In the chunk above, you used base R code add a new column and to update the column name. It took more than a few lines of code to carry out these operations. You could reduce the amount of code needed for these steps by removing the lines included to check your work. But another way that you can reduce the amount of code you're writing for these operations is to use tidyverse notation and functions:
 ```{r}
@@ -330,7 +409,9 @@ sim_dats %>%
 
 In the code above, you added 2 more numeric columns to the data frame and you did this without needing to use the `rep()` function. Since you piped an existing data frame into each `dplyr::mutate()` expression, the single value that you specified for each of the year, month, and day columns was automatically repeated to fill the total rows in the data frame. Specifying a single value for a new column can help reduce the amount of code that you write, but only when you truly want the same value repeated across all rows of a data frame.
 
-In the chunks of code above that inserted `glimpse()` between piping operations, you did not save the new sim_dats as an object. You can create the updated data frame now, and also add another column with 2 unique PIT tag identifiers (1 for each simulated individual):
+<h4>Create a final data frame for the RFID data</h4>
+
+In the chunks of code above that inserted `glimpse()` between piping operations, you did not save the modifications that you made to `sim_dats` in an object (the output was printed to the console only). You can create an object with the updated data frame now. You'll also add another column with 2 unique PIT tag identifiers (1 for each simulated individual):
 ```{r}
 
 # Make a vector for the experimental replicate
@@ -357,7 +438,54 @@ glimpse(sim_dats_rfid)
 
 ```
 
-Next, repeat this process of creating a data frame with metadata for the infrared beam breaker dataset. Since the beam breakers do not collect unique individual identity information, you will add columns for the year, month, and day only.
+You can simulate data collection over more than one day as well. To create more observations (rows) for two additional days, you can append rows from a modified copy of `sim_dats_rfid` to itself. In the code below, you're piping `sim_dats_rfid` into `bind_rows()`, which indicates that this is the object to which you want to append rows. Then the code inside of `bind_rows()` indicates the data frame (rows) that will be appended to `sim_dats_rfid`. In this case, the code inside of `bind_rows()` pipes `sim_dats_rfid` into `dplyr::mutate()`, which you're using to modify the `day` column to reflect a subsequent day of data collection.
+```{r}
+
+sim_dats_rfid <- sim_dats_rfid %>% 
+  bind_rows(
+    sim_dats_rfid %>% 
+      dplyr::mutate(
+        day = 02
+      )
+  )
+
+glimpse(sim_dats_rfid) # Double the number of rows, looks good
+
+```
+
+<h4>Check data frame columns with base R</h4>
+
+You checked that simulated data frame has data collected over two days looking at the structure of the new object. You can also check the unique values present in the column `day`. Below is a way of checking the unique values contained in a column of a data frame, using two different examples of base R notation for accessing columns:
+```{r}
+
+# The name of a data frame object, followed by a $ sign and then the name of a column allows you to pull out one column at a time from a data frame. A data frame column is a vector, so when you run this code you will see a vector of values print to the console
+sim_dats_rfid$day
+
+# You can also access a column in a data frame by using double square brackets after the name of the data frame, and placing the column name in quotes inside of the inner brackets
+sim_dats_rfid[["day"]]
+
+# You can use the function unique() to see the unique values of any vector, including a column of a data frame
+unique(sim_dats_rfid$day) # Two days, looks good
+
+unique(sim_dats_rfid[["day"]]) # Two days, looks good
+
+```
+
+<h4>Check data frame columns with the tidyverse</h4>
+
+You can also check the unique values in a column using functions from the tidyverse. In the expression below, you're piping `sim_dats_rfid` into the function `pull()`, which lets you pull the column `day` out of the data frame as a vector, and then that vector is piped into the function `unique()` to check the unique values contained in the vector. The function `unique()` does not need an argument inside of the parentheses here because you're already piping the output that it needs directly into the function.
+```{r}
+
+# Two days, looks good
+sim_dats_rfid %>% 
+  pull(day) %>% 
+  unique()
+
+```
+
+<h4>Create a final data frame for the beam breaker data</h4>
+
+Next, repeat this process of creating a data frame with metadata for the infrared beam breaker dataset. Since the beam breakers do not collect unique individual identity information, you will add columns for the year, month, and day only. You will also simulate data collection for the beam breakers over the same two days as the RFID system.
 ```{r}
 
 # Overwrite the vector exp_rep with a new vector the same length as irbb_ts
@@ -374,9 +502,24 @@ sim_dats_irbb <- sim_dats_irbb %>%
 
 glimpse(sim_dats_irbb)
 
+sim_dats_irbb <- sim_dats_irbb %>% 
+  bind_rows(
+    sim_dats_irbb %>% 
+      dplyr::mutate(
+        day = 02
+      )
+  )
+
+glimpse(sim_dats_irbb) # Double the number of rows, looks good
+
+# Two days, looks good
+sim_dats_irbb %>% 
+  pull(day) %>% 
+  unique()
+
 ```
 
-<h2>Save each data frame as a physical file</h2>
+<h3>Save each data frame as a physical file</h3>
 
 Now that you made data frames of the timestamps and metadata per sensor, you can write out or save these data frames as physical files in your working directory. You have many different file type options, but I recommend using .csv format for data frames since this file type is compatible with R as well as Microsoft Word and other programs like LibreOffice.
 ```{r eval = FALSE}
@@ -393,7 +536,7 @@ write.csv(x = sim_dats_rfid, file = rfid_file, row.names = FALSE)
 
 ```
 
-As specified in the function documentation for `write.csv()`, by default the function will include column names in the resulting spreadsheet. The function will also not append new information to the .csv if it already exists. If you already created this file then it will be overwritten when you run the function again.
+As specified in the function documentation for `write.csv()`, the function will include column names in the resulting spreadsheet by default. The function will also not append new information to the .csv if it already exists. If you already created this file then it will be overwritten when you run the function again.
 
 You can also write out a spreadsheet for the infrared beam breaker dataset.
 ```{r eval = FALSE}
@@ -413,4 +556,3 @@ list.files(path)
 ```
 
 In the next vignette, you will use these spreadsheets of simulated data in the ABISSMAL data processing and analysis workflow.
-

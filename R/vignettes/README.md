@@ -13,6 +13,7 @@ The goal of these tutorials is to disseminate basic R coding skills in a biologi
 
 - Need to add to the Intro how to report bugs in vignettes as GitHub issues
 - Also add how to troubleshoot when an expression isn't complete in the console
+- Tab completion, keyboard shortcuts
 
 2. Setup a virtual workspace (global environment, package installation, working directory, RMarkdown files)
 
@@ -29,6 +30,7 @@ The goal of these tutorials is to disseminate basic R coding skills in a biologi
 Things that would be important to add:
 - Loops
 - Errors and troubleshooting online
+- Color code chunks that are for testing code versus chunks that are for creating necessary objects (https://bookdown.org/yihui/rmarkdown-cookbook/chunk-styling.html)
 
 I want to make a pre- and post-vignette Google form to asses the content and style of the vignettes for disseminating basic R coding skills in a biological context
 
