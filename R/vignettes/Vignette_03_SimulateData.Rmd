@@ -335,4 +335,4 @@ sim_dats %>%
 
 In the code above, you added 2 more numeric columns to the data frame and you did this without needing to use the `rep()` function. Since you piped an existing data frame into each `dplyr::mutate()` expression, the single value that you specified for each of the year, month, and day columns was automatically repeated to fill the total rows in the data frame. Specifying a single value for a new column can help reduce the amount of code that you write, but only when you truly want the same value repeated across all rows of a data frame.
 
-In the next vignette, you will write out the simulated RFID and IRBB data to spreadsheets and then you'll use this data to start the ABISSMAL data processing and analysis workflow.
+You did not save these modifications that you made to `sim_dats` in an object (the output was printed to the console only). In the next vignette, you will write out this simulated RFID and IRBB data to spreadsheets and then you'll use this data to start the ABISSMAL data processing and analysis workflow.

@@ -13,12 +13,14 @@ knitr::opts_chunk$set(echo = TRUE, eval = TRUE)
 
 <h2>Vignette Overview and Learning Objectives</h2>
 
-In this fourth vignette, you will pre-process the simulated datasets of animal movements detected by different sensors. Throughout the process of data pre-processing, you will continue to use coding skills that you learned in the previous vignettes, and you will learn additional skills that include:
+In this fourth vignette, you will write out spreadsheets of simulated detections of animal movements to your computer. You'll begin using this data in the ABISSMAL data processing and analysis workflow, including combining raw data across days and pre-processing the raw data. You will continue to use coding skills that you learned in the previous vignettes, and you will learn additional skills that include:
 
-1. Saving objects from R as physical files on your computer 
-2. Reading files from your computer into R
-3. Sourcing custom functions
-4. Using custom functions
+1. Indexing and filtering data frames
+2. Checking data frame structure with base R and the tidyverse
+3. Saving objects from R as physical files on your computer 
+4. Reading files from your computer into R
+5. Sourcing custom functions
+6. Using custom functions in an analytical pipeline
 
 <h2>Load packages and your working directory path</h2>
 
@@ -32,10 +34,39 @@ path <- "/home/gsvidaurre/Desktop/ABISSMAL_vignettes" # Initialize an object wit
 
 ```
 
+<h3>Create the simulated data</h3>
 
-<h3>Create a final data frame for the RFID data</h3>
+In the code below, you'll recreate the simulated RFID and beam breaker datasets that you learned to build in the previous vignette. Here the code from vignette 03 has been condensed into fewer chunks.
+```{r}
 
-In the chunks of code above that inserted `glimpse()` between piping operations, you did not save the modifications that you made to `sim_dats` in an object (the output was printed to the console only). You can create an object with the updated data frame now. You'll also add another column with 2 unique PIT tag identifiers (1 for each simulated individual), and a column with the sensor type:
+# Create a vector of 4 RFID timestamps in HH:MM:SS format
+rfid_ts <- c("10:00:00", "10:05:00", "11:00:00", "11:05:00")
+
+# Add perching events to the RFID data
+rfid_ts <- c(rfid_ts, "08:00:00", "08:00:01", "08:00:02", "08:00:03", "11:30:00", "11:30:01", "11:30:02", "11:30:03", "11:30:04", "11:30:05")
+
+glimpse(rfid_ts)
+
+```
+
+```{r}
+
+# For the beam breakers, simulate timestamps for an entrance, an exit, and then another entrance and exit
+irbb_ts <- c("09:59:59", "10:05:01", "10:59:59", "11:05:01")
+
+# Simulate some RFID detection failures for the beam breaker data
+irbb_ts <- c(irbb_ts, "06:05:05", "06:35:08", "07:15:40", "11:10:25")
+
+# Simulate some stray beam breaker detections
+irbb_ts <- c(irbb_ts, "09:45:01", "09:45:02", "09:45:03", "09:45:04", "09:45:05", "09:45:06", "09:45:07", "09:45:08", "09:45:09", "09:45:10", "09:45:11")
+
+glimpse(irbb_ts)
+  
+```
+
+<h3>Simulate 2 days of RFID data collection</h3>
+
+In the code below, you'll use combine the vector of RFID timestamps that you made above with metadata in a data frame. This metadata will include the year, month, and day, as well as a column with 2 unique PIT tag identifiers (1 for each simulated individual), and a column with the sensor type. You should recognize some of this code from the previous vignette:
 ```{r}
 
 # Make a vector for the experimental replicate
@@ -65,7 +96,9 @@ glimpse(sim_dats_rfid)
 
 ```
 
-You can simulate data collection over more than one day as well. To create more observations (rows) for two additional days, you can append rows from a modified copy of `sim_dats_rfid` to itself. In the code below, you're piping `sim_dats_rfid` into `bind_rows()`, which indicates that this is the object to which you want to append rows. Then the code inside of `bind_rows()` indicates the data frame (rows) that will be appended to `sim_dats_rfid`. In this case, the code inside of `bind_rows()` pipes `sim_dats_rfid` into `dplyr::mutate()`, which you're using to modify the `day` column to reflect a subsequent day of data collection.
+Next, you can use this data frame to simulate data collection over more than one day. To create more observations (rows) for two additional days, you can append rows from a modified copy of `sim_dats_rfid` to itself. 
+
+In the code below, you're piping `sim_dats_rfid` into `bind_rows()`, which indicates that this is the original object to which you want to append new rows. Then the code inside of `bind_rows()` indicates the data frame (the new rows) that will be appended to `sim_dats_rfid`. In this case, the code inside of `bind_rows()` pipes `sim_dats_rfid` into `dplyr::mutate()`, which is a function that you're using to modify the `day` column to reflect a subsequent day of data collection.
 ```{r}
 
 sim_dats_rfid <- sim_dats_rfid %>% 
@@ -110,7 +143,7 @@ sim_dats_rfid %>%
 
 ```
 
-<h3>Create a final data frame for the beam breaker data</h3>
+<h3>Simulate 2 days of beam breaker data collection</h3>
 
 Next, repeat this process of creating a data frame with metadata for the infrared beam breaker dataset. Since the beam breakers do not collect unique individual identity information, you will add columns for the year, month, day, and sensor type. You will also simulate data collection for the beam breakers over the same two days as the RFID system.
 ```{r}
@@ -147,11 +180,13 @@ sim_dats_irbb %>%
 
 ```
 
-<h2>Save each data frame per day as a physical file</h2>
+<h2>Save data frames as physical files</h2>
 
 Now that you made data frames of the timestamps and metadata per sensor, you can write out or save these data frames as physical files in your working directory. You have many different file type options, but I recommend using .csv format for data frames since this file type is compatible with R as well as Microsoft Word and other programs like LibreOffice.
 
-In the code below, you'll write out a spreadsheet per sensor for each day of data collection. In order to write out a spreadsheet per day, you need to filter the rows of the full data frame for each sensor by date. To do this filtering, you'll use a conditional statement inside of the function `dplyr::filter()`:
+In the code below, you'll write out a spreadsheet per sensor for each day of data collection. You're writing out a spreadsheet per day in order to use the first ABISSMAL function, which combines data collected across days per sensor into a single spreadsheet and in the right format for downstream functions.
+
+In order to write out a spreadsheet per sensor and day, you need to filter the rows of the full data frame for each sensor by date. To do this filtering, you'll use a conditional statement inside of the function `dplyr::filter()`:
 ```{r}
 
 # Pipe the data frame into the filter() function
@@ -228,10 +263,17 @@ list.files(path)
 
 ```
 
+You can read one these files back into R with the function `read.csv()`. In the code below, you're piping the output of `read.csv()` directly into `glimpse()` to check out the structure of the resulting data frame. The output of the code is printed to the console but is not saved inside of an object for later manipulation. Instead, you will be using a custom function from ABISSMAL that automatically reads in each spreadsheet.
+```{r}
+
+read.csv(file.path(path, "IRBB_simulated_Pair-01_2023_08_02.csv")) %>% 
+  glimpse()
+
+```
 
 <h2>Load ABISSMAL functions</h2>
 
-In this vignette, you will use the the R functions available through the ABISSMAL GitHub repository. These functions are stored in physical files (extension .R) inside the local version of the ABISSMAL repository on your computer. You need to load these files into R so that the functions you want to use are available in your global environment.
+The custom R functions available through the ABISSMAL GitHub repository are stored in physical files (extension .R) inside the local repository on your computer (which you should have downloaded in vignette 01). In order to start using the ABISSMAL functions, you need to load the physical .R files so that the functions are available in your global environment. In the code below, you will use the function `source()` to load 3 of the 5 main ABISSMAL functions, plus a script that holds a set of utility functions:
 ```{r}
 
 # Load the function that combines raw data
@@ -248,9 +290,18 @@ source("/home/gsvidaurre/Desktop/GitHub_repos/ABISSMAL/R/utilities.R")
 
 ```
 
+<h2>Access ABISSMAL function information</h2>
+
 After running the lines of code above, you should see that a whole set of functions have been loaded into your global environment (check the `Environment` pane). Many of these functions start with `check_`, and those are utility functions. If you scroll down, you'll see that the three main functions above (`combine_raw_data`, `detect_perching_events`, `preprocess_detections`) are all loaded in your global environment. In the column to the right of the function names you can also see a preview of each function's arguments. 
 
 To get more information about each of these three main functions, you can click the white square icon to the very right of each function in the `Environment` pane, or run the code `View(function_name)`. This will open the script for the given function a new tab in your Source pane. In each script for each function, you'll see lines of documentation starting with the symbols "`# @". You'll see the function name and description first, and then a description of each argument (parameter) for the function. If you keep scrolling down, you'll see a section with details about how the given function works, and the information that it returns. After the lines of documentation, you'll see the code that makes up the function itself. 
 
-
 <h2>Combine raw data</h2>
+
+Once you've loaded the ABISSMAL functions, you can start using the first function, `combine_raw_data()`, to combine data collected across days per sensor into a single spreadsheet per sensor.
+```{r}
+
+combine_raw_data()
+
+```
+
