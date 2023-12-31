@@ -180,13 +180,137 @@ sim_dats_irbb %>%
 
 ```
 
-<h2>Save data frames as physical files</h2>
+<h2>Save a data frame as a physical file</h2>
 
-Now that you made data frames of the timestamps and metadata per sensor, you can write out or save these data frames as physical files in your working directory. You have many different file type options, but I recommend using .csv format for data frames since this file type is compatible with R as well as Microsoft Word and other programs like LibreOffice.
+Data frames that you create and manipulate in R can be saved as physical files in your working directory. You have many different file type options for saving data frames, but I recommend using .csv format since this file type is compatible with R, Microsoft Word, and other software. You can use the function `write.csv()` to save data frames to .csv spreadsheets on your computer:
+```{r eval = FALSE}
 
-In the code below, you'll write out a spreadsheet per sensor for each day of data collection. You're writing out a spreadsheet per day in order to use the first ABISSMAL function, which combines data collected across days per sensor into a single spreadsheet and in the right format for downstream functions.
+?write.csv
 
-In order to write out a spreadsheet per sensor and day, you need to filter the rows of the full data frame for each sensor by date. To do this filtering, you'll use a conditional statement inside of the function `dplyr::filter()`:
+```
+
+In order to write a physical file to your working directory, you need to tell R 1) where to save the file and 2) the name of the file that you want to create. You can pass both of these pieces of information to `write.csv()` by combining your working directory path and the file name through the function `file.path()`. For this example, you'll create a test file as you practice using `write.csv()`:
+```{r}
+
+# Create a custom file name by combining the path for your working directory with the file name that you want to write out
+# The function file.path() will combine both pieces of information into a single file path
+rfid_file <- file.path(path, "test_file.csv")
+rfid_file
+
+```
+
+Next, you can pipe the data frame to `write.csv()` and specify additional information for creating the .csv file, such as whether you want to add a column of numeric row identifiers: 
+```{r}
+
+sim_dats_rfid %>% 
+  # Write out the data frame as a .csv spreadsheet. Do not include row names
+  #The "." below means the function will use the object that is piped in, which here is the data frame sim_dats_rfid
+  write.csv(x = ., file = rfid_file, row.names = FALSE)
+
+```
+
+As specified in the function documentation for `write.csv()`, the function will include column names in the resulting spreadsheet by default. The function will also not append new information to the .csv if it already exists. If you already created this file then it will be overwritten when you run the function again.
+
+Next, you can check that `write.csv()` worked as expected by using `list.files()` to check the files in your working directory. In the second usage of `list.files()` below, you're using a new argument called `pattern` that makes it possible to customize the search. Using the argument `pattern` here is similar to searching for a specific word inside of a text document. Below, the dollar sign placed after ".csv" means that you're telling the function to search specifically for all files that end in the pattern ".csv".
+```{r}
+
+# List all files in the given path
+list.files(path)
+
+# List only files that end in the pattern ".csv" in the given path
+list.files(path, pattern = ".csv$")
+
+```
+
+Now that you've practiced using `write.csv()`, you can delete the temporary file that you created by feeding the `rfid_file` object to the function `file.remove()`.
+```{r eval = FALSE}
+
+rfid_file <- file.path(path, "test_file.csv")
+rfid_file
+
+file.remove(rfid_file)
+
+```
+
+<h2>Save simulated data for the ABISSMAL workflow</h2>
+
+In the code below, you'll work through a pipeline to save the simulated data in the format and locations expected by the custom ABISSMAL functions. In order to use the ABISSMAL pipeline, the simulated raw data need to be saved in a separate spreadsheet per sensor and day of data collection. These spreadsheets need to be saved inside of a folder per sensor as well. ABISSMAL will automatically save data in these ways when the tracking system is used to collect data from live animals.
+
+<h3>Filter a data frame</h3>
+
+In the code below, you'll practice how to use the function `dplyr::filter()` to filter rows of a data frame by day and then save a filtered data frame with `write.csv()`. To filter a data frame, you can use a conditional statement inside of the function `dplyr::filter()`:
+```{r}
+
+# Pipe the data frame into the filter() function
+sim_dats_rfid %>% 
+  # Filter the data frame by pulling out all rows in which the day column was equal to 1
+  dplyr::filter(day == 1) %>%
+  glimpse()
+
+# Check that the filtering was done correctly by getting the unique values in the day column. Looks good
+sim_dats_rfid %>% 
+  dplyr::filter(day == 1) %>%
+  pull(day) %>% 
+  unique()
+
+```
+
+You can can similar results by inverting the conditional statement inside of `dplyr::filter()` to remove days that are not the first day of data collection.
+```{r}
+
+sim_dats_rfid %>% 
+  # Filter the data frame by pulling out all rows in which the day column was not equal to 2
+  dplyr::filter(day != 2) %>%
+  glimpse()
+
+# Check that the filtering was done correctly by getting the unique values in the day column. Looks good
+sim_dats_rfid %>% 
+  dplyr::filter(day != 2) %>%
+  pull(day) %>% 
+  unique()
+
+```
+
+Now that you've practiced filtering a data frame, you can combine this filtering step with writing out a .csv file that contains the filtered data frame with data collected on a single day.
+```{r eval = FALSE}
+
+# Make the new file name with your working directory path
+rfid_file <- file.path(path, "test.csv")
+rfid_file
+
+sim_dats_rfid %>% 
+  dplyr::filter(day == 1) %>% 
+  # Write out the data frame as a .csv spreadsheet. Do not include row names
+  # Remember that the "." means the function will use the object that is piped in, which here is the data frame filtered by day 1
+  write.csv(x = ., file = rfid_file, row.names = FALSE)
+
+```
+
+Check that the test file was created, and then delete it.
+```{r eval = FALSE}
+
+list.files(path, pattern = ".csv$")
+
+rfid_file <- file.path(path, "test.csv")
+rfid_file
+
+file.remove(rfid_file)
+
+```
+
+<h3>Write a loop to filter and save data frames</h3>
+
+In order to write out a data frame for each day of data collection per sensor, you could repeat the code above 4 times (twice per sensor). But it's good coding habit to avoid repeating code over and over, since this can lead to messy scripts as well as greater risk for errors in data processing and analysis. Whenever you need to run the same code many times, you can write a loop. Loops are an important coding skill and it can take some time to wrap your head around them, so we'll work through building a loop step by step.
+
+TKTK continue
+
+
+you'll write out a spreadsheet per sensor for each day of data collection. You're writing out a spreadsheet per day in order to use the first ABISSMAL function, which combines data collected across days per sensor into a single spreadsheet and in the right format for downstream functions.
+
+In order to write out a spreadsheet per sensor and day, you need to filter the rows of the full data frame for each sensor by date.
+
+You can now use this `dplyr::filter()` function as you write out a spreadsheet per day. In the code below, you will create a custom file name for the 1st day of RFID data, then you'll filter the RFID data frame by the first day and write it out as a .csv file:
+
 ```{r}
 
 # Pipe the data frame into the filter() function
@@ -203,7 +327,6 @@ sim_dats_rfid %>%
 
 ```
 
-You can now use this `dplyr::filter()` function as you write out a spreadsheet per day. In the code below, you will create a custom file name for the 1st day of RFID data, then you'll filter the RFID data frame by the first day and write it out as a .csv file:
 ```{r eval = FALSE}
 
 ?write.csv
@@ -221,7 +344,6 @@ sim_dats_rfid %>%
 
 ```
 
-As specified in the function documentation for `write.csv()`, the function will include column names in the resulting spreadsheet by default. The function will also not append new information to the .csv if it already exists. If you already created this file then it will be overwritten when you run the function again.
 
 Repeat this process for the second day of RFID data:
 ```{r}
@@ -299,9 +421,11 @@ To get more information about each of these three main functions, you can click 
 <h2>Combine raw data</h2>
 
 Once you've loaded the ABISSMAL functions, you can start using the first function, `combine_raw_data()`, to combine data collected across days per sensor into a single spreadsheet per sensor.
+
+TKTK Need a new directory per sensor...
 ```{r}
 
-combine_raw_data()
+combine_raw_data(sensors = "RFID", path = path, )
 
 ```
 
