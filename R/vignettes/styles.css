@@ -67,3 +67,17 @@ ol {
   font-size: 16px;
 
 }
+
+/* class "testing" for code chunks */
+.watch-out {
+  background-color: lightpink;
+  border: 3px solid red;
+  font-weight: bold;
+}
+
+/* class "necessary" for code chunks */
+.code-necessary {
+  background-color: lightpink;
+  border: 3px solid red;
+  font-weight: bold;
+}
