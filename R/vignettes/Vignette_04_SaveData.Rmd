@@ -19,8 +19,7 @@ In this fourth vignette, you will write out spreadsheets of simulated detections
 2. Checking data frame structure with base R and the tidyverse
 3. Saving objects from R as physical files on your computer 
 4. Reading files from your computer into R
-5. Sourcing custom functions
-6. Using custom functions in an analytical pipeline
+5. Writing and testing loops
 
 <h2>Load packages and your working directory path</h2>
 
@@ -61,7 +60,7 @@ irbb_ts <- c(irbb_ts, "06:05:05", "06:35:08", "07:15:40", "11:10:25")
 irbb_ts <- c(irbb_ts, "09:45:01", "09:45:02", "09:45:03", "09:45:04", "09:45:05", "09:45:06", "09:45:07", "09:45:08", "09:45:09", "09:45:10", "09:45:11")
 
 glimpse(irbb_ts)
-  
+
 ```
 
 <h3>Simulate 2 days of RFID data collection</h3>
@@ -200,7 +199,7 @@ rfid_file
 ```
 
 Next, you can pipe the data frame to `write.csv()` and specify additional information for creating the .csv file, such as whether you want to add a column of numeric row identifiers: 
-```{r}
+```{r eval = FALSE}
 
 sim_dats_rfid %>% 
   # Write out the data frame as a .csv spreadsheet. Do not include row names
@@ -211,8 +210,8 @@ sim_dats_rfid %>%
 
 As specified in the function documentation for `write.csv()`, the function will include column names in the resulting spreadsheet by default. The function will also not append new information to the .csv if it already exists. If you already created this file then it will be overwritten when you run the function again.
 
-Next, you can check that `write.csv()` worked as expected by using `list.files()` to check the files in your working directory. In the second usage of `list.files()` below, you're using a new argument called `pattern` that makes it possible to customize the search. Using the argument `pattern` here is similar to searching for a specific word inside of a text document. Below, the dollar sign placed after ".csv" means that you're telling the function to search specifically for all files that end in the pattern ".csv".
-```{r}
+Next, you can check that `write.csv()` worked as expected by using `list.files()` to check the files in your working directory. In the second usage of `list.files()` below, you're using a new argument called `pattern` that makes it possible to customize a search. Using the argument `pattern` here is similar to searching for a specific word inside of a text document. Below, the dollar sign placed after ".csv" means that you're telling the function to search specifically for all files that *end* in the pattern ".csv".
+```{r eval = FALSE}
 
 # List all files in the given path
 list.files(path)
@@ -222,7 +221,17 @@ list.files(path, pattern = ".csv$")
 
 ```
 
-Now that you've practiced using `write.csv()`, you can delete the temporary file that you created by feeding the `rfid_file` object to the function `file.remove()`.
+<h3>Read in a spreadsheet</h3
+
+You can read one these files back into R with the function `read.csv()`. In the code below, you're piping the output of `read.csv()` directly into `glimpse()` to check out the structure of the resulting data frame. The output of the code is printed to the console but is not saved inside of an object for later manipulation. Instead, you will be using a custom function from ABISSMAL that automatically reads in each spreadsheet.
+```{r eval = FALSE}
+
+read.csv(file.path(path, "test_file.csv")) %>% 
+  glimpse()
+
+```
+
+Now that you've practiced using `write.csv()` and `read.csv()`, you can delete the temporary file that you created by feeding the `rfid_file` object to the function `file.remove()`.
 ```{r eval = FALSE}
 
 rfid_file <- file.path(path, "test_file.csv")
@@ -234,7 +243,7 @@ file.remove(rfid_file)
 
 <h2>Save simulated data for the ABISSMAL workflow</h2>
 
-In the code below, you'll work through a pipeline to save the simulated data in the format and locations expected by the custom ABISSMAL functions. In order to use the ABISSMAL pipeline, the simulated raw data need to be saved in a separate spreadsheet per sensor and day of data collection. These spreadsheets need to be saved inside of a folder per sensor as well. ABISSMAL will automatically save data in these ways when the tracking system is used to collect data from live animals.
+In the code below, you'll work through a pipeline to save the simulated data in the format and locations expected by the custom ABISSMAL functions. In order to use the ABISSMAL pipeline, the simulated raw data needs to be saved in a separate spreadsheet per sensor and day of data collection. These spreadsheets need to be saved inside of a folder per sensor as well. ABISSMAL will automatically save data in these ways when the tracking system is used to collect data from live animals.
 
 <h3>Filter a data frame</h3>
 
@@ -274,8 +283,13 @@ sim_dats_rfid %>%
 Now that you've practiced filtering a data frame, you can combine this filtering step with writing out a .csv file that contains the filtered data frame with data collected on a single day.
 ```{r eval = FALSE}
 
+# Make a new directory inside of your working directory for the raw RFID data
+file.path(path, "RFID") # Check the new path
+dir.create(file.path(path, "RFID")) # Create the new path
+
 # Make the new file name with your working directory path
-rfid_file <- file.path(path, "test.csv")
+# Make sure to specify that the spreadsheet will be saved inside of the new folder "RFID"
+rfid_file <- file.path(path, "RFID", "test.csv")
 rfid_file
 
 sim_dats_rfid %>% 
@@ -286,109 +300,346 @@ sim_dats_rfid %>%
 
 ```
 
-Check that the test file was created, and then delete it.
+Check that the test file was created inside of the new RFID folder, and then delete it.
 ```{r eval = FALSE}
 
-list.files(path, pattern = ".csv$")
+list.files(file.path(path, "RFID"), pattern = ".csv$")
 
-rfid_file <- file.path(path, "test.csv")
+rfid_file <- file.path(path, "RFID", "test.csv")
 rfid_file
 
 file.remove(rfid_file)
 
 ```
 
-<h3>Write a loop to filter and save data frames</h3>
+<h3>Practicing writing a loop</h3>
 
-In order to write out a data frame for each day of data collection per sensor, you could repeat the code above 4 times (twice per sensor). But it's good coding habit to avoid repeating code over and over, since this can lead to messy scripts as well as greater risk for errors in data processing and analysis. Whenever you need to run the same code many times, you can write a loop. Loops are an important coding skill and it can take some time to wrap your head around them, so we'll work through building a loop step by step.
+In order to write out a data frame for each day of data collection per sensor, you could repeat the code above 4 times (twice per sensor). But it's good to avoid repeating code over and over, since this can lead to messy scripts as well as a greater risk for errors in data processing and analysis. Whenever you need to run the same code many times, you can write a loop. Loops are an important coding skill and we'll work through building a loop step by step.
 
-TKTK continue
-
-
-you'll write out a spreadsheet per sensor for each day of data collection. You're writing out a spreadsheet per day in order to use the first ABISSMAL function, which combines data collected across days per sensor into a single spreadsheet and in the right format for downstream functions.
-
-In order to write out a spreadsheet per sensor and day, you need to filter the rows of the full data frame for each sensor by date.
-
-You can now use this `dplyr::filter()` function as you write out a spreadsheet per day. In the code below, you will create a custom file name for the 1st day of RFID data, then you'll filter the RFID data frame by the first day and write it out as a .csv file:
-
+To start, you can practice building a loop with the function `lapply()`.
 ```{r}
 
-# Pipe the data frame into the filter() function
-sim_dats_rfid %>% 
-  # Filter the data frame by pulling out all rows in which the day column was equal to 1
-  dplyr::filter(day == 1) %>%
-  glimpse()
+?lapply
 
-# One day, looks good
-sim_dats_rfid %>% 
-  dplyr::filter(day == 1) %>%
-  pull(day) %>% 
-  unique()
+# Make a vector of the files to write out
+files <- c(file.path(path, "RFID", "test1.csv"), file.path(path, "RFID", "test2.csv"))
+
+files
+length(files)
+
+# The argument X specifies the number of times that the loop will run. In this case, X is a numeric vector from 1 to the length of the files vector and contains the numbers 1 and 2. Therefore the loop will run twice, and each value in X will be used in each loop iteration to write out one file at a time
+
+# The argument FUN is a custom function, written using the function(x){} notation. All of the code inside of the curly brackets {} will be run for each iteration of the loop. The argument x inside function() is the iterating variable, or the variable that will take on a different value in each iteration of the loop
+
+# In this loop, the iterating variable x will take on each value in the vector supplied to the X argument. This means that in the first loop iteration, x will take on the numeric value 1. In the second loop iteration, x will hold the numeric value 2. To test that this is true, you can run the loop below, which will print the value of x per iteration to the console
+lapply(X = 1:length(files), FUN = function(x){
+  
+  x
+  
+})
 
 ```
+
+The iterating variable of the loop, or `x` does not exist as an object outside of the function. So if you print `x` outside of the loop, no object will be found. If you created a object called `x` outside of the loop above, then you will see the contents of that object instead. This means that writing a loop and setting `x` as the iterating variable will not affect other lines of code outside of the loop.
+
+The iterating variable of a function does not always need to be `x`, but can be another letter (`i`, `j`, `y`, `z`) or any combination of multiple letters and numbers, underscores, and periods (as long as the variable name starts with a letter).
+
+A useful property of the iterating variable is that you can use it to index vectors, data frames, or other objects that you created outside of the loop. For instance, you can use `x` and square bracket indexing to print the name of each file that you want to save.
+```{r}
+
+lapply(X = 1:length(files), FUN = function(x){
+  
+  files[x]
+  
+})
+
+```
+
+You can also modify the code inside the custom function to save each of these files, by placing the expression `files[x]` inside of the `write.csv()` function and piping a data frame to `write.csv()`.
+```{r eval = FALSE}
+
+lapply(X = 1:length(files), FUN = function(x){
+  
+  sim_dats_rfid %>%
+    write.csv(file = files[x], row.names = FALSE)
+  
+})
+
+```
+
+You should see 2 "NULL" outputs printed to the console if the loop runs correctly. When you check the contents of the nested RFID folder, you should see that both .csv files were written out:
+```{r}
+
+list.files(file.path(path, "RFID"))
+
+```
+
+You just wrote out 2 spreadsheets using 1 loop, but you wrote out the same data frame to each spreadsheet. In order to write out a different data frame to each spreadsheet, you add the data frame filtering that you learned above to the loop. In the code below, you'll create another vector object called `days`, and then use the iterating variable to filter `sim_dats_rfid` by each day in `days`.
+```{r eval = FALSE}
+
+days <- c(1, 2)
+
+lapply(X = 1:length(files), FUN = function(x){
+  
+  sim_dats_rfid %>%
+    # Filter the data frame by one day at a time
+    dplyr::filter(day == days[x]) %>% 
+    write.csv(file = files[x], row.names = FALSE)
+  
+})
+
+```
+
+You can delete these files that you created for testing. In the code below, you're seeing another pattern searching example. The string that you passed to the argument `pattern` starts with the symbol `^`, which is a symbol that indicates you're searching for all files that *start* with the pattern "test". You're also telling the function to return the full location of each file along with the file name, so that `file.remove()` knows exactly where to look for each file.
+```{r eval = FALSE}
+
+rem_files <- list.files(file.path(path, "RFID"), pattern = "^test", full.names = TRUE)
+rem_files
+
+file.remove(rem_files)
+
+```
+
+<h3>Use a loop to save RFID spreadsheets</h3>
+
+Now you can put all of these pieces together and use the loop to write out a spreadsheet per day for the RFID sensor.
+```{r eval = FALSE}
+
+# Make a vector of the custom file names to write out
+files <- c("RFID_simulated_Pair-01_2023_08_01.csv", "RFID_simulated_Pair-01_2023_08_02.csv")
+
+# Add the file path for the correct directory
+files <- file.path(path, "RFID", files) 
+files
+
+# Make a vector of the days to write out (1 day per iteration of the loop)
+days <- c(1, 2)
+days
+
+# You can drop the lapply() argument names, since you're supplying the arguments in the order that the function expects
+invisible(lapply(1:length(files), function(x){
+  
+  sim_dats_rfid %>%
+    # Filter the data frame by one day at a time
+    dplyr::filter(day == days[x]) %>% 
+    write.csv(file = files[x], row.names = FALSE)
+  
+}))
+
+```
+
+In the code above, you'll see one additional change that we made to the loop by wrapping it in the function `invisible()`. This function silences the output printed to the console that you saw several times above, in which the output of each `lapply()` iteration is enclosed in double square brackets, and then a single pair of square brackets. `lapply()` is a function that returns a list, and when the function is carried out correctly but there is not output to print, the function will return `NULL` values (indicating empty output). This is the expected behavior of `lapply()` for our purposes, because we used `lapply()` to write out physical files rather than to return output as an object in R. Since you can check that the function worked by running `list.files()`, using `invisible()` helps clean up the amount of text that you need to check in your console.
 
 ```{r eval = FALSE}
 
-?write.csv
-
-# For the RFID data, create a vector of the working directory and the file name that you will use for the argument file in write.csv()
-# The function file.path() will combine both pieces of information into a single file path
-rfid_file <- file.path(path, "RFID_simulated_Pair-01_2023_08_01.csv")
-rfid_file
-
-sim_dats_rfid %>% 
-  dplyr::filter(day == 1) %>% 
-  # Write out the data frame as a .csv spreadsheet. Do not include row names
-  # Remember that the "." means the function will use the object that is piped in, which here is the data frame filtered by day 1
-  write.csv(x = ., file = rfid_file, row.names = FALSE)
+# Both new .csv files for each day of RFID data are present, looks good
+list.files(file.path(path, "RFID"))
 
 ```
 
-
-Repeat this process for the second day of RFID data:
-```{r}
-
-rfid_file <- file.path(path, "RFID_simulated_Pair-01_2023_08_02.csv")
-rfid_file
-
-sim_dats_rfid %>% 
-  dplyr::filter(day == 2) %>% 
-  write.csv(x = ., file = rfid_file, row.names = FALSE)
-
-```
-
-You can also write out a spreadsheet per day for the infrared beam breaker dataset.
+You can remove these files.
 ```{r eval = FALSE}
 
-irbb_file <- file.path(path, "IRBB_simulated_Pair-01_2023_08_01.csv")
-irbb_file
+files <- c("RFID_simulated_Pair-01_2023_08_01.csv", "RFID_simulated_Pair-01_2023_08_02.csv")
 
-sim_dats_irbb %>% 
-  dplyr::filter(day == 1) %>% 
-  # By default, write.csv() will write out the object that is piped in, so you don't need to specify "x = ."
-  write.csv(irbb_file, row.names = FALSE)
+# Add the file path for the correct directory
+files <- file.path(path, "RFID", files) 
+files
 
-irbb_file <- file.path(path, "IRBB_simulated_Pair-01_2023_08_02.csv")
-irbb_file
-
-sim_dats_irbb %>% 
-  dplyr::filter(day == 2) %>% 
-  # By default, write.csv() will write out the object that is piped in, so you don't need to specify "x = ."
-  write.csv(irbb_file, row.names = FALSE)
+file.remove(files)
 
 ```
 
-Check that these 2 files now exist in your working directory.
+You can continue practicing loops by repeating this process for the infrared beam breaker dataset.
+
+<h3>Write a nested loop to save spreadsheets</h3>
+
+If you want to cut down on the amount of code that you're writing, you could write out both the RFID and beam breaker data in the same loop. First you'll need to create another directory for the beam breaker data:
 ```{r eval = FALSE}
 
-list.files(path)
+dir.create(file.path(path, "IRBB"))
 
 ```
 
-You can read one these files back into R with the function `read.csv()`. In the code below, you're piping the output of `read.csv()` directly into `glimpse()` to check out the structure of the resulting data frame. The output of the code is printed to the console but is not saved inside of an object for later manipulation. Instead, you will be using a custom function from ABISSMAL that automatically reads in each spreadsheet.
+To carry out the file filtering and writing, you'll use a type of object called a `list`, and then use these lists inside of a nested loop:
 ```{r}
 
-read.csv(file.path(path, "IRBB_simulated_Pair-01_2023_08_02.csv")) %>% 
-  glimpse()
+# Make a list of the custom file names to write out
+files <- list(
+  c("RFID_simulated_Pair-01_2023_08_01.csv", "RFID_simulated_Pair-01_2023_08_02.csv"),
+  c("IRBB_simulated_Pair-01_2023_08_01.csv", "IRBB_simulated_Pair-01_2023_08_02.csv")
+)
+
+glimpse(files)
 
 ```
+
+Lists are useful objects to use in R because they're very flexible. Unlike vectors, a single list can hold many different types of data. Unlike a data frame, the elements of a list do not need to be the same dimension. The elements of a list can also be different data structures or object types. For instance, lists can contain vectors, data frames, and other lists all inside of the same object. The list that you created above has 2 elements, and each element is a vector of 2 strings containing file names that you supplied using the function `c()`.
+
+You can index lists in a manner that is similar to indexing vectors and data frames, but indexing lists can be done with single or double square brackets for different outcomes:
+```{r}
+
+# Using a single square bracket to filter a list returns the first list element in list format
+files[1]
+glimpse(files[1])
+
+# Using double square brackets returns the first list element only, so it removes the list structure and shows the original data structure of that element (here a vector)
+files[[1]]
+glimpse(files[[1]])
+
+```
+
+Lists can also have named elements, which makes it possible to access elements by name.
+```{r}
+
+# Make a named list of the custom file names to write out
+files <- list(
+  `RFID` = c("RFID_simulated_Pair-01_2023_08_01.csv", "RFID_simulated_Pair-01_2023_08_02.csv"),
+  `IRBB` = c("IRBB_simulated_Pair-01_2023_08_01.csv", "IRBB_simulated_Pair-01_2023_08_02.csv")
+)
+
+glimpse(files)
+
+```
+
+Access the list elements by name:
+```{r}
+
+# Using a single bracket returns the first element as a list, called "RFID"
+files["RFID"]
+
+# Using the dollar sign or double square brackets returns the first list element in its original format
+files$RFID
+
+files[["RFID"]]
+
+```
+
+Lists are useful data structures for nested loops. For instance, if you want to write out a spreadsheet per day per sensor type, you need a loop to 1) iterate over sensor types, and then a loop to 2) iterate over days per sensor. You can use lists to create nested data structures to supply to a nested loop to make sure that each layer of the loop runs in the way that you expect. For instance, the list called `files` reflects the nested loop that you need because files are listed first by sensor type (each element of the list) and then by date (each element of the vector inside each list element):
+```{r}
+
+# Make a vector of sensor labels
+sensors <- c("RFID", "IRBB")
+
+sensors
+
+# Make a named list of the custom file names to write out
+files <- list(
+  `RFID` = c("RFID_simulated_Pair-01_2023_08_01.csv", "RFID_simulated_Pair-01_2023_08_02.csv"),
+  `IRBB` = c("IRBB_simulated_Pair-01_2023_08_01.csv", "IRBB_simulated_Pair-01_2023_08_02.csv")
+)
+
+files
+
+# Make a list of file paths per sensor that will be used inside of the loop
+file_dirs <- list(
+  `RFID` = file.path(path, "RFID"),
+  `IRBB` = file.path(path, "IRBB") 
+)
+
+file_dirs
+
+# Make a list of the days to write out for each sensor
+# This could be a single vector rather than a list since you want to write out the same days per sensor, but a list is useful in case you wanted to change the days (and number of days) to write out per sensor
+days <- list(
+  `RFID` = c(1, 2),
+  `IRBB` = c(1, 2)
+)
+
+days
+
+# Finally, you need to make a list of the data frames that you want to write out. Since you already know how to filter data frames by day, that code can go inside of the loop, and you only need to specify a data frame per sensor type here
+dats <- list(
+  `RFID` = sim_dats_rfid,
+  `IRBB` = sim_dats_irbb
+)
+
+glimpse(dats)
+
+```
+
+Once you've set up the data structures that you want to loop over, you can write out the nested loop. Since this is a complex loop structure, it can be helpful to test the loop with set values of each iterating variable (`x` and `y`). 
+
+After writing out this loop, but before running it, you should test the code inside of each loop layer. To do this, you can set the values of each iterating variable outside of the loop and then run the code inside of each loop. This form of testing is equivalent to freezing the loop in time, so that you're seeing the output of the code for a single loop iteration (here, the first iteration for each loop layer).
+
+To carry out this type of testing, you should run the code to freeze the iterating variables on the first iteration of each loop. Then, you should run the code inside of each loop, starting with the creation of `days_tmp`, then the indexing and filtering the data frame, and then the filtering of the file names. You should not run either of the lines with `lapply()` in them, since you don't want either loop to fully execute.
+
+As you test the code inside of each loop, you should see that between the outer and inner loops, you're using the name of the sensor for the given outer loop iteration ("RFID" for the first iteration) to set up the days over which the inner loop will iterate (in `days_tmp`). Inside of the inner loop, you're filtering the list of data frames by sensor, and then by the days that you want per sensor. Finally, you're indexing the file name for the right sensor type and day with a combination of double and single bracket filtering on the list of file names:
+```{r eval = FALSE}
+
+# Testing
+x <- 1
+y <- 1
+
+# Start by iterating over sensors
+invisible(lapply(1:length(sensors), function(x){
+  
+  # Index the named list of days to get the right days per sensor
+  # This indexing is important to set up the next loop correctly
+  
+  sensors[x] # This is a string with the sensor name
+  
+  # Place the string with the sensor name inside of double square brackets to extract the vector of days for that sensor 
+  days_tmp <- days[[sensors[x]]]
+  
+  days_tmp
+  
+  # For each sensor, iterate over days
+  lapply(1:length(days_tmp), function(y){
+    
+    # Get the data frame per sensor type using x inside of double square brackets to extract the given data frame from the list
+    dats[[x]] %>%
+      # Filter the data frame by one day at a time by using y to index the temporary vector of days (e.g. to extract a single element from that vector)
+      dplyr::filter(day == days_tmp[y]) %>% 
+      glimpse()
+    
+    # Use double bracket filtering to pull out the vector of file names for the given sensor from the overall list, then use y with single bracket filtering to pull a single file name from the resulting vector of names
+    files[[x]]
+    
+    files[[x]][y]
+    
+    # You'll also combine the file name with the right path:
+    file.path(file_dirs[[x]], files[[x]][y])
+    
+  })
+  
+}))
+
+```
+
+You should have a better sense now of how each loop operates over different data structures to carry out the operation that you want (writing out a single spreadsheet per sensor type and day). Next, you can modify the full loop to replace the lines written for testing with the final operations that you want to carry out: 
+```{r eval = FALSE}
+
+# Start by iterating over sensors
+invisible(lapply(1:length(sensors), function(x){
+  
+  # Index the list of days to get the right days per sensor
+  # This indexing is important to set up the next loop correctly
+  days_tmp <- days[[sensors[x]]]
+  
+  # For each sensor, iterate over days
+  lapply(1:length(days_tmp), function(y){
+    
+    # Get the data frame per sensor type using x and then filter by day using y
+    dats[[x]] %>%
+      # Filter the data frame by one day at a time
+      dplyr::filter(day == days_tmp[y]) %>%
+      # Use double and single bracket filtering to pull out the right file name
+      write.csv(file = file.path(file_dirs[[x]], files[[x]][y]), row.names = FALSE)
+    
+  })
+  
+}))
+
+```
+
+This loop should have created 1 file per sensor and day in the correct directory per sensor. Check that these 4 files now exist inside each directory per sensor within your working directory.
+```{r eval = FALSE}
+
+list.files(file.path(path, "RFID"))
+
+list.files(file.path(path, "IRBB"))
+
+```
+
+You learned more about filtering data frames, writing them out to spreadsheets, and writing loops in this vignette. In the next vignette, you'll use the spreadsheets of simulated RFID and IRBB data to start the ABISSMAL data processing and analysis workflow.

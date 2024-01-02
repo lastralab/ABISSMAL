@@ -14,6 +14,7 @@ The goal of these tutorials is to disseminate basic R coding skills in a biologi
 - Need to add to the Intro how to report bugs in vignettes as GitHub issues
 - Also add how to troubleshoot when an expression isn't complete in the console
 - Tab completion, keyboard shortcuts
+- The fact that there are many different ways to do any one thing in R, and this is meant to be one set of examples, not at all exhaustive
 
 2. Setup a virtual workspace (global environment, package installation, working directory, RMarkdown files)
 
