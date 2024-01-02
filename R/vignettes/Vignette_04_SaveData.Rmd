@@ -1,5 +1,5 @@
 ---
-title: "Vignette 04: Process Data"
+title: "Vignette 04: Save Data"
 author: "Grace Smith-Vidaurre"
 date: "2023-12-27"
 output: html_document
@@ -69,10 +69,10 @@ In the code below, you'll use combine the vector of RFID timestamps that you mad
 ```{r}
 
 # Make a vector for the experimental replicate
-exp_rep <- rep(x = "Pair_01", times = length(rfid_ts))
+exp_rep <- rep(x = "Nest_01", times = length(rfid_ts))
 
 # Make the data frame with the experimental replicate metadata and the timestamps
-sim_dats_rfid <- data.frame(replicate = exp_rep, timestamps = rfid_ts)
+sim_dats_rfid <- data.frame(chamber_id = exp_rep, timestamps = rfid_ts)
 
 # Overwrite the data frame with the modified version that has columns for the year, month, and day
 sim_dats_rfid <- sim_dats_rfid %>%
@@ -148,9 +148,9 @@ Next, repeat this process of creating a data frame with metadata for the infrare
 ```{r}
 
 # Overwrite the vector exp_rep with a new vector the same length as irbb_ts
-exp_rep <- rep(x = "Pair_01", times = length(irbb_ts))
+exp_rep <- rep(x = "Nest_01", times = length(irbb_ts))
 
-sim_dats_irbb <- data.frame(replicate = exp_rep, timestamps = irbb_ts)
+sim_dats_irbb <- data.frame(chamber_id = exp_rep, timestamps = irbb_ts)
 
 sim_dats_irbb <- sim_dats_irbb %>%
   dplyr::mutate(
@@ -283,13 +283,17 @@ sim_dats_rfid %>%
 Now that you've practiced filtering a data frame, you can combine this filtering step with writing out a .csv file that contains the filtered data frame with data collected on a single day.
 ```{r eval = FALSE}
 
-# Make a new directory inside of your working directory for the raw RFID data
+# Make a new directory inside of your working directory for saving data
+file.path(path, "Data") # Check the new path
+dir.create(file.path(path, "Data")) # Create the new path
+
+# Then make a new directory inside of the Data folder for the raw RFID data
 file.path(path, "RFID") # Check the new path
-dir.create(file.path(path, "RFID")) # Create the new path
+dir.create(file.path(path, "Data", "RFID")) # Create the new path
 
 # Make the new file name with your working directory path
 # Make sure to specify that the spreadsheet will be saved inside of the new folder "RFID"
-rfid_file <- file.path(path, "RFID", "test.csv")
+rfid_file <- file.path(path, "Data/RFID", "test.csv")
 rfid_file
 
 sim_dats_rfid %>% 
@@ -303,9 +307,9 @@ sim_dats_rfid %>%
 Check that the test file was created inside of the new RFID folder, and then delete it.
 ```{r eval = FALSE}
 
-list.files(file.path(path, "RFID"), pattern = ".csv$")
+list.files(file.path(path, "Data/RFID"), pattern = ".csv$")
 
-rfid_file <- file.path(path, "RFID", "test.csv")
+rfid_file <- file.path(path, "Data/RFID", "test.csv")
 rfid_file
 
 file.remove(rfid_file)
@@ -322,7 +326,7 @@ To start, you can practice building a loop with the function `lapply()`.
 ?lapply
 
 # Make a vector of the files to write out
-files <- c(file.path(path, "RFID", "test1.csv"), file.path(path, "RFID", "test2.csv"))
+files <- c(file.path(path, "Data/RFID", "test1.csv"), file.path(path, "Data/RFID", "test2.csv"))
 
 files
 length(files)
@@ -370,7 +374,7 @@ lapply(X = 1:length(files), FUN = function(x){
 You should see 2 "NULL" outputs printed to the console if the loop runs correctly. When you check the contents of the nested RFID folder, you should see that both .csv files were written out:
 ```{r}
 
-list.files(file.path(path, "RFID"))
+list.files(file.path(path, "Data/RFID"))
 
 ```
 
@@ -393,7 +397,7 @@ lapply(X = 1:length(files), FUN = function(x){
 You can delete these files that you created for testing. In the code below, you're seeing another pattern searching example. The string that you passed to the argument `pattern` starts with the symbol `^`, which is a symbol that indicates you're searching for all files that *start* with the pattern "test". You're also telling the function to return the full location of each file along with the file name, so that `file.remove()` knows exactly where to look for each file.
 ```{r eval = FALSE}
 
-rem_files <- list.files(file.path(path, "RFID"), pattern = "^test", full.names = TRUE)
+rem_files <- list.files(file.path(path, "Data/RFID"), pattern = "^test", full.names = TRUE)
 rem_files
 
 file.remove(rem_files)
@@ -409,7 +413,7 @@ Now you can put all of these pieces together and use the loop to write out a spr
 files <- c("RFID_simulated_Pair-01_2023_08_01.csv", "RFID_simulated_Pair-01_2023_08_02.csv")
 
 # Add the file path for the correct directory
-files <- file.path(path, "RFID", files) 
+files <- file.path(path, "Data/RFID", files) 
 files
 
 # Make a vector of the days to write out (1 day per iteration of the loop)
@@ -433,7 +437,7 @@ In the code above, you'll see one additional change that we made to the loop by 
 ```{r eval = FALSE}
 
 # Both new .csv files for each day of RFID data are present, looks good
-list.files(file.path(path, "RFID"))
+list.files(file.path(path, "Data/RFID"))
 
 ```
 
@@ -443,7 +447,7 @@ You can remove these files.
 files <- c("RFID_simulated_Pair-01_2023_08_01.csv", "RFID_simulated_Pair-01_2023_08_02.csv")
 
 # Add the file path for the correct directory
-files <- file.path(path, "RFID", files) 
+files <- file.path(path, "Data/RFID", files) 
 files
 
 file.remove(files)
@@ -457,7 +461,7 @@ You can continue practicing loops by repeating this process for the infrared bea
 If you want to cut down on the amount of code that you're writing, you could write out both the RFID and beam breaker data in the same loop. First you'll need to create another directory for the beam breaker data:
 ```{r eval = FALSE}
 
-dir.create(file.path(path, "IRBB"))
+dir.create(file.path(path, "Data", "IRBB"))
 
 ```
 
@@ -533,8 +537,8 @@ files
 
 # Make a list of file paths per sensor that will be used inside of the loop
 file_dirs <- list(
-  `RFID` = file.path(path, "RFID"),
-  `IRBB` = file.path(path, "IRBB") 
+  `RFID` = file.path(path, "Data/RFID"),
+  `IRBB` = file.path(path, "Data/IRBB") 
 )
 
 file_dirs
@@ -636,9 +640,9 @@ invisible(lapply(1:length(sensors), function(x){
 This loop should have created 1 file per sensor and day in the correct directory per sensor. Check that these 4 files now exist inside each directory per sensor within your working directory.
 ```{r eval = FALSE}
 
-list.files(file.path(path, "RFID"))
+list.files(file.path(path, "Data/RFID"))
 
-list.files(file.path(path, "IRBB"))
+list.files(file.path(path, "Data/IRBB"))
 
 ```
 
