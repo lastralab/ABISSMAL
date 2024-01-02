@@ -20,18 +20,15 @@ The goal of these tutorials is to disseminate basic R coding skills in a biologi
 
 3. Create simulated data, including entrances, exits, and perching events
 
-4. Combine the raw data and pre-process the raw data, detect perching events
+4. Save data and practice writing loops
 
-TKTK this is turning into save data only...vignette 04
-
-5. Make barcode style visualizations of the raw and per-processed data
+5. Combine the raw data, detect perching events and pre-process the raw data, make plots (barcode style visualizations of the raw and per-processed data)
 
 - For vignette 05, I want to make 3 barcode style visuals: 1) the raw combined RFID data, perching events and RFID pre-processed,2) IRBB raw combined and pre-processed, then 3) pre-processed RFID and IRBB together. All of these will be faceted plots with ggplot 
 
 6. Detect clusters, score clusters, generate summary statistics
 
 Things that would be important to add:
-- Loops
 - Errors and troubleshooting online
 - Color code chunks that are for testing code versus chunks that are for creating necessary objects (https://bookdown.org/yihui/rmarkdown-cookbook/chunk-styling.html)
 - an explanation about how simulating the data replaces the process that ABISSMAL does to collect data from live animals
