@@ -313,44 +313,7 @@ ggplot() +
 
 This change to the start and end coordinates of how segments are drawn on the y-axis offset the two sets of line segments per sensor dataset. The plot is now less crowded and it's easier to visualize patterns over time and between datasets now.
 
-You can make some minor adjustments to the plot to make it easier to interpret, including changing the axis titles to be more informative, changing the background to be white, and removing the y-axis text and axis ticks (since the height of each segment does not reflect data that you want to interpret).
-```{r}
-
-ggplot() +
-  
-  # Add a vertical line for each RFID timestamp
-  geom_segment(
-    data = rfid_raw,
-    aes(x = timestamp_ms, xend = timestamp_ms, y = 0, yend = 0.45),
-    color = "blue",
-    linewidth = 0.3
-  ) +
-  
-  # Add a vertical line for each beam breaker timestamp
-  geom_segment(
-    data = irbb_raw,
-    aes(x = timestamp_ms, xend = timestamp_ms, y = 0.5, yend = 1),
-    color = "orange",
-    linewidth = 0.3
-  ) +
-  
-  # Change the x and y axis labels
-  xlab("Date and time") +
-  
-  ylab("") +
-  
-  # Use this function to convert the plot background to black and white
-  theme_bw() +
-  
-  # Use aesthetics functions to remove the y-axis labels and ticks
-  theme(
-    axis.text.y = element_blank(),
-    axis.ticks.y = element_blank()
-  )
-
-```
-
-The plot is looking a lot better, but there is at least one more aesthetic that you can change to make easier to interpret. The x-axis currently holds two types of information: 1) the day of data collection, and 2) the time of day. It's difficult to see when detections were recorded on each day, and whether detections were recorded over similar or different time periods between days. To make the x-axis more interpretable, you can change the plot to be "faceted", so that you have 1 panel per day of data collection.
+The plot is looking a lot better, but there's a problem with the x-axis. The x-axis currently holds two types of information: 1) the day of data collection, and 2) the time of day. It's difficult to see when detections were recorded on each day, and whether detections were recorded over similar or different time periods between days. To make the x-axis more interpretable, you can change the plot to be "faceted", so that you have 1 panel per day of data collection.
 ```{r}
 
 ggplot() +
@@ -372,26 +335,11 @@ ggplot() +
   ) +
   
   # Facet the plot by day (e.g. create a panel per day)
-  facet_wrap(~ day, nrow = 2, strip.position = "left") +
-  
-  # Change the x and y axis labels
-  xlab("Time") +
-  
-  # Now you can add a y-axis label
-  ylab("Day of data collection") +
-  
-  # Use this function to convert the plot background to black and white
-  theme_bw() +
-  
-  # Use aesthetics functions to remove the y-axis labels and ticks
-  theme(
-    axis.text.y = element_blank(),
-    axis.ticks.y = element_blank()
-  )
+  facet_wrap(~ day, nrow = 2, strip.position = "left")
 
 ```
 
-The overall plot structure has improved a lot, but there are still some modifications that would help interpretability. First, the panel or facet labels on the left could be changed from the date to the day of data collection (e.g. "Day 1"). The x-axis labels could also be changed to show only the time of day (remove the month and day), and there could also be more labels available (e.g. label each hour).
+The overall plot structure has improved a lot, but are still some modifications that would help interpretability. First, the panel or facet labels on the left could be changed from the date to the day of data collection (e.g. "Day 1"). The x-axis labels could also be changed to show only the time of day (remove the month and day), and there could also be more labels available (e.g. label each hour).
 
 You can start by modifying the data frame of raw data for each senor to add information about the day of data collection. You'll create this new column by relying on conditional statements with the `ifelse()` function, since there are only 2 days of data collection that need recoding.
 
@@ -402,18 +350,13 @@ ifelse(test = rfid_raw$day == 1, yes = "Day 1", no = "Day 2")
 
 ```
 
-Now you can create a new column per data frame using an `ifelse` statement. You will also update the format of the timetamps column so that the timestamps include the time only (not the month and day). The code to convert the timestamps to a different format is nested and repetitive, but the timestamp conversion will be performed correctly. 
-
-When you convert the timestamps to hours, minutes, and seconds only, R adds a default year, month, and day beforehand (likely the current date that you rant the code). This is expected, and it is not an error, but rather makes it possible for the timestamps to align correctly over days in the plot (since R sees all timestamps occurring on a single day). TKTK this change needs to come much earlier...
+Now you can create a new column per data frame using an `ifelse` statement. 
 ```{r}
 
 # Create a new column in the raw data for the date of data collection
 rfid_raw2 <- rfid_raw %>% 
   dplyr::mutate(
     day_label = ifelse(day == 1, "Day 1", "Day 2")
-  ) %>% 
-  dplyr::mutate(
-    timestamp = as.POSIXct(strptime(format(as.POSIXct(timestamp_ms), "%H:%M:%S"), format = "%H:%M:%S"))
   )
   
 # You should see that the new column "day_label" was created
@@ -424,16 +367,13 @@ glimpse(rfid_raw2)
 irbb_raw2 <- irbb_raw %>% 
   dplyr::mutate(
     day_label = ifelse(day == 1, "Day 1", "Day 2")
-  ) %>% 
-  dplyr::mutate(
-    timestamp = as.POSIXct(strptime(format(as.POSIXct(timestamp_ms), "%H:%M:%S"), format = "%H:%M:%S"))
   )
 
 glimpse(irbb_raw2)
 
 ```
 
-Now you can update the code to include the new date labels, and you can also change the aesthetics of the x-axis using the function `scale_x_datetime()`:
+Now you can update the code to include the new date labels:
 ```{r}
 
 ggplot() +
@@ -443,7 +383,7 @@ ggplot() +
   # Make sure to use the new timestamp column
   geom_segment(
     data = rfid_raw2,
-    aes(x = timestamp, xend = timestamp, y = 0, yend = 0.45),
+    aes(x = timestamp_ms, xend = timestamp_ms, y = 0, yend = 0.45),
     color = "blue",
     linewidth = 0.3
   ) +
@@ -453,6 +393,97 @@ ggplot() +
   # Make sure to use the new timestamp column
   geom_segment(
     data = irbb_raw2,
+    aes(x = timestamp_ms, xend = timestamp_ms, y = 0.5, yend = 1),
+    color = "orange",
+    linewidth = 0.3
+  ) +
+  
+  # Facet the plot by day (e.g. create a panel per day)
+  # Use the new day labels here
+  facet_wrap(~ day_label, nrow = 2, strip.position = "left")
+
+```
+
+Now that information about the day of data collection has been moved to the facet labels, you need to fix the x-axis labels. The plot will be more interpretable if you can line up the timestamps by hour and minute for a direct comparison across days.  
+
+To line up the timestamps across days, you will need to update the format of the timestamps column. The code to convert the timestamps to a different format is nested and repetitive, but the timestamp conversion will be performed correctly. When you prompt the R to convert the timestamps to hours, minutes, and seconds only, R adds a default year, month, and day beforehand (likely the current date that you rant the code). This is expected, and it is not an error, but rather makes it possible for the timestamps to align correctly over days in the plot (since R sees all timestamps occurring on a single day).
+```{r}
+
+rfid_raw3 <- rfid_raw2 %>% 
+  dplyr::mutate(
+    timestamp = as.POSIXct(strptime(format(as.POSIXct(timestamp_ms), "%H:%M:%S"), format = "%H:%M:%S"))
+  )
+  
+# You'll see that a new year, month, and day were appended to the updated timestamps, but this is expected (see above)
+glimpse(rfid_raw3)
+
+# Repeat this process for the beam breaker data
+irbb_raw3 <- irbb_raw2 %>% 
+  dplyr::mutate(
+    timestamp = as.POSIXct(strptime(format(as.POSIXct(timestamp_ms), "%H:%M:%S"), format = "%H:%M:%S"))
+  )
+
+glimpse(irbb_raw3)
+
+```
+
+Now you can update the plotting code to change the aesthetics of the x-axis using the function `scale_x_datetime()` to specify that you want x-axis labels every half hour:
+```{r}
+
+ggplot() +
+  
+  # Add a vertical line for each RFID timestamp
+  # Use the new version of this data frame with the new day_label column
+  # Make sure to use the new timestamp column
+  geom_segment(
+    data = rfid_raw3,
+    aes(x = timestamp, xend = timestamp, y = 0, yend = 0.45),
+    color = "blue",
+    linewidth = 0.3
+  ) +
+  
+  # Add a vertical line for each beam breaker timestamp
+  # Use the new version of this data frame with the new day_label column
+  # Make sure to use the new timestamp column
+  geom_segment(
+    data = irbb_raw3,
+    aes(x = timestamp, xend = timestamp, y = 0.5, yend = 1),
+    color = "orange",
+    linewidth = 0.3
+  ) +
+  
+  # Facet the plot by day (e.g. create a panel per day)
+  # Use the new day labels here
+  facet_wrap(~ day_label, nrow = 2, strip.position = "left") +
+
+  # Change the aesthetics of the x-axis labels
+  scale_x_datetime(
+    date_breaks = "30 mins",
+    date_labels = "%H:%M"
+  )
+
+```
+
+You can make some minor adjustments to the plot to make it easier on the eyes, including changing the axis titles to be more informative, changing the background to be white, and removing the y-axis text and axis ticks (since the height of each segment does not reflect data that you want to interpret).
+```{r}
+
+ggplot() +
+  
+  # Add a vertical line for each RFID timestamp
+  # Use the new version of this data frame with the new day_label column
+  # Make sure to use the new timestamp column
+  geom_segment(
+    data = rfid_raw3,
+    aes(x = timestamp, xend = timestamp, y = 0, yend = 0.45),
+    color = "blue",
+    linewidth = 0.3
+  ) +
+  
+  # Add a vertical line for each beam breaker timestamp
+  # Use the new version of this data frame with the new day_label column
+  # Make sure to use the new timestamp column
+  geom_segment(
+    data = irbb_raw3,
     aes(x = timestamp, xend = timestamp, y = 0.5, yend = 1),
     color = "orange",
     linewidth = 0.3
@@ -470,11 +501,8 @@ ggplot() +
   
   # Change the aesthetics of the x-axis labels
   scale_x_datetime(
-    # date_breaks = "1 hour",
-    # breaks = seq(x_lims[1], x_lims[2], "1 hour"),
-    date_labels = "%H:%M",
-    expand = c(0, 0)
-    # limits = x_lims
+    date_breaks = "30 mins",
+    date_labels = "%H:%M"
   ) +
   
   # Use this function to convert the plot background to black and white
@@ -488,6 +516,88 @@ ggplot() +
 
 ```
 
+Finally, you need to add a legend to this plot so you can communicate what the two different colors mean. Adding a legend to this plot is tricky because you manually coded the colors of the line segments in two separate uses in `geom_segment()`. `ggplot2` functions have specific requirements for making a legend, and they can require automated coding of aesthetic values like color.
+
+In order to automatically create a legend in a plot, it helps to have a layer of the plot in which color is automatically encoded. The way that you would do this is to move the `color` argument inside of the function `aes()` for one layer of the plot, and then supply `color` with a column of data type `factor`...TKTK continue
+```{r}
+
+all_sensors <- rfid_raw3 %>%
+  bind_rows(
+    irbb_raw3
+  ) %>% 
+  dplyr::mutate(
+    sensor_id = factor(sensor_id)
+  )
+
+glimpse(all_sensors)
+
+```
+
+Then make the plot...TKTK split up creating the legend a bit more (e.g. default colors first)
+```{r}
+
+ggplot() +
+  
+  # Add a vertical line for each RFID timestamp
+  # Use the new version of this data frame with the new day_label column
+  # Make sure to use the new timestamp column
+  geom_segment(
+    data = rfid_raw3,
+    aes(x = timestamp, xend = timestamp, y = 0, yend = 0.45),
+    color = "blue",
+    linewidth = 0.3
+  ) +
+  
+  # Add a vertical line for each beam breaker timestamp
+  # Use the new version of this data frame with the new day_label column
+  # Make sure to use the new timestamp column
+  geom_segment(
+    data = irbb_raw3,
+    aes(x = timestamp, xend = timestamp, y = 0.5, yend = 1),
+    color = "orange",
+    linewidth = 0.3
+  ) +
+  
+  # Add the fake layer of lines so that you can create a legend
+  # The argument color here must be supplied with the name of a column that is the data type "factor" in R. This will trigger automatic coding of the color values that you specify below
+  geom_line(data = all_sensors, aes(x = timestamp, y = 1, color = sensor_id), linewidth = 0) +
+
+  # Set the colors that will be used to color the lines in the legend itself
+  # The length of the vector of color values that you supply here must be the same length as the number of "levels" (or unique values) in the factor column
+  # If you do not supply your own color values, then R will assign default colors to each factor level 
+  scale_color_manual(values = c("blue", "orange")) +
+
+  # Specify that you want to create a color legend, and override the linewidth of 0 above so that the lines show up in the legend. You can also customize the legend title, otherwise it will use the column name linked to the color encoding
+  guides(color = guide_legend(override.aes = list(linewidth = 2), title = "Sensor type")) +
+  
+  # Facet the plot by day (e.g. create a panel per day)
+  # Use the new day labels here
+  facet_wrap(~ day_label, nrow = 2, strip.position = "left") +
+  
+  # Change the x and y axis labels
+  xlab("Time") +
+  
+  # Now you can add a y-axis label
+  ylab("Day of data collection") +
+  
+  # Change the aesthetics of the x-axis labels
+  scale_x_datetime(
+    date_breaks = "30 mins",
+    date_labels = "%H:%M"
+  ) +
+  
+  # Use this function to convert the plot background to black and white
+  theme_bw() +
+  
+  # Use aesthetics functions to remove the y-axis labels and ticks
+  # Add an argument to change where the legend is located in the plot
+  theme(
+    axis.text.y = element_blank(),
+    axis.ticks.y = element_blank(),
+    legend.position = "top"
+  )
+
+```
 
 
 
