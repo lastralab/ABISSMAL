@@ -13,7 +13,7 @@ knitr::opts_chunk$set(echo = TRUE, eval = TRUE)
 
 <h2>Vignette Overview and Learning Objectives</h2>
 
-In this fourth vignette, you will write out spreadsheets of simulated detections of animal movements to your computer. You'll begin using this data in the ABISSMAL data processing and analysis workflow, including combining raw data across days and pre-processing the raw data. You will continue to use coding skills that you learned in the previous vignettes, and you will learn additional skills that include:
+In this fifth vignette, you will begin using the simulated detections of animal movements in the ABISSMAL data processing and analysis workflow, including combining raw data across days and pre-processing the raw data. You will also make visualizations of the processed data. You will continue to use coding skills that you learned in the previous vignettes, and you will learn additional skills that include:
 
 1. Accessing custom functions
 2. Using custom functions
@@ -287,7 +287,7 @@ ggplot() +
 
 ```
 
-This plot has more information, but it's difficult to interpret. Some of the detections for each sensor type occurred so close in time that they're layered nearly directly over one another. You can change where the line segements per sensor start and end on the y-axis in order to have better temporal resolution for visualizng the datasets from both sensors.
+This plot has more information, but it's difficult to interpret. Some of the detections for each sensor type occurred so close in time that they're layered nearly directly over one another. You can change the position of the line segements on the y-axis in order to have better resolution for visualizng the datasets from both sensors.
 
 ```{r}
 
@@ -533,7 +533,68 @@ glimpse(all_sensors)
 
 ```
 
-Then make the plot...TKTK split up creating the legend a bit more (e.g. default colors first)
+Then make the plot.
+```{r}
+
+ggplot() +
+  
+  # Add a vertical line for each RFID timestamp
+  # Use the new version of this data frame with the new day_label column
+  # Make sure to use the new timestamp column
+  geom_segment(
+    data = rfid_raw3,
+    aes(x = timestamp, xend = timestamp, y = 0, yend = 0.45),
+    color = "blue",
+    linewidth = 0.3
+  ) +
+  
+  # Add a vertical line for each beam breaker timestamp
+  # Use the new version of this data frame with the new day_label column
+  # Make sure to use the new timestamp column
+  geom_segment(
+    data = irbb_raw3,
+    aes(x = timestamp, xend = timestamp, y = 0.5, yend = 1),
+    color = "orange",
+    linewidth = 0.3
+  ) +
+  
+  # Add the fake layer of lines so that you can create a legend
+  # The argument color here must be supplied with the name of a column that is the data type "factor" in R. This will trigger automatic coding of the color values that you specify below
+  geom_line(data = all_sensors, aes(x = timestamp, y = 1, color = sensor_id), linewidth = 0) +
+
+  # Specify that you want to create a color legend, and override the linewidth of 0 above so that the lines show up in the legend. You can also customize the legend title, otherwise it will use the column name linked to the color encoding
+  guides(color = guide_legend(override.aes = list(linewidth = 2), title = "Sensor type")) +
+  
+  # Facet the plot by day (e.g. create a panel per day)
+  # Use the new day labels here
+  facet_wrap(~ day_label, nrow = 2, strip.position = "left") +
+  
+  # Change the x and y axis labels
+  xlab("Time") +
+  
+  # Now you can add a y-axis label
+  ylab("Day of data collection") +
+  
+  # Change the aesthetics of the x-axis labels
+  scale_x_datetime(
+    date_breaks = "30 mins",
+    date_labels = "%H:%M"
+  ) +
+  
+  # Use this function to convert the plot background to black and white
+  theme_bw() +
+  
+  # Use aesthetics functions to remove the y-axis labels and ticks
+  # Add an argument to change where the legend is located in the plot
+  theme(
+    axis.text.y = element_blank(),
+    axis.ticks.y = element_blank(),
+    legend.position = "top"
+  )
+
+```
+
+You added a legend to the plot, but the colors in the legend don't line up with the colors of the line segments per sensor. You can use the function `scale_color_manual()` to match colors between the plot and legend.
 ```{r}
 
 ggplot() +
@@ -599,77 +660,73 @@ ggplot() +
 
 ```
 
-
-
-Then...TKTK add a legend, write out a plot as an image file. More modification to get font size right
-
+Now that you've made the plot in R, you can save the plot as an image file on your computer using the function `ggsave()`.
 ```{r}
 
-  ggplot() +
+ggplot() +
   
   # Add a vertical line for each RFID timestamp
+  # Use the new version of this data frame with the new day_label column
+  # Make sure to use the new timestamp column
   geom_segment(
-    data = raw_rfid,
-    aes(x = timestamp, y = 0, xend = timestamp, yend = y_max/4),
-    color = cols[4],
+    data = rfid_raw3,
+    aes(x = timestamp, xend = timestamp, y = 0, yend = 0.45),
+    color = "blue",
     linewidth = 0.3
   ) +
   
+  # Add a vertical line for each beam breaker timestamp
+  # Use the new version of this data frame with the new day_label column
+  # Make sure to use the new timestamp column
   geom_segment(
-    data = raw_all2 %>% 
-      dplyr::filter(sensor_id == "Inner Beam Breaker"),
-    aes(x = timestamp, xend = timestamp, y = y_max/4, yend = (y_max/4) * 2),
-    color = cols[3],
+    data = irbb_raw3,
+    aes(x = timestamp, xend = timestamp, y = 0.5, yend = 1),
+    color = "orange",
     linewidth = 0.3
   ) +
   
-  geom_segment(
-    data = raw_all2 %>% 
-      dplyr::filter(sensor_id == "RFID"),
-    aes(x = timestamp, xend = timestamp, y = (y_max/4) * 2, yend = (y_max/4) * 3),
-    color = cols[2],
-    linewidth = 0.3
-  ) +
-  
-  geom_segment(
-    data = raw_all2 %>% 
-      dplyr::filter(sensor_id == "Outer Beam Breaker"),
-    aes(x = timestamp, xend = timestamp, y = (y_max/4) * 3, yend = y_max),
-    color = cols[1],
-    linewidth = 0.3
-  ) +
-  
-  # I removed switch = "y" because it's possible to rotate strip lables horizontally when they're on the right
-  facet_grid(rows = vars(new_date)) +
-  
-  # Add shaded rectangles for the nocturnal periods
-  geom_rect(data = rect_df2, aes(xmin = time_xmin, xmax = time_xmax, ymin = -Inf, ymax = Inf), color = alpha("black", 0), fill = alpha("black", 0.08), inherit.aes = FALSE) +
-  
-  scale_x_datetime(
-    breaks = seq(x_lims[1], x_lims[2], "1 hour"),
-    date_labels = "%H:%M",
-    expand = c(0, 0),
-    limits = x_lims
-  ) +
+  # Add the fake layer of lines so that you can create a legend
+  # The argument color here must be supplied with the name of a column that is the data type "factor" in R. This will trigger automatic coding of the color values that you specify below
+  geom_line(data = all_sensors, aes(x = timestamp, y = 1, color = sensor_id), linewidth = 0) +
 
-  scale_y_continuous(limits = c(0, y_max)) +
-  guides(color = "none") +
+  # Set the colors that will be used to color the lines in the legend itself
+  # The length of the vector of color values that you supply here must be the same length as the number of "levels" (or unique values) in the factor column
+  # If you do not supply your own color values, then R will assign default colors to each factor level 
+  scale_color_manual(values = c("blue", "orange")) +
+
+  # Specify that you want to create a color legend, and override the linewidth of 0 above so that the lines show up in the legend. You can also customize the legend title, otherwise it will use the column name linked to the color encoding
+  guides(color = guide_legend(override.aes = list(linewidth = 2), title = "Sensor type")) +
+  
+  # Facet the plot by day (e.g. create a panel per day)
+  # Use the new day labels here
+  facet_wrap(~ day_label, nrow = 2, strip.position = "left") +
+  
+  # Change the x and y axis labels
+  xlab("Time") +
+  
+  # Now you can add a y-axis label
+  ylab("Day of data collection") +
+  
+  # Change the aesthetics of the x-axis labels
+  scale_x_datetime(
+    date_breaks = "30 mins",
+    date_labels = "%H:%M"
+  ) +
+  
+  # Use this function to convert the plot background to black and white
   theme_bw() +
-  ylab("") +
-  xlab("") +
+  
+  # Use aesthetics functions to remove the y-axis labels and ticks
+  # Add an argument to change where the legend is located in the plot
   theme(
-    axis.ticks.y = element_blank(),
     axis.text.y = element_blank(),
-    panel.grid.major = element_blank(),
-    panel.grid.minor = element_blank(),
-    axis.text.x = element_text(size = 7, angle = 90, vjust = 0.5, hjust = 0.5, color = "black"),
-    strip.text.y = element_text(size = 7, face = "bold", angle = 0),
-    strip.background = element_rect(fill = "white"),
-    legend.position = "top",
-    axis.ticks = element_line(linewidth = 0.25)
+    axis.ticks.y = element_blank(),
+    legend.position = "top"
   )
 
+# Save the image file to your computer
+ggsave(file.path(path, "raw_detections.tiff"), width = 8, height = 6, units = "in", dpi = 300)
 
 ```
 
-
+You just learned how to make a plot in R, and also how to save it to your computer. You can continue to modify minor aesthetics to this image file to create a high-quality figure for a publication. For instance, you can change the final size of the image file (`width`, `height`), as well as the resolution (`dpi`). You can also change the size of the text on each axis and the axis titles, or the legend position, as you play around with the final image size.

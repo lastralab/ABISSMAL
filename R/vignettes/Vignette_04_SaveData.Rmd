@@ -13,7 +13,7 @@ knitr::opts_chunk$set(echo = TRUE, eval = TRUE)
 
 <h2>Vignette Overview and Learning Objectives</h2>
 
-In this fourth vignette, you will write out spreadsheets of simulated detections of animal movements to your computer. You'll begin using this data in the ABISSMAL data processing and analysis workflow, including combining raw data across days and pre-processing the raw data. You will continue to use coding skills that you learned in the previous vignettes, and you will learn additional skills that include:
+In this fourth vignette, you will write out spreadsheets of simulated detections of animal movements to your computer. You will continue to use coding skills that you learned in the previous vignettes, and you will learn additional skills that include:
 
 1. Indexing and filtering data frames
 2. Checking data frame structure with base R and the tidyverse
