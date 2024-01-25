@@ -22,11 +22,11 @@ The goal of these tutorials is to disseminate basic R coding skills in a biologi
 
 4. Save data and practice writing loops
 
-5. Combine the raw data, detect perching events and pre-process the raw data, make plots (barcode style visualizations of the raw and per-processed data)
+5. Combine the raw data, detect perching events and pre-process the raw data, make simple barcode plots of the raw and per-processed data, and highlight how to encode color in these plots
 
-- For vignette 05, I want to make 3 barcode style visuals: 1) the raw combined RFID data, perching events and RFID pre-processed,2) IRBB raw combined and pre-processed, then 3) pre-processed RFID and IRBB together. All of these will be faceted plots with ggplot 
+6. For vignette 06, I want to make complex barcode style visuals: 1) the raw combined RFID data, perching events and RFID pre-processed,2) IRBB raw combined and pre-processed, then 3) pre-processed RFID and IRBB together. All of these will be faceted plots with ggplot, and with a complicated legend 
 
-6. Detect clusters, score clusters, generate summary statistics
+7. Detect clusters, score clusters, generate summary statistics, make final barcode ot line plots
 
 Things that would be important to add:
 - Errors and troubleshooting online

@@ -13,11 +13,13 @@ knitr::opts_chunk$set(echo = TRUE, eval = TRUE)
 
 <h2>Vignette Overview and Learning Objectives</h2>
 
-In this fifth vignette, you will begin using the simulated detections of animal movements in the ABISSMAL data processing and analysis workflow, including combining raw data across days and pre-processing the raw data. You will also make visualizations of the processed data. You will continue to use coding skills that you learned in the previous vignettes, and you will learn additional skills that include:
+In this sixth vignette... You will also make visualizations of the processed data. You will continue to use coding skills that you learned in the previous vignettes, and you will learn additional skills that include:
 
-1. Accessing custom functions
-2. Using custom functions
-3. Plotting data with ggplot
+TKTK change code before plots to be about detecting and scoring clusters
+
+1. TKTK
+2. TKTK
+3. TKTK
 
 <h2>Load packages and your working directory path</h2>
 
