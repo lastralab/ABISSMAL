@@ -135,7 +135,7 @@ glimpse(perching)
 
 ```
 
-`detect_perching_events()` identified 4 total perching events, which is the same number that you simulated in the previous vignette. You can look at the values inside of data frame for more information about these perching events:
+`detect_perching_events()` identified 6 total perching events, which is the same number that you simulated in the previous vignette (two perching events per day). You can look at the values inside of data frame for more information about these perching events:
 ```{r}
 
 # The timestamps when each perching event started
@@ -146,6 +146,13 @@ perching$perching_end
 
 # The unique PIT tag identifier that tells you which individual was perched on the RFID antenna
 perching$PIT_tag
+
+```
+
+You can also view the whole data frame in a separate pane:
+```{r eval = FALSE}
+
+View(perching)
 
 ```
 
@@ -247,7 +254,9 @@ rfid_combined <- rfid_raw %>%
       dplyr::mutate(
         dataset = "pre-processed"
       ) 
-  )
+  ) %>% 
+  # Order the data frame by timestamps. The -desc() inside of arrange() means that the timestamps will be arranged in increasing order
+  dplyr::arrange(-desc(timestamp_ms))
 
 glimpse(rfid_combined)
 
@@ -363,7 +372,7 @@ From this point of view though, it's hard to see how the raw and pre-processed d
 
 ggplot(data = rfid_combined %>%
          group_by(dataset) %>% 
-         slice(1:3) %>% 
+         slice(1:2) %>% 
          ungroup()
        ) +
   

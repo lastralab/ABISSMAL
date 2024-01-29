@@ -65,7 +65,7 @@ You can practice removing the `path` object from your global environment by writ
 
 The primary data collected by the ABISSMAL tracking system are timestamps indicating the moment of time when a movement sensor triggered. Many (but not all) of these detections can be attributed to one or more animals moving near a sensor, such as a bird moving through a radio frequency identification (RFID) antenna mounted in the entrance of a nest container. 
 
-In the subsequent code chunks, we will generate simulated data that represent RFID and infrared beam breaker detection datasets. In this simulated example, let's assume that we're collecting data for 2 adult birds at a nest container. The RFID antenna is mounted in the entrance of nest container and 1 pair of infrared beam breakers is mounted in front of the RFID antenna. In this simulated setup, the infrared beam breakers will trigger first when a bird enters the nest container, and the RFID antenna should trigger first when a bird leaves the nest container.
+In the subsequent code chunks, we will generate simulated data that represent RFID and infrared beam breaker detection datasets. In this simulated example, let's assume that we're collecting data for 2 adult birds at a nest container. The RFID antenna is mounted in the entrance of nest container. One pair of infrared beam breakers, the "outer" pair is mounted in front of the RFID antenna to catch movements just outside of the container entrance. A second pair of infrared beam breakers, the "inner" pair is mounted behind the RFID antenna to catch movements just inside the container entrance. In this simulated setup, the outer beam breakers will trigger first when a bird enters the nest container, followed by the RFID antenna and the inner beam breakers. When a bird leaves the nest container, the inner beam breakers should trigger first, followed by the RFID antenna and then the outer beam breakers.
 
 We will start by creating an object that holds simulated timestamps for the RFID antenna. This object is called `rfid_ts`, and it holds 4 timestamps in hours:minutes:seconds format. Each timestamp is surrounded by double quotes to denote that we are using character information here. 
 
@@ -93,8 +93,9 @@ length(rfid_ts) # This vector has 4 elements
 Let's continue by simulating 2 entrance and 2 exit events. We can choose timestamps for the infrared beam breakers that precede the RFID timestamps to simulate an entrance event, and infrared beam breaker timestamps that follow the RFID timestamps to simulate an exit event. We will offset detections from each sensor within the entrance and exit events by 1 second.
 ```{r class.source = "bg-info"}
 
-# Simulate timestamps for an entrance, an exit, and then another entrance and exit
-irbb_ts <- c("09:59:59", "10:05:01", "10:59:59", "11:05:01")
+# Simulate outer and inner beam breaker timestamps for an entrance, an exit, and then another entrance and exit
+o_irbb_ts <- c("09:59:59", "10:05:01", "10:59:59", "11:05:01")
+i_irbb_ts <- c("10:00:01", "10:04:59", "11:00:01", "11:04:59")
 
 ```
 
@@ -116,19 +117,22 @@ glimpse(rfid_ts)
 Another important type of information to simulate is noise in the sensor detections. For instance, the RFID antenna can fail to detect an individual's passive integrated transponder (PIT) tag, and the infrared beam breakers can trigger when birds leave nesting material hanging in the entrance of the container. In both of these cases, the infrared beam breakers should trigger when the RFID antenna does not.
 ```{r class.source = "bg-info"}
 
-# Simulate some RFID detection failures
-irbb_ts <- c(irbb_ts, "06:05:05", "06:35:08", "07:15:40", "11:10:25")
+# Simulate some RFID detection failures across both beam breaker pairs
+# These RFID detection failures occurred over 2 additional simulated entrances and 2 additional simulated exits
+o_irbb_ts <- c(o_irbb_ts, "06:05:05", "06:35:08", "07:15:40", "11:10:25")
+i_irbb_ts <- c(i_irbb_ts, "06:05:04", "06:35:09", "07:15:41", "11:10:24")
 
-glimpse(irbb_ts)
+glimpse(o_irbb_ts)
+glimpse(i_irbb_ts)
 
-# Simulate some stray beam breaker detections
-irbb_ts <- c(irbb_ts, "09:45:01", "09:45:02", "09:45:03", "09:45:04", "09:45:05", "09:45:06", "09:45:07", "09:45:08", "09:45:09", "09:45:10", "09:45:11")
+# Simulate some stray detections for the outer beam breaker
+o_irbb_ts <- c(o_irbb_ts, "09:45:01", "09:45:02", "09:45:03", "09:45:04", "09:45:05", "09:45:06", "09:45:07", "09:45:08", "09:45:09", "09:45:10", "09:45:11")
 
-glimpse(irbb_ts)
+glimpse(o_irbb_ts)
 
 ```
 
-You've created simulated datasets of detections of animal movements, but currently, these datasets are in vector format only and do not have important metadata. For instance, some useful metadata includes information about the experimental replicate, the date, and for the RFID data, the unique alphanumeric identity of each PIT tag detected.
+You've created simulated datasets of detections of animal movements, but currently, these datasets are in vector format only and do not have important metadata. For instance, some useful metadata includes information about the experimental replicate, the date, and for the RFID data, the unique alphanumeric code of each PIT tag detected by the RFID antenna.
 
 Right now, the data for both sensors is in vector format. Vectors are useful data structures in R, but one limitation of vectors is that you cannot combine different data types into the same object. You can try this out with the code below:
 ```{r class.source = "bg-warning"}

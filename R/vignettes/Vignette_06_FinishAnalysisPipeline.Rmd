@@ -1,5 +1,5 @@
 ---
-title: "Vignette 05: Process Data"
+title: "Vignette 06: Finish Analysis Pipeline"
 author: "Grace Smith-Vidaurre"
 date: "2023-12-27"
 output: html_document
@@ -13,11 +13,7 @@ knitr::opts_chunk$set(echo = TRUE, eval = TRUE)
 
 <h2>Vignette Overview and Learning Objectives</h2>
 
-In this fifth vignette, you will begin using the simulated detections of animal movements in the ABISSMAL data processing and analysis workflow, including combining raw data across days and pre-processing the raw data. You will also make visualizations of the processed data. You will continue to use coding skills that you learned in the previous vignettes, and you will learn additional skills that include:
-
-1. Accessing custom functions
-2. Using custom functions
-3. Plotting data with ggplot
+In this sixth vignette, you will finish using the simulated detections of animal movements in the ABISSMAL data processing and analysis workflow. You will detect clusters of detections that represent distinct movement events, and then score behavioral inferences about the movement events. You will also make plots to visualize these behavioral inferences. You will continue to use coding skills that you learned in the previous vignettes, and you will additionally learn how to build more complex visualizations with ggplot.
 
 <h2>Load packages and your working directory path</h2>
 
@@ -33,44 +29,74 @@ path <- "/home/gsvidaurre/Desktop/ABISSMAL_vignettes"
 
 ```
 
-<h2>Plot raw and pre-processed data</h2>
+<h2>Load ABISSMAL functions</h2>
 
-Now that you've combined the raw data per sensor, detected perching events in the raw data, and pre-processed the raw data, it's time to visualize these different datasets. Making visualizations in R is important for generating high-quality figures for publications and presentations, but it's also important for checking your work as you process and analyze data.
-
-In the code below, you'll learn how to use functions from the `ggplot2` package to make barcode style visualizations of the raw and processed detection datasets.
-
-Start by reading in the raw data for each sensor, and convert the timestamps to POSIX format.
 ```{r}
 
-rfid_raw <- read.csv(file.path(path, "Data/raw_combined", "combined_raw_data_RFID.csv")) %>%
-  # The timestamps must be converted to POSIX format every time that the data is read back into R for plotting
-  dplyr::mutate(
-    timestamp_ms = as.POSIXct(format(as.POSIXct(timestamp_ms, tz = "America/New York"), "%Y-%m-%d %H:%M:%OS6"))
-  )
+# Load the function that detects clusters in the pre-processed data
+source("/home/gsvidaurre/Desktop/GitHub_repos/ABISSMAL/R/detect_clusters.R")
 
-# You should see that the timestamp_ms is in "dttm" format, which means that the POSIX conversion was done correctly
-glimpse(rfid_raw)
+# Load the function that scores behavioral inferences about clusters
+source("/home/gsvidaurre/Desktop/GitHub_repos/ABISSMAL/R/score_clusters.R")
 
-irbb_raw <- read.csv(file.path(path, "Data/raw_combined", "combined_raw_data_IRBB.csv")) %>%
-  # The timestamps must be converted to POSIX format every time that the data is read back into R for plotting
-  dplyr::mutate(
-    timestamp_ms = as.POSIXct(format(as.POSIXct(timestamp_ms, tz = "America/New York"), "%Y-%m-%d %H:%M:%OS6"))
-  )
-
-glimpse(irbb_raw)
+# Load a script with utility functions that each function above requires
+source("/home/gsvidaurre/Desktop/GitHub_repos/ABISSMAL/R/utilities.R")
 
 ```
 
-Next, start plotting this raw data using functions from `ggplot2`. This package is part of the `tidyverse`, but can also be installed and used separately. You can check out this [link](https://ggplot2.tidyverse.org/) for more resources to learn how to use ggplot to make different types of plots. These resources include sections of three different books with hands-on exercises at different levels, as well as an online course and a webinar.
+<h2>Finish the ABISSMAL pipeline</h2>
 
-Thde `ggplot2` package has a unique syntax for building plots, in which you start making a plot by calling the function `ggplot()`, and then add features by layering on other `ggplot2` functions with the `+` symbol.
-
-If you call `ggplot()`, you'll see that the function immediately draws a blank plot in your Plots pane in RStudio.
+Here you'll use the ABISSMAL function `detect_clusters()` to identify clusters of detections across sensor types (e.g. detections from different sensors that were recorded close together in time). 
 ```{r}
 
-ggplot()
+# The run length needs to be set to 1 in order to correctly detect detection clusters of length 2
+detect_clusters(file_nms = c("pre_processed_data_RFID.csv", "pre_processed_data_IRBB.csv"), threshold = 2, run_length = 1, sensor_id_col_nm = "sensor_id", timestamps_col_nm = "timestamp_ms", PIT_tag_col_nm = "PIT_tag", rfid_label = "RFID", preproc_metadata_col_nms = c("thin_threshold_s", "data_stage", "date_pre_processed"), general_metadata_col_nms = c("chamber_id", "year", "month", "day"), path = path, data_dir = "Data/processed", out_dir = "Data/processed", out_file_nm = "detection_clusters.csv", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS")
 
 ```
+
+Next, you'll score behavioral inferences about these detection clusters with the function `score_clusters()`. 
+```{r}
+
+score_clusters(file_nm = "detection_clusters.csv", rfid_label = "RFID", camera_label = NULL, outer_irbb_label = "Outer Beam Breakers", inner_irbb_label = "Inner Beam Breakers", video_metadata_col_nms = NULL, integrate_perching = TRUE, perching_dataset = "RFID", perching_prefix = "perching_events_", sensor_id_col_nm = "sensor_id", PIT_tag_col_nm = "PIT_tag", pixel_col_nm = NULL, video_width = NULL, video_height = NULL, integrate_preproc_video = FALSE, video_file_nm = NULL, timestamps_col_nm = NULL, path = path, data_dir = "Data/processed", out_dir = "Data/processed", out_file_nm = "scored_detectionClusters.csv", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS")
+
+```
+
+<h2>Check final results</h2>
+
+Now that you finished running the ABISSMAL pipeline to detect and make inferences about movement events, you can check the final results.
+```{r}
+
+scored_clusters <- read.csv(file.path(path, "Data/processed", "scored_detectionClusters.csv"))
+
+glimpse(scored_clusters)
+
+```
+
+How many entrances and exits were scored per day? In order to count the number of each of these events scored per day, you need to 1) make a new column with information about the day per timestamp, 2) drop rows with missing data for direction scored, 3) group the data frame by day and direction scored, and 4) count the number of rows per group.
+```{r}
+
+scored_clusters %>%
+  # Extract the day from each timestamp and make a new column with this information
+  dplyr::mutate(
+    day = lubridate::day(start)
+  ) %>% 
+  # Drop rows with missing values for direction_scored
+  # Here you're using the function is.na(), which will return TRUE when it finds an NA (missing) value in the given column. By placing the ! before this function, you're inverting the output, so that all TRUE values are converted to FALSE. As a result, dplyr::filter will drop all rows that return the value FALSE (e.g. all rows with missing values in the column direction_scored)
+  dplyr::filter(!is.na(direction_scored)) %>%
+  # Group the data frame by both columns for which you want to count rows
+  group_by(day, direction_scored) %>% 
+  # The number of rows here is the number of exits or entrances scored per day
+  dplyr::summarise(
+    n = n()
+  )
+
+```
+
+Four entrance and exit events were scored per day. Does this line up with the anticipated number of exits and entrances per day? If you go back to the code where you created the simulated raw datasets in vignettes 3 and 4, you should see that you started by simulating 2 entrances and exits per day across the RFID and beam breaker datasets. Then, you added 2 more entrance and 2 more exit events per day when you simulated RFID detection failures (e.g. movements captured by the beam breakers only). `score_clusters()` detected the correct number of entrances and exits per day.
+
+
+TKTK continue with summarizing perching data, individual identity information, then a complex barcode plot with color encoding individual, line type indicating the direction of movement, and perching events as dots above these lines.
+
 
 The plot will still remain blank even if you supply information about your data in order to set up plot aesthetics.
 ```{r}

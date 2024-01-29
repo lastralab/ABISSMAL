@@ -50,26 +50,35 @@ glimpse(rfid_ts)
 
 ```{r}
 
-# For the beam breakers, simulate timestamps for an entrance, an exit, and then another entrance and exit
-irbb_ts <- c("09:59:59", "10:05:01", "10:59:59", "11:05:01")
+# Simulate outer and inner beam breaker timestamps for an entrance, an exit, and then another entrance and exit
+o_irbb_ts <- c("09:59:59", "10:05:01", "10:59:59", "11:05:01")
+i_irbb_ts <- c("10:00:01", "10:04:59", "11:00:01", "11:04:59")
 
-# Simulate some RFID detection failures for the beam breaker data
-irbb_ts <- c(irbb_ts, "06:05:05", "06:35:08", "07:15:40", "11:10:25")
+# Simulate some RFID detection failures across both beam breaker pairs
+# These RFID detection failures occurred over 2 additional simulated entrances and 2 additional simulated exits 
+o_irbb_ts <- c(o_irbb_ts, "06:05:05", "06:35:08", "07:15:40", "11:10:25")
+i_irbb_ts <- c(i_irbb_ts, "06:05:04", "06:35:09", "07:15:41", "11:10:24")
 
-# Simulate some stray beam breaker detections
-irbb_ts <- c(irbb_ts, "09:45:01", "09:45:02", "09:45:03", "09:45:04", "09:45:05", "09:45:06", "09:45:07", "09:45:08", "09:45:09", "09:45:10", "09:45:11")
+# Simulate some stray detections for the outer beam breaker
+o_irbb_ts <- c(o_irbb_ts, "09:45:01", "09:45:02", "09:45:03", "09:45:04", "09:45:05", "09:45:06", "09:45:07", "09:45:08", "09:45:09", "09:45:10", "09:45:11")
 
-glimpse(irbb_ts)
+glimpse(o_irbb_ts)
+glimpse(i_irbb_ts)
 
 ```
 
-<h3>Simulate 2 days of RFID data collection</h3>
+<h3>Simulate 3 days of RFID data collection</h3>
 
 In the code below, you'll use combine the vector of RFID timestamps that you made above with metadata in a data frame. This metadata will include the year, month, and day, as well as a column with 2 unique PIT tag identifiers (1 for each simulated individual), and a column with the sensor type. You should recognize some of this code from the previous vignette:
 ```{r}
 
 # Make a vector for the experimental replicate
 exp_rep <- rep(x = "Nest_01", times = length(rfid_ts))
+
+# Make a vector of the PIT tag codes
+# Allocate the first 4 RFID detections to the first individual, the first perching event (4 detections) to the first individual, and the second perching event (6 detections) to the second individual
+# The 3 rep() expressions are combined into a single vector using the c() function
+PIT_tag <- c(rep("1357aabbcc", 4), rep("1357aabbcc", 4), rep("2468zzyyxx", 6))
 
 # Make the data frame with the experimental replicate metadata and the timestamps
 sim_dats_rfid <- data.frame(chamber_id = exp_rep, timestamps = rfid_ts)
@@ -83,9 +92,9 @@ sim_dats_rfid <- sim_dats_rfid %>%
     month = 08,
     day = 01
   ) %>%
-  # Allocate the first half of the detections to the first individual using nrow(.)/2, and the second half of the detctions to the second individual using nrow(.)/2 again. Both of the rep() expressions are combined into a single vector using the c() function
+  # Add the PIT tag metadata as a new column
   dplyr::mutate(
-    PIT_tag = c(rep("1357aabbcc", nrow(.)/2), rep("2468zzyyxx", nrow(.)/2))
+    PIT_tag = PIT_tag
   ) %>% 
   dplyr::mutate(
     sensor_id = "RFID"
@@ -106,9 +115,15 @@ sim_dats_rfid <- sim_dats_rfid %>%
       dplyr::mutate(
         day = 02
       )
+  ) %>% 
+  bind_rows(
+    sim_dats_rfid %>% 
+      dplyr::mutate(
+        day = 03
+      )
   )
 
-glimpse(sim_dats_rfid) # Double the number of rows, looks good
+glimpse(sim_dats_rfid) # Triple the number of rows, looks good
 
 ```
 
@@ -124,9 +139,9 @@ sim_dats_rfid$day
 sim_dats_rfid[["day"]]
 
 # You can use the function unique() to see the unique values of any vector, including a column of a data frame
-unique(sim_dats_rfid$day) # Two days, looks good
+unique(sim_dats_rfid$day) # Three days, looks good
 
-unique(sim_dats_rfid[["day"]]) # Two days, looks good
+unique(sim_dats_rfid[["day"]]) # Three days, looks good
 
 ```
 
@@ -135,29 +150,32 @@ unique(sim_dats_rfid[["day"]]) # Two days, looks good
 You can also check the unique values in a column using functions from the tidyverse. In the expression below, you're piping `sim_dats_rfid` into the function `pull()`, which lets you pull the column `day` out of the data frame as a vector, and then that vector is piped into the function `unique()` to check the unique values contained in the vector. The function `unique()` does not need an argument inside of the parentheses here because you're already piping the output that it needs directly into the function.
 ```{r}
 
-# Two days, looks good
+# Three days, looks good
 sim_dats_rfid %>% 
   pull(day) %>% 
   unique()
 
 ```
 
-<h3>Simulate 2 days of beam breaker data collection</h3>
+<h3>Simulate 3 days of beam breaker data collection</h3>
 
-Next, repeat this process of creating a data frame with metadata for the infrared beam breaker dataset. Since the beam breakers do not collect unique individual identity information, you will add columns for the year, month, day, and sensor type. You will also simulate data collection for the beam breakers over the same two days as the RFID system.
+Next, repeat this process of creating a data frame with metadata for the infrared beam breaker datasets. Since the beam breakers do not collect unique individual identity information, you will add columns for the year, month, day, and sensor type. You will also simulate data collection for the beam breakers over the same two days as the RFID system.
 ```{r}
 
-# Overwrite the vector exp_rep with a new vector the same length as irbb_ts
-exp_rep <- rep(x = "Nest_01", times = length(irbb_ts))
+# Overwrite the vector exp_rep with a new vector the same length as o_irbb_ts and i_irbb_ts together
+exp_rep <- rep(x = "Nest_01", times = length(o_irbb_ts) + length(i_irbb_ts))
 
-sim_dats_irbb <- data.frame(chamber_id = exp_rep, timestamps = irbb_ts)
+# Here the timestamps of both beam breaker pairs have been added to the same column using c()
+sim_dats_irbb <- data.frame(chamber_id = exp_rep, timestamps = c(o_irbb_ts, i_irbb_ts))
 
 sim_dats_irbb <- sim_dats_irbb %>%
   dplyr::mutate(
     year = 2023,
     month = 08,
     day = 01,
-    sensor_id = "Beam breakers"
+    # Add a unique sensor identifier by beam breaker pair
+    # Each unique label is repeated for the length of the vector of timestamps of each beam breaker pair
+    sensor_id = c(rep("Outer Beam Breakers", length(o_irbb_ts)), rep("Inner Beam Breakers", length(i_irbb_ts)))
   )
 
 glimpse(sim_dats_irbb)
@@ -168,11 +186,17 @@ sim_dats_irbb <- sim_dats_irbb %>%
       dplyr::mutate(
         day = 02
       )
+  ) %>% 
+  bind_rows(
+    sim_dats_irbb %>% 
+      dplyr::mutate(
+        day = 03
+      )
   )
 
-glimpse(sim_dats_irbb) # Double the number of rows, looks good
+glimpse(sim_dats_irbb) # Triple the number of rows, looks good
 
-# Two days, looks good
+# Three days, looks good
 sim_dats_irbb %>% 
   pull(day) %>% 
   unique()
@@ -381,7 +405,7 @@ list.files(file.path(path, "Data/RFID"))
 You just wrote out 2 spreadsheets using 1 loop, but you wrote out the same data frame to each spreadsheet. In order to write out a different data frame to each spreadsheet, you add the data frame filtering that you learned above to the loop. In the code below, you'll create another vector object called `days`, and then use the iterating variable to filter `sim_dats_rfid` by each day in `days`.
 ```{r eval = FALSE}
 
-days <- c(1, 2)
+days <- c(1, 2, 3)
 
 lapply(X = 1:length(files), FUN = function(x){
   
@@ -410,14 +434,14 @@ Now you can put all of these pieces together and use the loop to write out a spr
 ```{r eval = FALSE}
 
 # Make a vector of the custom file names to write out
-files <- c("RFID_simulated_Pair-01_2023_08_01.csv", "RFID_simulated_Pair-01_2023_08_02.csv")
+files <- c("RFID_simulated_Pair-01_2023_08_01.csv", "RFID_simulated_Pair-01_2023_08_02.csv", "RFID_simulated_Pair-01_2023_08_03.csv")
 
 # Add the file path for the correct directory
 files <- file.path(path, "Data/RFID", files) 
 files
 
 # Make a vector of the days to write out (1 day per iteration of the loop)
-days <- c(1, 2)
+days <- c(1, 2, 3)
 days
 
 # You can drop the lapply() argument names, since you're supplying the arguments in the order that the function expects
@@ -444,7 +468,7 @@ list.files(file.path(path, "Data/RFID"))
 You can remove these files.
 ```{r eval = FALSE}
 
-files <- c("RFID_simulated_Pair-01_2023_08_01.csv", "RFID_simulated_Pair-01_2023_08_02.csv")
+files <- c("RFID_simulated_Pair-01_2023_08_01.csv", "RFID_simulated_Pair-01_2023_08_02.csv", "RFID_simulated_Pair-01_2023_08_03.csv")
 
 # Add the file path for the correct directory
 files <- file.path(path, "Data/RFID", files) 
@@ -470,8 +494,8 @@ To carry out the file filtering and writing, you'll use a type of object called 
 
 # Make a list of the custom file names to write out
 files <- list(
-  c("RFID_simulated_Pair-01_2023_08_01.csv", "RFID_simulated_Pair-01_2023_08_02.csv"),
-  c("IRBB_simulated_Pair-01_2023_08_01.csv", "IRBB_simulated_Pair-01_2023_08_02.csv")
+  c("RFID_simulated_Pair-01_2023_08_01.csv", "RFID_simulated_Pair-01_2023_08_02.csv", "RFID_simulated_Pair-01_2023_08_03.csv"),
+  c("IRBB_simulated_Pair-01_2023_08_01.csv", "IRBB_simulated_Pair-01_2023_08_02.csv", "IRBB_simulated_Pair-01_2023_08_03.csv")
 )
 
 glimpse(files)
@@ -498,8 +522,8 @@ Lists can also have named elements, which makes it possible to access elements b
 
 # Make a named list of the custom file names to write out
 files <- list(
-  `RFID` = c("RFID_simulated_Pair-01_2023_08_01.csv", "RFID_simulated_Pair-01_2023_08_02.csv"),
-  `IRBB` = c("IRBB_simulated_Pair-01_2023_08_01.csv", "IRBB_simulated_Pair-01_2023_08_02.csv")
+  `RFID` = c("RFID_simulated_Pair-01_2023_08_01.csv", "RFID_simulated_Pair-01_2023_08_02.csv", "RFID_simulated_Pair-01_2023_08_03.csv"),
+  `IRBB` = c("IRBB_simulated_Pair-01_2023_08_01.csv", "IRBB_simulated_Pair-01_2023_08_02.csv", "IRBB_simulated_Pair-01_2023_08_03.csv")
 )
 
 glimpse(files)
@@ -529,8 +553,8 @@ sensors
 
 # Make a named list of the custom file names to write out
 files <- list(
-  `RFID` = c("RFID_simulated_Pair-01_2023_08_01.csv", "RFID_simulated_Pair-01_2023_08_02.csv"),
-  `IRBB` = c("IRBB_simulated_Pair-01_2023_08_01.csv", "IRBB_simulated_Pair-01_2023_08_02.csv")
+  `RFID` = c("RFID_simulated_Pair-01_2023_08_01.csv", "RFID_simulated_Pair-01_2023_08_02.csv", "RFID_simulated_Pair-01_2023_08_03.csv"),
+  `IRBB` = c("IRBB_simulated_Pair-01_2023_08_01.csv", "IRBB_simulated_Pair-01_2023_08_02.csv", "IRBB_simulated_Pair-01_2023_08_03.csv")
 )
 
 files
@@ -546,8 +570,8 @@ file_dirs
 # Make a list of the days to write out for each sensor
 # This could be a single vector rather than a list since you want to write out the same days per sensor, but a list is useful in case you wanted to change the days (and number of days) to write out per sensor
 days <- list(
-  `RFID` = c(1, 2),
-  `IRBB` = c(1, 2)
+  `RFID` = c(1, 2, 3),
+  `IRBB` = c(1, 2, 3)
 )
 
 days
