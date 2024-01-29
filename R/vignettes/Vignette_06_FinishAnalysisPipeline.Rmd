@@ -66,7 +66,13 @@ score_clusters(file_nm = "detection_clusters.csv", rfid_label = "RFID", camera_l
 Now that you finished running the ABISSMAL pipeline to detect and make inferences about movement events, you can check the final results.
 ```{r}
 
-scored_clusters <- read.csv(file.path(path, "Data/processed", "scored_detectionClusters.csv"))
+scored_clusters <- read.csv(file.path(path, "Data/processed", "scored_detectionClusters.csv")) %>% 
+  # The timestamps must be converted to POSIX format every time that the data is read back into R for plotting
+  dplyr::mutate(
+    start = as.POSIXct(format(as.POSIXct(start, tz = "America/New York"), "%Y-%m-%d %H:%M:%OS6")),
+    end = as.POSIXct(format(as.POSIXct(end, tz = "America/New York"), "%Y-%m-%d %H:%M:%OS6"))
+  ) %>% 
+  dplyr::arrange(-desc(start))
 
 glimpse(scored_clusters)
 
@@ -94,300 +100,358 @@ scored_clusters %>%
 
 Four entrance and exit events were scored per day. Does this line up with the anticipated number of exits and entrances per day? If you go back to the code where you created the simulated raw datasets in vignettes 3 and 4, you should see that you started by simulating 2 entrances and exits per day across the RFID and beam breaker datasets. Then, you added 2 more entrance and 2 more exit events per day when you simulated RFID detection failures (e.g. movements captured by the beam breakers only). `score_clusters()` detected the correct number of entrances and exits per day.
 
-
-TKTK continue with summarizing perching data, individual identity information, then a complex barcode plot with color encoding individual, line type indicating the direction of movement, and perching events as dots above these lines.
-
-
-The plot will still remain blank even if you supply information about your data in order to set up plot aesthetics.
+Next, check out the perching events. Start by filtering out all rows that were not scored as perching events (rows that have NA values in the column "perching_PIT_tag"). Then, select only the columns that have information that is useful to check: the PIT tag codes, as well as the start and end of each perching event.
 ```{r}
 
-ggplot(data = rfid_raw)
+scored_clusters %>% 
+  # Use a conditional statement with is.na() to retain only rows that have PIT tag codes associated with perching events
+  dplyr::filter(!is.na(perching_PIT_tag)) %>%
+  # Then select only the columns that you want to check visually
+  dplyr::select(start, end, perching_PIT_tag)
 
 ```
 
-The functions that you use to layer aesthetics over the empty plot will depend on the type of plot that you want to make. For this example, you will make a barcode style plot, in which each timestamp is shown as a thin vertical line. Barcode plots can be useful visualizations when you're working with timestamps, since the most important information is contained in one dimension (time on the x-axis). If you were to summarize the number of timestamps recorded on each day, then you could create a line plot instead (see a plot in the next vignette).
+As specified in vignettes 3 and 4, the first perching event each day was performed by the first individual (PIT tag 1357aabbcc), and the second was attributed to the second individual (PIT tag 2468zzyyxx).
 
-
-
-
-TKTK the code below complicates adding a legend. Consider this code to be a more complex version of the figure...maybe save for another script? And here add just a single sensor
-
-You can layer the function `geom_segment()` over the base plot layer. `geom_segment()` allows you to add lines to a plot, and the lines can communicate information in one or two dimensions (width on the x-axis and height on the x-axis). In the plot you'll make below, you'll use `geom_segment()` to add lines to the plot that contain temporal information in one dimension (timestamps, information on the x-axis only).
+How many movement events that were not perching events were attributed to each individual?
 ```{r}
 
-ggplot() +
-  
-  # Add a vertical line for each RFID timestamp
-  geom_segment(
-    data = rfid_raw,
-    aes(x = timestamp_ms, y = 0, xend = timestamp_ms, yend = 1),
-    color = "blue",
-    linewidth = 0.3
-  )
-  
-```
-
-In the code above, you used the argument `data` inside of `geom_segment()` to tell the function where to get data for drawing the line segments. 
-
-In the argument `aes()`, which is a standard `ggplot2` function for encoding plot aesthetics, you specified that the data to plot on the x-axis are the timestamps for each detection, by providing the column name `timestamp_ms` to the inner argument `x`. You also specified what data should be plotted on the y-axis using the argument `y`. In this case, you can set `y` to any value that you want, since you aren't plotting data along this axis.
-
-The arguments `x` and `y` determine where the beginning of each line is drawn on the x and y-axes, respectively. You also need to specify where you want the line segment to **end** on each axis. On the x-axis, by supplying the column name `timestamp_ms` to the argument `xend`, you're indicating that you want the line segment to start and end on the same timestamp. On the y-axis, the number that you supply to `yend` will determine the height of each line. Since you're adding data from a single sensor here, the height of the line does not matter much. If you changed the code to read `yend = 0.1`, the plot would look very similar, but the y-axis would be scaled to have 0.1 as the maximum value instead of 1.
-
-The last two arguments inside of `geom_segment()` control the color of the line segments (`color`), as well as the width of ech line (`linewidth`). Specifying the width of each line is different than specifying where each line segment starts and ends.
-
-You can continue adding information to this plot by layering on the raw beam breaker detections:
-```{r}
-
-ggplot() +
-  
-  # Add a vertical line for each RFID timestamp
-  geom_segment(
-    data = rfid_raw,
-    aes(x = timestamp_ms, xend = timestamp_ms, y = 0, yend = 1),
-    color = "blue",
-    linewidth = 0.3
-  ) +
-  
-  # Add a vertical line for each beam breaker timestamp
-  geom_segment(
-    data = irbb_raw,
-    aes(x = timestamp_ms, xend = timestamp_ms, y = 0, yend = 1),
-    color = "orange",
-    linewidth = 0.3
+scored_clusters %>%
+  # Extract the day from each timestamp and make a new column with this information
+  dplyr::mutate(
+    day = lubridate::day(start)
+  ) %>%
+  # Use a conditional statement with is.na() to retain only rows that have PIT tag codes not associated with perching events
+  # Here you're combining two conditional statements, which allows you to search for rows in the column individual_initiated that have PIT tag codes, but that also do not have a sensor label in the column perching_sensor (e.g. movement events that were not perching events)
+  dplyr::filter(!is.na(individual_initiated) & is.na(perching_sensor)) %>%
+  group_by(day, individual_initiated) %>% 
+  dplyr::summarise(
+    n = n()
   )
 
 ```
 
-This plot has more information, but it's difficult to interpret. Some of the detections for each sensor type occurred so close in time that they're layered nearly directly over one another. You can change the position of the line segements on the y-axis in order to have better resolution for visualizng the datasets from both sensors.
+As you can see, 4 movement events that were not perching events were attributed to the first individual (PIT tag code 1357aabbcc) on each day. This is exactly what we expected when creating the simulated dataset (see vignettes 3 and 4). More non-perching movement events were detected across these days, but those events were not always captured by the RFID antenna (e.g. the simulated RFID detection failures that were captured by the beam breakers only). The beam breakers captured those movement events but cannot record individual identity.
 
+<h2>Build complex barcode plot</h2>
+
+Now that you checked out the final results, you can visualize them. In the code below, you'll learn how to build a barcode plot that is more complex than the plot you made in vignette 5. For this plot, it would be helpful to visualize 3 types of behavioral inferences or types of information over time: the direction of movement (when available), the identity of the individual (when available), and perching events.
+
+You can start building the plot by adding vertical line segments for non-perching movement events. The color of each line will indicate the individual identity, or whether individual identity could not be assigned. The line type of each line will indicate the direction of movement, or if direction could not be scored.
+
+In order to encode colors and line types correctly in the plot, you need to modify the data frame of final results to convert NAs in the two associated columns to more meaningful information. For instance, when individual identity is missing, it would be useful to convert the associated NA value to "unassigned". In the code below, you will use the function `is.na()` inside of `ifelse()` conditional statements to change the NA values inside the columns individual_initiated and direction_scored to more useful information for plotting purposes.
+
+First you can practice using `is.na()` inside of `ifelse()` to create a new vector. In the code below, you're providing the conditional statement that you want to test (here you're testing whether the day is the first day of the month), the value you want to add to the vector if the condition is true ("Day 1" of data collection), and then the value that you want to add if the condition is false ("Day 2" of data collection, since there are only 2 dates in each dataset). 
+```{r}
+
+# All NAs in this column are converted to "unassigned", but all other values were not changed
+ifelse(test = is.na(scored_clusters$individual_initiated), yes = "unassigned", no = scored_clusters$individual_initiated)
+
+```
+
+Now you can use `is.na()` inside of `ifelse` statements to modify columns in the data frame.
+```{r}
+
+scored_clusters_gg <- scored_clusters %>% 
+  dplyr::mutate(
+    # If this column has an NA value, then convert it to "unassigned"
+    # Else, do not change the given value
+    individual_initiated = ifelse(is.na(individual_initiated), "unassigned", individual_initiated),
+    # Repeat this process for the direction_scored column but with a different value
+    # Also, in the conditional statement below, you added is.na(perching_sensor) to only convert values of direction_scored when they were not labeled as perching events
+    direction_scored = ifelse(is.na(direction_scored) & is.na(perching_sensor), "not scored", direction_scored)
+  ) %>% 
+  # Next, you'll convert each of these columns to type factor and arrange the levels in order for plotting
+  dplyr::mutate(
+    individual_initiated = factor(individual_initiated, levels = c("1357aabbcc", "2468zzyyxx", "unassigned")),
+    direction_scored = factor(direction_scored, levels = c("entrance", "exit", "not scored"))
+  )
+
+# Check the resulting changes using the function distinct() to see all of the unique values for both columns that were modified
+# The NA values in the direction_scored column are expected since these refer to perching events
+scored_clusters_gg %>% 
+  distinct(individual_initiated, direction_scored)
+
+```
+
+You can use this modified data frame to build the plot. In the code below, you'll add lines colored by individual identity and with line types encoding the direction of movement. First you'll specify the plot aesthetics:
+```{r}
+
+# Colors will be encoded in the same order as the levels of the column individual_initiated, so orange will encode "1357aabbcc"
+levels(scored_clusters_gg$individual_initiated)
+cols <- c("orange", "darkgreen", "black")
+
+# Line types will be encoded in the same order as the levels of the column direction_scored, so dotted will encode "not scored"
+levels(scored_clusters_gg$direction_scored)
+ltys <- c("solid", "longdash", "dotted")
+  
+```
+
+Then you can add lines to the plot by individual identity. Here, you're splitting up the `geom_segment()` calls by unique values in the individual_initiated column. You only added segments for the first individual and all non-perching events that were not assigned to an individual, because from checking the results above, you know that no non-perching events were assigned to the second individual.
 ```{r}
 
 ggplot() +
   
-  # Add a vertical line for each RFID timestamp
+  # Add a vertical line for each non-perching event assigned to the first individual
   geom_segment(
-    data = rfid_raw,
-    aes(x = timestamp_ms, xend = timestamp_ms, y = 0, yend = 0.45),
-    color = "blue",
+    data = scored_clusters_gg %>% 
+      dplyr::filter(individual_initiated == "1357aabbcc"),
+    aes(x = start, y = 0, xend = end, yend = 0.5, linetype = direction_scored),
+    color = "orange",
     linewidth = 0.3
   ) +
   
-  # Add a vertical line for each beam breaker timestamp
+  # Add a vertical line for each non-perching event assigned to the first individual
   geom_segment(
-    data = irbb_raw,
-    aes(x = timestamp_ms, xend = timestamp_ms, y = 0.5, yend = 1),
-    color = "orange",
+    data = scored_clusters_gg %>% 
+      dplyr::filter(individual_initiated == "unassigned"),
+    aes(x = start, y = 0.6, xend = end, yend = 1.1, linetype = direction_scored),
+    color = "black",
     linewidth = 0.3
+  ) +
+  
+  # Add the custom linetype values to this plot
+  scale_linetype_manual(values = ltys) +
+  
+  # Remove the y-axis label
+  ylab("") +
+  
+  # Use this function to convert the plot background to black and white
+  theme_bw() +
+  
+  # Use aesthetics functions to remove the y-axis labels and ticks
+  # Add an argument to change where the legend is located in the plot
+  theme(
+    axis.text.y = element_blank(),
+    axis.ticks.y = element_blank(),
+    legend.position = "top"
   )
   
 ```
 
-This change to the start and end coordinates of how segments are drawn on the y-axis offset the two sets of line segments per sensor dataset. The plot is now less crowded and it's easier to visualize patterns over time and between datasets now.
+To make this plot, you vertically offset the line segments for the first individual and those that were unassigned. This vertical offset makes it easier to visually compare patterns over time. You created this vertical offset by changing the values used for `y`
+and `yend` in the second `geom_segment()` layer, so that those line segments would start higher than the end of the first set of segments. 
 
-The plot is looking a lot better, but there's a problem with the x-axis. The x-axis currently holds two types of information: 1) the day of data collection, and 2) the time of day. It's difficult to see when detections were recorded on each day, and whether detections were recorded over similar or different time periods between days. To make the x-axis more interpretable, you can change the plot to be "faceted", so that you have 1 panel per day of data collection.
-```{r}
+You can make some additional modifications that would help make this plot easier to interpret. First, the panel or facet labels on the left could be changed from the date to the day of data collection (e.g. "Day 1"). The x-axis labels could also be changed to show only the time of day (remove the month and day), and there could also be more labels available (e.g. a label each half hour).
 
-ggplot() +
-  
-  # Add a vertical line for each RFID timestamp
-  geom_segment(
-    data = rfid_raw,
-    aes(x = timestamp_ms, xend = timestamp_ms, y = 0, yend = 0.45),
-    color = "blue",
-    linewidth = 0.3
-  ) +
-  
-  # Add a vertical line for each beam breaker timestamp
-  geom_segment(
-    data = irbb_raw,
-    aes(x = timestamp_ms, xend = timestamp_ms, y = 0.5, yend = 1),
-    color = "orange",
-    linewidth = 0.3
-  ) +
-  
-  # Facet the plot by day (e.g. create a panel per day)
-  facet_wrap(~ day, nrow = 2, strip.position = "left")
-
-```
-
-The overall plot structure has improved a lot, but are still some modifications that would help interpretability. First, the panel or facet labels on the left could be changed from the date to the day of data collection (e.g. "Day 1"). The x-axis labels could also be changed to show only the time of day (remove the month and day), and there could also be more labels available (e.g. label each hour).
-
-You can start by modifying the data frame of raw data for each senor to add information about the day of data collection. You'll create this new column by relying on conditional statements with the `ifelse()` function, since there are only 2 days of data collection that need recoding.
-
-First you can practice using `ifelse()` to create a new vector. In the code below, you're providing the conditional statement that you want to test (here you're testing whether the day is the first day of the month), the value you want to add to the vector if the condition is true ("Day 1" of data collection), and then the value that you want to add if the condition is false ("Day 2" of data collection, since there are only 2 dates in each dataset). 
-```{r}
-
-ifelse(test = rfid_raw$day == 1, yes = "Day 1", no = "Day 2")
-
-```
-
-Now you can create a new column per data frame using an `ifelse` statement. 
+You can start by modifying the data frame to add information about the day of data collection. You'll create this new column by relying on conditional statements with the `ifelse()` function, since there are only 3 days of data collection that need recoding.
 ```{r}
 
 # Create a new column in the raw data for the date of data collection
-rfid_raw2 <- rfid_raw %>% 
+scored_clusters_gg2 <- scored_clusters_gg %>% 
+  # First you need to create a column with information about the day
   dplyr::mutate(
-    day_label = ifelse(day == 1, "Day 1", "Day 2")
-  )
-  
-# You should see that the new column "day_label" was created
-# You'll see that a new year, month, and day were appended to the updated timestamps, but this is expected (see above)
-glimpse(rfid_raw2)
-
-# Repeat this process for the beam breaker data
-irbb_raw2 <- irbb_raw %>% 
+    day = lubridate::day(start)
+  ) %>% 
   dplyr::mutate(
-    day_label = ifelse(day == 1, "Day 1", "Day 2")
+    # Then recode the label for each day and save this in a new column
+    day_label = ifelse(day == 1, "Day 1", day), # Here the last argument is day because the column day_label does not exist yet
+    day_label = ifelse(day == 2, "Day 2", day_label),
+    day_label = ifelse(day == 3, "Day 3", day_label)
   )
 
-glimpse(irbb_raw2)
+# Looks good  
+glimpse(scored_clusters_gg2)
+
+scored_clusters_gg2 %>% 
+  distinct(day_label)
 
 ```
 
 Now you can update the code to include the new date labels:
 ```{r}
 
-ggplot() +
+# Add the data frame as the default dataset for the base layer plot, so that the facet_wrap() layer below has data to plot
+ggplot(data = scored_clusters_gg) +
   
-  # Add a vertical line for each RFID timestamp
-  # Use the new version of this data frame with the new day_label column
-  # Make sure to use the new timestamp column
+  # Add a vertical line for each non-perching event assigned to the first individual
   geom_segment(
-    data = rfid_raw2,
-    aes(x = timestamp_ms, xend = timestamp_ms, y = 0, yend = 0.45),
-    color = "blue",
-    linewidth = 0.3
-  ) +
-  
-  # Add a vertical line for each beam breaker timestamp
-  # Use the new version of this data frame with the new day_label column
-  # Make sure to use the new timestamp column
-  geom_segment(
-    data = irbb_raw2,
-    aes(x = timestamp_ms, xend = timestamp_ms, y = 0.5, yend = 1),
+    data = scored_clusters_gg2 %>% 
+      dplyr::filter(individual_initiated == "1357aabbcc"),
+    aes(x = start, y = 0, xend = end, yend = 0.5, linetype = direction_scored),
     color = "orange",
     linewidth = 0.3
   ) +
   
-  # Facet the plot by day (e.g. create a panel per day)
-  # Use the new day labels here
-  facet_wrap(~ day_label, nrow = 2, strip.position = "left")
-
-```
-
-Now that information about the day of data collection has been moved to the facet labels, you need to fix the x-axis labels. The plot will be more interpretable if you can line up the timestamps by hour and minute for a direct comparison across days.  
-
-To line up the timestamps across days, you will need to update the format of the timestamps column. The code to convert the timestamps to a different format is nested and repetitive, but the timestamp conversion will be performed correctly. When you prompt the R to convert the timestamps to hours, minutes, and seconds only, R adds a default year, month, and day beforehand (likely the current date that you rant the code). This is expected, and it is not an error, but rather makes it possible for the timestamps to align correctly over days in the plot (since R sees all timestamps occurring on a single day).
-```{r}
-
-rfid_raw3 <- rfid_raw2 %>% 
-  dplyr::mutate(
-    timestamp = as.POSIXct(strptime(format(as.POSIXct(timestamp_ms), "%H:%M:%S"), format = "%H:%M:%S"))
-  )
-  
-# You'll see that a new year, month, and day were appended to the updated timestamps, but this is expected (see above)
-glimpse(rfid_raw3)
-
-# Repeat this process for the beam breaker data
-irbb_raw3 <- irbb_raw2 %>% 
-  dplyr::mutate(
-    timestamp = as.POSIXct(strptime(format(as.POSIXct(timestamp_ms), "%H:%M:%S"), format = "%H:%M:%S"))
-  )
-
-glimpse(irbb_raw3)
-
-```
-
-Now you can update the plotting code to change the aesthetics of the x-axis using the function `scale_x_datetime()` to specify that you want x-axis labels every half hour:
-```{r}
-
-ggplot() +
-  
-  # Add a vertical line for each RFID timestamp
-  # Use the new version of this data frame with the new day_label column
-  # Make sure to use the new timestamp column
+  # Add a vertical line for each non-perching event assigned to the first individual
   geom_segment(
-    data = rfid_raw3,
-    aes(x = timestamp, xend = timestamp, y = 0, yend = 0.45),
-    color = "blue",
+    data = scored_clusters_gg2 %>% 
+      dplyr::filter(individual_initiated == "unassigned"),
+    aes(x = start, y = 0.6, xend = end, yend = 1.1, linetype = direction_scored),
+    color = "black",
     linewidth = 0.3
   ) +
   
-  # Add a vertical line for each beam breaker timestamp
-  # Use the new version of this data frame with the new day_label column
-  # Make sure to use the new timestamp column
-  geom_segment(
-    data = irbb_raw3,
-    aes(x = timestamp, xend = timestamp, y = 0.5, yend = 1),
-    color = "orange",
-    linewidth = 0.3
-  ) +
+  # Add the custom linetype values to this plot
+  scale_linetype_manual(values = ltys) +
   
-  # Facet the plot by day (e.g. create a panel per day)
-  # Use the new day labels here
-  facet_wrap(~ day_label, nrow = 2, strip.position = "left") +
-
-  # Change the aesthetics of the x-axis labels
-  scale_x_datetime(
-    date_breaks = "30 mins",
-    date_labels = "%H:%M"
-  )
-
-```
-
-You can make some minor adjustments to the plot to make it easier on the eyes, including changing the axis titles to be more informative, changing the background to be white, and removing the y-axis text and axis ticks (since the height of each segment does not reflect data that you want to interpret).
-```{r}
-
-ggplot() +
-  
-  # Add a vertical line for each RFID timestamp
-  # Use the new version of this data frame with the new day_label column
-  # Make sure to use the new timestamp column
-  geom_segment(
-    data = rfid_raw3,
-    aes(x = timestamp, xend = timestamp, y = 0, yend = 0.45),
-    color = "blue",
-    linewidth = 0.3
-  ) +
-  
-  # Add a vertical line for each beam breaker timestamp
-  # Use the new version of this data frame with the new day_label column
-  # Make sure to use the new timestamp column
-  geom_segment(
-    data = irbb_raw3,
-    aes(x = timestamp, xend = timestamp, y = 0.5, yend = 1),
-    color = "orange",
-    linewidth = 0.3
-  ) +
-  
-  # Facet the plot by day (e.g. create a panel per day)
-  # Use the new day labels here
-  facet_wrap(~ day_label, nrow = 2, strip.position = "left") +
-  
-  # Change the x and y axis labels
-  xlab("Time") +
-  
-  # Now you can add a y-axis label
-  ylab("Day of data collection") +
-  
-  # Change the aesthetics of the x-axis labels
-  scale_x_datetime(
-    date_breaks = "30 mins",
-    date_labels = "%H:%M"
-  ) +
+  # Remove the y-axis label
+  ylab("") +
   
   # Use this function to convert the plot background to black and white
   theme_bw() +
   
   # Use aesthetics functions to remove the y-axis labels and ticks
+  # Add an argument to change where the legend is located in the plot
   theme(
     axis.text.y = element_blank(),
-    axis.ticks.y = element_blank()
+    axis.ticks.y = element_blank(),
+    legend.position = "top"
+  ) +
+  
+  # Facet the plot by day (e.g. create a panel per day)
+  # Use the new day labels here
+  facet_wrap(~ day_label, nrow = 3, strip.position = "left")
+
+```
+
+Now that information about the day of data collection has been moved to the facet labels, you need to fix the x-axis labels. The plot will be more interpretable if you can line up the timestamps by hour and minute for a direct comparison across days.  
+
+To line up the timestamps across days, you will need to update the format of the columns that hold timestamps. The code to convert the timestamps to a different format is nested and repetitive, but the timestamp conversion will be performed correctly. When you prompt the R to convert the timestamps to hours, minutes, and seconds only, R adds a default year, month, and day beforehand (likely the current date that you rant the code). This is expected, and it is not an error, but rather makes it possible for the timestamps to align correctly over days in the plot (since R sees all timestamps occurring on a single day).
+```{r}
+
+scored_clusters_gg3 <- scored_clusters_gg2 %>% 
+  dplyr::mutate(
+    start_gg = as.POSIXct(strptime(format(as.POSIXct(start), "%H:%M:%S"), format = "%H:%M:%S")),
+    end_gg = as.POSIXct(strptime(format(as.POSIXct(end), "%H:%M:%S"), format = "%H:%M:%S"))
+  )
+  
+# You'll see that a new year, month, and day were appended to the updated timestamps, but this is expected (see above)
+glimpse(scored_clusters_gg3)
+
+```
+
+Now you can update the plotting code to change the aesthetics of the x-axis using the function `scale_x_datetime()` to specify that you want x-axis labels every half hour. Also add an x-axis title:
+```{r}
+
+# Update the dataset in the base layer of the plot, which will be used by all layers that do not have a specific data argument themselves
+ggplot(data = scored_clusters_gg3) +
+  
+  # Add a vertical line for each non-perching event assigned to the first individual
+  geom_segment(
+    data = scored_clusters_gg3 %>% 
+      dplyr::filter(individual_initiated == "1357aabbcc"),
+    aes(x = start_gg, y = 0, xend = end_gg, yend = 0.5, linetype = direction_scored),
+    color = "orange",
+    linewidth = 0.3
+  ) +
+  
+  # Add a vertical line for each non-perching event assigned to the first individual
+  geom_segment(
+    data = scored_clusters_gg3 %>% 
+      dplyr::filter(individual_initiated == "unassigned"),
+    aes(x = start_gg, y = 0.6, xend = end_gg, yend = 1.1, linetype = direction_scored),
+    color = "black",
+    linewidth = 0.3
+  ) +
+  
+  # Add the custom linetype values to this plot
+  scale_linetype_manual(values = ltys) +
+  
+  # Remove the y-axis label
+  ylab("") +
+  
+  # Add a y-axis label
+  xlab("Time") +
+  
+  # Use this function to convert the plot background to black and white
+  theme_bw() +
+  
+  # Use aesthetics functions to remove the y-axis labels and ticks
+  # Add an argument to change where the legend is located in the plot
+  theme(
+    axis.text.y = element_blank(),
+    axis.ticks.y = element_blank(),
+    legend.position = "top"
+  ) +
+  
+  # Facet the plot by day (e.g. create a panel per day)
+  # Use the new day labels here
+  facet_wrap(~ day_label, nrow = 3, strip.position = "left") +
+
+  # Change the aesthetics of the x-axis labels
+  scale_x_datetime(
+    date_breaks = "30 mins",
+    date_labels = "%H:%M"
   )
 
 ```
 
-Finally, you need to add a legend to this plot so you can communicate what the two different colors mean. Adding a legend to this plot is tricky because you manually coded the colors of the line segments in two separate uses in `geom_segment()`. `ggplot2` functions have specific requirements for making a legend, and they can require automated coding of aesthetic values like color.
+There's still one more important piece of information to add to the plot: the perching events. You'll add these using `geom_segment()`, but you'll make these line segments short and thick, so that they appear more like dots on the plot:
+```{r}
+
+ggplot(data = scored_clusters_gg3) +
+  
+  # Add a vertical line for each non-perching event assigned to the first individual
+  geom_segment(
+    data = scored_clusters_gg3 %>% 
+      dplyr::filter(individual_initiated == "1357aabbcc"),
+    aes(x = start_gg, y = 0, xend = end_gg, yend = 0.5, linetype = direction_scored),
+    color = "orange",
+    linewidth = 0.3
+  ) +
+  
+  # Add a vertical line for each non-perching event assigned to the first individual
+  geom_segment(
+    data = scored_clusters_gg3 %>% 
+      dplyr::filter(individual_initiated == "unassigned"),
+    aes(x = start_gg, y = 0.6, xend = end_gg, yend = 1.1, linetype = direction_scored),
+    color = "black",
+    linewidth = 0.3
+  ) +
+  
+  # Add the custom linetype values to this plot
+  scale_linetype_manual(values = ltys) +
+  
+  # Remove the y-axis label
+  ylab("") +
+  
+  # Add a y-axis label
+  xlab("Time") +
+  
+  # Use this function to convert the plot background to black and white
+  theme_bw() +
+  
+  # Use aesthetics functions to remove the y-axis labels and ticks
+  # Add an argument to change where the legend is located in the plot
+  theme(
+    axis.text.y = element_blank(),
+    axis.ticks.y = element_blank(),
+    legend.position = "top"
+  ) +
+  
+  # Facet the plot by day (e.g. create a panel per day)
+  # Use the new day labels here
+  facet_wrap(~ day_label, nrow = 3, strip.position = "left") +
+
+  # Change the aesthetics of the x-axis labels
+  scale_x_datetime(
+    date_breaks = "30 mins",
+    date_labels = "%H:%M"
+  ) +
+  
+  # Add the perching events as rounded segments, and now encode color through the column individual_initiated
+  geom_segment(
+    data = scored_clusters_gg3 %>% 
+      dplyr::filter(!is.na(perching_sensor)),
+    aes(x = start_gg, y = 1.2, xend = end_gg, yend = 1.2, color = individual_initiated),
+    linewidth = 2, lineend = "round"
+  ) +
+  
+  # Add the custom colors
+  scale_color_manual(values = cols)
+
+
+```
+
+TKTK the color legend is added by default with the new geom_segment call, so make only minor changes from here on
+
+
+
+Then end with adding the legend for color.
+
+
+Finally, you need to add a legend to this plot so you can communicate what the two different colors mean. Adding this second legend to this plot is tricky because you manually coded the colors of the line segments in two separate uses in `geom_segment()`. `ggplot2` functions have specific requirements for making a legend, and they can require automated coding of aesthetic values like color.
 
 In order to automatically create a legend in a plot, it helps to have a layer of the plot in which color is automatically encoded. The way that you would do this is to move the `color` argument inside of the function `aes()` for one layer of the plot, and then supply `color` with a column of data type `factor`...TKTK continue
 ```{r}
