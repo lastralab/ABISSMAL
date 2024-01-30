@@ -30,6 +30,7 @@ Things that would be important to add:
 - Errors and troubleshooting online
 - Color code chunks that are for testing code versus chunks that are for creating necessary objects (https://bookdown.org/yihui/rmarkdown-cookbook/chunk-styling.html)
 - an explanation about how simulating the data replaces the process that ABISSMAL does to collect data from live animals
+- NA missing values
 
 I want to make a pre- and post-vignette Google form to asses the content and style of the vignettes for disseminating basic R coding skills in a biological context
 

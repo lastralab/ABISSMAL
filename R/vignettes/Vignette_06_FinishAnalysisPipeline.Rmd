@@ -144,6 +144,9 @@ In order to encode colors and line types correctly in the plot, you need to modi
 First you can practice using `is.na()` inside of `ifelse()` to create a new vector. In the code below, you're providing the conditional statement that you want to test (here you're testing whether the day is the first day of the month), the value you want to add to the vector if the condition is true ("Day 1" of data collection), and then the value that you want to add if the condition is false ("Day 2" of data collection, since there are only 2 dates in each dataset). 
 ```{r}
 
+# is.na() returns TRUE when it encounters NAs inside of a vector (or column), and FALSE when a value inside of the vector is not NA
+is.na(scored_clusters$individual_initiated)
+
 # All NAs in this column are converted to "unassigned", but all other values were not changed
 ifelse(test = is.na(scored_clusters$individual_initiated), yes = "unassigned", no = scored_clusters$individual_initiated)
 
@@ -321,7 +324,7 @@ glimpse(scored_clusters_gg3)
 
 ```
 
-Now you can update the plotting code to change the aesthetics of the x-axis using the function `scale_x_datetime()` to specify that you want x-axis labels every half hour. Also add an x-axis title:
+Now you can update the plotting code to change the aesthetics of the x-axis using the function `scale_x_datetime()` to specify that you want x-axis labels every half hour. Also add an x-axis title, make the vertical line segments thicker, and remove the y-axis grid lines inside of each panel:
 ```{r}
 
 # Update the dataset in the base layer of the plot, which will be used by all layers that do not have a specific data argument themselves
@@ -333,7 +336,7 @@ ggplot(data = scored_clusters_gg3) +
       dplyr::filter(individual_initiated == "1357aabbcc"),
     aes(x = start_gg, y = 0, xend = end_gg, yend = 0.5, linetype = direction_scored),
     color = "orange",
-    linewidth = 0.3
+    linewidth = 0.5
   ) +
   
   # Add a vertical line for each non-perching event assigned to the first individual
@@ -342,7 +345,7 @@ ggplot(data = scored_clusters_gg3) +
       dplyr::filter(individual_initiated == "unassigned"),
     aes(x = start_gg, y = 0.6, xend = end_gg, yend = 1.1, linetype = direction_scored),
     color = "black",
-    linewidth = 0.3
+    linewidth = 0.5
   ) +
   
   # Add the custom linetype values to this plot
@@ -359,10 +362,13 @@ ggplot(data = scored_clusters_gg3) +
   
   # Use aesthetics functions to remove the y-axis labels and ticks
   # Add an argument to change where the legend is located in the plot
+  # Then remove the y-axis grid lines (major and minor) inside of each panel
   theme(
     axis.text.y = element_blank(),
     axis.ticks.y = element_blank(),
-    legend.position = "top"
+    legend.position = "top",
+    panel.grid.major.y = element_blank(),
+    panel.grid.minor.y = element_blank()
   ) +
   
   # Facet the plot by day (e.g. create a panel per day)
@@ -388,7 +394,7 @@ ggplot(data = scored_clusters_gg3) +
       dplyr::filter(individual_initiated == "1357aabbcc"),
     aes(x = start_gg, y = 0, xend = end_gg, yend = 0.5, linetype = direction_scored),
     color = "orange",
-    linewidth = 0.3
+    linewidth = 0.5
   ) +
   
   # Add a vertical line for each non-perching event assigned to the first individual
@@ -397,7 +403,7 @@ ggplot(data = scored_clusters_gg3) +
       dplyr::filter(individual_initiated == "unassigned"),
     aes(x = start_gg, y = 0.6, xend = end_gg, yend = 1.1, linetype = direction_scored),
     color = "black",
-    linewidth = 0.3
+    linewidth = 0.5
   ) +
   
   # Add the custom linetype values to this plot
@@ -414,10 +420,13 @@ ggplot(data = scored_clusters_gg3) +
   
   # Use aesthetics functions to remove the y-axis labels and ticks
   # Add an argument to change where the legend is located in the plot
+  # Remove the y-axis grid lines (major and minor) from each panel
   theme(
     axis.text.y = element_blank(),
     axis.ticks.y = element_blank(),
-    legend.position = "top"
+    legend.position = "top",
+    panel.grid.major.y = element_blank(),
+    panel.grid.minor.y = element_blank()
   ) +
   
   # Facet the plot by day (e.g. create a panel per day)
@@ -441,227 +450,95 @@ ggplot(data = scored_clusters_gg3) +
   # Add the custom colors
   scale_color_manual(values = cols)
 
-
 ```
 
-TKTK the color legend is added by default with the new geom_segment call, so make only minor changes from here on
-
-
-
-Then end with adding the legend for color.
-
-
-Finally, you need to add a legend to this plot so you can communicate what the two different colors mean. Adding this second legend to this plot is tricky because you manually coded the colors of the line segments in two separate uses in `geom_segment()`. `ggplot2` functions have specific requirements for making a legend, and they can require automated coding of aesthetic values like color.
-
-In order to automatically create a legend in a plot, it helps to have a layer of the plot in which color is automatically encoded. The way that you would do this is to move the `color` argument inside of the function `aes()` for one layer of the plot, and then supply `color` with a column of data type `factor`...TKTK continue
+You should see that a color legend appears at the top of the plot with the addition of the new `geom_segment()` layer. Both legends are a little messy. You can improve the plot by updating the title of each legend, increasing the size of the legend text, and reducing the white space between the plot and the legend. To modify the legend titles, you'll rely on the functions `guides()` and `guide_legend()`. To increase the legend text size, you'll use the argument `legend.text` inside of the function `theme()`. To reduce white space between the plot and legend, you'll use the argument `legend.margin` inside of the function `theme()`.
 ```{r}
 
-all_sensors <- rfid_raw3 %>%
-  bind_rows(
-    irbb_raw3
-  ) %>% 
-  dplyr::mutate(
-    sensor_id = factor(sensor_id)
-  )
-
-glimpse(all_sensors)
-
-```
-
-Then make the plot.
-```{r}
-
-ggplot() +
+gg <- ggplot(data = scored_clusters_gg3) +
   
-  # Add a vertical line for each RFID timestamp
-  # Use the new version of this data frame with the new day_label column
-  # Make sure to use the new timestamp column
+  # Add a vertical line for each non-perching event assigned to the first individual
   geom_segment(
-    data = rfid_raw3,
-    aes(x = timestamp, xend = timestamp, y = 0, yend = 0.45),
-    color = "blue",
-    linewidth = 0.3
-  ) +
-  
-  # Add a vertical line for each beam breaker timestamp
-  # Use the new version of this data frame with the new day_label column
-  # Make sure to use the new timestamp column
-  geom_segment(
-    data = irbb_raw3,
-    aes(x = timestamp, xend = timestamp, y = 0.5, yend = 1),
+    data = scored_clusters_gg3 %>% 
+      dplyr::filter(individual_initiated == "1357aabbcc"),
+    aes(x = start_gg, y = 0, xend = end_gg, yend = 0.5, linetype = direction_scored),
     color = "orange",
-    linewidth = 0.3
+    linewidth = 0.5
   ) +
   
-  # Add the fake layer of lines so that you can create a legend
-  # The argument color here must be supplied with the name of a column that is the data type "factor" in R. This will trigger automatic coding of the color values that you specify below
-  geom_line(data = all_sensors, aes(x = timestamp, y = 1, color = sensor_id), linewidth = 0) +
-
-  # Specify that you want to create a color legend, and override the linewidth of 0 above so that the lines show up in the legend. You can also customize the legend title, otherwise it will use the column name linked to the color encoding
-  guides(color = guide_legend(override.aes = list(linewidth = 2), title = "Sensor type")) +
+  # Add a vertical line for each non-perching event assigned to the first individual
+  geom_segment(
+    data = scored_clusters_gg3 %>% 
+      dplyr::filter(individual_initiated == "unassigned"),
+    aes(x = start_gg, y = 0.6, xend = end_gg, yend = 1.1, linetype = direction_scored),
+    color = "black",
+    linewidth = 0.5
+  ) +
   
-  # Facet the plot by day (e.g. create a panel per day)
-  # Use the new day labels here
-  facet_wrap(~ day_label, nrow = 2, strip.position = "left") +
+  # Add the custom linetype values to this plot
+  scale_linetype_manual(values = ltys) +
   
-  # Change the x and y axis labels
+  # Remove the y-axis label
+  ylab("") +
+  
+  # Add a y-axis label
   xlab("Time") +
-  
-  # Now you can add a y-axis label
-  ylab("Day of data collection") +
-  
-  # Change the aesthetics of the x-axis labels
-  scale_x_datetime(
-    date_breaks = "30 mins",
-    date_labels = "%H:%M"
-  ) +
   
   # Use this function to convert the plot background to black and white
   theme_bw() +
   
   # Use aesthetics functions to remove the y-axis labels and ticks
   # Add an argument to change where the legend is located in the plot
+  # Remove the y-axis grid lines (major and minor) from each panel
+  # Increase the legend text size
   theme(
     axis.text.y = element_blank(),
     axis.ticks.y = element_blank(),
-    legend.position = "top"
-  )
-
-```
-
-You added a legend to the plot, but the colors in the legend don't line up with the colors of the line segments per sensor. You can use the function `scale_color_manual()` to match colors between the plot and legend.
-```{r}
-
-ggplot() +
-  
-  # Add a vertical line for each RFID timestamp
-  # Use the new version of this data frame with the new day_label column
-  # Make sure to use the new timestamp column
-  geom_segment(
-    data = rfid_raw3,
-    aes(x = timestamp, xend = timestamp, y = 0, yend = 0.45),
-    color = "blue",
-    linewidth = 0.3
+    legend.position = "top",
+    panel.grid.major.y = element_blank(),
+    panel.grid.minor.y = element_blank(),
+    legend.text = element_text(size = 10),
+    legend.margin = margin(-1, -1, -1, -1, unit = "pt")
   ) +
-  
-  # Add a vertical line for each beam breaker timestamp
-  # Use the new version of this data frame with the new day_label column
-  # Make sure to use the new timestamp column
-  geom_segment(
-    data = irbb_raw3,
-    aes(x = timestamp, xend = timestamp, y = 0.5, yend = 1),
-    color = "orange",
-    linewidth = 0.3
-  ) +
-  
-  # Add the fake layer of lines so that you can create a legend
-  # The argument color here must be supplied with the name of a column that is the data type "factor" in R. This will trigger automatic coding of the color values that you specify below
-  geom_line(data = all_sensors, aes(x = timestamp, y = 1, color = sensor_id), linewidth = 0) +
-
-  # Set the colors that will be used to color the lines in the legend itself
-  # The length of the vector of color values that you supply here must be the same length as the number of "levels" (or unique values) in the factor column
-  # If you do not supply your own color values, then R will assign default colors to each factor level 
-  scale_color_manual(values = c("blue", "orange")) +
-
-  # Specify that you want to create a color legend, and override the linewidth of 0 above so that the lines show up in the legend. You can also customize the legend title, otherwise it will use the column name linked to the color encoding
-  guides(color = guide_legend(override.aes = list(linewidth = 2), title = "Sensor type")) +
   
   # Facet the plot by day (e.g. create a panel per day)
   # Use the new day labels here
-  facet_wrap(~ day_label, nrow = 2, strip.position = "left") +
-  
-  # Change the x and y axis labels
-  xlab("Time") +
-  
-  # Now you can add a y-axis label
-  ylab("Day of data collection") +
-  
+  facet_wrap(~ day_label, nrow = 3, strip.position = "left") +
+
   # Change the aesthetics of the x-axis labels
   scale_x_datetime(
     date_breaks = "30 mins",
     date_labels = "%H:%M"
   ) +
   
-  # Use this function to convert the plot background to black and white
-  theme_bw() +
+  # Add the perching events as rounded segments, and now encode color through the column individual_initiated
+  geom_segment(
+    data = scored_clusters_gg3 %>% 
+      dplyr::filter(!is.na(perching_sensor)),
+    aes(x = start_gg, y = 1.2, xend = end_gg, yend = 1.2, color = individual_initiated),
+    linewidth = 2, lineend = "round"
+  ) +
   
-  # Use aesthetics functions to remove the y-axis labels and ticks
-  # Add an argument to change where the legend is located in the plot
-  theme(
-    axis.text.y = element_blank(),
-    axis.ticks.y = element_blank(),
-    legend.position = "top"
+  # Add the custom colors
+  scale_color_manual(values = cols) +
+  
+  guides(
+    linetype = guide_legend(title = "Direction"),
+    color = guide_legend(title = "Individual")
   )
+
+gg
 
 ```
 
-Now that you've made the plot in R, you can save the plot as an image file on your computer using the function `ggsave()`.
+Finally, you can save this plot as an image file:
 ```{r}
 
-ggplot() +
-  
-  # Add a vertical line for each RFID timestamp
-  # Use the new version of this data frame with the new day_label column
-  # Make sure to use the new timestamp column
-  geom_segment(
-    data = rfid_raw3,
-    aes(x = timestamp, xend = timestamp, y = 0, yend = 0.45),
-    color = "blue",
-    linewidth = 0.3
-  ) +
-  
-  # Add a vertical line for each beam breaker timestamp
-  # Use the new version of this data frame with the new day_label column
-  # Make sure to use the new timestamp column
-  geom_segment(
-    data = irbb_raw3,
-    aes(x = timestamp, xend = timestamp, y = 0.5, yend = 1),
-    color = "orange",
-    linewidth = 0.3
-  ) +
-  
-  # Add the fake layer of lines so that you can create a legend
-  # The argument color here must be supplied with the name of a column that is the data type "factor" in R. This will trigger automatic coding of the color values that you specify below
-  geom_line(data = all_sensors, aes(x = timestamp, y = 1, color = sensor_id), linewidth = 0) +
-
-  # Set the colors that will be used to color the lines in the legend itself
-  # The length of the vector of color values that you supply here must be the same length as the number of "levels" (or unique values) in the factor column
-  # If you do not supply your own color values, then R will assign default colors to each factor level 
-  scale_color_manual(values = c("blue", "orange")) +
-
-  # Specify that you want to create a color legend, and override the linewidth of 0 above so that the lines show up in the legend. You can also customize the legend title, otherwise it will use the column name linked to the color encoding
-  guides(color = guide_legend(override.aes = list(linewidth = 2), title = "Sensor type")) +
-  
-  # Facet the plot by day (e.g. create a panel per day)
-  # Use the new day labels here
-  facet_wrap(~ day_label, nrow = 2, strip.position = "left") +
-  
-  # Change the x and y axis labels
-  xlab("Time") +
-  
-  # Now you can add a y-axis label
-  ylab("Day of data collection") +
-  
-  # Change the aesthetics of the x-axis labels
-  scale_x_datetime(
-    date_breaks = "30 mins",
-    date_labels = "%H:%M"
-  ) +
-  
-  # Use this function to convert the plot background to black and white
-  theme_bw() +
-  
-  # Use aesthetics functions to remove the y-axis labels and ticks
-  # Add an argument to change where the legend is located in the plot
-  theme(
-    axis.text.y = element_blank(),
-    axis.ticks.y = element_blank(),
-    legend.position = "top"
-  )
+gg
 
 # Save the image file to your computer
-ggsave(file.path(path, "raw_detections.tiff"), width = 8, height = 6, units = "in", dpi = 300)
+ggsave(file.path(path, "behavioral_inferences.tiff"), width = 8, height = 6, units = "in", dpi = 300)
 
 ```
 
-You just learned how to make a plot in R, and also how to save it to your computer. You can continue to modify minor aesthetics to this image file to create a high-quality figure for a publication. For instance, you can change the final size of the image file (`width`, `height`), as well as the resolution (`dpi`). You can also change the size of the text on each axis and the axis titles, or the legend position, as you play around with the final image size.
+You can continue to modify minor aesthetics to this image file to create a high-quality figure for a publication. For instance, you can change the final size of the image file (`width`, `height`), as well as the resolution (`dpi`). You can also change the size of the text on each axis and the axis titles, or the legend position, as you play around with the final image size.
