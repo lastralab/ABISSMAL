@@ -201,16 +201,16 @@ ggplot() +
       dplyr::filter(individual_initiated == "1357aabbcc"),
     aes(x = start, y = 0, xend = end, yend = 0.5, linetype = direction_scored),
     color = "orange",
-    linewidth = 0.3
+    linewidth = 0.5
   ) +
   
-  # Add a vertical line for each non-perching event assigned to the first individual
+  # Add a vertical line for each non-perching event that was not assigned to either individual
   geom_segment(
     data = scored_clusters_gg %>% 
       dplyr::filter(individual_initiated == "unassigned"),
     aes(x = start, y = 0.6, xend = end, yend = 1.1, linetype = direction_scored),
     color = "black",
-    linewidth = 0.3
+    linewidth = 0.5
   ) +
   
   # Add the custom linetype values to this plot
@@ -265,7 +265,7 @@ Now you can update the code to include the new date labels:
 ```{r}
 
 # Add the data frame as the default dataset for the base layer plot, so that the facet_wrap() layer below has data to plot
-ggplot(data = scored_clusters_gg) +
+ggplot(data = scored_clusters_gg2) +
   
   # Add a vertical line for each non-perching event assigned to the first individual
   geom_segment(
@@ -273,16 +273,16 @@ ggplot(data = scored_clusters_gg) +
       dplyr::filter(individual_initiated == "1357aabbcc"),
     aes(x = start, y = 0, xend = end, yend = 0.5, linetype = direction_scored),
     color = "orange",
-    linewidth = 0.3
+    linewidth = 0.5
   ) +
   
-  # Add a vertical line for each non-perching event assigned to the first individual
+  # Add a vertical line for each non-perching event that was not assigned to either individual
   geom_segment(
     data = scored_clusters_gg2 %>% 
       dplyr::filter(individual_initiated == "unassigned"),
     aes(x = start, y = 0.6, xend = end, yend = 1.1, linetype = direction_scored),
     color = "black",
-    linewidth = 0.3
+    linewidth = 0.5
   ) +
   
   # Add the custom linetype values to this plot
@@ -306,6 +306,7 @@ ggplot(data = scored_clusters_gg) +
   # Use the new day labels here
   facet_wrap(~ day_label, nrow = 3, strip.position = "left")
 
+
 ```
 
 Now that information about the day of data collection has been moved to the facet labels, you need to fix the x-axis labels. The plot will be more interpretable if you can line up the timestamps by hour and minute for a direct comparison across days.  
@@ -324,135 +325,7 @@ glimpse(scored_clusters_gg3)
 
 ```
 
-Now you can update the plotting code to change the aesthetics of the x-axis using the function `scale_x_datetime()` to specify that you want x-axis labels every half hour. Also add an x-axis title, make the vertical line segments thicker, and remove the y-axis grid lines inside of each panel:
-```{r}
-
-# Update the dataset in the base layer of the plot, which will be used by all layers that do not have a specific data argument themselves
-ggplot(data = scored_clusters_gg3) +
-  
-  # Add a vertical line for each non-perching event assigned to the first individual
-  geom_segment(
-    data = scored_clusters_gg3 %>% 
-      dplyr::filter(individual_initiated == "1357aabbcc"),
-    aes(x = start_gg, y = 0, xend = end_gg, yend = 0.5, linetype = direction_scored),
-    color = "orange",
-    linewidth = 0.5
-  ) +
-  
-  # Add a vertical line for each non-perching event assigned to the first individual
-  geom_segment(
-    data = scored_clusters_gg3 %>% 
-      dplyr::filter(individual_initiated == "unassigned"),
-    aes(x = start_gg, y = 0.6, xend = end_gg, yend = 1.1, linetype = direction_scored),
-    color = "black",
-    linewidth = 0.5
-  ) +
-  
-  # Add the custom linetype values to this plot
-  scale_linetype_manual(values = ltys) +
-  
-  # Remove the y-axis label
-  ylab("") +
-  
-  # Add a y-axis label
-  xlab("Time") +
-  
-  # Use this function to convert the plot background to black and white
-  theme_bw() +
-  
-  # Use aesthetics functions to remove the y-axis labels and ticks
-  # Add an argument to change where the legend is located in the plot
-  # Then remove the y-axis grid lines (major and minor) inside of each panel
-  theme(
-    axis.text.y = element_blank(),
-    axis.ticks.y = element_blank(),
-    legend.position = "top",
-    panel.grid.major.y = element_blank(),
-    panel.grid.minor.y = element_blank()
-  ) +
-  
-  # Facet the plot by day (e.g. create a panel per day)
-  # Use the new day labels here
-  facet_wrap(~ day_label, nrow = 3, strip.position = "left") +
-
-  # Change the aesthetics of the x-axis labels
-  scale_x_datetime(
-    date_breaks = "30 mins",
-    date_labels = "%H:%M"
-  )
-
-```
-
-There's still one more important piece of information to add to the plot: the perching events. You'll add these using `geom_segment()`, but you'll make these line segments short and thick, so that they appear more like dots on the plot:
-```{r}
-
-ggplot(data = scored_clusters_gg3) +
-  
-  # Add a vertical line for each non-perching event assigned to the first individual
-  geom_segment(
-    data = scored_clusters_gg3 %>% 
-      dplyr::filter(individual_initiated == "1357aabbcc"),
-    aes(x = start_gg, y = 0, xend = end_gg, yend = 0.5, linetype = direction_scored),
-    color = "orange",
-    linewidth = 0.5
-  ) +
-  
-  # Add a vertical line for each non-perching event assigned to the first individual
-  geom_segment(
-    data = scored_clusters_gg3 %>% 
-      dplyr::filter(individual_initiated == "unassigned"),
-    aes(x = start_gg, y = 0.6, xend = end_gg, yend = 1.1, linetype = direction_scored),
-    color = "black",
-    linewidth = 0.5
-  ) +
-  
-  # Add the custom linetype values to this plot
-  scale_linetype_manual(values = ltys) +
-  
-  # Remove the y-axis label
-  ylab("") +
-  
-  # Add a y-axis label
-  xlab("Time") +
-  
-  # Use this function to convert the plot background to black and white
-  theme_bw() +
-  
-  # Use aesthetics functions to remove the y-axis labels and ticks
-  # Add an argument to change where the legend is located in the plot
-  # Remove the y-axis grid lines (major and minor) from each panel
-  theme(
-    axis.text.y = element_blank(),
-    axis.ticks.y = element_blank(),
-    legend.position = "top",
-    panel.grid.major.y = element_blank(),
-    panel.grid.minor.y = element_blank()
-  ) +
-  
-  # Facet the plot by day (e.g. create a panel per day)
-  # Use the new day labels here
-  facet_wrap(~ day_label, nrow = 3, strip.position = "left") +
-
-  # Change the aesthetics of the x-axis labels
-  scale_x_datetime(
-    date_breaks = "30 mins",
-    date_labels = "%H:%M"
-  ) +
-  
-  # Add the perching events as rounded segments, and now encode color through the column individual_initiated
-  geom_segment(
-    data = scored_clusters_gg3 %>% 
-      dplyr::filter(!is.na(perching_sensor)),
-    aes(x = start_gg, y = 1.2, xend = end_gg, yend = 1.2, color = individual_initiated),
-    linewidth = 2, lineend = "round"
-  ) +
-  
-  # Add the custom colors
-  scale_color_manual(values = cols)
-
-```
-
-You should see that a color legend appears at the top of the plot with the addition of the new `geom_segment()` layer. Both legends are a little messy. You can improve the plot by updating the title of each legend, increasing the size of the legend text, and reducing the white space between the plot and the legend. To modify the legend titles, you'll rely on the functions `guides()` and `guide_legend()`. To increase the legend text size, you'll use the argument `legend.text` inside of the function `theme()`. To reduce white space between the plot and legend, you'll use the argument `legend.margin` inside of the function `theme()`.
+Now you can update the plotting code to change the aesthetics of the x-axis using the function `scale_x_datetime()` to specify that you want x-axis labels every half hour. Also add an x-axis title, and remove the y-axis grid lines inside of each panel:
 ```{r}
 
 gg <- ggplot(data = scored_clusters_gg3) +
@@ -466,7 +339,7 @@ gg <- ggplot(data = scored_clusters_gg3) +
     linewidth = 0.5
   ) +
   
-  # Add a vertical line for each non-perching event assigned to the first individual
+  # Add a vertical line for each non-perching event that was not assigned to either individual
   geom_segment(
     data = scored_clusters_gg3 %>% 
       dplyr::filter(individual_initiated == "unassigned"),
@@ -481,35 +354,44 @@ gg <- ggplot(data = scored_clusters_gg3) +
   # Remove the y-axis label
   ylab("") +
   
-  # Add a y-axis label
-  xlab("Time") +
-  
   # Use this function to convert the plot background to black and white
   theme_bw() +
   
   # Use aesthetics functions to remove the y-axis labels and ticks
   # Add an argument to change where the legend is located in the plot
-  # Remove the y-axis grid lines (major and minor) from each panel
-  # Increase the legend text size
   theme(
     axis.text.y = element_blank(),
     axis.ticks.y = element_blank(),
-    legend.position = "top",
-    panel.grid.major.y = element_blank(),
-    panel.grid.minor.y = element_blank(),
-    legend.text = element_text(size = 10),
-    legend.margin = margin(-1, -1, -1, -1, unit = "pt")
+    legend.position = "top"
   ) +
   
   # Facet the plot by day (e.g. create a panel per day)
   # Use the new day labels here
   facet_wrap(~ day_label, nrow = 3, strip.position = "left") +
-
+  
   # Change the aesthetics of the x-axis labels
   scale_x_datetime(
     date_breaks = "30 mins",
     date_labels = "%H:%M"
   ) +
+  
+  # Add an x-axis title
+  xlab("Time of day (HH:MM)") +
+  
+  # Remove the y-axis grid lines (major and minor) inside of each panel
+  theme(
+    panel.grid.major.y = element_blank(),
+    panel.grid.minor.y = element_blank()
+  ) 
+
+gg
+  
+```
+
+There's still one more important piece of information to add to the plot: the perching events. You'll add these using `geom_segment()`, but you'll make these line segments short and thick, so that they appear more like dots on the plot:
+```{r}
+
+gg <- gg + 
   
   # Add the perching events as rounded segments, and now encode color through the column individual_initiated
   geom_segment(
@@ -520,8 +402,27 @@ gg <- ggplot(data = scored_clusters_gg3) +
   ) +
   
   # Add the custom colors
-  scale_color_manual(values = cols) +
+  scale_color_manual(values = cols)
+
+gg
+
+```
+
+You should see that a color legend appears at the top of the plot with the addition of the new `geom_segment()` layer. Both legends are a little messy. You can improve the plot by updating the title of each legend, increasing the size of the legend text, and reducing the white space between the plot and the legend. To modify the legend titles, you'll rely on the functions `guides()` and `guide_legend()`. To increase the legend text size, you'll use the argument `legend.text` inside of the function `theme()`. To reduce white space between the plot and legend, you'll use the argument `legend.margin` inside of the function `theme()`.
+```{r}
+
+# Check out more information about the function used to control margins (white space) around the legend
+?margin
+
+gg <- gg +
   
+  # Increase the legend text size and reduce white space between the plot and legend
+  theme(
+    legend.text = element_text(size = 10),
+    legend.margin = margin(-1, -1, -1, -1, unit = "pt")
+  ) +
+
+  # Change the legend titles
   guides(
     linetype = guide_legend(title = "Direction"),
     color = guide_legend(title = "Individual")
@@ -542,3 +443,81 @@ ggsave(file.path(path, "behavioral_inferences.tiff"), width = 8, height = 6, uni
 ```
 
 You can continue to modify minor aesthetics to this image file to create a high-quality figure for a publication. For instance, you can change the final size of the image file (`width`, `height`), as well as the resolution (`dpi`). You can also change the size of the text on each axis and the axis titles, or the legend position, as you play around with the final image size.
+
+This is the all of the code used for the final plot, condensed and reorganized:
+```{r}
+
+ggplot(data = scored_clusters_gg3) +
+  
+  # Add a vertical line for each non-perching event assigned to the first individual
+  geom_segment(
+    data = scored_clusters_gg3 %>% 
+      dplyr::filter(individual_initiated == "1357aabbcc"),
+    aes(x = start_gg, y = 0, xend = end_gg, yend = 0.5, linetype = direction_scored),
+    color = "orange",
+    linewidth = 0.5
+  ) +
+  
+  # Add a vertical line for each non-perching event that was not assigned to either individual
+  geom_segment(
+    data = scored_clusters_gg3 %>% 
+      dplyr::filter(individual_initiated == "unassigned"),
+    aes(x = start_gg, y = 0.6, xend = end_gg, yend = 1.1, linetype = direction_scored),
+    color = "black",
+    linewidth = 0.5
+  ) +
+  
+  # Add the perching events as rounded segments, and now encode color through the column individual_initiated
+  geom_segment(
+    data = scored_clusters_gg3 %>% 
+      dplyr::filter(!is.na(perching_sensor)),
+    aes(x = start_gg, y = 1.2, xend = end_gg, yend = 1.2, color = individual_initiated),
+    linewidth = 2, lineend = "round"
+  ) +
+  
+  # Add the custom linetype values to this plot
+  scale_linetype_manual(values = ltys) +
+  
+  # Add the custom colors
+  scale_color_manual(values = cols) +
+  
+  # Change the legend titles
+  guides(
+    linetype = guide_legend(title = "Direction"),
+    color = guide_legend(title = "Individual")
+  ) +
+  
+  # Add an x-axis title
+  xlab("Time of day (HH:MM)") +
+  
+  # Remove the y-axis label
+  ylab("") +
+  
+  # Change the aesthetics of the x-axis labels
+  scale_x_datetime(
+    date_breaks = "30 mins",
+    date_labels = "%H:%M"
+  ) +
+  
+  # Facet the plot by day (e.g. create a panel per day)
+  # Use the new day labels here
+  facet_wrap(~ day_label, nrow = 3, strip.position = "left") +
+  
+  # Use this function to convert the plot background to black and white
+  theme_bw() +
+  
+  # Use aesthetics functions to remove the y-axis labels and ticks
+  # Add an argument to change where the legend is located in the plot
+  # Remove the y-axis grid lines (major and minor) inside of each panel
+  # Increase the legend text size and reduce white space between the plot and legend
+  theme(
+    axis.text.y = element_blank(),
+    axis.ticks.y = element_blank(),
+    legend.position = "top",
+    panel.grid.major.y = element_blank(),
+    panel.grid.minor.y = element_blank(),
+    legend.text = element_text(size = 10),
+    legend.margin = margin(-1, -1, -1, -1, unit = "pt")
+  )
+
+```
