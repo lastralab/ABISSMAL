@@ -18,7 +18,9 @@ knitr::opts_chunk$set(echo = TRUE, eval = TRUE)
 
 <h2>Vignette Overview and Learning Objectives</h2>
 
-In this third vignette, we will create simulated datasets of animal movements detected by different sensors. Throughout the process of creating these simulated datasets, you will continue to use coding skills that you learned in vignette 02, and you will learn additional skills that include:
+In this third vignette, we will create simulated datasets of animal movements detected by different sensors. Simulating these datasets replaces the data collection process that ABISSMAL undertakes in order to collect data from live animals. Using simulated datasets will provide you more opportunities to practice basic coding skills, and will also allow you to have more control over the process of data collection in order to understand the subsequent data analysis steps. If you want to see movement detection datasets collected from live birds with ABISSMAL, and code used to analyze those datasets, then check out the [methods manuscript preprint](https://ecoevorxiv.org/repository/view/6268/) that has links to publicly available data and code.
+
+Throughout the process of creating simulated datasets in this vignette, you will continue to use coding skills that you learned in vignette 02, and you will learn additional skills that include:
 
 1. Creating objects like vectors and data frames
 2. Data types in R

@@ -78,7 +78,35 @@ glimpse(scored_clusters)
 
 ```
 
-How many entrances and exits were scored per day? In order to count the number of each of these events scored per day, you need to 1) make a new column with information about the day per timestamp, 2) drop rows with missing data for direction scored, 3) group the data frame by day and direction scored, and 4) count the number of rows per group.
+How many entrances and exits were scored per day? 
+
+<h2>Missing data in R</h2>
+
+In order to count the number of each of these events scored per day, you need to know how to account for missing data in R. Missing data is often indicated using the value `NA` or "not available", which is a specific type of logical value. You can figure out whether a vector (or a column in a data frame) contains missing values by using the function `is.na()`, which will return TRUE when it finds an NA (missing) value in the given column.
+```{r}
+
+?is.na()
+
+x <- c(1, NA, 2, 3, NA)
+
+is.na(x)
+
+```
+
+In the code above, you created a vector called `x` that has 2 NA values. The function `is.na()` checks whether each element of `x` is equivalent to `NA`, and returns `TRUE` when that condition is met.
+
+Because `is.na()` is a conditional statement, you can also use other special symbols relevant to conditional statements, such as the `!` symbol, which will invert a conditional statement. For instance, in the code below, by adding `!` before `is.na()`, you're now asking whether each element of `x` is *not* equivalent to NA:
+```{r}
+
+!is.na(x)
+
+```
+
+As you can see, adding the `!` infront of `is.na()` results in an inverted output compared to `is.na()` alone, such that each value that was previously `TRUE` is now `FALSE`. Together, the ability to invert the `is.na()` conditional statement, plus the binary output that `is.na()` returns, is really useful for finding and filtering rows of a data frame. For instance, the function `dplyr::filter()` will drop a row whenever it encounters a value of `FALSE` along a given column, and will retain a row whenever it encounters a value of `TRUE`. So if you want to drop rows that contain NA values for a given column, you would add `!is.na(name_of_column)` inside of `dplyr::filter()`, which should return `FALSE` every time it encounters a row with `NA`. 
+
+<h2>Count events per day</h2>
+
+Now you can write code to count the number of entrance and exit events scored per day. You will need to 1) make a new column with information about the day per timestamp, 2) drop rows with missing data for direction scored, 3) group the data frame by day and direction scored, and then 4) count the number of rows per group.
 ```{r}
 
 scored_clusters %>%
@@ -86,8 +114,7 @@ scored_clusters %>%
   dplyr::mutate(
     day = lubridate::day(start)
   ) %>% 
-  # Drop rows with missing values for direction_scored
-  # Here you're using the function is.na(), which will return TRUE when it finds an NA (missing) value in the given column. By placing the ! before this function, you're inverting the output, so that all TRUE values are converted to FALSE. As a result, dplyr::filter will drop all rows that return the value FALSE (e.g. all rows with missing values in the column direction_scored)
+  # Here you're using the function is.na(), which will return TRUE when it finds an NA (missing) value in the given column. By placing the ! before is.na(), you're inverting the output, so that all TRUE values are converted to FALSE. As a result, dplyr::filter will drop all rows that return the value FALSE (e.g. all rows with missing values in the column direction_scored)
   dplyr::filter(!is.na(direction_scored)) %>%
   # Group the data frame by both columns for which you want to count rows
   group_by(day, direction_scored) %>% 

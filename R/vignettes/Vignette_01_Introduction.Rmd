@@ -12,8 +12,12 @@ This first vignette will take you through a brief introduction to RStudio, downl
 1. How to configure your RStudio session
 2. How to create a local version of a GitHub repository
 3. The data processing and analysis steps provided by the ABISSMAL R functions
+4. Troubleshoot errors online
+5. How to report bugs as GitHub issues
 
-<h2>1. Configure your RStudio session </h2>
+There are many different ways to carry out a single task or to solve a single problem in R. Keep this in mind throughout all of these tutorials. In each tutorial, you will learn examples of how to carry out specific tasks or solve specific problems with code, but these examples are not an exhaustive overview of how to address any one task or solve any one problem. Instead, use these tutorials as an opportunity to practice using your coding skills in a particular biological context.  
+
+<h2>Configure your RStudio session</h2>
 
 If you are new to using R (a programming language for statistical analysis) and RStudio (a graphical user interface for R), then I recommend checking out the introductory lesson [R for Reproducible Scientific Analysis](https://swcarpentry.github.io/r-novice-gapminder/) provided by [Software Carpentry](https://software-carpentry.org/).
 
@@ -43,7 +47,7 @@ Another useful change to the RStudio configuration is soft-wrapping lines of tex
 
 You can also play with the font size, font color, and background color of your RStudio workspace. After selecting "Tools" and "Global Options", go to "Appearance" to see some different options.
 
-<h2>2. Create a local version of an existing GitHub repository</h2>
+<h2>Create a local version of an existing GitHub repository</h2>
 
 If you are new to using GitHub, then I recommend downloading [GitHub Desktop](https://desktop.github.com/). This software is a graphical user interface for the GitHub version control platform. We will work through how to download the GitHub repository for ABISSMAL so that you can access the ABISSMAL R functions on your local computer. If you are already familiar with GitHub and using Git through the command line, then check out the installation instructions on the [ABISSMAL README](https://github.com/lastralab/ABISSMAL).
 
@@ -74,7 +78,7 @@ Once the repository has been installed on your computer, you should see the foll
 
 The files that we'll be working with throughout the following vignettes are inside of the "R" folder. This folder contains 6 R files (extension ".R"), a README file that contains more information about each R file, and folders with the R vignettes as well as automated unit testing scripts.
 
-<h2>3. ABISSMAL data processing and analysis</h2>
+<h2>ABISSMAL data processing and analysis</h2>
 
 ABISSMAL provides 5 different R functions for data processing and analysis. These functions are briefly described below in the order in which they should generally be used. The functions are also described in more detail in the R folder README as well as the accompanying methods manuscript:
 
@@ -92,6 +96,16 @@ ABISSMAL provides 5 different R functions for data processing and analysis. Thes
 ![Figure 4 from the ABISSMAL methods manuscript under review, that shows a general workflow across these 5 functions](/home/gsvidaurre/Desktop/GitHub_repos/ABISSMAL/R/vignettes/images/Figure4_ComputationalAnalyses.png)
 * Figure from Smith-Vidaurre, G., Molina, T., Jarvis, E.D., and E.A. Hobson. 2023. Automated tracking of avian parental care. Under review.
 
+<h2>Troubleshoot errors online</h2>
+
+You will run into errors while writing and running code, and while this can be frustrating, errors are an important part of the overall learning experience. Errors can arise for many different reasons, including typos that you introduced while writing code, issues with package versions that you installed, or perhaps missing packages. Sometimes, errors may be due to issues with the custom ABISSMAL functions that you will use in the subsequent vignettes, or issues with the code in the vignettes themselves. 
+
+Whenever you run into an error with your code, it's important to troubleshoot the error and figure out out how to solve it before assuming that the error is due to the custom ABISSMAL functions or issues with the vignettes. There are many different resources online that you can use to troubleshoot common errors in R. One way to start troubleshooting errors online is to copy and paste the error message printed to your console into a search engine, which should point you to public forums online in which people have asked about and solved similar errors. You may also be able to use generative AI tools like ChatGPT to search for potential typos or issues with your code. You can also read R documentation if the error is associated with a specific package or function.
+
+Once you have thoroughly researched a given error, and you're sure that the error you're getting isn't due to a typo or issues with data structure on your end, then it's time to consider whether the error is due to a bug in a custom ABISSMAL function or the code provided in a vignette. These are bugs that you can report to the ABISSMAL developers on GitHub (see below).
+
+<h2>Report bugs on GitHub</h2>
+
+As you work through each vignette, you may encounter "bugs" or errors with the code, including code that does not work or that yields incorrect outcomes. These bugs can occur with the ABISSMAL functions themselves, or with the code in a given vignette. When you encounter a bug with an ABISSMAL function, you can create an Issue through the GitHub repository. To create a new Issue, you can select "New Issue" on [Issues page](https://github.com/lastralab/ABISSMAL/issues) of the main ABISSMAL repository, then follow the instructions in the Issue template to add the information needed for the code developers to address the bug effectively. You can also add the tag "bug" to your issue. If you encounter an issue with the ABISSMAL vignettes, then you can submit an issue through the GitHub repository for these vignettes.
+
 In the next vignette, we will create simulated datasets of raw movement data to learn how to use the different functions described above.
-
-
