@@ -2,7 +2,12 @@
 title: "Vignette 05: Process and Plot Data"
 author: "Grace Smith-Vidaurre"
 date: "2023-12-27"
-output: html_document
+output: 
+  html_document:
+    css: "styles.css"
+    toc: true
+    toc_float: true
+    toc_depth: 4
 ---
 
 ```{r setup, include = FALSE}
