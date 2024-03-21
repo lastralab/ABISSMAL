@@ -59,7 +59,7 @@ source("/home/gsvidaurre/Desktop/GitHub_repos/ABISSMAL/R/utilities.R")
 
 <h2>Access ABISSMAL function information</h2>
 
-After running the lines of code above, you should see that a whole set of functions have been loaded into your global environment (check the `Environment` pane). Many of these functions start with `check_`, and those are utility functions. If you scroll down, you'll see that the three main functions above (`combine_raw_data`, `detect_perching_events`, `preprocess_detections`) are all loaded in your global environment. In the column to the right of the function names you can also see a preview of each function's arguments. 
+After running the lines of code above, you should see that a whole set of functions have been loaded into your global environment (check the `Environment` pane). Many of these functions start with `check_`, and those are utility functions. If you scroll down, you'll see that the three of the main ABISSMAL functions above (`combine_raw_data`, `detect_perching_events`, `preprocess_detections`) are all loaded in your global environment as well. In the column to the right of the function names you can also see a preview of each function's arguments. 
 
 To get more information about each of these three main functions, you can click the white square icon to the very right of each function in the `Environment` pane, or run the code `View(function_name)`. This will open the script for the given function a new tab in your Source pane. In each script for each function, you'll see lines of documentation starting with the symbols "`# @". You'll see the function name and description first, and then a description of each argument (parameter) for the function. If you keep scrolling down, you'll see a section with details about how the given function works, and the information that it returns. After the lines of documentation, you'll see the code that makes up the function itself. 
 
@@ -67,7 +67,7 @@ To get more information about each of these three main functions, you can click 
 
 Once you've loaded the ABISSMAL functions, you can start using the first function, `combine_raw_data()`, to combine data collected across days per sensor into a single spreadsheet per sensor. You'll start by combining raw data for the RFID sensor collected over different days into a single spreadsheet.
 
-Here goes more information about the arguments you are supplying to the function below:
+Here goes more information about the arguments that you are supplying to the `combine_raw_data()` function below:
 
 * `sensors` is a vector containing the labels of the sensors for which you want to combine raw data. Below you're specifying RFID as a single sensor
 
@@ -85,33 +85,27 @@ Here goes more information about the arguments you are supplying to the function
 # Combine raw data for the RFID and infrared beam breaker sensors separately
 combine_raw_data(sensors = "RFID", path = path, data_dir = "Data", out_dir = "Data/raw_combined", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS")
 
-combine_raw_data(sensors = "IRBB", path = path, data_dir = "Data", out_dir = "Data/raw_combined", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS")
-
 ```
 
-You can check that `combine_raw_data()` wrote separate spreadsheets of raw RFID and beam breaker data to the new directory `raw_combined`:
+You can check that `combine_raw_data()` wrote a spreadsheet of raw RFID data to the new directory `raw_combined`:
 ```{r}
 
 list.files(file.path(path, "Data/raw_combined"), pattern = ".csv$")
 
 ```
 
-You can read thw combined .csv files (called "combined_raw_data_RFID.csv" and "combined_raw_data_IRBB.csv") back into R to check out the structure of this spreadsheet:
+You can read the combined .csv file (called "combined_raw_data_RFID.csv") back into R to check out the structure of this spreadsheet:
 ```{r}
 
 rfid_data <- read.csv(file.path(path, "Data/raw_combined", "combined_raw_data_RFID.csv"))
 
 glimpse(rfid_data)
 
-irbb_data <- read.csv(file.path(path, "Data/raw_combined", "combined_raw_data_IRBB.csv"))
-
-glimpse(irbb_data)
-
 ```
 
-You should be able to see that there are some new columns created by the function, such as the column `data_type`. For this spreadsheet, the columns `sensor_id` and `data_type` contain the same information, but it's useful to have separate columns to keep track of the sensor id and type of sensor used to collect data when multiple sensors are used (e.g. two beam breaker pairs will each have a unique identifier in `sensor_id`).
+You should be able to see that there are some new columns created by the function, such as the column `data_type`. For this spreadsheet, the columns `sensor_id` and `data_type` contain the same information, but it's useful to have separate columns to keep track of the sensor id and type of sensor used to collect data when multiple sensors are used (e.g. two beam breaker pairs will each have a unique identifier in the `sensor_id` column).
 
-The function created a new timestamps column in POSIXct format for downsteam processing and analysis, but it kept the original timestamps column. The function also added columns to indicate the stage of data processing and the date that the raw data were combined. Finally, if you check the folders with the original raw RFID data, you'll see that the original spreadsheets per day were retained and not removed not overwritten.
+The function `combine_raw_data()` also created a new timestamps column in POSIXct format for downsteam processing and analysis, but it kept the original timestamps column. The function then added columns to indicate the stage of data processing and the date that the raw data were combined. Finally, if you check the folders with the original raw RFID data, you'll see that the original spreadsheets per day were retained and were not overwritten.
 
 You can also run `combine_raw_data()` with raw data from multiple sensors by supplying a vector with the sensor labels to the argument `sensors`:
 ```{r}
@@ -129,7 +123,7 @@ list.files(file.path(path, "Data/raw_combined"), pattern = ".csv$")
 
 <h2>Detect perching events</h2>
 
-You can use the combined raw data from different sensors in subsequent ABISSMAL functions to start making behavioral inferences from events in the movement detection datasets. For instance, you can detect perching events in the raw RFID data with the function `detect_perching_events()`. You can read more about each argument in the R script that contains this function.
+You can use the combined raw data from different sensors in subsequent ABISSMAL functions to start making behavioral inferences from the movement detection datasets. For instance, you can detect perching events in the raw RFID data with the function `detect_perching_events()`. You can read more about each argument in the R script that contains this function.
 ```{r}
 
 detect_perching_events(file_nm = "combined_raw_data_RFID.csv", threshold = 2, run_length = 2, sensor_id_col_nm = "sensor_id", timestamps_col_nm = "timestamp_ms", PIT_tag_col_nm = "PIT_tag", rfid_label = "RFID", general_metadata_cols = c("chamber_id", "sensor_id"), path = file.path(path, "Data"), data_dir = "raw_combined", out_dir = "processed", out_file_prefix = "perching_events", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS")
@@ -216,7 +210,7 @@ glimpse(irbb_pp)
 
 Now that you've combined and processed the raw data per sensor, it's time to visualize these different datasets. Making visualizations as you write code is important for generating high-quality figures for publications and presentations, but also for checking your work.
 
-In the code below, you'll learn how to use functions from the `ggplot2` package to make barcode style visualizations of the raw and pre-processed RFID detection datasets.
+In the code below, you'll learn how to use functions from the `ggplot2` package to make a barcode style figure of the raw and pre-processed RFID detection datasets.
 
 Start by reading in the raw and pre-processed RFID data, as well as the RFID perching events, and convert the timestamps to POSIX format.
 ```{r}
@@ -225,7 +219,8 @@ rfid_raw <- read.csv(file.path(path, "Data/raw_combined", "combined_raw_data_RFI
   # The timestamps must be converted to POSIX format every time that the data is read back into R for plotting
   dplyr::mutate(
     timestamp_ms = as.POSIXct(format(as.POSIXct(timestamp_ms, tz = "America/New York"), "%Y-%m-%d %H:%M:%OS6"))
-  ) %>% 
+  ) %>%
+  # Arrange the timestamps from oldest to most recent
   dplyr::arrange(-desc(timestamp_ms))
 
 # You should see that the timestamp_ms is in "dttm" format, which means that the POSIX conversion was done correctly
@@ -276,7 +271,7 @@ glimpse(rfid_combined)
 
 You will start plotting the data using functions from `ggplot2`. This package is part of the `tidyverse`, but can also be installed and used separately. You can check out this [link](https://ggplot2.tidyverse.org/) for more resources to learn how to use ggplot to make different types of plots. These resources include sections of three different books with hands-on exercises at different levels, as well as an online course and a webinar.
 
-Thde `ggplot2` package has a unique syntax for building plots, in which you start making a plot by calling the function `ggplot()`, and then add features by layering on other `ggplot2` functions with the `+` symbol.
+The `ggplot2` package has a unique syntax for building plots, in which you start making a plot by calling the function `ggplot()`, and then add features by layering on other `ggplot2` functions with the `+` symbol.
 
 If you call `ggplot()`, you'll see that the function immediately draws a blank plot in your Plots pane in RStudio.
 ```{r}
@@ -292,9 +287,9 @@ ggplot(data = rfid_combined)
 
 ```
 
-You need to add other aesthetics functions to this base layer of the plot in order to see your data. The functions that you use to layer aesthetics over the empty plot will depend on the type of plot that you want to make. For this example, you will make a barcode style plot, in which each timestamp is shown as a thin vertical line. Barcode plots can be useful visualizations when you're working with timestamps, since the most important information is contained in one dimension (time on the x-axis). If you were to summarize the number of timestamps recorded on each day, then you could create a line plot instead (see a plot in the next vignette).
+You need to add other aesthetics functions to this base layer of the plot in order to see your data. The functions that you use to layer aesthetics over the empty plot will depend on the type of plot that you want to make. For this example, you will make a barcode style plot, in which each timestamp is shown as a thin vertical line. Barcode plots can be useful visualizations when you're working with timestamps, since the most important information is contained in one dimension (time on the x-axis). If you were to summarize the number of timestamps recorded on each day, then you could create a line plot instead.
 
-You can layer the function `geom_segment()` over the base plot layer. `geom_segment()` allows you to add lines to a plot, and the lines can communicate information in one or two dimensions (width on the x-axis and height on the x-axis). In the plot you'll make below, you'll use `geom_segment()` to add lines to the plot that contain temporal information in one dimension (timestamps, information on the x-axis only).
+You can layer the function `geom_segment()` over the base plot layer. `geom_segment()` allows you to add lines to a plot, and the lines can communicate information in one or two dimensions (width on the x-axis and height on the x-axis). In the plot you'll make below, you'll use `geom_segment()` to add lines to the plot that contain temporal information in one dimension (timestamps that provide information on the x-axis only).
 ```{r}
 
 ggplot(data = rfid_combined) +
@@ -307,9 +302,9 @@ ggplot(data = rfid_combined) +
   
 ```
 
-In the code above, `geom_segment()` adds a vertical line segment to the plot for each detection in the full dataset. Using the argument `color` inside of `geom_segment()`, you told the function that these line segments should be colored by dataset by supplying the column name holding the dataset labels. The `color` argument must be inside of the `aes()` function in order for this color assignment by dataset to work correctly. 
+In the code above, `geom_segment()` adds a vertical line segment to the plot for each detection in the full dataset. Using the argument `color` inside of `geom_segment()`, you told the function that these line segments should be colored by dataset by supplying the column name that holds the dataset labels. The `color` argument must be inside of the `aes()` function in order for this color assignment by dataset to work correctly. 
 
-The line segment colors are automatically assigned by ggplot using default colors, but you can change these colors using the function `scale_color_manual()`:
+The line segment colors are automatically assigned by `ggplot` using default colors, but you can change these colors using the function `scale_color_manual()`:
 ```{r}
 
 ggplot(data = rfid_combined) +
@@ -379,7 +374,7 @@ ggplot(data = rfid_combined) +
 
 By faceting this plot, you split up the datasets into different panels but also lined them up on the x-axis so that it's easier to compare temporal patterns. 
 
-From this point of view though, it's hard to see how the raw and pre-processed datasets differ. You can filter the data with `tidyverse` functions to plot the first 3 detections for each of the raw and pre-processed datasets:
+From this point of view though, it's hard to see how the raw and pre-processed datasets differ. You can filter the data with `tidyverse` functions to plot the first 2 detections for each of the raw and pre-processed datasets:
 ```{r}
 
 ggplot(data = rfid_combined %>%
@@ -403,7 +398,7 @@ ggplot(data = rfid_combined %>%
 
 You should be able to see that the second timestamp in the raw data was dropped from the pre-processed dataset.
 
-Next, you can add the perching data to the plot. This dataset doesn't have a single timestamps column, but rather has two columns that indicate the start and the end of each perching event, respectively. You can add this dataset to the full plot by using another function called `geom_segment()`. This function allows you to add lines to a plot, and the lines can communicate information in one or two dimensions (width on the x-axis and height on the x-axis). In the plot you'll make below, you'll use `geom_segment()` to add lines to the plot that contain temporal information in one dimension (on the x-axis only) about when perching events started and ended.
+Next, you can add the perching data to the plot. This dataset doesn't have a single timestamps column, but rather has two columns that indicate the start and the end of each perching event, respectively. You can add this dataset to the full plot by using another `geom_segment()` layer. You'll use `geom_segment()` to add lines to the plot that contain temporal information about when perching events started and ended.
 ```{r}
 
 ggplot(data = rfid_combined) +
@@ -429,9 +424,9 @@ ggplot(data = rfid_combined) +
 
 ```
 
-In the code above for `geom_segment()`, you specified that you wanted to add another dataset to the plot using the argument `data`. The arguments `x` and `y` determine where the beginning of each line segment is drawn on the x and y-axes, respectively. You also need to specify where you want the line segment to **end** on each axis. On the x-axis, by supplying the column name `perching_start` to the argument `x`, and `perching_end` to the argument `xend`, you're indicating that you want the line segment to start and end at the times when perching was inferred to start and end. On the y-axis, the numbers that you supplied to `y` and `yend` determined where the line segments for perching events were drawn, which was just above the other datasets. Note that the perching events were layered over each facet of the plot by default.
+In the code above for `geom_segment()`, you specified that you wanted to add another dataset to the plot using the argument `data`. The arguments `x` and `y` determine where the beginning of each line segment is drawn on the x and y-axes, respectively. You also need to specify where you want the line segment to end on each axis. On the x-axis, by supplying the column name `perching_start` to the argument `x`, and `perching_end` to the argument `xend`, you're indicating that you want the line segment to start and end at the times when perching was inferred to start and end. On the y-axis, the numbers that you supplied to `y` and `yend` determined where the line segments for perching events were drawn, which was just above the other datasets. Note that the perching events were layered over each facet of the plot by default.
 
-There are some additional changes you can make to this plot to make it more interpretable. You can change the position of the legend using the argument `legend.positon` inside of the general function `theme()`. Below you will also save the plot inside of an object, so that you don't have to write out all of the code over and over.
+There are some additional changes you can make to this plot to make it more interpretable. You can change the position of the legend using the argument `legend.position` inside of the general function `theme()`. Below you will also save the plot inside of an object, so that you don't have to write out all of the code over and over.
 ```{r}
 
 gg <- ggplot(data = rfid_combined) +
@@ -499,3 +494,5 @@ ggsave(file.path(path, "raw_processed_perching.tiff"), width = 8, height = 6, un
 ```
 
 You can continue to modify minor aesthetics to this image file to create a high-quality figure for a publication. For instance, you can change the final size of the image file (`width`, `height`), as well as the resolution (`dpi`). You can also change the size of the text on each axis and the axis titles, or the legend position, as you play around with the final image size.
+
+In the next vignette, you will continue the ABISSMAL data analysis pipeline and make a more complex and refined barcode style figure.
