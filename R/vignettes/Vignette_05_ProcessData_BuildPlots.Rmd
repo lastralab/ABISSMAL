@@ -11,7 +11,7 @@ knitr::opts_chunk$set(echo = TRUE, eval = TRUE)
 
 ```
 
-<h2>Vignette Overview and Learning Objectives</h2>
+<h2>Vignette overview and learning objectives</h2>
 
 In this fifth vignette, you will begin using the simulated detections of animal movements in the ABISSMAL data processing and analysis workflow, including combining raw data across days and pre-processing the raw data. You will also make visualizations of the processed data. You will continue to use coding skills that you learned in the previous vignettes, and you will learn additional skills that include:
 

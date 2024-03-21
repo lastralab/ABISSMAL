@@ -11,7 +11,7 @@ knitr::opts_chunk$set(echo = TRUE, eval = TRUE)
 
 ```
 
-<h2>Vignette Overview and Learning Objectives</h2>
+<h2>Vignette overview and learning objectives</h2>
 
 In this sixth vignette, you will finish using the simulated detections of animal movements in the ABISSMAL data processing and analysis workflow. You will detect clusters of detections that represent distinct movement events, and then score behavioral inferences about the movement events. You will also make plots to visualize these behavioral inferences. You will continue to use coding skills that you learned in the previous vignettes, and you will additionally learn how to build more complex visualizations with ggplot.
 
