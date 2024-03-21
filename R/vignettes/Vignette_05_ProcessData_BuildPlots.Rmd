@@ -77,27 +77,34 @@ Here goes more information about the arguments you are supplying to the function
 * `POSIXct_format` is a string containing the POSIX formatting information for how dates and timestamps should be combined into a single column. The default is to encode the year as a 4 digit number and the month and day as 2 digit numbers, separated by dashes. The date is followed by a space, then the 2-digit hour, minute, and decimal second (separated by colons)
 ```{r}
 
+# Combine raw data for the RFID and infrared beam breaker sensors separately
 combine_raw_data(sensors = "RFID", path = path, data_dir = "Data", out_dir = "Data/raw_combined", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS")
+
+combine_raw_data(sensors = "IRBB", path = path, data_dir = "Data", out_dir = "Data/raw_combined", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS")
 
 ```
 
-You can check that `combine_raw_data()` wrote a single spreadsheet of raw RFID data to the new directory `raw_combined`:
+You can check that `combine_raw_data()` wrote separate spreadsheets of raw RFID and beam breaker data to the new directory `raw_combined`:
 ```{r}
 
 list.files(file.path(path, "Data/raw_combined"), pattern = ".csv$")
 
 ```
 
-You can read this combined .csv file (called "combined_raw_data_RFID.csv") back into R to check out the structure of this spreadsheet:
+You can read thw combined .csv files (called "combined_raw_data_RFID.csv" and "combined_raw_data_IRBB.csv") back into R to check out the structure of this spreadsheet:
 ```{r}
 
 rfid_data <- read.csv(file.path(path, "Data/raw_combined", "combined_raw_data_RFID.csv"))
 
 glimpse(rfid_data)
 
+irbb_data <- read.csv(file.path(path, "Data/raw_combined", "combined_raw_data_IRBB.csv"))
+
+glimpse(irbb_data)
+
 ```
 
-You should be able to see that there are some new columns created by the function, such as the column `data_type`. For this spreadsheet, the columns `sensor_id` and `data_type` contain the same information, but it's useful to have separate columns to keep track of the sensor id and type of sensor used to collect data when multiple sensors are used (e.g. two beam breaker pairs will each hace a unique identifier in `sensor_id`).
+You should be able to see that there are some new columns created by the function, such as the column `data_type`. For this spreadsheet, the columns `sensor_id` and `data_type` contain the same information, but it's useful to have separate columns to keep track of the sensor id and type of sensor used to collect data when multiple sensors are used (e.g. two beam breaker pairs will each have a unique identifier in `sensor_id`).
 
 The function created a new timestamps column in POSIXct format for downsteam processing and analysis, but it kept the original timestamps column. The function also added columns to indicate the stage of data processing and the date that the raw data were combined. Finally, if you check the folders with the original raw RFID data, you'll see that the original spreadsheets per day were retained and not removed not overwritten.
 

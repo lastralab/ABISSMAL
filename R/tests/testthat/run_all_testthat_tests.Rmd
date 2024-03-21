@@ -14,7 +14,7 @@ rm(list = ls())
 if (!require(testthat)) install.packages('testthat')
 library(testthat)
 
-testing_path <- "/home/gsvidaurre/Desktop/GitHub_repos/Abissmal/R/tests/testthat/"
+testing_path <- "/home/gsvidaurre/Desktop/GitHub_repos/ABISSMAL/R/tests/testthat/"
 
 # Run the testthat tests for each function
 
