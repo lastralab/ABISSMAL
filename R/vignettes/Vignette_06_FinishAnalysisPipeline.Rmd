@@ -76,7 +76,8 @@ scored_clusters <- read.csv(file.path(path, "Data/processed", "scored_detectionC
   dplyr::mutate(
     start = as.POSIXct(format(as.POSIXct(start, tz = "America/New York"), "%Y-%m-%d %H:%M:%OS6")),
     end = as.POSIXct(format(as.POSIXct(end, tz = "America/New York"), "%Y-%m-%d %H:%M:%OS6"))
-  ) %>% 
+  ) %>%
+  # Arrange the rows by increasing timestamps
   dplyr::arrange(-desc(start))
 
 glimpse(scored_clusters)
@@ -87,7 +88,7 @@ How many entrances and exits were scored per day?
 
 <h2>Missing data in R</h2>
 
-In order to count the number of each of these events scored per day, you need to know how to account for missing data in R. Missing data is often indicated using the value `NA` or "not available", which is a specific type of logical value. You can figure out whether a vector (or a column in a data frame) contains missing values by using the function `is.na()`, which will return TRUE when it finds an NA (missing) value in the given column.
+In order to count the number of each of these events scored per day, you need to know how to account for missing data in R. Missing data is often indicated using the value `NA` or "not available", which is a specific type of logical value in R. You can figure out whether a vector (or a column in a data frame) contains missing values by using the function `is.na()`, which will return TRUE when it finds an NA (missing) value in the given column.
 ```{r}
 
 ?is.na()
@@ -107,11 +108,13 @@ Because `is.na()` is a conditional statement, you can also use other special sym
 
 ```
 
-As you can see, adding the `!` infront of `is.na()` results in an inverted output compared to `is.na()` alone, such that each value that was previously `TRUE` is now `FALSE`. Together, the ability to invert the `is.na()` conditional statement, plus the binary output that `is.na()` returns, is really useful for finding and filtering rows of a data frame. For instance, the function `dplyr::filter()` will drop a row whenever it encounters a value of `FALSE` along a given column, and will retain a row whenever it encounters a value of `TRUE`. So if you want to drop rows that contain NA values for a given column, you would add `!is.na(name_of_column)` inside of `dplyr::filter()`, which should return `FALSE` every time it encounters a row with `NA`. 
+As you can see, adding the `!` in front of `is.na()` results in an inverted output compared to `is.na()` alone, such that each value that was previously `TRUE` is now `FALSE`. Together, the ability to invert the `is.na()` conditional statement, plus the binary output that `is.na()` returns, is really useful for finding and filtering rows of a data frame. 
+
+For instance, the function `dplyr::filter()` will drop a row whenever it encounters a value of `FALSE` in a given column, and will retain a row whenever it encounters a value of `TRUE`. If you want to drop rows that contain NA values for a given column, you would add `!is.na(name_of_column)` inside of `dplyr::filter()`, which should return `FALSE` every time it encounters a row with `NA`, and will remove that row during filtering. 
 
 <h2>Count events per day</h2>
 
-Now you can write code to count the number of entrance and exit events scored per day. You will need to 1) make a new column with information about the day per timestamp, 2) drop rows with missing data for direction scored, 3) group the data frame by day and direction scored, and then 4) count the number of rows per group.
+Now you can write code to count the number of entrance and exit events scored per day. You will need to 1) make a new column with information about the day per timestamp, 2) drop rows with missing data for the direction scored, 3) group the data frame by day and direction scored, and then 4) count the number of rows per group.
 ```{r}
 
 scored_clusters %>%
@@ -123,14 +126,14 @@ scored_clusters %>%
   dplyr::filter(!is.na(direction_scored)) %>%
   # Group the data frame by both columns for which you want to count rows
   group_by(day, direction_scored) %>% 
-  # The number of rows here is the number of exits or entrances scored per day
+  # Then summarize the data: the number of rows here is the number of exits or entrances scored per day
   dplyr::summarise(
     n = n()
   )
 
 ```
 
-Four entrance and exit events were scored per day. Does this line up with the anticipated number of exits and entrances per day? If you go back to the code where you created the simulated raw datasets in vignettes 3 and 4, you should see that you started by simulating 2 entrances and exits per day across the RFID and beam breaker datasets. Then, you added 2 more entrance and 2 more exit events per day when you simulated RFID detection failures (e.g. movements captured by the beam breakers only). `score_clusters()` detected the correct number of entrances and exits per day.
+Four entrance and exit events were scored per day. Does this line up with the anticipated number of exits and entrances per day? If you go back to the code where you created the simulated raw datasets in vignettes 03 and 04, you should see that you started by simulating 2 entrances and exits per day across the RFID and beam breaker datasets. Then, you added 2 more entrance and 2 more exit events per day when you simulated RFID detection failures (e.g. movements captured by the beam breakers only). `score_clusters()` detected the correct number of entrances and exits per day.
 
 Next, check out the perching events. Start by filtering out all rows that were not scored as perching events (rows that have NA values in the column "perching_PIT_tag"). Then, select only the columns that have information that is useful to check: the PIT tag codes, as well as the start and end of each perching event.
 ```{r}
@@ -143,7 +146,7 @@ scored_clusters %>%
 
 ```
 
-As specified in vignettes 3 and 4, the first perching event each day was performed by the first individual (PIT tag 1357aabbcc), and the second was attributed to the second individual (PIT tag 2468zzyyxx).
+As specified in vignettes 03 and 04, the first perching event each day was performed by the first individual (PIT tag 1357aabbcc), and the second was attributed to the second individual (PIT tag 2468zzyyxx).
 
 How many movement events that were not perching events were attributed to each individual?
 ```{r}
@@ -163,17 +166,17 @@ scored_clusters %>%
 
 ```
 
-As you can see, 4 movement events that were not perching events were attributed to the first individual (PIT tag code 1357aabbcc) on each day. This is exactly what we expected when creating the simulated dataset (see vignettes 3 and 4). More non-perching movement events were detected across these days, but those events were not always captured by the RFID antenna (e.g. the simulated RFID detection failures that were captured by the beam breakers only). The beam breakers captured those movement events but cannot record individual identity.
+As you can see, 4 movement events that were not perching events were attributed to the first individual (PIT tag code 1357aabbcc) on each day. This is exactly what we expected when creating the simulated dataset (see vignettes 03 and 04). More non-perching movement events were detected across these days, but those events were not always captured by the RFID antenna (e.g. the simulated RFID detection failures that were captured by the beam breakers only). The beam breakers captured those movement events but cannot record individual identity.
 
 <h2>Build complex barcode plot</h2>
 
-Now that you checked out the final results, you can visualize them. In the code below, you'll learn how to build a barcode plot that is more complex than the plot you made in vignette 5. For this plot, it would be helpful to visualize 3 types of behavioral inferences or types of information over time: the direction of movement (when available), the identity of the individual (when available), and perching events.
+Now that you checked out the final results, you can visualize them. In the code below, you'll learn how to build a barcode plot that is more complex but also easier to interpret than the plot that you made in vignette 05. For this plot, it would be helpful to visualize 3 types of behavioral inferences or types of information over time: the direction of movement (when available), the identity of the individual (when available), and perching events.
 
 You can start building the plot by adding vertical line segments for non-perching movement events. The color of each line will indicate the individual identity, or whether individual identity could not be assigned. The line type of each line will indicate the direction of movement, or if direction could not be scored.
 
-In order to encode colors and line types correctly in the plot, you need to modify the data frame of final results to convert NAs in the two associated columns to more meaningful information. For instance, when individual identity is missing, it would be useful to convert the associated NA value to "unassigned". In the code below, you will use the function `is.na()` inside of `ifelse()` conditional statements to change the NA values inside the columns individual_initiated and direction_scored to more useful information for plotting purposes.
+In order to encode colors and line types correctly in the plot, you need to modify the data frame of final results to convert NAs in the two associated columns to more meaningful information. For instance, when individual identity is missing, it would be useful to convert the associated NA value to "unassigned". In the code below, you will use the function `is.na()` inside of `ifelse()` conditional statements to change the NA values inside the columns "individual_initiated" and "direction_scored" to more useful information for plotting purposes.
 
-First you can practice using `is.na()` inside of `ifelse()` to create a new vector. In the code below, you're providing the conditional statement that you want to test (here you're testing whether the day is the first day of the month), the value you want to add to the vector if the condition is true ("Day 1" of data collection), and then the value that you want to add if the condition is false ("Day 2" of data collection, since there are only 2 dates in each dataset). 
+First you can practice using `is.na()` inside of `ifelse()` to create a new vector. In the code below, you're providing the conditional statement that you want to test (here you're testing whether the column holding the PIT tag code of the individual that initiated a movement has NAs), the value you want to add to the vector if the condition is true ("unassigned" when no PIT tag code is present), and then the value that you want to add if the condition is false (return the PIT tag code in the individual_initiated column if the given value is not NA). 
 ```{r}
 
 # is.na() returns TRUE when it encounters NAs inside of a vector (or column), and FALSE when a value inside of the vector is not NA
@@ -208,6 +211,8 @@ scored_clusters_gg %>%
   distinct(individual_initiated, direction_scored)
 
 ```
+
+This output looks good. You should see NAs in this data frame, but they're in the column "direction_scored", which means that the direction of some movements could not be scored.
 
 You can use this modified data frame to build the plot. In the code below, you'll add lines colored by individual identity and with line types encoding the direction of movement. First you'll specify the plot aesthetics:
 ```{r}
@@ -264,8 +269,7 @@ ggplot() +
   
 ```
 
-To make this plot, you vertically offset the line segments for the first individual and those that were unassigned. This vertical offset makes it easier to visually compare patterns over time. You created this vertical offset by changing the values used for `y`
-and `yend` in the second `geom_segment()` layer, so that those line segments would start higher than the end of the first set of segments. 
+To make this plot, you vertically offset the line segments for the first individual and those that were unassigned. This vertical offset makes it easier to visually compare patterns over time. You created this vertical offset by changing the values used for `y` and `yend` in the second `geom_segment()` layer, so that those line segments would start higher than the top of the first set of segments. 
 
 You can make some additional modifications that would help make this plot easier to interpret. First, the panel or facet labels on the left could be changed from the date to the day of data collection (e.g. "Day 1"). The x-axis labels could also be changed to show only the time of day (remove the month and day), and there could also be more labels available (e.g. a label each half hour).
 
@@ -477,7 +481,7 @@ ggsave(file.path(path, "behavioral_inferences.tiff"), width = 8, height = 6, uni
 You can continue to modify minor aesthetics to this image file to create a high-quality figure for a publication. For instance, you can change the final size of the image file (`width`, `height`), as well as the resolution (`dpi`). You can also change the size of the text on each axis and the axis titles, or the legend position, as you play around with the final image size.
 
 This is the all of the code used for the final plot, condensed and reorganized:
-```{r}
+```{r eval = FALSE}
 
 ggplot(data = scored_clusters_gg3) +
   
@@ -553,3 +557,5 @@ ggplot(data = scored_clusters_gg3) +
   )
 
 ```
+
+You completed the final vignette of the ABISSMAL data processing and analysis pipeline. You also practiced your coding and data science skills in a biological context. Well done! It would be very helpful if you could complete the brief Google form for a post-vignette evaluation that will help us continue to improve these vignettes over time. A link to this Google form will be available in the README file for the vignettes.

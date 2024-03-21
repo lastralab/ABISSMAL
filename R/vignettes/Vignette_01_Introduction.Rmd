@@ -12,6 +12,8 @@ output:
 
 <h2>Vignette overview and learning objectives</h2>
 
+Prior to starting this vignette, it would be very helpful if you could complete the brief Google form for a pre-vignette evaluation that will help us learn more about your experience in R and data science with biological datasets prior to completing these vignettes, and what types of skills you're hoping to improve. Your responses in this pre-vignette form will help us continue to improve these vignettes over time. A link to this Google form will be available in the README file for the vignettes.
+
 This first vignette will take you through a brief introduction to RStudio, downloading a local version of the ABISSMAL GitHub repository, and an introduction to the data analysis workflow provided by ABISSMAL. Through this tutorial, you will learn:
 
 1. How to configure your RStudio session
