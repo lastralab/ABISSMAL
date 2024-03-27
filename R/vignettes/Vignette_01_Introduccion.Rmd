@@ -12,111 +12,111 @@ output:
 
 <h2>Resumen del tutorial y objetivos de aprendizaje</h2>
 
-Antes de empezar este tutorial, si puedes completar esta encuesta a través de Google Forms seria una gran ayuda. La información que compartes nos ayudara saber mas de tu experiencia en R y analizando datos biologicos antes de empezar los tutoriales mismos, tanto como las habilidades que buscas mejorar a traves de completar esta coleccion de tutoriales, y tambien nos ayudara mejorar estos tutoriales en el futuro. Puedes encontrar el enlace para la encuesta en el archivo README de los tutoriales.
+Antes de empezar este tutorial, si puedes completar esta encuesta a través de Google Forms seria una gran ayuda. La información que compartes nos ayudara saber mas de tu experiencia en R y analizando datos biológicos antes de empezar los tutoriales mismos, tanto como las habilidades que buscas mejorar a través de completar esta colección de tutoriales, y también nos ayudara mejorar estos tutoriales en el futuro. Puedes encontrar el enlace para la encuesta en el archivo README de los tutoriales.
 
-En este primer tutorial, vas a leer sobre el programa RStudio, aprender como crear una version local de el repositorio de ABISSMAL en GitHub, y aprender mas sobre el flujo de analisis de datos en ABISSMAL. En este tutorial vas a aprender como:
+En este primer tutorial, vas a leer sobre el programa RStudio, aprender como crear una versión local de el repositorio de ABISSMAL en GitHub, y aprender mas sobre el flujo de análisis de datos en ABISSMAL. En este tutorial vas a aprender como:
 
-1. Configurar tu sesion de RStudio
-2. Crear una version local de un repositorio de GitHub
+1. Configurar tu sesión de RStudio
+2. Crear una versión local de un repositorio de GitHub
 3. Usar ABISSMAL para procesar y analizar datos
-4. Solucionar problemas con tu codigo usando recursos en linea
-5. Reportar problemas de codigo a GitHub
+4. Solucionar problemas con tu código usando recursos en linea
+5. Reportar problemas de código a GitHub
 
-Hay muchas formas de hacer una sola tarea o solucionar un problema en R, y deberias de mantener esto en mente mientras completas estos tutoriales. En cada tutorial, vas a aprender diferentes ejemplos sobre como manejar ciertas tares o solucionar problemas especificas con codigo, pero estos ejemplos no son un resumen exhaustivo de como manejar cada tarea ni solucionar cada problema. Mas bien recomiendo que uses estos tutoriales como una oportunidad para practicar como usar tus habilidades de escribir codigo en un contexto biologico.
+Hay muchas formas de hacer una sola tarea o solucionar un problema en R, y deberías de mantener esto en mente mientras completas estos tutoriales. En cada tutorial, vas a aprender diferentes ejemplos sobre como manejar ciertas tares o solucionar problemas especificas con código, pero estos ejemplos no son un resumen exhaustivo de como manejar cada tarea ni solucionar cada problema. Mas bien recomiendo que uses estos tutoriales como una oportunidad para practicar como usar tus habilidades de escribir código en un contexto biológico.
 
-<h2>Configurar tu sesion de RStudio</h2>
+<h2>Configurar tu sesión de RStudio</h2>
 
-Si nunca has usado R, un lenguaje de programacion para analisis estadisticos, ni RStudio, una interfaz grafica de usuario, recomiendo revisar el tutorial [R for Reproducible Scientific Analysis](https://swcarpentry.github.io/r-novice-gapminder-es/) de [Software Carpentry](https://software-carpentry.org/).
+Si nunca has usado R, un lenguaje de programación para análisis estadísticos, ni RStudio, una interfaz gráfica de usuario, recomiendo revisar el tutorial [R for Reproducible Scientific Analysis](https://swcarpentry.github.io/r-novice-gapminder-es/) de [Software Carpentry](https://software-carpentry.org/).
 
-Cuando hayas instalado R y RStudio en tu computadora, puedes hacer click en el iconon de RStudio para abrir el programa. La configuracion predeterminada de los paneles de RStudio se deberia de ver algo asi, aunque el color de fondo puede ser diferente:
+Cuando hayas instalado R y RStudio en tu computadora, puedes hacer clic en el icono de RStudio para abrir el programa. La configuración predeterminada de los paneles de RStudio se debería de ver algo así, aunque el color de fondo puede ser diferente:
 
 <br>
 ![Un imagen de la configuracion predeterminada de los paneles de RStudio, con el panel de la consola debajo del panel de la fuente](/home/gsvidaurre/Desktop/GitHub_repos/ABISSMAL/R/vignettes/images/RStudio_01.png)
-Con esta configuracion de paneles es dificil ver el codigo que escribes y guardas en archivos fisicos en el panel de la fuente, tanto como el resultado de ese codigo en el panel de la consola. Puedes reconfigurar los paneles para que el panel de la fuente este al lado izquierdo del panel de la consola, y asi sera mas facil de ver los resultados de tu codigo inmediatamente. Puedes seguir los siguientes pasos para reconfigurar los paneles en RStudio:
+Con esta configuración de paneles es difícil de ver el código que escribes y guardas en archivos físicos en el panel de la fuente, tanto como el resultado de ese código en el panel de la consola. Puedes reconfigurar los paneles para que el panel de la fuente este al lado izquierdo del panel de la consola, y así sera mas fácil de ver los resultados de tu código inmediatamente. Puedes seguir los siguientes pasos para reconfigurar los paneles en RStudio:
 
-* Seleciona la opcion "Tools" en el menu 
+* Selecciona la opción "Tools" en el menú 
 
-* Seleciona la opcion "Global Options" en el menu desplegable que sale en "Tools"
+* Selecciona la opción "Global Options" en el menú desplegable que sale en "Tools"
 
-* Se va a abrir otra ventana con opciones. Selecciona la opcion "Pane Layout" a la izquierda 
+* Se va a abrir otra ventana con opciones. Selecciona la opción "Pane Layout" a la izquierda 
 
-* Usa el menu desplegable para seleccionar "Source" como el panel en la primera fila y al lado izquierdo, y seleciona "Console" como el panel que ocupara la siguiente parte de la primera fila de paneles a mano derecha
+* Usa el menú desplegable para seleccionar "Source" como el panel en la primera fila y al lado izquierdo, y selecciona "Console" como el panel que ocupara la siguiente parte de la primera fila de paneles a mano derecha
 
 * Puedes seleccionar "Apply" para aplicar estos cambios y luego "Ok" para salir de esta ventana 
 
-Tu configuracion de paneles en RStudio ahora se deberia de ver asi:
+Tu configuración de paneles en RStudio ahora se debería de ver así:
 
 <br>
 ![Un imagen de la configuracion modificada de los paneles de RStudio, con el panel de la consola al lado derecho y el panel de la fuente al lado izquierdo](/home/gsvidaurre/Desktop/GitHub_repos/ABISSMAL/R/vignettes/images/RStudio_02.png)
 
-Otro cambio que puedes implementar en tu configuracion de RStudio es el retorno automatico, para no tener que hacer scroll a tu derecha cada vez que quieres leer una linea completa de texto o codigo. Para implementar este cambio, puedes ir a "Tools", luego "Global Options", seleccionar "Code", y seleccionar la caja para la opcion "Soft-wrap R source files", luego hacer click en "Apply" y "Ok".
+Otro cambio que puedes implementar en tu configuración de RStudio es el retorno automático, para no tener que hacer scroll a tu derecha cada vez que quieres leer una linea completa de texto o código. Para implementar este cambio, puedes ir a "Tools", luego "Global Options", seleccionar "Code", y seleccionar la caja para la opción "Soft-wrap R source files", luego hacer clic en "Apply" y "Ok".
 
 
-Tambien puedes cambiar el tamano de la fuente del texto y codigo que escribes, tanto como el color de texto y codigo, y el color de fondo de tu ventana de RStudio. Despues de selecionar "Tools" y "Global Options", puedes seleccionar "Appearance" para ver diferentes opciones.
+También puedes cambiar el tamaño de la fuente del texto y código que escribes, tanto como el color de texto y código, y el color de fondo de tu ventana de RStudio. Después de seleccionar "Tools" y "Global Options", puedes seleccionar "Appearance" para ver diferentes opciones.
 
-<h2>Crear una version local de un repositorio de GitHub</h2>
+<h2>Crear una versión local de un repositorio de GitHub</h2>
 
-Si nunca has usado GitHub, recomiendo bajar el programa [GitHub Desktop](https://docs.github.com/es/desktop). Este programa es una interfaz grafica de usuario para el plataforma de GitHub, que provee un sistema de control de versiones. Vamos a seguir unos pasos para crear una version local del repositorio de ABISSMAL que esta en GitHub para que puedas acceder las funciones de R de ABISSMAL en tu propia computadora. Si ya sabes como usar GitHub y como usar Git en el terminal, puedes seguir las instrucciones que tenemos en el [README de ABISSMAL](https://github.com/lastralab/ABISSMAL).
+Si nunca has usado GitHub, recomiendo bajar el programa [GitHub Desktop](https://docs.github.com/es/desktop). Este programa es una interfaz gráfica de usuario para el plataforma de GitHub, que provee un sistema de control de versiones. Vamos a seguir unos pasos para crear una versión local del repositorio de ABISSMAL que esta en GitHub para que puedas acceder las funciones de R de ABISSMAL en tu propia computadora. Si ya sabes como usar GitHub y como usar Git en el terminal, puedes seguir las instrucciones que tenemos en el [README de ABISSMAL](https://github.com/lastralab/ABISSMAL).
 
 Cuando hayas instalado GitHub Desktop, puedes:
 
-* Hacer click en el icono de GitHub Desktop para abrir el programa
+* Hacer clic en el icono de GitHub Desktop para abrir el programa
 
 * Abrir tu navegador web e ir al repositorio de ABISSMAL en GitHub: https://github.com/lastralab/ABISSMAL
 
-* Hacer click en el boton verde de "Code" y copiar la URL debajo de la opcion HTTPS en el menu desplegable
+* Hacer clic en el botón verde de "Code" y copiar la URL debajo de la opción HTTPS en el menú desplegable
 
-* Ir al menu de GitHub Desktop window y seleccionar "File"
+* Ir al menú de GitHub Desktop y seleccionar "File"
 
 * Seleccionar "Clone repository"
 
-* Seleccionar la pestana "URL"
+* Seleccionar la pestaña "URL"
 
 * Pegar la URL de ABISSMAL que copiaste de GitHub en la caja que pide "Repository URL or GitHub username and repository"
 
-* Revisar que el directorio en la caja "Local path" es la ubicacion en tu computadora donde quieres instalar el repositorio de ABISSMAL. Por ejemplo, si "Local path" es "/home/User/Desktop/ABISSMAL", el repositorio de ABISSMAL se instalara directamente en tu Desktop
+* Revisar que el directorio en la caja "Local path" es la ubicación en tu computadora donde quieres instalar el repositorio de ABISSMAL. Por ejemplo, si "Local path" es "/home/User/Desktop/ABISSMAL", el repositorio de ABISSMAL se instalara directamente en tu Desktop
 
-* Seleccionar "Clone" cuando estes lista para crear una version local del repositorio de ABISSMAL en tu computadora
+* Seleccionar "Clone" cuando estés lista para crear una versión local del repositorio de ABISSMAL en tu computadora
 
-Cuando el repositorio se ha instalado en tu computadora, deberias de poder ver el siguiente directorio y lista de archvios adentro de una carpeta llamada "ABISSMAL":
+Cuando el repositorio se ha instalado en tu computadora, deberías de poder ver el siguiente directorio y lista de archivos adentro de una carpeta llamada "ABISSMAL":
 
 <br>
 ![Un imagen del directorio de la version local del repositorio de ABISSMAL](/home/gsvidaurre/Desktop/GitHub_repos/ABISSMAL/R/vignettes/images/ABISSMAL_localrepo.png)
 
-Los archivos que vamos a usar en los siguientes tutoriales estan adentro de la carpeta "R". Esta carpeta contiene 6 archivos de R (extension ".R"), un archivo README que contiene mas informacion sobre cada archivo de R, y carpetas con los tutoriales en formato RMarkdown (extension ".Rmd"), y tambien codigo para pruebas unitarias automatizadas.
+Los archivos que vamos a usar en los siguientes tutoriales están adentro de la carpeta "R". Esta carpeta contiene 6 archivos de R (extensión ".R"), un archivo README que contiene mas información sobre cada archivo de R, y carpetas con los tutoriales en formato RMarkdown (extensión ".Rmd"), y también código para pruebas unitarias automatizadas.
 
 <h2>Procesar y analizar datos con ABISSMAL</h2>
 
-ABISSMAL provee 5 funciones diferentes de R para procesar y analizar datos, y describimos estas funciones en mas detalle abajo, en el orden que se deberian de usar in general. Puedes encontrar mas informacion detallada sobre estas funciones en el archivo README de la carpeta "R", y tambien el manuscrito asociado con ABISSMAL:
+ABISSMAL provee 5 funciones diferentes de R para procesar y analizar datos, y describimos estas funciones en mas detalle abajo, en el orden que se deberían de usar in general. Puedes encontrar mas información detallada sobre estas funciones en el archivo README de la carpeta "R", y también el manuscrito asociado con ABISSMAL:
 
-1. `combine_raw_data` automaticamente combina hojas de calculo de datos originales que fueron colectados por dia y los guarda en una sola hoja de calculo a traves de todos los dias de coleccion de datos. Esta concatenacion de datos se realiza por cada tipo de sensor, por ejemplo, los sensores de rayos infrarrojos o una camara de infrarrojo, y no cambia ni reemplaza los datos originales. Esta funcion puede usar datos de los sensors de RFID (radio frequency identification), rayos infrarrojo, la camara, o el sensor de temperatura de ABISSMAL. Las siguientes funciones no aceptan datos de temperatura
+1. `combine_raw_data` automáticamente combina hojas de calculo de datos originales que fueron colectados por día y los guarda en una sola hoja de calculo a través de todos los días de colección de datos. Esta concatenación de datos se realiza por cada tipo de sensor, por ejemplo, los sensores de rayos infrarrojos o una cámara de infrarrojo, y no cambia ni reemplaza los datos originales. Esta función puede usar datos de los sensores de RFID ("radio frequency identification"), rayos infrarrojo, la cámara, o el sensor de temperatura de ABISSMAL. Las siguientes funciones no aceptan datos de temperatura
 
-2. `detect_perching_events` toma como entrada los resultados de `combine_raw_data` y detecta grupos de detecciones que occurrieron cerca en el tiempo como eventos de posar. Estos eventos de posa representan periodos de tiempo cuando un individuo estuvo posado en el antena de RFID (como percha) situado en la entrada del contenedor de nido. La function usa datos de los sensors ubicados en la entrada del contenedor (RFID o los sensors de infrarrojo) y devuelve una hoja de calculo de las coordenadas temporales de los eventos de posar inferidos
+2. `detect_perching_events` toma como entrada los resultados de `combine_raw_data` y detecta grupos de detecciones que ocurrieron cerca en el tiempo como eventos de posar. Estos eventos de posa representan periodos de tiempo cuando un individuo estuvo posado en el antena de RFID (como percha) situado en la entrada del contenedor de nido. La función usa datos de los sensores ubicados en la entrada del contenedor (RFID o los sensores de infrarrojo) y devuelve una hoja de calculo de las coordenadas temporales de los eventos de posar inferidos
 
-3. `preprocess_detections` usa como entrada los resultados de `combine_raw_data` y remueve detecciones que occurrieron muy cerca en el tiempo. Esta funcion devuelve una hoja de calculo de datos pre-procesados por tipo de sensor, y en cada hoja de calculo, las detecciones consecutivas deberian de estar separadas por un umbral temporal predeterminado o mas. Por ejemplo, cuando usas un umbral de 1 segundo, solo una deteccion puede occurir por segundo en los datos pre-procesados
+3. `preprocess_detections` usa como entrada los resultados de `combine_raw_data` y remueve detecciones que ocurrieron muy cerca en el tiempo. Esta función devuelve una hoja de calculo de datos pre-procesados por tipo de sensor, y en cada hoja de calculo, las detecciones consecutivas deberían de estar separadas por un umbral temporal predeterminado o mas. Por ejemplo, cuando usas un umbral de 1 segundo, solo una detección puede ocurrir por segundo en los datos pre-procesados
 
-4. `detect_clusters` usa como entrada los resultados de `preprocess_detections` obtenidos con 2 o mas tipos de sensores. La funcion identifica detecciones a traves de 2 o mas tipos de sensores que occurieron cerca en el tiempo, y devuelve informacion temporal y metadatos sobre cada grupo o cumulo. Cada cumulo de detecciones representa un evento discreto de movimiento de un individuo o mas que un individuo
+4. `detect_clusters` usa como entrada los resultados de `preprocess_detections` obtenidos con 2 o mas tipos de sensores. La función identifica detecciones a través de 2 o mas tipos de sensores que ocurrieron cerca en el tiempo, y devuelve información temporal y metadatos sobre cada grupo o cumulo. Cada cumulo de detecciones representa un evento discreto de movimiento de un individuo o mas que un individuo
 
-5. `score_clusters` usa como entrada los resultados de `detect_clusters`. Esta funcion tambien puede usar los resultados de `detect_perching_events` para integrar eventos de posar identificados en los datos originales de RFID o los sensores de infrarrojo, y puede usar los resultados de `preprocess_detections` para integrar eventos de grabacion de videos que no fueron incluidos en los cumulos detectados por `detect_clusters`. Esta funcion hace inferencias de comportamiento de los eventos de movimento, incluyendo la direccion de movimiento, el magnitud de movimiento, identidad de individuo (cuando datos de RFID se encontraron en un cumulo), y donde occurrio el inicio de la secuecia de movimiento (en la entrada o adentro del contenedor de nido). La funcion devuelve una hoja de calculo de inferencias de comportamientos y otros metadatos sobre cada evento de movimiento, y estos resultados se pueden usar para visualizaciones y analisis estadisticos.
+5. `score_clusters` usa como entrada los resultados de `detect_clusters`. Esta función también puede usar los resultados de `detect_perching_events` para integrar eventos de posar identificados en los datos originales de RFID o los sensores de infrarrojo, y puede usar los resultados de `preprocess_detections` para integrar eventos de grabación de vídeos que no fueron incluidos en los cúmulos detectados por `detect_clusters`. Esta función hace inferencias de comportamiento de los eventos de movimiento, incluyendo la dirección de movimiento, el magnitud de movimiento, identidad de individuo (cuando datos de RFID se encontraron en un cumulo), y donde ocurrir el inicio de la secuencia de movimiento (en la entrada o adentro del contenedor de nido). La función devuelve una hoja de calculo de inferencias de comportamientos y otros metadatos sobre cada evento de movimiento, y estos resultados se pueden usar para visualizaciones y análisis estadísticos.
 
 <br>
 ![Figure 4 del manuscrito de ABISSMAL con un flujo general de trabajo a traves de las 5 funciones primarias](/home/gsvidaurre/Desktop/GitHub_repos/ABISSMAL/R/vignettes/images/Figure4_ComputationalAnalyses.png)
 * Esta figura es de Smith-Vidaurre, G., Molina, T., Jarvis, E.D., and E.A. Hobson. 2023. Automated tracking of avian parental care. [EcoEvoRxiv preprint]((https://ecoevorxiv.org/repository/view/6268/)).
 
-<h2>Solucionar errors en linea</h2>
+<h2>Solucionar errores en linea</h2>
 
-Mientras escribes y ejecutas codigo encontraras errores que a veces pueden ser frustrantes. Experimentar y solucionar errors es una parte muy importante de tu proceso de aprendizaje en R (u otros lenguajes de programacion). Los errores surgen por diferentes razones, incluyendo errores de tipeo mientras escribes codigo, problemas con las versiones de paquetes externos de R que instalaste, o posiblemente por necesitar funciones de paquetes que no has instalado en tu computadora. Los errors a veces pueden surgir por problemas con las funciones de ABISSMAL que usaras en los siguientes tutoriales, or por errores con el codigo en los tutoriales mismos.
+Mientras escribes y ejecutas código encontraras errores que a veces pueden ser frustrantes. Experimentar y solucionar errores es una parte muy importante de tu proceso de aprendizaje en R (u otros lenguajes de programación). Los errores surgen por diferentes razones, incluyendo errores de tipeo mientras escribes código, problemas con las versiones de paquetes externos de R que instalaste, o posiblemente por necesitar funciones de paquetes que no has instalado en tu computadora. Los errores a veces pueden surgir por problemas con las funciones de ABISSMAL que usaras en los siguientes tutoriales, o por errores con el código en los tutoriales mismos.
 
-Cuando experimentas un error con tu condigo, es importante intentar solucionar el error independientement antes de suponer que el error nacio de errores de las funciones de ABISSMAL o los tutoriales. Hay muchos recursos en linea que puedes usar para solucionar errores comunes o inusuales en R. Puedes empezar con copiar y pegar el mensaje de error que ves en tu consola en un buscador, y asi deberias de ver varias opciones de foros publicos donde otras personas han preguntado por y solucionado errores similares. Tambien deberias poder de usar herramientas de IA generativo como ChatGPT para buscar errores de tipeo u otros problemas con tu codigo. Otra opcion util es leer la documentation de R para investigar si el error que ves esta relacionado con un paquete o funcion que puede ser una dependencia de ABISSMAL.
+Cuando experimentas un error con tu condigo, es importante intentar solucionar el error independientemente antes de suponer que el error nació de errores de las funciones de ABISSMAL o los tutoriales. Hay muchos recursos en linea que puedes usar para solucionar errores comunes o inusuales en R. Puedes empezar con copiar y pegar el mensaje de error que ves en tu consola en un buscador, y así deberías de ver varias opciones de foros públicos donde otras personas han preguntado por y solucionado errores similares. También deberías de poder de usar herramientas de IA generativo como ChatGPT para buscar errores de tipeo u otros problemas con tu código. Otra opción útil es leer la documentación de R para investigar si el error que ves esta relacionado con un paquete o función que puede ser una dependencia de ABISSMAL.
 
-Ya cuando hayas investigado cuidadosamente un error, y estas segura que el error no se debe a un error de tipeo o problemas con la estructura de tus datos, luego puedes considerar si el error se debe a un problema con las funciones de ABISSMAL o los tutoriales mismos, y puedes reportar el error a las desarolladoras de ABISSMAL en GitHub (ver la siguiente seccion).
+Ya cuando hayas investigado cuidadosamente un error, y estas segura que el error no se debe a un error de tipeo o problemas con la estructura de tus datos, luego puedes considerar si el error se debe a un problema con las funciones de ABISSMAL o los tutoriales mismos, y puedes reportar el error a las desarolladoras de ABISSMAL en GitHub (ver la siguiente sección).
 
 <h2>Reportar errores en GitHub</h2>
 
-Es posible que encuentres errores mientras trabajas en cada tutorial, incluyendo errores con codigo que no ejecuta, y que devuelve resultados incorrectos. Estos errores pueden manifestar de las funciones de ABISSMAL o con el codigo de algun tutorial. Cuando encuentras un error en una funcion de ABISSMAL, puedes crear un "Issue" (asunto o problema) en el repositorio de GitHub. Para crear un asunto nuevo, puedes seleccionar "New Issue" en la pagina de [Issues](https://github.com/lastralab/ABISSMAL/issues) en el repositorio de ABISSMAL, y seguir las instrucciones en el esquema del "Issue" nuevo para anadir la informacion que las desarrolladoras necesitan para trabajar efectivamente en el error. Tambien puedes anadir la etiqueta de "bug" (o error) a tu "Issue". Si encuentras un error con los tutoriales puedes crear un "Issue" usando los mismos pasos, y deberias de clarificar que el error esta relacionado al codigo de algun tutorial en particular.
+Es posible que encuentres errores mientras trabajas en cada tutorial, incluyendo errores con código que no ejecuta, y que devuelve resultados incorrectos. Estos errores pueden manifestar de las funciones de ABISSMAL o con el código de algún tutorial. Cuando encuentras un error en una función de ABISSMAL, puedes crear un "Issue" (asunto o problema) en el repositorio de GitHub. Para crear un asunto nuevo, puedes seleccionar "New Issue" en la pagina de [Issues](https://github.com/lastralab/ABISSMAL/issues) en el repositorio de ABISSMAL, y seguir las instrucciones en el esquema del "Issue" nuevo para añadir la información que las desarrolladoras necesitan para trabajar efectivamente en el error. También puedes añadir la etiqueta de "bug" (o error) a tu "Issue". Si encuentras un error con los tutoriales puedes crear un "Issue" usando los mismos pasos, y deberías de clarificar que el error esta relacionado al código de algún tutorial en particular.
 
 En el siguiente tutorial, vamos a crear datos simulados de movimiento de animales para aprender como usar las cinco funciones primarias de ABISSMAL.
 
-<h2>Informacion sobre esta traduccion</h2>
+<h2>Información sobre esta traducción</h2>
 
-Este tutorial fue traducido al espanol por Grace Smith-Vidaurre, siguiendo las [convenciones de traduccion de los Carpentries](https://github.com/Carpentries-ES/board/blob/master/Convenciones_Traduccion.md), incluyendo usar el genero femenino por defecto. Si encuentran errores de ortografia que impiden su habilidad de completar estos tutoriales, por favor reporten los errores de ortografia a GitHub usando los pasos arriba para reportar un "Issue" con los tutoriales.
+Este tutorial fue traducido al español por Grace Smith-Vidaurre, siguiendo las [convenciones de traduccion de los Carpentries](https://github.com/Carpentries-ES/board/blob/master/Convenciones_Traduccion.md), incluyendo usar el genero femenino por defecto. Si encuentran errores de ortografía que impiden su habilidad de completar estos tutoriales, por favor reporten los errores de ortografía a GitHub usando los pasos arriba para reportar un "Issue" con los tutoriales.
