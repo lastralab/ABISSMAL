@@ -10,6 +10,10 @@ output:
     toc_depth: 4
 ---
 
+<h2>Información sobre esta traducción</h2>
+
+Este tutorial fue traducido al español por Grace Smith-Vidaurre, siguiendo las [convenciones de traducción de los Carpentries](https://github.com/Carpentries-ES/board/blob/master/Convenciones_Traduccion.md), incluyendo usar el género femenino por defecto. Si encuentras errores de ortografía que impiden tu habilidad de completar los tutoriales, por favor reporta los errores de ortografía a GitHub usando los pasos arriba para reportar un "Issue".
+
 <h2>Resumen del tutorial y objetivos de aprendizaje</h2>
 
 Sería una gran ayuda si antes de empezar este tutorial puedes completar una encuesta a través de Google Forms. La información que compartes nos ayudará saber más de tu experiencia en R y analizando datos biológicos antes de empezar los tutoriales mismos, tanto como las habilidades que buscas mejorar a través de completar esta colección de tutoriales, y también nos ayudara mejorar estos tutoriales en el futuro. Puedes encontrar el enlace para la encuesta en el archivo README de los tutoriales.
@@ -116,7 +120,3 @@ Ya cuando hayas investigado cuidadosamente un error, y estas segura que el error
 Es posible que encuentres errores mientras trabajas en cada tutorial, incluyendo errores con código que no ejecuta, y que devuelve resultados incorrectos. Estos errores pueden manifestar de las funciones de ABISSMAL o con el código de algún tutorial. Cuando encuentras un error en una función de ABISSMAL, puedes crear un "Issue" (asunto o problema) en el repositorio de GitHub. Para crear un asunto nuevo, puedes seleccionar "New Issue" en la pagina de [Issues](https://github.com/lastralab/ABISSMAL/issues) en el repositorio de ABISSMAL, y seguir las instrucciones en el esquema del "Issue" nuevo para añadir la información que las desarrolladoras necesitan para trabajar efectivamente en el error. También puedes añadir la etiqueta de "bug" (o error) a tu "Issue". Si encuentras un error con los tutoriales puedes crear un "Issue" usando los mismos pasos, y deberías de clarificar que el error esta relacionado al código de algún tutorial en particular.
 
 En el siguiente tutorial, vamos a crear datos simulados de movimiento de animales para aprender como usar las cinco funciones primarias de ABISSMAL.
-
-<h2>Información sobre esta traducción</h2>
-
-Este tutorial fue traducido al español por Grace Smith-Vidaurre, siguiendo las [convenciones de traduccion de los Carpentries](https://github.com/Carpentries-ES/board/blob/master/Convenciones_Traduccion.md), incluyendo usar el género femenino por defecto. Si encuentras errores de ortografía que impiden tu habilidad de completar estos tutoriales, por favor reporta los errores de ortografía a GitHub usando los pasos arriba para reportar un "Issue".

@@ -1,0 +1,192 @@
+---
+title: "Vignette 02: Configuración"
+author: "Grace Smith-Vidaurre"
+date: "2023-12-27"
+output: 
+  html_document:
+    css: "styles.css"
+    toc: true
+    toc_float: true
+    toc_depth: 4
+---
+
+```{r setup, include = FALSE}
+
+knitr::opts_chunk$set(echo = TRUE, eval = FALSE)
+
+```
+
+<h2>Información sobre esta traducción</h2>
+
+Este tutorial fue traducido al español por Grace Smith-Vidaurre, siguiendo las [convenciones de traducción de los Carpentries](https://github.com/Carpentries-ES/board/blob/master/Convenciones_Traduccion.md), incluyendo usar el género femenino por defecto. Si encuentras errores de ortografía que impiden tu habilidad de completar los tutoriales, por favor reporta los errores de ortografía a GitHub usando los pasos arriba para reportar un "Issue".
+
+<h2>Resumen del tutorial y objetivos de aprendizaje</h2>
+
+Vamos a configurar tu espacio de trabajo virtual para sesiones de escribir codigo en R y usar las funciones de ABISSMAL en este segundo tutorial. Vas a aprender habilidades basicas de programacion en R y buenas costumbres de la ciencia abierta para escribir codigo, incluyendo como:
+
+1. Usar archivos de RMarkdown
+2. Limpiar tu ambiente global
+3. Ejecutar codigo adentro de un "trozo" de codigo de RMarkdown
+4. Aprender sobre funciones en R y su documentacion
+5. Instalar y acceder paquetes
+6. Comentar tu codigo
+7. Atajos de RStudio para escribir codigo
+8. Crear y usar una carpeta o un directorio de trabajo
+
+<h2>Usar archivos de RMarkdown</h2>
+
+Cada tutorial en esta serie de tutoriales esta disponsible como un archivo de RMarkdown (extension .Rmd) y tambien como un archivo de HTML que puedes abrir y ver en tu navegador por defecto. Cada archivo de HTML fue generado por "tejer" el archivo de RMarkdown, o convertir el texto y el codigo junto con los resultados del codigo en un reporte en formato HTML. Puedes leer [la documentación de RMarkdown](https://rmarkdown.rstudio.com/lesson-1.html) o este tutorial por [Teresa Boca en RPubs](https://rpubs.com/tereboca/informe_rmakrdown) para aprender mas sobre como usar RMarkdown para escribo codigo y generar reportes.
+
+Los archivos de RMarkdown facilitan el proceso de compartir tu codigo y resultados. Si nunca has usado RMarkdown, la mejor forma de completar los tutoriales sera crear un archivo de RMarkdown nuevo para cada tutorial y escribir el codigo por ti mismo. Aprenderas mas si escribes el codigo y los comentarios (adentro y afuera de cada trozo de codigo) en tus propias palabras. Tambien puedes abrir el reporte HTML de cada tutorial en tu navegador para tener una guia mientras escribes el codigo de cada tutorial en tu propio archivo de RMarkdown. Como otra alternativa puedes abrir el archivo de RMarkdown del tutorial al lado de con tu propio archivo de RMarkdown si anades una tercera columna a la configuracion de tus paneles de RStudio. Puedes seleccionar las siguientes opciones:
+
+* "Tools"
+* "Global Options"
+* "Pane Layout"
+* "Add Column" para anadir otro panel de fuente en una tercera columna
+* Luego puedes abrir el tutorial original en un panel de fuente, y tu propio archivo de RMarkdown en el otro panel de fuente
+
+Si ya tienes experiencia con escribir codigo en R y usar archivos de RMarkdown, puedes abrir el archivo original de RMarkdown de un tutorial y ejecutar el codigo adentro de cada trozo para completar cada tutorial (con algunas modificaciones de los directorios para especificar los directorios y archivos en tu computadora). Si quieres preservar el codigo original en cada archivo de RMarkdown, puedes crear una copia de cada tutorial y modificar las copias mientras completas cada tutorial.
+
+<h2>Limpiar tu ambiente global</h2>
+
+Tu ambiente global es tu espacio virtual en R, y puede contener paquetes y objectos diferentes que facilitaran tus objetivos de programacion y/o analizar datos. Puedes ver los paquetes y objetos que existen en tu ambiente con hacer clic en la pestana de ambiente o "Environment" en el mismo panel que incluye las pestanas de "History" y "Connections".
+
+Si iniciaste una sesion nueva de RStudio puede que tu ambiente global este vacio. Pero si estas trabajando en una sesion vieja, o capaz que en un ambiente de un proyecto de R (RProject), tu ambiente global ya puede contener paquetes y objetos. Limpiar tu ambiente global es una buena costumbre para asegurar que cada vez que empiezas una sesion de escribir codigo. Si no limpias tu ambiente global, incluso cuando usas el mismo codigo entre sesiones, corres el riesgo de usar versiones viejas de objetos que no reflejan los cambios mas recientes en tu codigo. 
+
+Puedes limpiar tu ambiente global directamente de la interfaz de RStudio con hacer clic en el icono de la escoba debajo de la pestana de "Environment" (haz clic en "Yes" con "hidden objects" para tambien limpiar objectos escondidos).
+
+Tambien puedes limpiar tu ambiente global con ejecutar el codigo como se detalla abajo. Puedes ejecutar el codigo adentro de este trozo de formas diferentes:
+
+* Hacer clic en el icono de la flecha verde en la parte superior derecha del trozo de codigo para ejecutar solamente el codigo en este trozo
+
+* Puedes ubicar tu cursor (y hacer clic) en cualquiera posicion adentro de la linea de codigo, y luego navegar al icono de "Run" en la parte superior derecha del panel de fuente que tiene un cuadro blanco y una flecha verde. En el menu desplegable, selecciona "Run Selected Lines" or "Run Current Chunk" (o usar los atajos de cada comando, ver los siguientes dos vinetas). "Run Selected Lines" ejecutara la linea de codigo en donde esta tu cursor, y "Run Current Chunk" ejecutara todo el codigo adentro del trozo (independientemente de la posicion de tu cursor)
+
+* Puedes ubicar tu cursor (y hacer clic) en cualquiera posicion adentro de la linea de codigo, y usar el atajo de "Ctrl" + "Enter" para ejecutar la linea de codigo corriente donde esta tu cursor
+
+* Para ejecutar todo el codigo en el trozo, puedes usar el atajo "Ctrl" + "Shift" + "Enter"
+
+El primer atajo arriba, para ejecutar una linea de codigo a la vez, es muy util para poder ver los resultados de cada linea de codigo y revisarlos por errores.
+```{r}
+
+rm(list = ls())
+
+```
+
+El codigo arriba para limpiar tu ambente global es una expresion anidada con 2 funciones: `rm()` and `ls()`. La notacion de `()` se usa para funciones en R. Las funciones son operaciones que puedes aplicar en tu propio codigo con usar el nombre de una funcion especifica. R tiene una coleccion de funciones base que puedes acceder sin necesitar un paquete especifico, incluyendo las dos funciones arriba (`rm()` and `ls()`).
+
+<h2>Acceder documentacion de funciones de R</h2>
+
+Puedes acceder la documentacion para las funciones que usaste arriba con hacer clic en la pestana de "Help" en el panel que incluye "Files" y "Plots", o con escribir el nombre de la funcion en la barra de busqueda. Tambien puedes acceder la documentacion de funciones con ejecutar este codigo:
+```{r}
+
+?rm
+
+```
+
+```{r}
+
+?ls
+
+```
+
+La documentacion de cada funcion contiene secciones especificas que pueden ser utiles para entender el uso y proposito de la function, sobre todo los argumentos de la funcion. Estos argumentos son los valores que la funcion require de la usaria para poder guiar o modificar la operacion. Muchas funciones tienen valores por defecto para algunos de sus argumentos que se usaran cuando no provees valores especificos a los argumentos.
+
+Por ejemplo, la funcion `rm()` tiene un argumento `list()` (seguido por un `=` o signo igual, que se usa para proveer un valor especifico a un argumento). Necesitas proveer informacion despues del argumento `list()` para que `rm()` limpie tu ambiente global de la forma que quieres. Para eliminar todo en tu ambiente global, estamos usando los resultados de la funcion `ls()`, que imprime los nombres de todos los objetos en tu ambiente global.
+
+<h2>Instalar y cargar paquetes</h2>
+
+Despues de limpiar tu ambiente global, todavia necesitas configurar tu espacio virtual de trabajo para preparar para tu sesion de escribir codigo para analizar datos. Un paso important es asegurar que puedes acceder funciones que necesitas para analizar datos pero que no son disponibles a traves de la coleccion de funciones bases de R. Por ejemplo, [el `tidyverse`](https://www.tidyverse.org/) es una coleccion de paquetes de R que provee funciones y expresiones utiles para analizar datos.
+
+Si no has instalado el `tidyverse` en tu computadora local, necesitas instalar esta coleccion de paquetes para acceder funciones utiles para analizar datos. El codigo abajo instala el `tidyverse` de [CRAN](https://cran.r-project.org/), el "Comprehensive R Archive Network" en linea que contiene miles de paquetes de R.
+```{r}
+
+# Instalar el tidyverse de CRAN
+install.packages("tidyverse")
+
+```
+
+En el trozo arriba, anadi un comentario arriba del codigo usando el simbolo de `#`, un signo numeral o hashtag. Cualquier texto que escribes despues de un hashtag sera ignorado cuando ejecutas tu codigo. Es buena costumbre comentar tu codigo, sobre todo cuando estes aprendiendo como escribir codigo en R. Para biologas, comentar tu codigo incluso cuando eres experto tambien puede ser muy buena costumbre. Comentar tu codigo es una forma de documentar to trabajo, y sirve para hacer el codigo que publicas con manuscritos o herramientas mas acesible para otros en la comunidad. 
+
+Cuando hayas instalado el `tidyverse` en tu computadora no necesitas instalarlo otra vez (por ejemplo, la siguiente vez que abres RStudio). Lo que necesitas hacer cada vez que abres otra sesion de RStudio es cargar el paquete en tu ambiente global para poder acceder las funciones contenidos adentro de la coleccion de paquetes del `tidyverse`.
+```{r}
+
+library(tidyverse)
+
+```
+
+<h2>Atajos para escribir codigo</h2>
+
+RStudio tiene varios atajo utiles para escribir codigo. Puedes encontrar estos atajos con ir a "Tools" en el menu de RStudio, luego seleccionar "Keyboard Shortcuts Help", que deberia de abrir una ventana nueva con todos los atajos por defecto en RStudio. Arriba aprendiste sobre unos atajos para ejecutar codigo adentro de un trozo de RStudio. Algunos atajos utiles son "Shift + Ctrl + C", que puedes usar para comentar o silenciar de una a multiple lineas de codigo a la vez (o sea, convertir codigo a comentarios), y "Ctrl + Alt + I", que automaticamente crea un trozo nuevo de RMarkdown.
+
+RStudio tambien contiene un atajo de autocompletar con el tabulador. Por ejemplo, en el trozo abajo, despues de escribir `libr` y hacer clic en el tabulador, deberias de poder ver una ventana pequena que demuestra todas las funciones, paquetes, u objetos disponibles que empiezan en el patron "libr". Puedes usar las teclas con flechas para seleccionar la opcion que quieres y hacer clic en "Enter" para completar la linea (por ejemplo, para escribir `library()` para cargar un paquete).
+```{r eval = FALSE}
+
+libr
+
+```
+
+TKTK continue translation
+
+<h2>Troubleshooting incomplete statements</h2>
+
+As you write and run code in RStudio, it's important to keep an eye on the console. When you see the symbol `>` in the console, this means that the console finished running code and is ready for another operation. However, when you see the symbol `+` in the console, this means that the statement you just ran was incomplete. Incomplete lines of code can occur when you have a typo so that a statement isn't fully closed, like when you miss an opening or closing parenthesis in a function. Below is an example of an incomplete statement:
+```{r eval = FALSE}
+
+library(tidyverse
+
+```
+
+When you run the code above, you should see a `+` symbol appear in the console. This is because you're missing a parenthesis to close the function `library()`. There are two ways to solve this problem. First, if you know what is missing from the statement, you can type the missing bit into the console and hit "Enter". Or, you can click in the console, and then press "Esc", which will remove the incomplete statement and restart the console for additional code. It's good practice to keep an eye on the console to check that the code you're running is producing output. If you run a lot of code and don't see the output that you expect, it may be because you included an incomplete statement, and it would be better to clean the console and check your code before running it again.
+
+<h2>Create your working directory</h2>
+
+The next important step for setting up your virtual workspace is to decide on the working directory that you will use for the coding session. A directory is a location (a folder) on your computer where R will search for files to read in. When you write out files from R, those files can also be written to your working directory.
+
+You can use the function `getwd()` to check your current working directory.
+```{r eval = TRUE}
+
+getwd()
+
+```
+
+My working directory is set by default to the folder on my computer where I saved this RMarkdown file. To work in a separate directory that holds only data generated from these vignettes, you can create a new directory or folder on your computer:
+```{r}
+
+?dir.create
+
+dir.create("/home/gsvidaurre/Desktop/ABISSMAL_vignettes")
+
+```
+
+In the code above, you'll need to replace the path (or the list of folder names) to reflect where you want to save the new folder called `ABISSMAL_vignettes` (or another name of your choice) on your own computer. For those using Windows, if you copy and paste a path into R directly from your computer then you may need to change the direction of the slashes.
+
+In introductory R coding courses, it's common to formally set your working directory before a coding session by using the function `setwd()`. It's good practice to avoid using `setwd()` in code that that you want to share with collaborators or share more widely in the spirit of open science (e.g. accompanying a publication or a new tool). When you use `setwd()` and share the code with others, you're assuming that someone else has the same working directory on their computer, which generally will not be true. There are other ways in which you can specify your working directory throughout your code without using `setwd()`.
+
+For instance, let's say that we want to make a copy of the first vignette and then save that copy inside of the directory that we created above. We can use a base R functions to copy and save the file to the correct working directory. You will need to update the paths below to reflect the folder where the vignettes are saved on your computer, as well as your own working directory:
+```{r}
+
+file.copy(
+  from = "/home/gsvidaurre/Desktop/GitHub_repos/ABISSMAL/R/vignettes/Vignette_01_Introduction.Rmd",
+  to = "/home/gsvidaurre/Desktop/ABISSMAL_vignettes/Vignette_01_Introduction_copy.Rmd"
+    )
+
+```
+
+In the code above, we're specifying 2 arguments to the function `file.copy()`. The first argument specifies the location of the file that we want to copy (/home/gsvidaurre/Desktop/GitHub_repos/ABISSMAL/R/vignettes/) and the name of the file (Vignette_01_Introduction.Rmd). The second argument specifies the location where we want to save this copy (/home/gsvidaurre/Desktop/ABISSMAL_vignettes/), and a new file name for the copied file (Vignette_01_Introduction_copy.Rmd). In each argument, the file paths are surrounded by 2 double quotes, in order to indicate that the text inside each pair of quotes should be considered character information or a "character string" (a formal term for text included in R code).
+
+When you run the line of code above, the output in the console should read "[1] TRUE" if the file was successfully copied and saved. You can check that the function worked correctly by opening a file window on your computer in this new directory. You can also use the base R function `list.files()` to check whether the copied file exists in the working directory. The output of `list.files()` is a list of all of the files contained within the new directory, and that list should contain a single file: "Vignette_01_Introduction_copy.Rmd".
+```{r}
+
+list.files(path = "/home/gsvidaurre/Desktop/ABISSMAL_vignettes")
+
+```
+
+The code above is an example of how you can specify your working directory in the code that you write without needing to use `setwd()`. In the following vignettes, you will see other examples of how to specify your working directory without `setwd()`. Before moving on to the next vignette, you can remove the file that you copied to your working directory:
+
+```{r}
+
+file.remove("/home/gsvidaurre/Desktop/ABISSMAL_vignettes/Vignette_01_Introduction_copy.Rmd")
+
+```
+
+In the next vignette, you will start creating and manipulating objects in R that can be used in the ABISSMAL data processing and analysis pipeline.
