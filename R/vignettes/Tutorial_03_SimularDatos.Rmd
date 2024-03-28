@@ -73,17 +73,17 @@ Los datos primarios que colecta ABISSMAL son marcas de tiempo que indican el mom
 
 Digamos que estamos recolectando datos para 2 pajaros adultos a traves de sensores de ABISSMAL montados en un contenedor de nido. La antena de RFID esta montada en la entrada del contenedor, y un par de sensores de infrarrojo, el par "externo", esta montado en frente de la antena de RFID para capturar movimientos afuera de la entrada del contenedor. Un segundo par de sensores de infrarrojo, el par "interno", esta montado detras de la antena de RFID para capturar movimientos adentro de la entrada del contenedor. En este ejemplo simulado, el par externo de sensores infrarrojo va a activar cuando un pajaro entra al contenedor de nido, luego la antena de RFID, y luego el par interno de sensores infrarrojos. Cuando un pajaro sale del contenedor, el par interno de sensores infrarrojos deberia de activar primero, luego la antena de RFID, y luego el par externo de sensores infrarrojos.
 
-TKTK continue translation
+Empezaremos con crear un objeto que contiene las marcas de tiempo simuladas para la antena de RFID. Este objecto se llamara `rfid_ts` y va a contener cuatro marcas de tiempo en formato de horas:minutos:segundos. Cada marca de tiempo estara entrecomillas para indicar que estamos usando informacion de text o secuencia de caracteres en el formato `string` de R.
 
-We will start by creating an object that holds simulated timestamps for the RFID antenna. This object will be called `rfid_ts`, and it will hold 4 timestamps in hours:minutes:seconds format. Each timestamp will be surrounded by double quotes to denote that we are using text or character string information here. 
-
-These timestamps are combined inside of the same object by using the function `c()`. This function `c()` concatenates values separated by commas into a vector or list object. Above you created an object called `path` without using `c()`, but that object had a single value. Using `c()` allows you to combine multiple values into a vector that will have more than 1 element.
+Vas a combinar estas marcas de tiempo adentro de un solo objeto usando la funcion `c()`. Esta function concatena valores separados por comas en un objecto de tipo vector o lista. Arriba creaste un objeto que se llama `path` sin usar `c()`, pero este objeto tenia un solo valor o elemento. Usar `c()` facilita combinar multiple valores en un objeto como un vector que puede tener multiple elementos.
 ```{r}
 
-# Create a vector of 4 RFID timestamps or 4 elements in HH:MM:SS format
+# Crea un vector de cuatro marcas de tiempo de RFID o cuatro elementos in formato HH:MM:SS
 rfid_ts <- c("10:00:00", "10:05:00", "11:00:00", "11:05:00")
   
 ```
+
+TKTK continue translation
 
 You can check out the different properties of the `rfid_ts` object after it's made:
 ```{r}
