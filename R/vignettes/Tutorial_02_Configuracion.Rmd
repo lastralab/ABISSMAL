@@ -1,5 +1,5 @@
 ---
-title: "Vignette 02: Configuración"
+title: "Tutorial 02: Configuración"
 author: "Grace Smith-Vidaurre"
 date: "2023-12-27"
 output: 
@@ -125,68 +125,65 @@ libr
 
 ```
 
-TKTK continue translation
+<h2>Resolver frases incompletas en la consola</h2>
 
-<h2>Troubleshooting incomplete statements</h2>
-
-As you write and run code in RStudio, it's important to keep an eye on the console. When you see the symbol `>` in the console, this means that the console finished running code and is ready for another operation. However, when you see the symbol `+` in the console, this means that the statement you just ran was incomplete. Incomplete lines of code can occur when you have a typo so that a statement isn't fully closed, like when you miss an opening or closing parenthesis in a function. Below is an example of an incomplete statement:
+Es importante vigilar el panel de la consola mientras escribes y ejecutas codigo en RStudio. El simbolo de `>` (o "mayor que") en la consola significa que la consola termino de ejecutar codigo y esta lista para otra operacion. Cuando ves el simbolo de `+` (o "mas") en la consola, este simbolo indica que la frase de codigo que acabas de ejecutar no esta completa. Frases incompletas de codigo surgen de errores de tipeo, como cuando te falto o abrir o cerrar los parentesis en una function. Abajo hay un ejemplo de una frase incompleta de codigo:
 ```{r eval = FALSE}
 
 library(tidyverse
 
 ```
 
-When you run the code above, you should see a `+` symbol appear in the console. This is because you're missing a parenthesis to close the function `library()`. There are two ways to solve this problem. First, if you know what is missing from the statement, you can type the missing bit into the console and hit "Enter". Or, you can click in the console, and then press "Esc", which will remove the incomplete statement and restart the console for additional code. It's good practice to keep an eye on the console to check that the code you're running is producing output. If you run a lot of code and don't see the output that you expect, it may be because you included an incomplete statement, and it would be better to clean the console and check your code before running it again.
+Deberias de ver el simbolo de `+` aparecer en la consola cuando ejecutas el codigo arriba, porque te falto un parentesis para cerrar la funcion `library()`. Tienes dos opciones para resolver este problema. Primero, si sabes que simbolo te falta para completar la frase, puedes escribir este simbolo directamente en la consola y terminar de ejecutar el codigo con seleccionar "Enter". La segunda opcion que tienes es hacer clic en la consola y luego seleccionar "Esc", que va a borrar la frase incompleta de la consola y reinciar la consola para que puedas ejecutar mas codigo (despues de corregir tu error en el codigo en el panel de la fuente). Es buena costumbre vigilar la consola para revisar que el codigo que ejectuas produce resultados. Si ejecutas muchas frases de codigo a la vez y no observas los resultados que esperas en la consola, puede que tienes una frase incompleta por alli, y seria mejor limpiar la consola y revisar bien tu codigo antes de ejecutarlo otra vez. 
 
-<h2>Create your working directory</h2>
+<h2>Crear tu directorio de trabajo</h2>
 
-The next important step for setting up your virtual workspace is to decide on the working directory that you will use for the coding session. A directory is a location (a folder) on your computer where R will search for files to read in. When you write out files from R, those files can also be written to your working directory.
+El siguiente paso en el proceso de configurar tu espacio virtual de trabajo es decidir donde sera tu directorio de trabajo para tu sesion de escribir codigo. Un directorio es una ubicacion fisica en tu computadora (o una carpeta) donde R va a buscar archivos para leer o cargar datos. Cuando escribes datas de R como archivos fisicos, estos archivos fisicos se crearan en tu directorio de trabajo.
 
-You can use the function `getwd()` to check your current working directory.
+Puedes usar la funcion `getwd()` para revisar tu directorio corriente de trabajo.
 ```{r eval = TRUE}
 
 getwd()
 
 ```
 
-My working directory is set by default to the folder on my computer where I saved this RMarkdown file. To work in a separate directory that holds only data generated from these vignettes, you can create a new directory or folder on your computer:
+Mi directorio de trabajo por defecto es la carpeta en mi computadora donde guarde este archivo de RMarkdown. Para trabajar en un directorio aparte que contiene solo los datos generados en estos tutoriales, puedes mejor crear un nuevo directorio o carpeta en tu computadora:
 ```{r}
 
 ?dir.create
 
-dir.create("/home/gsvidaurre/Desktop/ABISSMAL_vignettes")
+dir.create("/home/gsvidaurre/Desktop/ABISSMAL_tutoriales")
 
 ```
 
-In the code above, you'll need to replace the path (or the list of folder names) to reflect where you want to save the new folder called `ABISSMAL_vignettes` (or another name of your choice) on your own computer. For those using Windows, if you copy and paste a path into R directly from your computer then you may need to change the direction of the slashes.
+En el codigo arriba, deberias de reemplazar el `path`, o la combinacion de directorios arriba (en este ejemplo, el `path` es "/home/gsvidaurre/Desktop/ABISSMAL_tutoriales") para que represente la ubicacion en tu computadora donde quieres guardar la carpeta nueva que se llamara `ABISSMAL_tutoriales` (u otro nombre que prefieres). Si usas el sistema operativo de Windows, tienes que cambiar la direccion de los simbolos de barra porque el `path` que aparece en Windows para una carpeta va a tener barras invertidas (`\`) y R acepta solo barras inclinadas (`/`) en un `path`.
 
-In introductory R coding courses, it's common to formally set your working directory before a coding session by using the function `setwd()`. It's good practice to avoid using `setwd()` in code that that you want to share with collaborators or share more widely in the spirit of open science (e.g. accompanying a publication or a new tool). When you use `setwd()` and share the code with others, you're assuming that someone else has the same working directory on their computer, which generally will not be true. There are other ways in which you can specify your working directory throughout your code without using `setwd()`.
+Es comun configurar tu directorio de trabajo con la funcion `setwd()` en cursos preliminares de programacion en R. Es buena costumbre evitar usar `setwd()` en codigo que quieres compartir con colaboradores o codigo que quieres compartir con la comunidad en general siguiendo la filosofia de ciencia abierta, por ejemplo cuando publicas un articulo o compartes una nueva herramienta. Usar `setwd()` cuando compartes tu codigo es suponer que todos los que van a usar tu codigo tienen el mismo directorio de trabajo en su computadora. Hay otras formas en que puedes especificar tu directorio de trabajo a traves de tu codigo sin depender de `setwd()`.
 
-For instance, let's say that we want to make a copy of the first vignette and then save that copy inside of the directory that we created above. We can use a base R functions to copy and save the file to the correct working directory. You will need to update the paths below to reflect the folder where the vignettes are saved on your computer, as well as your own working directory:
+Por ejemplo, digamos que quieres crear una copia del primer tutorial y luego guardar esa copia adentro del directorio que creamos arriba. Podemos usar funciones de la coleccion base de R para copiar y guardar este archivo al directorio correcto de trabajo. Para evitar errores, vas a necesitar actualizar los `paths` abajo para que representen la carpeta en tu computadora con los tutoriales, y tambien tu directorio de trabajo:
 ```{r}
 
 file.copy(
-  from = "/home/gsvidaurre/Desktop/GitHub_repos/ABISSMAL/R/vignettes/Vignette_01_Introduction.Rmd",
-  to = "/home/gsvidaurre/Desktop/ABISSMAL_vignettes/Vignette_01_Introduction_copy.Rmd"
+  from = "/home/gsvidaurre/Desktop/GitHub_repos/ABISSMAL/R/vignettes/Tutorial_01_Introduccion.Rmd",
+  to = "/home/gsvidaurre/Desktop/ABISSMAL_tutoriales/Tutorial_01_Introduccion_copy.Rmd"
     )
 
 ```
 
-In the code above, we're specifying 2 arguments to the function `file.copy()`. The first argument specifies the location of the file that we want to copy (/home/gsvidaurre/Desktop/GitHub_repos/ABISSMAL/R/vignettes/) and the name of the file (Vignette_01_Introduction.Rmd). The second argument specifies the location where we want to save this copy (/home/gsvidaurre/Desktop/ABISSMAL_vignettes/), and a new file name for the copied file (Vignette_01_Introduction_copy.Rmd). In each argument, the file paths are surrounded by 2 double quotes, in order to indicate that the text inside each pair of quotes should be considered character information or a "character string" (a formal term for text included in R code).
+En el codigo arriba especificamos dos argumentos a la funcion `file.copy()`. El primer argumento especifica la ubicacion del archivo que queremos copiar ("/home/gsvidaurre/Desktop/GitHub_repos/ABISSMAL/R/vignettes/") y el nombre del archivo mismo ("Tutorial_01_Introduccion.Rmd"). El segundo argumento especifica la ubicacion donde queremos guardar la copia que vamos a crear de este archivo ("/home/gsvidaurre/Desktop/ABISSMAL_tutoriales/") y un nombre nuevo para la copia que vamos a crear ("Tutorial_01_Introduccion_copy.Rmd"). Los `paths` en cada argumento estan entrecomillas en cada argumento, para indicar que la informacion entrecomillas se deberia de tratar como el tipo de datos `character` en R, que es un termino formal para informacion en formato de texto.
 
-When you run the line of code above, the output in the console should read "[1] TRUE" if the file was successfully copied and saved. You can check that the function worked correctly by opening a file window on your computer in this new directory. You can also use the base R function `list.files()` to check whether the copied file exists in the working directory. The output of `list.files()` is a list of all of the files contained within the new directory, and that list should contain a single file: "Vignette_01_Introduction_copy.Rmd".
+El resultado en la consola deberia de ser "[1] TRUE" si el archivo se copio y se guardo correctamente despues de que ejecutas el codigo. Puedes revisar que la funcion ejecuto bien con navegar a la carpeta donde se debio de haber guardado el archivo copiado y ver si esta copia existe. Tambien puedes usar la funcion base de R `list.files()` para revisar desde RStudio si el archivo que copiaste existe en tu directorio de trabajo. El resultados de `list.files()` es una lista de todos los archivos adentro de tu directorio de trabajo y esta lista deberia de contener un solo archivo: "Tutorial_01_Introduccion_copy.Rmd".
 ```{r}
 
-list.files(path = "/home/gsvidaurre/Desktop/ABISSMAL_vignettes")
+list.files(path = "/home/gsvidaurre/Desktop/ABISSMAL_tutoriales")
 
 ```
 
-The code above is an example of how you can specify your working directory in the code that you write without needing to use `setwd()`. In the following vignettes, you will see other examples of how to specify your working directory without `setwd()`. Before moving on to the next vignette, you can remove the file that you copied to your working directory:
-
+El codigo arriba es un ejemplo sobre como puedes especificar tu directorio de trabajo en el codigo que escribes sin tener que depender de `setwd()`. En los siguientes tutoriales vas a ver otros ejemplos sobre como puedes leer archivos de o escribir archivos a tu directorio de trabajo sin la funcion `setwd()`. Antes de empezar el siguiente tutorial, puedes borrar el archivo que copiaste a tu directorio de trabajo:
 ```{r}
 
-file.remove("/home/gsvidaurre/Desktop/ABISSMAL_vignettes/Vignette_01_Introduction_copy.Rmd")
+file.remove("/home/gsvidaurre/Desktop/ABISSMAL_tutoriales/Tutorial_01_Introduction_copy.Rmd")
 
 ```
 
-In the next vignette, you will start creating and manipulating objects in R that can be used in the ABISSMAL data processing and analysis pipeline.
+En el siguiente tutorial vas a crear y manipular objetos en R que puedes usar para procesar y analizar datos con ABISSMAL.
