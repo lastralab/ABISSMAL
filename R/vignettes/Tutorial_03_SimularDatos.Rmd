@@ -83,156 +83,160 @@ rfid_ts <- c("10:00:00", "10:05:00", "11:00:00", "11:05:00")
   
 ```
 
-TKTK continue translation
-
-You can check out the different properties of the `rfid_ts` object after it's made:
+Puedes ver las propiedades diferentes del objeto `rfid_ts`:
 ```{r}
 
-rfid_ts # Run the object name to see its contents
+rfid_ts # Ejecuta el nombre del objeto para ver sus contenidos
 
-is.vector(rfid_ts) # A binary value indicating that rfid_ts is a vector
+is.vector(rfid_ts) # Un valor binario indica si rfid_ts es un vector (TRUE) o no (FALSE)
 
-class(rfid_ts) # A vector with data of type "character"
+class(rfid_ts) # Un vector de tipo de dato `character` en R, o tipo `string`
 
-length(rfid_ts) # This vector has 4 elements
+length(rfid_ts) # Este vector tiene cuatro elementos
 
 ```
 
-Let's continue by simulating 2 entrance and 2 exit movement events. We can choose timestamps for the infrared beam breakers that precede the RFID timestamps to simulate an entrance event, and infrared beam breaker timestamps that follow the RFID timestamps to simulate an exit event. We will offset detections from each sensor within the entrance and exit movement events by 1 second.
+Continuemos por simular dos movimientos de entrada y dos movimientos de salida del contenedor. Podemos escoger marcas de tiempo para el par externo de sensores de infrarrojo que preceden las marcas de tiempo de RFID y marcas de tiempo del par interno de sensores infrarrojo que siguen las marcas de tiempo de RFID para simular un evento de entrada. Podemos simular eventos de salida con las marcas de tiempo en el orden opuesto (el par interno de sensores se activa primero, luego RFID, luego el par externo de sensores de infrarrojo). Vamos a separar las detecciones de cada sensor adentro de cada movimiento de entrada y salida por un segundo.
 ```{r}
 
-# Simulate outer and inner beam breaker timestamps for an entrance, an exit, and then another entrance and exit
-o_irbb_ts <- c("09:59:59", "10:05:01", "10:59:59", "11:05:01")
-i_irbb_ts <- c("10:00:01", "10:04:59", "11:00:01", "11:04:59")
+# Simula marcas de tiempo para el par externo ("o_") e interno ("i_") de sensores infrarrojo para una entrada, una salida, y luego otra entrada y salida
+o_irbb_ts <- c("09:59:59", "10:05:01", "10:59:59", "11:05:01") # externo
+i_irbb_ts <- c("10:00:01", "10:04:59", "11:00:01", "11:04:59") # interno
 
 ```
 
-Birds will sometimes perch in the nest container entrance, and the sensors should pick up this behavior. You can add some perching events to the simulated dataset. Here we will simulate perching events for the RFID data only.
+Los pajaros a veces posan en la entrada del contenedor usando la antena de RFID como percha, y los sensores deberian de colectar datos sobre este comportamiento. Puedes anadir eventos de posar a los datos simulados, y aqui vas a simular eventos de posar solamente con los datos de RFID.
 ```{r}
 
 rfid_ts <- c(rfid_ts, "08:00:00", "08:00:01", "08:00:02", "08:00:03", "11:30:00", "11:30:01", "11:30:02", "11:30:03", "11:30:04", "11:30:05")
 
 ```
 
-In the code above, we modified the object `rfid_ts` by using the function `c()` to add 10 more timestamps to this vector, for a total of 14 elements. Check out the structure of the modified `rfid_ts` object using the function `glimpse()`:
+En el codigo arriba, modificaste el objeto `rfid_ts` con la funcion `c()` para anadir diez mas marcas de tiempo a este vector para tener un total de 14 elementos. Revisa la estructura del objeto modificado de `rfid_ts` usando la funcion `glimpse()`:
 ```{r}
 
-# See the object structure in a format that includes the data type ("chr"), the number of elements ([1:14]), and a preview of the first few elements
+# Aqui puedes ver la estructura del objeto en un formato que incluye el tipo de dato en R ("chr", que es tipo `character` o `string`), el numero de elementos ([1:14]), y los valores de los primeros elementos del vector
 glimpse(rfid_ts)
 
 ```
 
-Another important type of information to simulate is noise in the sensor detections. For instance, the RFID antenna can fail to detect an individual's passive integrated transponder (PIT) tag, and the infrared beam breakers can activate when birds leave nesting material hanging in the entrance of the container. In both of these cases, the infrared beam breakers should activate when the RFID antenna does not.
+Otro tipo de informacion importante es simular ruido en las detecciones de los sensores. Por ejemplo, la antena de RFID puede fallar en detectar la etiqueta PIT ("passive integrated transponder") de un individuo, y los sensores de infrarrojo pueden activarse cuando los pajaros dejan materal de nido colgando en la entrada del contenedor. En ambos casos, los sensores infrarrojos deberian de activar pero no la antena de RFID.
 ```{r}
 
-# Simulate some RFID detection failures across both beam breaker pairs
-# These RFID detection failures occurred over 2 additional simulated entrances and 2 additional simulated exits
+# Simula unas fallas de deteccion de la antena de RFID a traves de ambos pares de sensore infrarrojos
+# Estas fallas en deteccion del sensor de RFID surgio en cuatro eventos simulados adicionales (dos entradas y dos salidas)
 o_irbb_ts <- c(o_irbb_ts, "06:05:05", "06:35:08", "07:15:40", "11:10:25")
 i_irbb_ts <- c(i_irbb_ts, "06:05:04", "06:35:09", "07:15:41", "11:10:24")
 
 glimpse(o_irbb_ts)
 glimpse(i_irbb_ts)
 
-# Simulate some stray detections for the outer beam breaker
+# Luego simula unas detecciones de ruido para el par externo de sensores infrarrojo
 o_irbb_ts <- c(o_irbb_ts, "09:45:01", "09:45:02", "09:45:03", "09:45:04", "09:45:05", "09:45:06", "09:45:07", "09:45:08", "09:45:09", "09:45:10", "09:45:11")
 
 glimpse(o_irbb_ts)
 
 ```
 
-You've created simulated, noisy datasets of detections of animal movements, but currently, these datasets are encoded across separate vector objects and do not have important metadata. For instance, some useful metadata includes information about the experimental replicate, the date, and for the RFID data, the unique alphanumeric code of each PIT tag detected by the RFID antenna. Some of this metadata is critically important for downstream analyses (e.g. the date and PIT tag codes).
+Acabas de crear datos simulados de movimientos de animales con unas detecciones que representan errores de deteccion, pero por el momento estos datos se encuentran en diferentes vectores separados y les faltan metadatos muy importantes. Por ejemplo, metadatos utiles que nos faltan incluyen informacion sobre la replica experimental, la fecha, y para los datos de RFID, el codigo alfanumerico unico de cada etiqueta PIT que fue detectada por la antena de RFID. Algunos de estos metadatos son criticos para los analisis mas adelante, como la fecha y los codigos de las etiquetas PIT.
 
-Vectors are useful data structures in R, but one limitation of vectors is that you cannot combine different data types into the same object. You can try this out with the code below:
+Los vectores son estructras utiles en R, pero una limitacion de los vectore es que no puedes combinar diferentes tipos de datos en un solo objeto. Puedes intentar combinar diferentes tipos de datos en un vector:
 ```{r}
 
-# Create a vector with character, numeric, and binary data types
-# Since you're not saving the output into an object, the result will print directly to the console
-# You should see that all elements are forced to be character strings in double quotes
+# Crea un vector con los tipos `character`, `numeric`, y `binary` (o sea, datos de texto, valores numericos, y valores binarios)
+# El resultado se deberia de imprimir directamente a la consola porque no estas guardando el resultado en un objeto
+# Deberias de ver que todos los elementos se forzan a tipo `character` o `string` entrecomillas
 c("1", 1, TRUE, FALSE)
 
-# Create a vector with numeric and binary data types
-# You should see that all elements have been forced to numeric. The TRUE and FALSE binary values are converted to the underlying numeric values used to store binary information (TRUE is stored as 1, and FALSE is stored as 0)
+# Ahora crea un vector con datos `numeric` y `binary`
+# Deberias de poder ver que todos los elementos se forzan al tipo `numeric`. Los valores de TRUE y FALSE se conviertieron a los valores numericos que R usa por defecto para guardar informacion binaria (TRUE se convierte a 1, y FALSE se convierte a 0)
 c(1, 1, TRUE, FALSE)
 
 ```
 
-When you try to combine character, numeric, and binary data types in the same vector, all vector elements will be forced to the character data type. A similar thing happens when you try to combine numeric and binary data types, but the vector is forced to numeric. Note that the binary values TRUE and FALSE are equivalent to the numeric values 1 and 0, respectively.
+Cuando intentas combinar los tipos de dato `character`, `numeric`, y `binary` en el mismo vector, todos los elementos del vector se convierten al tipo de data `character`. Algo parecido resulta cuando intentas combinar datos de tipo `numeric` y `binary` en el mismo vector, pero en este caso, los valores se convierten a numerico. En este ejemplo, tambien aprendiste que los valores binarios TRUE y FALSE en R son equivalentes a los valores numericos 1 y 0, respectivamente.
 
-<h2>Create metadata vectors</h2>
+<h2>Crear vectores de metadatos</h2>
 
-For downstream analyses, you need to be able to create metadata of different data types, and then combine the primary data for each sensor (timestamps) with this metadata. Start by creating vectors of metadata for the RFID timestamps, including information about the experimental replicate, the date, and the PIT tag identity for each detection.
+Para los analsis que siguen, necesitas poder crear metadatos con diferentes tipos de datos, y luego combinar los datos primarios para cada sensor (las marcas de tiempo por sensor) con los metadatos importantes. Puedes empezar con crear vectores de metadatos para las marcas de tiempo de RFID, incluyendo informacion sobre la replica experimental, la fecha, y la identidad de la etiqueta PIT para cada deteccion.
 
-Make a vector of metadata about the experimental replicate. Here, instead of writing out the same information many times, you'll use the function `rep()` to repeat the information about the experimental replicate several times. In order to set the number of times that the experimental replicate information is repeated, you'll also use the function `length()` to get the length of the `rfid_ts` vector, and then feed that result to `rep()`. Creating a metadata vector that is the same length as the `rfid_ts` vector will be useful for combining these vectors into a single object later. 
+Para crear un vector de metadatos sobre la replica experimental, vas a usar la funcion `rep()` para repetir la informacion sobre la replica experimental automaticamente, en vez de copiar y pegar las misma informacion varias veces. Para configurar el numero de veces que la informacion sobre la replica experimental se vaya a repetir, tambien vas a usar la funcion `length()` para calcular lo largo del vector `rfid_ts` automaticamente, y comunicarle este resultado a `rep()`. Crear un vector de metadatos que tiene el mismo largo que el vector de `rfid_ts` sera util para combinar estos vectores en un solo objeto mas adelante.
 ```{r}
 
-# The documentation tells us that rep() expects two arguments, `x` and `times`
+# La documentacion nos dice que rep() espera dos argumentos, `x` y `time`
 ?rep
 
-# Create a vector with information about the experimental replicate
-# The argument `x` contains the metadata information that will be repeated
-# The argument `times` specifies the number of times that the information will be repeated
+# Crea un vector con informacion sobre la replica experimental
+# El argumento `x` contiene la informacion de metadatos que se va a repetir
+# El argumento `times` especifica la cantidad de veces que esta informacion se va a repetir
 exp_rep <- rep(x = "Pair_01", times = length(rfid_ts))
 
 glimpse(exp_rep)
 
-# You can also run code without writing out the argument names, as long as the arguments are written in the same order that the function expects:
+# Tambien puedes ejecutar codigo sin escribir los nombres de los argumentos, siempre y cuando los argumentos se escriben en el mismo orden que la funcion espera:
 exp_rep <- rep("Pair_01", length(rfid_ts))
 
 glimpse(exp_rep)
 
 ```
 
-Using `times = length(rfid_ts)` is better practice than manually entering the length of `rfid_ts` (e.g. `times = 14`). When you manually enter a value for `times`, you're assuming that the `rfid_ts` has not changed within and between coding sessions, which can be a dangerous assumption. By using `times = length(rfid_ts)`, you are ensuring that the code above will create a vector of metadata the same length as `rfid_ts` regardless of whether you made additional modifications to `rfid_ts` above.
+Usar `times = length(rfid_ts)` es mejor costumbre que configur lo largo de `rfid_ts` mmanualmente (por ejemplo, `times = 14`). Configurar el valor de `times` manualmente es suponer que el objeto `rfid_ts` no ha cambiado dentro de una sesion de escribir codigo, o entre sesiones diferentes, y esto puede ser una suposicion peligrosa. Cuando usas `times = length(rfid_ts)` te aseguras que el codigo arriba va a crear un vector de metadatos del mismo largo que `rfid_ts` sin importar que tantas modificaciones le hayas hecho a `rfid_ts` en el codigo arriba.
 
-You can use a conditional statement to confirm that the vector of metadata is the same length as the vector of RFID timestamps. Conditional statements can be useful ways to check assumptions in your code, or to efficiently build new datasets and functions.
+Puedes tambien usar una frase condicional para confirmar que el vector de metadatos es del mismo largo que el vector de marcas de tiempo de RFID. Las frases condicionales puede ser utiles para revisar suposiciones en tu codigo, o para construir nuevos datos y funciones.
 ```{r}
 
-# If this condition is met, then the result in the console should be "[1] TRUE"
+# Si esta condicion se cumple, el resultado en la consola deberia de ser "[1] TRUE"
 length(rfid_ts) == length(exp_rep)
 
 ```
 
-In the conditional statement above, you're using the symbols `==` to ask if the two vectors `rfid_ts` and `exp_rep` are the same length.
+En la frase condicional arriba, estas usando los simbolos `==` para preguntar si los dos vectores `rfid_ts` y `exp_rep` tienen la misma cantidad de elementos (si tienen el mismo largo).
 
-You can also use the symbols `!=` to ask if the two vectors are *not* the same length:
+Tambien puedes usar los simbolos `!=` para preguntar si los dos vectores `rfid_ts` y `exp_rep` *no* tienen la misma cantidad de elementos (si *no* tienen el mismo largo):
 ```{r}
 
-# This statement should yield FALSE, because these vectors are the same length
+# El resultado de esta frase deberia de ser FALSE, porque estos vectores tienen el mismo largo
 length(rfid_ts) != length(exp_rep)
 
 ```
 
-As an example, you can modify `rfid_ts` so that it is a different length than `exp_rep`. Below you'll see some different ways that you can filter out 4 elements of the vector `rfid_ts` so that this vector is 10 elements long.
+Como un ejemplo, puedes modificar `rfid_ts` para que tenga un numero de elementos diferente a `exp_rep`. Abajo puedes ver algunas formas diferentes de filtrar o eliminra cuatro elementos del vector `rfid_ts` para que tenga diez elementos total.
 ```{r}
 
-# You can use : to create a sequence of numbers from indices 5 to the length of rfid_ts
+## Crear indices numericos para filtrar un objeto
+
+# Puedes usar el simbolo `:` para crear una secuencia de numeros de los indices 5 a lo largo de rfid_ts 
 5:length(rfid_ts)
 
-# You can also use the function `seq()` to create the same sequence of numeric indices
+# Tambien puedes usar la funcion `seq()` para crear la misma secuencia de indices numericos que ves arriba
 seq(from = 5, to = length(rfid_ts), by = 1)
 
-# If you want to filter out non-consecutive elements, you can create a vector of indices with the function `c()`
+# Si quieres filtrar elementos no consecutivos, puedes crear un vector de indices con la funcion `c()`
 c(1, 3, 5, 6, 8, 10, 11, 12, 13, 14)
 
-# When you put any of the expressions above inside of square brackets after the object name you will pull out elements 5 to the length of rfid_ts and drop the first 4 elements
+## Filtrar un vector por indices numericos
+
+# Cuando insertas cualquiera de las expresiones arriba adentro de los corchetes que vienen despues del nombre del vector, puedes seleccionar los elementos de indice cinco a lo largo de rfid_ts, y eliminar los primeros cuatro elementos 
 rfid_ts[5:length(rfid_ts)]
 
 rfid_ts[seq(from = 5, to = length(rfid_ts), by = 1)]
 
 rfid_ts[c(1, 3, 5, 6, 8, 10, 11, 12, 13, 14)]
 
-# Finally, you can use any of the methods above to create a sequence of indices that you want to drop, and then use the `-` symbol inside of the square brackets to remove those indices. For instance:
-rfid_ts[-c(1:4)] # the numbers must be wrapped in `c()` in order for this inverted filtering to work 
+# Puedes usar cualquier de los metodos arriba para crear una secuencia de indices que quieres eliminar, y luego usar el simbolo `-` adentro de los corchetes para eliminar los elementos en esos indices particulares. Por ejemplo:
+rfid_ts[-c(1:4)] # los numeros deberian de estar adentro de la funcion `c()` para que este tipo de filtrar de forma invertida funcione
 
 ```
 
-Next, you can check whether the modified version of `rfid_ts` is the same length as `exp_rep`:
+Luego puedes revisar si esta version modificada de `rfid_ts` es el mismo largo que `exp_rep`:
 ```{r}
 
-# This statement should yield TRUE, because these vectors are not the same length
+# Esta frase deberia de resultar en TRUE, porque estos vectores ya no tienen el mismo largo
 length(rfid_ts[-c(1:4)]) != length(exp_rep)
 
 ```
+
+TKTK continue translation
 
 <h2>Create data frames with primary data and metadata</h2>
 

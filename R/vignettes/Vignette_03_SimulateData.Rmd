@@ -92,7 +92,7 @@ length(rfid_ts) # This vector has 4 elements
 
 ```
 
-Let's continue by simulating 2 entrance and 2 exit movement events. We can choose timestamps for the infrared beam breakers that precede the RFID timestamps to simulate an entrance event, and infrared beam breaker timestamps that follow the RFID timestamps to simulate an exit event. We will offset detections from each sensor within the entrance and exit movement events by 1 second.
+Let's continue by simulating 2 entrance and 2 exit movement events. We can choose timestamps for the outer pair of infrared beam breakers that precede the RFID timestamps and timestamps for the inner beam breaker pai that follow the RFID antenna to simulate an entrance event. We can simulate detections by these sensors in the opposite order (inner beam breakers, then RFID, followed by the outer beam breakers) to simulate an exit event. We will offset detections from each sensor within the entrance and exit movement events by 1 second.
 ```{r}
 
 # Simulate outer and inner beam breaker timestamps for an entrance, an exit, and then another entrance and exit
@@ -199,6 +199,8 @@ length(rfid_ts) != length(exp_rep)
 As an example, you can modify `rfid_ts` so that it is a different length than `exp_rep`. Below you'll see some different ways that you can filter out 4 elements of the vector `rfid_ts` so that this vector is 10 elements long.
 ```{r}
 
+## Create numeric indices for filtering an object
+
 # You can use : to create a sequence of numbers from indices 5 to the length of rfid_ts
 5:length(rfid_ts)
 
@@ -207,6 +209,8 @@ seq(from = 5, to = length(rfid_ts), by = 1)
 
 # If you want to filter out non-consecutive elements, you can create a vector of indices with the function `c()`
 c(1, 3, 5, 6, 8, 10, 11, 12, 13, 14)
+
+## Filter an object using numeric indices
 
 # When you put any of the expressions above inside of square brackets after the object name you will pull out elements 5 to the length of rfid_ts and drop the first 4 elements
 rfid_ts[5:length(rfid_ts)]
