@@ -236,13 +236,11 @@ length(rfid_ts[-c(1:4)]) != length(exp_rep)
 
 ```
 
-TKTK continue translation
+<h2>Crear `dataframes` con datos primarios y metadatos</h2>
 
-<h2>Create data frames with primary data and metadata</h2>
+Es importante combinar los metadatos con los datos primarios para analisis futuros, y puedes combinarlos usando un tipo de objeto que se llama un `dataframe`. Los `dataframes` son parecidos a las hojas de calculo porque tienen dos dimensiones (filas y columnas), y puedes guardar multiples tipos de datos diferentes en el mismo `dataframe`. Tambien puedes guardar `dataframes` en hojas de calculo o archivos fisicos en tu computadora.
 
-For later analyses, it is really important to have the metadata accompany your primary data in the very same object. To combine the primary data and metadata for these simulated datasets, you can rely on an object called a "data frame". Data frames are similar to spreadsheets. They have 2 dimensions (rows and columns), and you can store multiple different types of data in the same data frame. You can also write out data frames to spreadsheets that exist as physical files on your computer.
-
-When you try making a data frame with vectors of different length, you should get an error message stating that the two arguments provided have different numbers of rows:
+Para combinar dos vectores en un solo `dataframe`, los vectores tienen que tener el mismo largo. Cuando intentas combinar dos vectores de largo diferentes, deberias de recibir un mensaje de error en la consola especificando que los dos argumentos no tienen el mismo numero de filas:
 ```{r eval = FALSE}
 
 sim_dats <- data.frame(exp_rep, rfid_ts[-c(1:4)])
@@ -252,7 +250,7 @@ sim_dats <- data.frame(exp_rep, rfid_ts[-c(1:4)])
 
 ```
 
-Now use the full `exp_rep` and `rfid_ts` vectors to create the data frame, in which these vectors become columns of the data frame:
+Ahora puedes usar los vectores enteros de `exp_rep` y `rfid_ts` para crear el `dataframe`, y los vectores se van a convertir en las columnas del `dataframe`:
 ```{r}
 
 sim_dats <- data.frame(exp_rep, rfid_ts)
@@ -261,9 +259,9 @@ glimpse(sim_dats)
 
 ```
 
-When you check out the structure of the new data frame `sim_dats`, you can see that it has 14 rows and 2 columns. For each column (after the "$" symbol), you can see the column name (here `exp_rep` and `rfid_ts`), the type of data in each column (both columns are type "character"), and then a preview of the first values in each column.
+Cuando revisas la estructura del objeto `sim_dats`, el `dataframe` nuevo, puedes ver que tiene 14 filas y 2 columnas. Para cada columna (despues del simbolo de "$"), puedes ver que el nombre de la columna (aqui `exp_rep` y `rfid_ts`), el tipo de dato en cada columna (en este momento cada column es del tipo `character`), y luego los valores de cada columna en las primeras filas del `dataframe`.
 
-You can change the column names by adding a new name and `=` before each vector. Here the vector `exp_rep` becomes the column `replicate` and the vector `rfid_ts` becomes the column `timestamps``
+Puedes cambiar los nombres de cada columna con anadir un nombre nuevo y el simbolo `=` antes de cada vector. Abajo el vector `exp_rep` se convierte en la column `replicate` con la replica experimental y el vector `rfid_ts` se convierte en la columna `timestamps` con las marcas de tiempo.
 ```{r}
 
 sim_dats <- data.frame(replicate = exp_rep, timestamps = rfid_ts)
@@ -272,7 +270,7 @@ glimpse(sim_dats)
 
 ```
 
-We can add additional metadata to this data frame now that it's been created. For instance, it would be useful to have information about the date when these timestamps were collected. You can start by adding a column for the year, which will be data type "dbl" (which stands for "double" or "numeric"):
+Podemos anadir metadatos adicionales a este `dataframe`, como informacion sobre la fecha de coleccion de datos. Puedes primero añadir una columna para el año usando el tipo de datos `double` en R que es un tipo de dato `numeric`.
 ```{r}
 
 sim_dats <- cbind(sim_dats, rep(2023, length(rfid_ts)))
@@ -281,36 +279,36 @@ glimpse(sim_dats)
 
 ```
 
-The year column has a strange name when we add the new column using `cbind()`. The column name is the expression that you wrote inside of `cbind()`. You can use the function `names()` and square bracket indexing to change the strange column name to "year":
+La columna del año tiene un nombre extraño cuando añadimos una nueva columna usando `cbind()`, y si revisas el codigo de arriba, puedes ver que el nombre de esta columna se parece mucho al codigo que escribiste adentro de `cbind()`. Puedes usar la funcion `names()` e indexar con corchetes para cambiar el nombre extraño a un nombre mejor, como "year":
 ```{r}
 
-# This function returns a vector of the column names of the data frame 
+# Esta funcion devuelve un vector de los nombres de las columnas del `dataframe`
 names(sim_dats)
 
-# Use square bracket indexing and the function `ncol()` to find the last column name
-ncol(sim_dats) # There are 3 columns in this data frame
+# Usa indexar con corchetes y la funcion `ncol()` para encontrar el ultimo nombre entre los nombres de todas las columnas, porque esta ultima columna contiene la informacion sobre el año
+ncol(sim_dats) # Hay 3 columnas en este `dataframe`
 
-# This expression gets you the name of the last column
+# Esta expresion devuelve el nombre de la ultima columna
 names(sim_dats)[ncol(sim_dats)]
 
-# Then you can overwrite the last column name with a new name
+# Puedes sobreescribir el nombre de la ultima columna con un nombre nuevo
 names(sim_dats)[ncol(sim_dats)] <- "year"
 
-# Confirm that the name was changed correctly
+# Confirma que el nombre de la columna de año se actualizo de la forma que esperas
 names(sim_dats)
 glimpse(sim_dats)
 
 ```
 
-<h2>Create data frames using the tidyverse</h2>
+<h2>Crear `dataframes` usando el `tidyverse`</h2>
 
-In the chunk above, you used base R code to add a new column and to update the column name. It took more than a few lines of code to carry out these operations. You could reduce the amount of code needed for these steps by removing the lines included to check your work. But another way that you can reduce the amount of code you're writing for these operations is to use tidyverse notation and functions:
+En el codigo arriba, usaste codigo de R base para anadir una columna nueva y actualizar el nombre de esa columna. Te tomo varias lineas de codigo para completar estas operaciones. Puedes reducir la cantidad de codigo que necesitas para estos pasos si eliminas las lineas de codigo que usaste para revisar las operaciones. Pero otra forma para reducir la cantidad de codigo que escribes para esta serie de operaciones es usar la notacion y coleccion de funciones del `tidyverse`:
 ```{r}
 
-# Make the data frame again with only 2 columns
+# Crear el `dataframe` de nuevo con dos columnas
 sim_dats <- data.frame(replicate = exp_rep, timestamps = rfid_ts)
 
-# Use the tidyverse to add the year as the 3rd column
+# Usa el `tidyverse` para anadir el año como la tercera columna
 sim_dats <- sim_dats %>% 
   dplyr::mutate(
     year = rep(2023, length(rfid_ts))
@@ -320,7 +318,9 @@ glimpse(sim_dats)
 
 ```
 
-You added a column for the year with the correct column name in fewer lines of code. In this tidyverse syntax, the symbol `%>%` represents a piping operation, in which you're using one object as the input for a subsequent operation. Here, you're using the object `sim_dats` at the input for the function `mutate()`, which you used to create the column `year`. 
+Acabas de anadir una columna para el año con el nombre correcto en menos lineas de codigo. En la notacion del `tidyverse`, el simbolo de `%>%` significa una operacion de `pipe`, en que usas el objeto antes del simbolo de `%>%` como entrada para la operacion o funcion que sigue el simbolo de `%>%`. Arriba usaste el objeto de `sim_dats` como entrada para la funcion `mutate()`, que usaste para crear la columna `year`.
+
+La notacion `dplyr::` antes de `mutate()` indica que la funcion `mutate()` se deberia de acceder desde el paquete que se llama `dplyr()`. Incluir el nombre del paquete con dos puntos repetidos dos veces es una notacion importante para usar cuando hay multiples funciones accesibles en tu ambiente global con el mismo nombre.
 
 The notation `dplyr::` before `mutate()` indicates that the function `mutate()` should be sourced from the package called `dplyr()`. Including the package name with 2 colons before a function name is important when there are multiple functions loaded in your global environment that have the same name. For instance, if you use other packages that also have functions called `mutate()`, and you don't specify which package you want to use, then you could end up with immediate errors (the code fails to run) or worse, you could run the wrong `mutate()` operation for a given analysis (which can lead to errors down the line that are harder to trace).
 
