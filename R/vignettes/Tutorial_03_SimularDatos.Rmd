@@ -308,7 +308,7 @@ En el codigo arriba, usaste codigo de R base para anadir una columna nueva y act
 # Crear el `dataframe` de nuevo con dos columnas
 sim_dats <- data.frame(replicate = exp_rep, timestamps = rfid_ts)
 
-# Usa el `tidyverse` para anadir el año como la tercera columna
+# Usa el tidyverse para anadir el año como la tercera columna
 sim_dats <- sim_dats %>% 
   dplyr::mutate(
     year = rep(2023, length(rfid_ts))
@@ -320,48 +320,46 @@ glimpse(sim_dats)
 
 Acabas de anadir una columna para el año con el nombre correcto en menos lineas de codigo. En la notacion del `tidyverse`, el simbolo de `%>%` significa una operacion de `pipe`, en que usas el objeto antes del simbolo de `%>%` como entrada para la operacion o funcion que sigue el simbolo de `%>%`. Arriba usaste el objeto de `sim_dats` como entrada para la funcion `mutate()`, que usaste para crear la columna `year`.
 
-La notacion `dplyr::` antes de `mutate()` indica que la funcion `mutate()` se deberia de acceder desde el paquete que se llama `dplyr()`. Incluir el nombre del paquete con dos puntos repetidos dos veces es una notacion importante para usar cuando hay multiples funciones accesibles en tu ambiente global con el mismo nombre.
+La notacion `dplyr::` antes de `mutate()` indica que la funcion `mutate()` se deberia de acceder desde el paquete que se llama `dplyr`. Incluir el nombre del paquete con dos puntos repetidos dos veces es una notacion importante para usar cuando hay multiples funciones accesibles en tu ambiente global con el mismo nombre. Por ejemplo, si usas otros paquetes aparte de `dplyr` que tambien tienen funciones que se llaman `mutate()`, y no especificas cual paquete quieres usar, puedes terminar con errores inmediatos (como cuando el codigo no se puede ejecutar). Incluso si el codigo ejecuta, usar la operacion equivocada de otra funcion de `mutate()` puede introducir errores a tus analisis mas adelante que son dificiles de identificar.
 
-The notation `dplyr::` before `mutate()` indicates that the function `mutate()` should be sourced from the package called `dplyr()`. Including the package name with 2 colons before a function name is important when there are multiple functions loaded in your global environment that have the same name. For instance, if you use other packages that also have functions called `mutate()`, and you don't specify which package you want to use, then you could end up with immediate errors (the code fails to run) or worse, you could run the wrong `mutate()` operation for a given analysis (which can lead to errors down the line that are harder to trace).
-
-Piping operations can simplify the code that you write, so that you don't have to create as many intermediate objects. On the other hand, for the same reason it can take practice to troubleshoot piping operations, especially when they become very long. A useful way to check intermediate results within long piping operations is to include the function `glimpse()` between different piping steps:
+Las oparaciones de `piping` con el simbolo `%>%` (o un `pipe`) pueden simplicar el codigo que escribes porque no creas tantos objetos intermedios como cuando usas R base. Por otro lado, por esta misma razon puede tomar practica solucionar errors con operaciones de `piping` cuando estas operaciones son largas y anidadas. Una forma util para revisar resultados intermedios adentro de operaciones largas de `piping` es incluir la funcion `glimpse()` entre diferentes pasos de la operacion:
 ```{r}
 
-# Make the data frame again with only 2 columns
+# Crear el data frame otra vez con solo dos columnas
 sim_dats <- data.frame(replicate = exp_rep, timestamps = rfid_ts)
 
-# Use the tidyverse to add the year as the 3rd column
+# Usa el tidyverse para añadir el año como la tercera columna
 sim_dats %>%
-  glimpse() %>% # See the structure of the first version sim_dats
+  glimpse() %>% # Ver la estructura de la primera version de sim_dats
   dplyr::mutate(
-    # The nrow(.) expression means "get the number of rows for the current object", which in this case is sim_dats
+    # La expresion nrow(.) significa "obtener el numero de filas para el objeto actual". El objeto en este caso es sim_dats
     year = rep(2023, nrow(.))
   ) %>%
-  glimpse() # See the structure of the latest sim_dats with the new column "year"
+  glimpse() # Ver la estructura de la version mas reciente de sim_dats con la columna nueva de "year"
 
 ```
 
-In the code above, you also learned a new way to repeat a value within a piping operation by using the notation '.' inside of a function, which means that you will perform the given operation (getting the number of rows) on the current object (`sim_dats`) piped into the expression (the `nrow()` function). 
+En el codigo arriba, tambien aprendiste una forma nueva para repetir un valor adentro de una operacion de `piping` con la notacion `.` adentro de una funcion, que significa que la operacion ejecutara con el objeto actual. En el ejemplo arriba, `.` se refiere al objeto `sim_dats` que se uso como entrada para la operacion entera de `piping`. Como el simbolo `.` esta adentro de la funcion `nrow()`, la funcion deberia de devolver el numero de filas de `sim_dat`.
 
-You can use a similar rule of thumb to add two more columns for the month and day to the data frame:
+Puedes usar una operacion parecida para anadir dos columnas al `dataframe` que contienen informacion del mes y dia:
 ```{r}
- 
-# Use the tidyverse to add the year as the 3rd column
+
+# Usar el tidyverse para anadir el año como la tercera columna
 sim_dats %>%
-  glimpse() %>% # See the structure of the original sim_dats
+  glimpse() %>% # Ver la estructura de la version original de sim_dats
   dplyr::mutate(
     year = 2023
   ) %>%
-  glimpse() %>% # See the structure of the intermediate sim_dats with the new column year
-  # Also add columns for the month and day
+  glimpse() %>% # Ver la estructura de la version intermedia de sim_dats con la nueva columna del año
+  # Tambien puedes anadir columnas para el mes ("month") y dia ("day")
   dplyr::mutate(
     month = 08,
     day = 01
   ) %>% 
-  glimpse() # See the structure of the final sim_dats with the additional new columns month and day
+  glimpse() # Ver la estructura de la version final de sim_dats con las columnas adicionales con el mes y el dia
 
 ```
 
-In the code above, you added 2 more numeric columns to the data frame and you did this without needing to use the `rep()` function. Since you piped an existing data frame into each `dplyr::mutate()` expression, the single value that you specified for each of the year, month, and day columns was automatically repeated to fill the total rows in the data frame. Specifying a single value for a new column can help reduce the amount of code that you write, but only when you truly want the same value repeated across all rows of a data frame.
+En el codigo arriba, anadiste dos columnas numericas mas al `dataframe` y lo hiciste sin necesitar usar la funcion `rep()` para repetir valores. Esto fue posible porque usaste un `dataframe` que ya existia como la entrada a las operaciones de `dplyr::mutate()`, y el unico valor que especificaste para cada columna nueva del año, mes, y dia se repitio automaticamente para llenar todas las filas en el data frame para cada columna. Especificar un solo valor para una nueva columna puede ayudar reducir la cantidad de codigo que escribes, pero solo cuando de verdad quieres que el mismo valor se repite por todas las filas del `dataframe`.
 
-You did not save these modifications that you made to `sim_dats` in an object, so the output was printed to the console only. In the next vignette, you will write out this data frame of simulated RFID and IRBB data to spreadsheets as physical files on your computer.
+Como no guardaste estas modificaciones a `sim_dats` en un objeto el resultado del codigo arriba se va a imprimir a la consola. En el siguiente tutorial, vas a guardar este `dataframe` de datos simulados de RFID y sensores infrarrojo a hojas de calculo como archivos fisicos en tu computadora.
