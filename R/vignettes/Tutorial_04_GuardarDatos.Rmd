@@ -1,5 +1,5 @@
 ---
-title: "Vignette 04: Save Data"
+title: "Tutorial 04: Guardar Datos"
 author: "Grace Smith-Vidaurre"
 date: "2023-12-27"
 output: 
@@ -16,37 +16,41 @@ knitr::opts_chunk$set(echo = TRUE, eval = TRUE)
 
 ```
 
-<h2>Vignette overview and learning objectives</h2>
+<h2>Información sobre esta traducción</h2>
 
-In this fourth vignette, you will write out spreadsheets of simulated detections of animal movements to your computer. You will continue to use coding skills that you learned in the previous vignettes, and you'll learn additional skills that include:
+Este tutorial fue traducido al español por Grace Smith-Vidaurre, siguiendo las [convenciones de traducción de los Carpentries](https://github.com/Carpentries-ES/board/blob/master/Convenciones_Traduccion.md), incluyendo usar el género femenino por defecto. Si encuentras errores de ortografía que impiden tu habilidad de completar los tutoriales, por favor reporta los errores de ortografía a GitHub usando los pasos arriba para reportar un "Issue".
 
-1. Indexing and filtering data frames
-2. Checking data frame structure with base R and the tidyverse
-3. Saving objects from R as physical files on your computer 
-4. Reading files from your computer into R
-5. Writing and testing loops
+<h2>Resumen del tutorial y objetivos de aprendizaje</h2>
 
-<h2>Load packages and your working directory path</h2>
+En este cuarto tutorial, vas a guardar hojas de calculo de las detecciones simuladas de movimientos de animales a tu computadora. Vas a continuar usando habilidades que aprendiste en los tutoriales anteriores, y vas a aprender nuevas habilidades que incluyen:
+
+1. Indexar y filtrar `dataframes`
+2. Revisar la estructura de `dataframes` con R base y el `tidyverse`
+3. Guardar objetos de R como archivos fisicos en tu computadora
+4. Leer archivos de tu computadora a R
+5. Escribir y probar bucles
+
+<h2>Cargar paquetes e inicializar el `path` de tu directorio de trabajo</h2>
 
 ```{r message = FALSE, warning = FALSE}
 
-rm(list = ls()) # Clean global environment
+rm(list = ls()) # Limpiar tu ambiente global
 
-library(tidyverse) # Load the set of tidyverse packages
+library(tidyverse) # Cargar la coleccion de paquetes del tidyverse
 
-path <- "/home/gsvidaurre/Desktop/ABISSMAL_vignettes" # Initialize an object with the path that is your working directory
+path <- "/home/gsvidaurre/Desktop/ABISSMAL_vignettes" # Inicializar un objeto con el path de tu directorio de trabajo
 
 ```
 
-<h3>Create the simulated data</h3>
+<h3>Crear los datos simulados</h3>
 
-In the code below, you'll recreate the simulated RFID and beam breaker datasets that you learned to build in the previous vignette. Here, the code from vignette 03 has been condensed into fewer chunks:
+En el codigo abajo, vas a recrear los datos simulados de RFID y sensores infrarrojos del tutorial anterior. Aqui estamos combinando el codigo en menos trozos comparado con el tercer tutorial:
 ```{r}
 
-# Create a vector of 4 RFID timestamps in HH:MM:SS format
+# Crea un vector de cuatro marcas de tiempo de RFID en formato HH:MM:SS
 rfid_ts <- c("10:00:00", "10:05:00", "11:00:00", "11:05:00")
 
-# Add perching events to the RFID data
+# Anade eventos de posar a los datos de RFID
 rfid_ts <- c(rfid_ts, "08:00:00", "08:00:01", "08:00:02", "08:00:03", "11:30:00", "11:30:01", "11:30:02", "11:30:03", "11:30:04", "11:30:05")
 
 glimpse(rfid_ts)
@@ -55,16 +59,16 @@ glimpse(rfid_ts)
 
 ```{r}
 
-# Simulate outer and inner beam breaker timestamps for an entrance, an exit, and then another entrance and exit
+# Simula marcas de tiempo para los pares externos ("o_") e internos ("i_") de sensores infrarrojos para una entrada y una salida, y luego otra entrada y salida
 o_irbb_ts <- c("09:59:59", "10:05:01", "10:59:59", "11:05:01")
 i_irbb_ts <- c("10:00:01", "10:04:59", "11:00:01", "11:04:59")
 
-# Simulate some RFID detection failures across both beam breaker pairs
-# These RFID detection failures occurred over 2 additional simulated entrances and 2 additional simulated exits 
+# Simula unos errores de deteccion por la antena de RFID en las marcas de tiempo de cada par de sensores infrarrojos
+# Estos errores de deteccion surgieron en cuatro movimientos adicionales: dos entradas y dos salidas
 o_irbb_ts <- c(o_irbb_ts, "06:05:05", "06:35:08", "07:15:40", "11:10:25")
 i_irbb_ts <- c(i_irbb_ts, "06:05:04", "06:35:09", "07:15:41", "11:10:24")
 
-# Simulate some stray detections for the outer beam breaker
+# Simula unas detecciones de ruido en las marcas de tiempo del par externo de sensores infrarrojo
 o_irbb_ts <- c(o_irbb_ts, "09:45:01", "09:45:02", "09:45:03", "09:45:04", "09:45:05", "09:45:06", "09:45:07", "09:45:08", "09:45:09", "09:45:10", "09:45:11")
 
 glimpse(o_irbb_ts)
@@ -72,23 +76,23 @@ glimpse(i_irbb_ts)
 
 ```
 
-<h3>Simulate 3 days of RFID data collection</h3>
+<h3>Simula tres dias de coleccion de datos de RFID</h3>
 
-In the code below, you'll combine the vector of RFID timestamps that you made above with metadata in a data frame. This metadata will include the year, month, and day, as well as a column with 2 unique PIT tag identifiers (1 for each simulated individual), and a column with the sensor type. You should recognize some of this code from the previous vignette:
+En el codigo abajo, vas a combinr el vector de marcas de tiempo de RFID que inicializaste arriba con metadatos en un `dataframe`. Estos metadatos van a incluir el año, el mes, y el dia, y tambien una columna con los valores de dos etiquetas PIT (una etiqueta por individuo simulado), y una columna con informacion sobre el tipo de sensor. Deberias de reconocer partes de este codigo desde el tutorial anterior:
 ```{r}
 
-# Make a vector for the experimental replicate
+# Crea un vector para la replica experimental
 exp_rep <- rep(x = "Nest_01", times = length(rfid_ts))
 
-# Make a vector of the PIT tag codes
-# Allocate the first 4 RFID detections to the first individual, the first perching event (4 detections) to the first individual, and the second perching event (6 detections) to the second individual
-# The 3 rep() expressions are combined into a single vector using the c() function
+# Crea un vector de las identidades de las etiquetas PIT
+# Asigna las primeras cuatro detecciones de RFID al primer individuo, el primer evento de posar (4 detecciones) al primer individuo, y el segundo evento de posar (6 detecciones) al segundo individuo
+# Estas tres expresiones de rep() estan combinadas en un solo vector usando la funcion c()
 PIT_tag <- c(rep("1357aabbcc", 4), rep("1357aabbcc", 4), rep("2468zzyyxx", 6))
 
-# Make the data frame with the experimental replicate metadata and the timestamps
+# Crea el dataframe con los metadatos de replica experimental y las marcas de tiempo
 sim_dats_rfid <- data.frame(chamber_id = exp_rep, timestamps = rfid_ts)
 
-# Overwrite the data frame with the modified version that has columns for the year, month, and day
+# Sobrescribe el datafram con la version modificada que tiene columnas para el año, el mes, y el dia
 sim_dats_rfid <- sim_dats_rfid %>%
   dplyr::mutate(
     year = 2023
@@ -97,7 +101,7 @@ sim_dats_rfid <- sim_dats_rfid %>%
     month = 08,
     day = 01
   ) %>%
-  # Add the PIT tag metadata as a new column
+  # Anade los metadatos de las etiquetas PIT en una columna nueva
   dplyr::mutate(
     PIT_tag = PIT_tag
   ) %>% 
@@ -109,9 +113,9 @@ glimpse(sim_dats_rfid)
 
 ```
 
-Next, you can use this data frame to simulate data collection over more than one day. To create more observations (rows) for two additional days, you can append rows from a modified copy of `sim_dats_rfid` to itself. 
+Ahora puedes usar este `dataframe` para simular el proceso de coleccion de datos a traves de dos dias mas. Para crear mas observaciones (filas) para dos dias adicionales, puedes adjuntar filas de una copia modificada de `sim_dats_rfid` al objeto original de `sim_dats_rfid`.
 
-In the code below, you're piping `sim_dats_rfid` into `bind_rows()`, which indicates that this is the original object to which you want to append or add new rows. Then the code inside of `bind_rows()` indicates the data frame (the new rows) that will be appended to `sim_dats_rfid`. In this case, the code inside of `bind_rows()` pipes `sim_dats_rfid` into `dplyr::mutate()`, which is a function that you're using to modify the `day` column to reflect a subsequent day of data collection. Then you'll repeat this process to simulate a third day of data collection:
+En el codigo abaho, estas usando una operacion `pipe` para usar `sim_dats_rfid` como entrada en `bind_rows()`, y con esta notacion estas especificando que `sim_dats_rfid` es el objeto original al cual quieres adjuntar mas filas. Luego el codigo adentro de `bind_rows()` especifica el `dataframe`, o las filas nuevas, que quieres adjuntar a `sim_dats_rfid`. En este case, el codigo adentro de `bind_rows()` provee `sim_dats_rfid` a `dplyr::mutate()` para modificar la columna de `day` para representar un dia adicional de coleccion de datos. Luego repites este proceso para anadir un tercer dias de recolectar datos:
 ```{r}
 
 sim_dats_rfid <- sim_dats_rfid %>% 
@@ -128,49 +132,49 @@ sim_dats_rfid <- sim_dats_rfid %>%
       )
   )
 
-glimpse(sim_dats_rfid) # Triple the number of rows, looks good
+glimpse(sim_dats_rfid) # Tres veces el numero original de filas, se ve bien
 
 ```
 
-<h3>Check data frame columns with base R</h3>
+<h3>Revisar columnas de `dataframe` con R base</h3>
 
-You checked that simulated data frame has data collected over three days by looking at the structure of the new object. You can also check the unique values present in the column `day`. Below is a way of checking the unique values contained in a column of a data frame, using two different examples of base R notation for accessing columns:
+Acabas de revisar la estructura del `dataframe` para confirmar que los datos simulados tiene datos recolectados a traves de tres dias. Tambien puedes revisar los valores unicos que estan presentes en la columna de `day`. Abajo puedes ver una forma de revisar los valores unicos adentro de una columna de un `dataframe`, usando dos ejemplos diferentes de notacion de R base para acceder columnas adentro de un `dataframe`:
 ```{r}
 
-# The name of a data frame object, followed by a $ sign and then the name of a column allows you to pull out one column at a time from a data frame. A data frame column is a vector, so when you run this code you will see a vector of values print to the console
+# Escribir una expresion con el nombre de un objeto dataframe, un simbolo $, y el nombre de una columna te ayuda sacar o acceder una columan a la vez de un dataframe. Una columna de un dataframe es un vector, por ende cuando ejecutas este codigo deberias de ver un vector de valores impreso en la consola
 sim_dats_rfid$day
 
-# You can also access a column in a data frame by using double square brackets after the name of the data frame, and placing the column name in quotes inside of the inner brackets
+# Puedes tambien acceder una columna en un dataframe con indexar si escribes dos pares corchetes (ambos pares de abrir y cerrar) despues del nombre del dataframe, y colocas el nombre de la columna entrecomillas adentro de del par interno de corchetes
 sim_dats_rfid[["day"]]
 
-# You can use the function unique() to see the unique values of any vector, including a column of a data frame
-unique(sim_dats_rfid$day) # Three days, looks good
+# Puedes usar la funcion unique() para ver los valores unicos adentro de un vector, incluyendo una columna en un dataframe
+unique(sim_dats_rfid$day) # Tres dias, se ve bien
 
-unique(sim_dats_rfid[["day"]]) # Three days, looks good
+unique(sim_dats_rfid[["day"]]) # Tres dias, se ve bien
 
 ```
 
-<h3>Check data frame columns with the tidyverse</h3>
+<h3>Revisar columnas de un `dataframe` con el `tidyverse`</h3>
 
-You can also check the unique values in a column using functions from the tidyverse. In the expression below, you're piping `sim_dats_rfid` into the function `pull()`, which lets you pull the column `day` out of the data frame as a vector. Then that vector is piped into the function `unique()` to check the unique values contained within it. The function `unique()` does not need an argument inside of the parentheses here because you're already piping the output that it needs directly into the function.
+Tambien puedes revisar valores unicos en una columna usando funciones del `tidyverse`. En la expresion abajo, vas a usar una expresion de `pipe` para proveer el `dataframe` `sim_dats_rfid` a la funcion `pull()`, que va a facilitar acceder la columna `day` del dataframe como un vector. Luedo este vector de la columna `day` se va a usar como entrada a la funcion `unique()` para revisar los valores unicos del vector mismo. La funcion `unique()` no require un argumento adentro de los parentesis porque ya recibio el valor de entrada que necesita a traves de la operacion de `piping`.
 ```{r}
 
-# Three days, looks good
+# Tres dias, se ve bien
 sim_dats_rfid %>% 
   pull(day) %>% 
   unique()
 
 ```
 
-<h3>Simulate 3 days of beam breaker data collection</h3>
+<h3>Simula tres dias de recolectar datos de los sensores infrarrojo</h3>
 
-Next, repeat this process of creating a data frame with metadata for the infrared beam breaker datasets. Since the beam breakers do not collect unique individual identity information, you will add columns for the year, month, day, and sensor type. You will also simulate data collection for the beam breakers over the same three days as the RFID system.
+Ahora puedes repetir este proceso de crear un `dataframe` con metadatos para los datos de los sensores de infrarrojo. Dado que los sensores de infrarrojo no colectan informacion sobre la identidad unica de individuos, vas a anadir columnas para el año, el mes, el dia, y el tipo de sensor. Tambien vas a simular la coleccion de datos para estos sensores a traves de los mismos tres dias que los datos simulados de RFID.
 ```{r}
 
-# Overwrite the vector exp_rep with a new vector the same length as o_irbb_ts and i_irbb_ts together
+# Sobreescribe el vector exp_rep con un vector nuevo que tiene el mismo largo que los vectores o_irbb_ts y i_irbb_ts juntos
 exp_rep <- rep(x = "Nest_01", times = length(o_irbb_ts) + length(i_irbb_ts))
 
-# Here the timestamps of both beam breaker pairs have been added to the same column using c()
+# Anade las marcas de tiempo de ambos pares de sensores infrarrojo a la misma columna usando c()
 sim_dats_irbb <- data.frame(chamber_id = exp_rep, timestamps = c(o_irbb_ts, i_irbb_ts))
 
 sim_dats_irbb <- sim_dats_irbb %>%
@@ -178,8 +182,8 @@ sim_dats_irbb <- sim_dats_irbb %>%
     year = 2023,
     month = 08,
     day = 01,
-    # Add a unique sensor identifier by beam breaker pair
-    # Each unique label is repeated for the length of the vector of timestamps of each beam breaker pair
+    # Anade un identificador unico para cada par de sensores
+    # Cada etiqueta unica se repitira por lo largo del vector de marcas de tiempo de cada par de sensores infrarrojo
     sensor_id = c(rep("Outer Beam Breakers", length(o_irbb_ts)), rep("Inner Beam Breakers", length(i_irbb_ts)))
   )
 
@@ -199,67 +203,67 @@ sim_dats_irbb <- sim_dats_irbb %>%
       )
   )
 
-glimpse(sim_dats_irbb) # Triple the number of rows, looks good
+glimpse(sim_dats_irbb) # Tres veces el numero de filas, se ve bien
 
-# Three days, looks good
+# Tres dias, se ve bien
 sim_dats_irbb %>% 
   pull(day) %>% 
   unique()
 
 ```
 
-<h2>Save a data frame as a physical file</h2>
+<h2>Guarda un `dataframe` como un archivo fisico</h2>
 
-The data frames that you create and manipulate in R can be saved as physical files in your working directory. You have many different file type options for saving data frames, but I recommend using .csv format since this file type is compatible with R, Microsoft Word, and other software. You can use the function `write.csv()` to save data frames to .csv spreadsheets on your computer:
+Los `dataframes` que creas y manipulas en R se pueden guardar como archivos fisicos en tu directorio de trabajo. Tienes muchas opciones diferentes para guardar `dataframes`, pero recomiendo que uses formato `.csv` porque este formato es compatible con R, Microsoft Word, y otros programas. Puedes usar la funcion `write.csv()` para guardar `dataframes` a hojas de calculo `.csv` en tu computadora:
 ```{r eval = FALSE}
 
 ?write.csv
 
 ```
 
-In order to write a physical file to your working directory, you need to tell R 1) where to save the file and 2) the name of the file that you want to create. You can pass both of these pieces of information to `write.csv()` by combining your working directory path and the file name through the function `file.path()`. For this example, you'll create a test file as you practice using `write.csv()`:
+Para escribir un archivo fisico a tu directorio de trabajo, necesitas comunicarle a R 1) donde guardar el archivo y 2) el nombre del archivo que quieres crear. Puedes pasarle ambas piezas de informacion a `write.csv()` con combinar tu directorio de trabajo y el nombre del archivo usando la funcion `file.path()`. Para este ejemplo, vas a crear un archivo de preuba mientras practicas como usar `write.csv()`:
 ```{r}
 
-# Create a custom file name by combining the path for your working directory with the file name that you want to write out
-# The function file.path() will combine both pieces of information into a single file path
+# Combina el path para tu directorio de trabajo con el nombre del archivo que quieres escribir
+# La funcion file.path() combinara ambas piezas de informacion en un solo path para este archivo
 rfid_file <- file.path(path, "test_file.csv")
 
-# This object contains the location where the file will be saved, followed by the file name
+# Este objeto contiene la ubicacion donde vas a guardar el archivo, y luego el nombre del archivo
 rfid_file
 
 ```
 
-Next, you can pipe the data frame to `write.csv()` and specify additional information for creating the .csv file, such as whether you want to add a column of numeric row identifiers: 
+Luego puedes proveer el `dataframe` a `write.csv()` usando un `pipe` y puedes especificar informacion adicional para crear el archivo `.csv`, como si quieres anadir una columna adicional de identidades numericas de las filas:
 ```{r eval = FALSE}
 
-sim_dats_rfid %>% 
-  # Write out the data frame as a .csv spreadsheet. Do not include row names
-  #The "." below means that the function write.csv() will operate on the object that is piped in, which here is the data frame sim_dats_rfid
+sim_dats_rfid %>%
+  # Escribe el dataframe como una hoja de calculo en formato .csv. No incluyes los nombres de las filas (row.names = FALSE)
+  # El simbolo "." abajo significa que la funcion write.csv() va a operar sobre el objeto que proveyo el pipe, que en este caso es el objeto sim_dats_rfid
   write.csv(x = ., file = rfid_file, row.names = FALSE)
 
 ```
 
-As specified in the function documentation for `write.csv()`, the function will include column names in the resulting spreadsheet by default. The function will also not append new information to the .csv if it already exists, so if you already created this file then it will be overwritten when you run the function again.
+Como se especifica en la documentacion para la funcion `write.csv()`, esta funcion va a incluir las nombres de las columnas en la hoja de calculo por defecto. La funcion tambien no va a adjuntar esta informacion en el `dataframe` al archivo de `.csv` si esta hoja de calculo ya existe, o sea, si ya creaste el archivo de `.csv` y vuelves a correr el codigo arriba, el archivo se va a sobrescribir por defecto.
 
-Next, you can check that `write.csv()` worked as expected by using `list.files()` to check the files in your working directory.
+Puedes revisar que `write.csv()` funcion como esperabas con usar `list.files()` para ver los archivos en tu directorio de trabajo.
 ```{r eval = FALSE}
 
-# List all files in the given path
+# Ve una lista de todos los archivos en este path
 list.files(path)
 
 ```
 
-You can also use `list.files()` to customize a search with the argument called `pattern`. Using the argument `pattern` here is similar to searching for a specific word inside of a text document. The dollar sign placed after ".csv" means that you're telling the function to search specifically for all files that *end* in the pattern ".csv":
+Tambien puedes usar `list.files()` para customizar una busqueda con el argumento `pattern`. Usar el argumento `pattern` es parecido a buscar una palabra especifica adentro de un documento de texto. El simbolo de "$" despues de ".csv" significa que la funcion deberia de buscar todos los archivos que *terminan* en el patron ".csv".
 ```{r eval = FALSE}
 
-# List only files that end in the pattern ".csv" in the given path
+# Devuelve solo archivos que terminan en el patron ".csv" en este path particular
 list.files(path, pattern = ".csv$")
 
 ```
 
-<h3>Read in a spreadsheet</h3>
+<h3>Leer una hoja de calculo</h3>
 
-You can read one these files back into R with the function `read.csv()`. In the code below, you're piping the output of `read.csv()` directly into `glimpse()` to check out the structure of the resulting data frame. The output of the code is printed to the console, but is not saved inside of an object.
+Ahora puedes leer uno de estos archivos con R usando la funcion `read.csv()`. En el codigo abajo, vas a proveer el resultado de `read.csv()` a la funcion `glimpse()` para revisar la estructura del `dataframe` creado en R cuando leiste el archivo. El resultado de este codigo se imprime a la consola porque no esta guardado adentro de un objeto.
 ```{r eval = FALSE}
 
 read.csv(file.path(path, "test_file.csv")) %>% 
@@ -267,7 +271,7 @@ read.csv(file.path(path, "test_file.csv")) %>%
 
 ```
 
-Now that you've practiced using `write.csv()` and `read.csv()`, you can delete the temporary file that you created by feeding the `rfid_file` object to the function `file.remove()`.
+Ahora que practicaste usar `write.csv()` y `read.csv()`, puedes eliminar el archivo temporal que creaste con proveer el objeto `rfid_file` a la funcion `file.remove()`.
 ```{r eval = FALSE}
 
 rfid_file <- file.path(path, "test_file.csv")
@@ -277,22 +281,22 @@ file.remove(rfid_file)
 
 ```
 
-<h2>Save simulated data for the ABISSMAL workflow</h2>
+<h2>Guardar datos simuladoes para analisis con ABISSMAL</h2>
 
-In the code below, you'll work through a pipeline to save the simulated data in the format and locations expected by the custom ABISSMAL functions. In order to use the ABISSMAL pipeline, the simulated raw data needs to be saved in a separate spreadsheet per sensor and day of data collection. These spreadsheets need to be saved inside of a folder per sensor as well. ABISSMAL will automatically save data in these ways when the tracking system is used to collect data from live animals.
+En el codigo abajo, vas a trabajar con una serie de pasos para guardar los datos simulados en el formato y en las ubicaciones esperadas por las funciones de ABISSMAL. Para poder usar estas funciones de ABISSMAL, los datos simulados originales se tienen que guardar en una hoja de calculo diferente por el tipo de sensor y el dia de coleccion de datos. Estas hojas de calculo se tienen que guardar adentro de una carpeta por tipo de sensor. ABISSMAL guarda los datos originales de esta misma forma cuando el sistema se usa para colectar datos empiricos de animales.
 
-<h3>Filter a data frame</h3>
+<h3>Filtrar un `dataframe`</h3>
 
-In the code below, you'll practice how to use the function `dplyr::filter()` to filter rows of a data frame by day and then save a filtered data frame with `write.csv()`. To filter a data frame, you can use a conditional statement inside of the function `dplyr::filter()`:
+Vas a practicar como usar la funcion `dplyr::filter()` para filtrar filas de un `dataframe` por dia y luego guardar un `dataframe` filtrado con `write.csv()`. Para filtrar un `dataframe`, puedes usar una frase condicional adentro de la funcion `dplyr::filter()`:
 ```{r}
 
-# Pipe the data frame into the filter() function
+# Provee el dataframe a la funcion filter() con un "pipe"
 sim_dats_rfid %>% 
-  # Filter the data frame by pulling out all rows in which the day column was equal to 1
+  # Filtra el dataframe con seleccionar todas las filas en que la columna de dia era igual a uno (el primer dia de coleccion de datos)
   dplyr::filter(day == 1) %>%
   glimpse()
 
-# Check that the filtering was done correctly by getting the unique values in the day column. Looks good
+# Revisa que este paso de filtrar se hizo correctamente. El unico valor adentro de la columna del dia deberia de ser uno, y se ve bien
 sim_dats_rfid %>% 
   dplyr::filter(day == 1) %>%
   pull(day) %>% 
@@ -300,15 +304,15 @@ sim_dats_rfid %>%
 
 ```
 
-You can obtain similar results by inverting the conditional statement inside of `dplyr::filter()` to remove days that are **not** the second or third days of data collection. Below you added two conditional statements together using the symbol "&".
+Puedes obtener resultados similares cuando inviertes la frase condicional adentro de `dplyr::filter()` para eliminar los dias que **no** fueron ni el segundo dia ni el tercer dia de coleccion de datos. Abajo combinaste dos frases condicionales usando el simbolo de "&".
 ```{r}
 
-sim_dats_rfid %>% 
-  # Filter the data frame by pulling out all rows in which the day column was not equal to 2
+sim_dats_rfid %>%
+  # Filtra el dataframe con seleccionar todas las filas en que los valores en la columna de dia no son iguales a 2 o 3
   dplyr::filter(day != 2 & day != 3) %>%
   glimpse()
 
-# Check that the filtering was done correctly by getting the unique values in the day column. Looks good
+# Usa la funcion par ver los valores uncios en una columna para revisar que el proceso de filtrar se completo bien. Se ve bien
 sim_dats_rfid %>% 
   dplyr::filter(day != 2 & day != 3) %>%
   pull(day) %>% 
@@ -316,32 +320,32 @@ sim_dats_rfid %>%
 
 ```
 
-Now that you've practiced filtering a data frame, you can combine this filtering step with writing out a .csv file that contains the filtered data frame with data collected on a single day:
+Ahora que practicaste filtrar un `dataframe`, puedes combinar este paso de filtrar con escribir un archivo `.csv` que contiene el `dataframe` filtrado por los datos colectados en un solo dia:
 ```{r eval = FALSE}
 
-# Make a new directory inside of your working directory for saving data
-file.path(path, "Data") # Check the new path
-dir.create(file.path(path, "Data")) # Create the new path
+# Crea un directorio nuevo adentro de tu directorio de trabajo para guardar datos
+file.path(path, "Data") # Revisa el path nuevo
+dir.create(file.path(path, "Data")) # Crea el path nuevo
 
-# Then make a new directory inside of the Data folder for the raw RFID data
-file.path(path, "RFID") # Check the new path
-dir.create(file.path(path, "Data", "RFID")) # Create the new path
+# Crea un directorio nuevo adentro del directorio de Data para los datos originales de RFID
+file.path(path, "RFID") # Revisa el path nuevo
+dir.create(file.path(path, "Data", "RFID")) # Crea el path nuevo
 
-# Make the new file name with your working directory path
-# Make sure to specify that the spreadsheet will be saved inside of the new folder "RFID"
+# Inicializa el nombre del archivo nuevo con el path de tu directorio de trabajo 
+# Asegurate de especificar que el archivo se va a guardar adentro de la carpeta neuva "RFID"
 rfid_file <- file.path(path, "Data/RFID", "test.csv")
 rfid_file
 
-# Filter the simulated RFID data to pull out the first day of data collection
+# Filtra los datos simulados de RFID para sacar el primer dia de coleccion de datos
 sim_dats_rfid %>% 
   dplyr::filter(day == 1) %>% 
-  # Write out the filtered data frame as a .csv spreadsheet. Do not include row names
-  # Remember that the "." means the function will use the object that is piped in, which here is the data frame filtered to retain day 1 of data collection only
+  # Escribe el dataframe filtrado como una hoja de calculo en formato .csv. No incluyes nombres para las filas
+  # Recuerda que el simbolo "." significa que la funcion ca a usar el objeto que proveyo la operacion de "pipe", que aqui es el dataframe filtrado para seleccionar solo el primer dia de coleccion de datos
   write.csv(x = ., file = rfid_file, row.names = FALSE)
 
 ```
 
-Check that the test file was created inside of the new RFID folder, and then delete it.
+Revisa que el archivo de prueba se creo adentro de la carpeta nueva de RFID, y luego puedes eliminar este archivo.
 ```{r eval = FALSE}
 
 list.files(file.path(path, "Data/RFID"), pattern = ".csv$")
@@ -353,16 +357,16 @@ file.remove(rfid_file)
 
 ```
 
-<h3>Practicing writing a loop</h3>
+<h3>Practicar escribir un bucle</h3>
 
-In order to write out a data frame for each day of data collection per sensor, you could repeat the code above 6 times (three times per sensor). But it's good to avoid repeating the same code over and over, since this can lead to messy scripts as well as a greater risk for errors in data processing and analysis. Whenever you need to run the same code many times, you can write a loop. Loops are an important coding skill and we'll work through building a loop step by step.
+Podrias repetir el codigo arriba seis veces (tres veces por sensor) para escribir un `dataframe` por cada dia de coleccion de datos por sensor. Pero es mejor evitar repetir el mismo codigo varias veces, porque cuando escribes codigo de esta forma es mas dificil mantener archivos organizados de codigo y tambien es mas facil introducir errors mientras procesas y analizas datos. Cuando necesitas ejecutar el mismo codigo varias veces, es mejor escribir un bucle. Escribir bucles es una habilidad muy importante y vamos a construir un bucle paso por paso.
 
-To start, you can practice building a loop with the function `lapply()`.
+Vas a practicar como escribir un bucle con la funcion `lapply()`.
 ```{r}
 
 ?lapply
 
-# Make a vector of the files to write out
+# Crea un vector de los archivos que quieres guardar
 files <- c(file.path(path, "Data/RFID", "test1.csv"), file.path(path, "Data/RFID", "test2.csv"))
 
 files
@@ -370,12 +374,11 @@ length(files)
 
 ```
 
-Next, you can start writing out a looping structure. In the code below, the argument `X` specifies the number of times that the loop will run. In this case, `X` is a numeric vector from 1 to the length of the `files` vector and contains the numbers 1 and 2. Therefore the loop will run twice, and each value in `X` will be used in each loop iteration to write out one file at a time
-
-The argument `FUN` is a custom function, written using the `function(x){}` notation. All of the code inside of the curly brackets `{}` will be run for each iteration of the loop. The argument `x` inside `function()` is the iterating variable, or the variable that will take on a different value of the vector supplied to `X` in each iteration of the loop.
+Ahora puedes empezar a escribir la estructura de un bucle. En el codigo abajo, el argumento `X` es el numero de veces que se va a ejecutar el bucle. En este caso, `X` es un vector numerico de uno al largo del vector `files` y contiene los numeros uno y dos. Por end, el bucle va a ejecutar dos veces, y cada valor consecutivo en `X` se va a usar en cada iteracion correspondiente del bucle para escribir un archivo a la vez. 
+El argumento `FUN` es una funcion customizada que fue escrita usando la notacion `function(x){}`. Todo el codigo adentro de las llaves curvas (abre y cierre) se ejecutara en cada iteracion del bucle. El argumento `x` adentro de `funcion()` es el variable de iteracion, o el variable que va a tomar un valor diferente del vector `X` en cada iteracion.
 ```{r}
 
-# In this loop, the iterating variable x will take on each value in the vector supplied to the X argument. This means that in the first loop iteration, x will take on the numeric value of 1. In the second loop iteration, x will hold the numeric value 2. To test that this is true, you can run the loop below, which will print the value of x per iteration to the console
+# En este bucle el variable de iteracion x va a tomar cada valor del vector en el argumento X. Por ejemplo, en la primera iteracion del bucle, x va a tomar el valor numerico de 1. En la segunda iteracion del bucle, x va a tomra el valor numerico de 2. Para probar esta logica puedes ejecutar el bucle abajo, y ver el valor de x que va a imprimir en cada iteracion en la consola
 lapply(X = 1:length(files), FUN = function(x){
   
   x
@@ -383,6 +386,8 @@ lapply(X = 1:length(files), FUN = function(x){
 })
 
 ```
+
+TKTK continue translation
 
 As you can see, the output of this loop is a list with 2 elements. Each list element is shown in double square brackets ([[1]] and [[2]]), and each list element contains a vector of length 1 that holds the value of the iterating variable in each iteration (1 and 2, respectively). 
 
