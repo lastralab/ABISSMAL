@@ -431,7 +431,7 @@ lapply(X = 1:length(files), FUN = function(x){
   sim_dats_rfid %>%
     # Filter the data frame by one day at a time
     dplyr::filter(day == days[x]) %>%
-    # Write out data frame filtered by the given data to a separate spreadsheet 
+    # Write out data frame filtered by the given day to a separate spreadsheet 
     write.csv(file = files[x], row.names = FALSE)
   
 })
@@ -527,7 +527,7 @@ glimpse(files)
 
 ```
 
-Lists are useful objects because they're very flexible. Unlike vectors, a single list can hold many different types of data. And then unlike a data frame, the elements of a list do not need to have the same dimensions. The elements of a list can also be different data structures or object types themselves. For instance, lists can contain vectors, data frames, and other lists all inside of the same larger list object. For instance, the list that you created above has 2 elements, and each element is a vector of 3 character strings containing the file names that you supplied using the function `c()`.
+Lists are useful objects because they're very flexible. Unlike vectors, a single list can hold many different types of data. And then unlike a data frame, the elements of a list do not need to have the same dimensions. The elements of a list can also be different data structures or object types themselves. For instance, lists can contain vectors, data frames, and other lists all inside of the same larger list object. The list that you created above has 2 elements, and each element is a vector of 3 character strings containing the file names that you supplied using the function `c()`.
 
 You can index lists in a manner that is similar to indexing vectors and data frames, but indexing lists can be done with single or double square brackets for different outcomes:
 ```{r}
@@ -568,7 +568,7 @@ files[["RFID"]]
 
 ```
 
-Lists are very useful data structures for setting up nested loop operations. For instance, if you want to write out a spreadsheet per day per sensor type, you need a loop to 1) iterate over sensor types, and then a loop to 2) iterate over days per sensor. You can use lists to create nested data structures to supply to a nested loop, which will help you make sure that each layer of the loop runs in the way that you expect. For instance, the list called `files` reflects the nested loop that you need because files are listed first by sensor type (each element of the list) and then by date (each element of the vector inside of each list element):
+Lists are very useful data structures for setting up nested loop operations. For instance, if you want to write out a spreadsheet per day per sensor type, you need 1) a loop to iterate over sensor types, and then 2) a loop to iterate over days per sensor. You can use lists to create nested data structures to supply to a nested loop, which will help you make sure that each layer of the loop runs in the way that you expect. For instance, the list called `files` reflects the nested loop that you need because files are listed first by sensor type (each element of the list) and then by date (each element of the vector inside of each list element):
 ```{r}
 
 # Make a vector of sensor labels
@@ -617,19 +617,20 @@ After writing out this loop but before running the full loop structure, you shou
 
 To carry out this type of testing, you should run the code to freeze the iterating variables on the first iteration of each loop. Then, you should run the code inside of each loop, starting with the creation of `days_tmp`, then the indexing and filtering the data frame, and then the filtering of the file names. You should not run either of the lines with `lapply()` in them, since you don't want either loop to fully execute before you're sure that the inner code is working as expected.
 
-As you test the code inside of each loop, you should see that between the outer and inner loops, you're using the name of the sensor for the given outer loop iteration ("RFID" for the first iteration) to set up the days over which the inner loop will iterate (in `days_tmp`). Inside of the inner loop, you're filtering the list of data frames by sensor, and then by the days that you want per sensor. Finally, you're indexing the file name for the right sensor type and day with a combination of double and single bracket filtering on the list of file names:
+*Important note*: Above you learned that the iterating variables in a loop do not exist outside of the loop. In this testing that you will cary out, you're not fully running either loop, and so the code that you're testing inside of each loop will "see" the values of iterating variables that you initialized outside of the loops.
+
+As you test the code inside of each loop, you should see that between the outer and inner loops, you're using the name of the sensor for the given outer loop iteration ("RFID" for the first iteration) to set up the days over which the inner loop will iterate (in `days_tmp`). Inside of the inner loop, you're filtering the list of data frames by sensor, and then by the days that you want per sensor. Finally, you're indexing the file name for the right sensor type and day with a combination of double and single bracket filtering on the list of file names. Below, the lines of code that open and close each loop are commented out in order to guide you through which lines of code you should run in this testing step:
 ```{r eval = FALSE}
 
-# Testing
+# Freezer the iterating variables for testing
 x <- 1
 y <- 1
 
-# Start by iterating over sensors
-invisible(lapply(1:length(sensors), function(x){
+# The outer loop: start by iterating over sensors
+# invisible(lapply(1:length(sensors), function(x){
   
   # Index the named list of days to get the right days per sensor
   # This indexing is important to set up the next loop correctly
-  
   sensors[x] # This is a string with the sensor name
   
   # Place the string with the sensor name inside of double square brackets to extract the vector of days for that sensor 
@@ -637,8 +638,8 @@ invisible(lapply(1:length(sensors), function(x){
   
   days_tmp
   
-  # For each sensor, iterate over days
-  lapply(1:length(days_tmp), function(y){
+  # The inner loop: for each sensor, iterate over days
+  # lapply(1:length(days_tmp), function(y){
     
     # Get the data frame per sensor type using x inside of double square brackets to extract the given data frame from the list
     dats[[x]] %>%
@@ -654,9 +655,9 @@ invisible(lapply(1:length(sensors), function(x){
     # You'll also combine the file name with the right path:
     file.path(file_dirs[[x]], files[[x]][y])
     
-  })
+  # })
   
-}))
+# }))
 
 ```
 
@@ -687,7 +688,7 @@ invisible(lapply(1:length(sensors), function(x){
 
 ```
 
-This loop should have created 1 file per sensor and day in the correct directory per sensor. Check that these 4 files now exist inside each directory per sensor within your working directory.
+This loop should have created 1 file per sensor and day in the correct directory per sensor. Check that these 6 files now exist inside each directory per sensor within your working directory.
 ```{r eval = FALSE}
 
 list.files(file.path(path, "Data/RFID"))

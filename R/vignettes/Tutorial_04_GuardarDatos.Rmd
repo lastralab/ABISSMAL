@@ -387,15 +387,13 @@ lapply(X = 1:length(files), FUN = function(x){
 
 ```
 
-TKTK continue translation
+Como puedes ver, el resultado de este bucle es una lista con dos elementos. Cada elemento de la lista esta rodeado de dos pares de corchetes ([[1]] and [[2]]) y contiene un vector con un largo de uno que contiene el valor del variable de iteracion (uno y dos, respectivamente). 
 
-As you can see, the output of this loop is a list with 2 elements. Each list element is shown in double square brackets ([[1]] and [[2]]), and each list element contains a vector of length 1 that holds the value of the iterating variable in each iteration (1 and 2, respectively). 
+El variable de iteracion, o `x`, no existe como un objetp afuera de la funcion del bucle. Si imprimes `x` afuera del bucle, no se va a encontrar ese objeto. Si creaste un objeto `x` afuera del bucle arria, veras los contenidos de este objeto cuando imprimes `x`. O sea, escribir un bucle que usa `x` como el variable de iteracion no afectara otras lineas de codigo que usan un objeto que se llama `x` afuera de la funcion, y viceversa.
 
-The iterating variable of the loop, or `x`, does not exist as an object outside of the function. So if you print `x` outside of the loop, no object will be found. If you created a object called `x` outside of the loop above, then you will see the contents of that object instead. This means that writing a loop that uses `x` as an iterating variable will not affect other lines of code that use an object called `x` outside of the loop, and vice versa.
+El variable de iteracion de una funcion puede ser otras letras del alfabeto como `i`, `j`, `y`, `z`, o una combinacion de multiples letras, numeros, guiones bajo, o periodos, siempre y cuando el nombre de la variable empieza con una letra.
 
-The iterating variable of a function does not always need to be `x`, but can be another letter (`i`, `j`, `y`, `z`) or any combination of multiple letters and numbers, underscores, and periods (as long as the variable name starts with a letter).
-
-A useful property of the iterating variable is that you can use it to index vectors, data frames, or other objects that you created outside of the loop. For instance, you can use `x` and square bracket indexing to print the name of each file that you want to save:
+Una propiedad util del variable de iteracion es que puedes usarlo para indexar vectores, `dataframes`, u otros objetos que creaste afuera del bucle. Por ejemplo, puedes usar `x` e indexar con corchetes para imprimir el nombre de cada archivo que quieres crear:
 ```{r}
 
 lapply(X = 1:length(files), FUN = function(x){
@@ -406,12 +404,12 @@ lapply(X = 1:length(files), FUN = function(x){
 
 ```
 
-You can also modify the code inside of the custom function to save each of these files, by placing the expression `files[x]` inside of the `write.csv()` function and piping a data frame to `write.csv()`.
+Tambien puedes modificar el codigo adentro de la funcion custoimizada para guardar cada archivo si metes la expresion `files[x]` adentro de la funcion `write.csv()` y usas una operacion de `piping` para usar un `dataframe` como entrada para `write.csv()`.
 ```{r eval = FALSE}
 
 lapply(X = 1:length(files), FUN = function(x){
   
-  # In each iteration of the loop, you will save the data frame `sim_dats_rfid` as a separate spreadsheet with the file name specified in the given iteration
+  # En cada iteracion del bucle, vas a guardar el dataframe `files[x]` en una hoja de calculo con el nombre de archivo de la iteracion actual
   sim_dats_rfid %>%
     write.csv(file = files[x], row.names = FALSE)
   
@@ -419,14 +417,14 @@ lapply(X = 1:length(files), FUN = function(x){
 
 ```
 
-You should see 2 "NULL" outputs printed to the console if the loop runs correctly. When you check the contents of the nested RFID folder, you should see that both of the testing .csv files were written out:
+Deberias de ver dos resultados `NULL` en la consola si el bucle se ejecuta correctamente. Cuando revisas los contenidos de la carpeta anidada de RFID, vas a poder ver que ambos archivos de `.csv` de prueba se escribieron a esta ubicacion:
 ```{r}
 
 list.files(file.path(path, "Data/RFID"))
 
 ```
 
-You just wrote out 2 spreadsheets using 1 loop, but you wrote out the same data frame to each spreadsheet. In order to write out a different data frame to each spreadsheet, you can add the data frame filtering that you learned above to the loop. In the code below, you'll also create another vector object called `days`, and then use the iterating variable to filter `sim_dats_rfid` and write out a spreadsheet by each day in `days`.
+Acabas de escribir dos hojas de calculo usando un bucle, pero escribistes el mismo `dataframe` a cada hoja de calculo. Para poder escribir un `dataframe` diferente a cada hoja de calculo, puedes anadir el paso de filtrar el `dataframe`que aprendiste arriba. En el codigo abajo, tambien vas a crear otro objecto de vector que se llama `days` (dias) y luego usaras el variable de iteracion para filtrar `sim_dats_rfid` y escribir una hoja de calculo por cada dia en `days`.
 ```{r eval = FALSE}
 
 days <- c(1, 2, 3)
@@ -434,16 +432,16 @@ days <- c(1, 2, 3)
 lapply(X = 1:length(files), FUN = function(x){
   
   sim_dats_rfid %>%
-    # Filter the data frame by one day at a time
+    # Filtra el dataframe una dia a la vez
     dplyr::filter(day == days[x]) %>%
-    # Write out data frame filtered by the given data to a separate spreadsheet 
+    # Escribe el dataframe filtrado por el dia actual a una hoja de calculo para ese dia 
     write.csv(file = files[x], row.names = FALSE)
   
 })
 
 ```
 
-You can delete these files that you created for testing. In the code below, you're seeing another pattern searching example while checking whether the function ran correctly. The string that you pass to the argument `pattern` starts with the symbol `^`, which is a symbol that indicates you're searching for all files that *start* with the pattern "test". You're also telling the function to return the full location of each file along with the file name, so that `file.remove()` knows exactly where to look for each file.
+Puedes borrar estos archivos que creaste de prueba. En el codigo abajo, vas a ver otro ejemplo de buscar un patron de texto mientras buscas evidencia que los archivos de prueba se crearon (antes de borrarlos). La secuencia de caracteres que usas para el argumento `pattern` empieza con el simbolo de `^`, el cual significa que quieres buscar todos los archivos que *empiezan* con el patron "test". Tambien esta especificandp que quieres devolver la ubicacion (`path`) completa de cada archivo usando el argumento `full.names = TRUE`, para que la funcion `file.remove()` tenga toda la informacion que necesita para borrar estos archivos de prueba.
 ```{r eval = FALSE}
 
 rem_files <- list.files(file.path(path, "Data/RFID"), pattern = "^test", full.names = TRUE)
@@ -453,54 +451,53 @@ file.remove(rem_files)
 
 ```
 
-<h3>Use a loop to save RFID spreadsheets</h3>
+<h3>Usa un bucle para guardar la hoja de calculo de RFID</h3>
 
-Now you can put all of these pieces together and use the loop to write out a spreadsheet per day for the RFID sensor.
+Ahora puedes juntar todo lo que aprendiste arriba y usar el bucle para escribir una hoja de calculo por dia para el sensor de RFID.
 ```{r eval = FALSE}
 
-# Make a vector of the custom file names to write out
+# Crea un vector de los nombres de los archivos que quieres guardar
 files <- c(
   "RFID_simulated_Pair-01_2023_08_01.csv", 
   "RFID_simulated_Pair-01_2023_08_02.csv", 
   "RFID_simulated_Pair-01_2023_08_03.csv"
 )
 
-# Add the file path for the correct directory
+# Anade el path para la ubicacion o carpeta al nombre de cada archivo
 files <- file.path(path, "Data/RFID", files) 
 files
 
-# Make a vector of the days to write out (1 day per iteration of the loop)
+# Inicializa un vector de los dias para poder escribir una hoja de calculo por dia en cada iteracion del bucle
 days <- c(1, 2, 3)
 days
 
-# You can drop the lapply() argument names, since you're supplying the arguments in the order that the function expects
+# Puedes eliminar los nombres de los argumentos de lapply() porque estas especificando los valores de los argumentos en el orden que la funcion espera por defecto
 invisible(lapply(1:length(files), function(x){
   
   sim_dats_rfid %>%
-    # Filter the data frame by one day at a time
+    # Filtra el dataframe por el dia actual en esta iteracion
     dplyr::filter(day == days[x]) %>%
-    # Write out the filtered data frame to the correct spreadsheet for the given day
+    # Escribe el dataframe filtrado a la hoja de calculo correcta para el dia actual
     write.csv(file = files[x], row.names = FALSE)
   
 }))
 
 ```
 
-In the code above, you'll see one additional change that we made to the loop by wrapping it in the function `invisible()`. This function silences the output printed to the console that you saw several times above, in which the output of each `lapply()` iteration is enclosed in double square brackets, and then a single pair of square brackets. `lapply()` is a function that returns a list, and when the function is carried out correctly but there is not output to print, the function will return `NULL` values (indicating empty output). This is the expected behavior of `lapply()` for our purposes, because we used `lapply()` to write out physical files rather than to return output to the R console. Since you can check that the function worked by running `list.files()`, using `invisible()` helps clean up the amount of text that you need to check in your console.
-
+En el codio arriba, deberias de poder ver un cambio adicional que hicimos al bucle con rodearlo con la funcion `invisible()`. Esta funcion silencia al resultado que se imprima a la consola (que viste cuando ejecutaste trozos de codigo arriba), en que el resultado de cada iteracion de `lapply()` esta rodeado de dos pares de corchetes, y luego un solo par de corchetes. `lapply()` es una funcion que devuelve una lista, y cuando la funcion se ejecuta correctamenta pero no hay resultados para imprimir (como cuando creas un archivo fisico), la funcion deberia de devolver valores de `NULL` que significan resultados vacios. Este comportamiento se espera con nuestro uso de `lapply()` porque usamos la funcion para escribir archivos fisicos y no para devolver resultados importantes a la consola. Ya que puedes usar `list.files()` para revisar que `lapply()` se ejecuto bien, usar `invisible()` te ayudara minimizar la cantidad de texto que tienes que revisar en tu consola.
 ```{r eval = FALSE}
 
-# The new .csv files for each day of RFID data are present, looks good
+# Los archivos nuevos de .csv para cada dia de datos de RFID estan presentes en el directorio esperado, se ve bien
 list.files(file.path(path, "Data/RFID"))
 
 ```
 
-You can remove these files for now, since you will work on writing a nested loop structure that automatically writes out the data for each sensor type per day.
+Ahora puedes eliminar los archivos que acabas de escribir, porque vas a trabajar en escribir un bucle anidado que va a automaticamente escribir los datos de cada dia para cada tipo de sensor.
 ```{r eval = FALSE}
 
 files <- c("RFID_simulated_Pair-01_2023_08_01.csv", "RFID_simulated_Pair-01_2023_08_02.csv", "RFID_simulated_Pair-01_2023_08_03.csv")
 
-# Add the file path for the correct directory
+# Anade el path para el directorio correcto a los nombres de los archivos que quieres borrar
 files <- file.path(path, "Data/RFID", files) 
 files
 
@@ -508,21 +505,21 @@ file.remove(files)
 
 ```
 
-If you want more practice writing loops, you can write out a loop structure to save a spreadsheet for each day of data collection for the infrared beam breaker dataset.
+Si quieres mas pratcica escribiendo bucles, puedes escribir un bucle para guardar una hoja de calculo para cada dia de coleccion de datos para los sensores infrarrojo.
 
-<h3>Write a nested loop to save spreadsheets</h3>
+<h3>Escribe un bucle anidado para crear hojas de calculo</h3>
 
-If you want to cut down on the amount of code that you're writing to save the raw data per sensor and day of data collection, you could write out both the RFID and beam breaker data in the same looping structure. To continue, you'll need to create another directory for the beam breaker data:
+Si quieres minimizar la cantidad de codigo que escribes para guardar los datos por tipo de sensor y por dia, puedes guardar archvos de ambos tipos de sensores (RFID y sensores infrarrojos) en el mismo bucle. Para continuar, deberias de crear otro directorio para los datos de los sensores infrarrojos:
 ```{r eval = FALSE}
 
 dir.create(file.path(path, "Data", "IRBB"))
 
 ```
 
-To carry out the file filtering and writing for both sensor types across days, you'll use a type of object called a `list`. You will then use these lists inside of a nested loop structure:
+Para lograr filtrar y escribir datos para ambos tipos de sensores a traves de los dias de coleccion de datos, vas a usar un tipo de objeto en R que se llama un `list`. Vas a usar estos lists adentro del bucle anidado:
 ```{r}
 
-# Make a list of the custom file names to write out for each sensor type and day
+# Crea una lista de los nombres de archivos customizados para guardar datos para cada tipo de sensor y dia
 files <- list(
   c("RFID_simulated_Pair-01_2023_08_01.csv", "RFID_simulated_Pair-01_2023_08_02.csv", "RFID_simulated_Pair-01_2023_08_03.csv"),
   c("IRBB_simulated_Pair-01_2023_08_01.csv", "IRBB_simulated_Pair-01_2023_08_02.csv", "IRBB_simulated_Pair-01_2023_08_03.csv")
@@ -532,25 +529,25 @@ glimpse(files)
 
 ```
 
-Lists are useful objects because they're very flexible. Unlike vectors, a single list can hold many different types of data. And then unlike a data frame, the elements of a list do not need to have the same dimensions. The elements of a list can also be different data structures or object types themselves. For instance, lists can contain vectors, data frames, and other lists all inside of the same larger list object. For instance, the list that you created above has 2 elements, and each element is a vector of 3 character strings containing the file names that you supplied using the function `c()`.
+Los `lists` son objetos utiles porque son muy flexibles. A diferencia de vectores, una sola lista puede contener varios diferentes tipos de datos. A diferecia de un `dataframe`, los elementos de una lista no necesitan tener las mismas dimensiones. Los elementors de una lista tambien pueden ser diferentes tipos de objetos con estructuras diferentes. Por ejemplo, un solo `list` puede contener vectores, `dataframes`, y otros `lists`. El `list` que creaste arriba tiene dos elementos, y cada elemento es un vector de tres secuencias de caracteres que contienen los nombres de archivos que especificaste usando la funcion `c()`.
 
-You can index lists in a manner that is similar to indexing vectors and data frames, but indexing lists can be done with single or double square brackets for different outcomes:
+Puedes indexar un `list` de una forma parecida a indexar vectores y `dataframes`, pero usar un par o dos pares de corchetes devuelve resultados diferentes:
 ```{r}
 
-# Using a single square bracket to filter a list returns the first list element in list format
+# Usar un par de corchetes para filtrar un list devuelve el elemento actual en formato de list
 files[1]
 glimpse(files[1])
 
-# Using double square brackets returns the first list element only, so it removes the list structure and shows the original data structure of that element (here a vector)
+# Usar dos pares de corchetes devuelvo solo el elemento actual, o sea elimina el estructura de list para demostrar el estructura original de ese elemento (aqui este elemento es un vector)
 files[[1]]
 glimpse(files[[1]])
 
 ```
 
-Lists can also have named elements, which makes it possible to access elements by name.
+Un `list` tambien puede tener nombres para sus elementos, y los elementos se pueden acceder por nombre:
 ```{r}
 
-# Make a named list of the custom file names to write out
+# Crea un list de los nombres de los archivos que quieres guardar
 files <- list(
   `RFID` = c("RFID_simulated_Pair-01_2023_08_01.csv", "RFID_simulated_Pair-01_2023_08_02.csv", "RFID_simulated_Pair-01_2023_08_03.csv"),
   `IRBB` = c("IRBB_simulated_Pair-01_2023_08_01.csv", "IRBB_simulated_Pair-01_2023_08_02.csv", "IRBB_simulated_Pair-01_2023_08_03.csv")
@@ -560,28 +557,28 @@ glimpse(files)
 
 ```
 
-Access the list elements by name:
+Accede los elementos de este `list` por nombre:
 ```{r}
 
-# Using a single bracket returns the first element as a list, called "RFID"
+# Usar un par de corchetes devuelve el elemento "RFID" como una lista
 files["RFID"]
 
-# Using the dollar sign or double square brackets returns the first list element in its original format
+# Usar el simbolo de dolar "$" o dos pares de corchetes devuelve el elemento "RFID" en su formato original
 files$RFID
 
 files[["RFID"]]
 
 ```
 
-Lists are very useful data structures for setting up nested loop operations. For instance, if you want to write out a spreadsheet per day per sensor type, you need a loop to 1) iterate over sensor types, and then a loop to 2) iterate over days per sensor. You can use lists to create nested data structures to supply to a nested loop, which will help you make sure that each layer of the loop runs in the way that you expect. For instance, the list called `files` reflects the nested loop that you need because files are listed first by sensor type (each element of the list) and then by date (each element of the vector inside of each list element):
+Los `lists` con tipos de objetos muy utiles para operaciones con bucles anidados. Por ejemplo, si quieres escribir una hoja de calculo por tipo de sensor y por dia, vas a necesitar 1) un bucle para iterar a traves de los tipos de sensors y 2) un bucle para iterar a traves de dias de coleccion de datos para cada sensor. Puedes usar listas para crear estructuras anidadas de datos que puedes proveer a un bucle anidado, para aseguar que cada capa del bucle ejecuta de la forma que esperas. Por ejemplo, el `list` que se llama `files` refleja el bucle anidado que necesitas, porque los archivos estan ordernados primero por el tipo de sensor (cada elemento del `list`) y luego por dia de coleccion de datos (cada elemento del vector adentro de cada elemento del `list`):
 ```{r}
 
-# Make a vector of sensor labels
+# Crea un vector de los nombres de los sensores
 sensors <- c("RFID", "IRBB")
 
 sensors
 
-# Make a named list of the custom file names to write out
+# Inicializa un list nombrado con los nombres de los archivos que quieres escribir
 files <- list(
   `RFID` = c("RFID_simulated_Pair-01_2023_08_01.csv", "RFID_simulated_Pair-01_2023_08_02.csv", "RFID_simulated_Pair-01_2023_08_03.csv"),
   `IRBB` = c("IRBB_simulated_Pair-01_2023_08_01.csv", "IRBB_simulated_Pair-01_2023_08_02.csv", "IRBB_simulated_Pair-01_2023_08_03.csv")
@@ -589,7 +586,7 @@ files <- list(
 
 files
 
-# Make a list of file paths per sensor that will be used inside of the loop
+# Crea un list de los paths para los archivos de cada sensor. Usaras estos paths adentro de los bucles
 file_dirs <- list(
   `RFID` = file.path(path, "Data/RFID"),
   `IRBB` = file.path(path, "Data/IRBB") 
@@ -597,8 +594,8 @@ file_dirs <- list(
 
 file_dirs
 
-# Make a list of the days to write out for each sensor
-# This could be a single vector rather than a list since you want to write out the same days per sensor, but a list is useful in case you wanted to change the days (and number of days) to write out per sensor
+# Crea un list de los dias de coleccion de datos para cada tipo de sensor
+# Esto puede ser un solo vector en vez de una lista porque quieres guardar el mismo numero de dias por sensor, pero una lista es util por si quieres cambiar los dias mismos o el numero de dias que quieres guardar por sensor
 days <- list(
   `RFID` = c(1, 2, 3),
   `IRBB` = c(1, 2, 3)
@@ -606,7 +603,7 @@ days <- list(
 
 days
 
-# Finally, you need to make a list of the data frames that you want to write out. Since you already know how to filter data frames by day, that code can go inside of the loop. Here you can specify the data frame to use in the filtering operation per sensor type
+# Ahora necesitas crear un list de los dataframes que quieres usar para crear los archivos. Como ya sabes como filtrar dataframes por dia, ese codigo puede ir adentro de los bucles para minimizar la cantidad de codigo que escribes. Aqui vas a especificar el dataframe que usaras en las operaciones de filtrar para cada tipo de sensor
 dats <- list(
   `RFID` = sim_dats_rfid,
   `IRBB` = sim_dats_irbb
@@ -616,74 +613,75 @@ glimpse(dats)
 
 ```
 
-Once you've set up the data structures that you want to loop over, you can write out the nested loop itself. Since this is a complex loop structure, it can be helpful to test the loop with set values of each iterating variable (below these will be `x` and `y`). 
+Cuando hayas establecido las estructuras de datos para informar la operacion del bucle, puedes escribir el bucle anidado mismo. Este bucle anidado es una estructra compleja, y por ende es util probar el bucle con valores determinados de cada variable de iteracion (`x` y `y` abajo).
 
-After writing out this loop but before running the full loop structure, you should test the code inside of each loop layer. To do this, you can set the values of each iterating variable outside of the loop and then run the code inside of each loop. This form of testing is equivalent to freezing the loop in time, so that you're seeing the output of the code for a single loop iteration (below, the first iteration for each loop layer when `x` and `y` are both set to 1).
+Despues de escribir este bucle pero antes de ejecutar la estructura completa del bucle, deberias de probar el codigo adentro de cada capa del bucle. Para lograr esto, puedes inicializar los valores de los variables de iteracion y luego correr el codigo adentro de cada bucle (pero sin ejecutar el bucle entero). Esta forma de revisar el bucle es equivalente a congelar el bucle en el tiempo, para que puedas ver el resultado del codigo para una sola iteracion (abajo vas a ver la primera iteracion para cada capa del bucle cuando ambos `x` y `y` tiene el valor numerico de uno).
 
-To carry out this type of testing, you should run the code to freeze the iterating variables on the first iteration of each loop. Then, you should run the code inside of each loop, starting with the creation of `days_tmp`, then the indexing and filtering the data frame, and then the filtering of the file names. You should not run either of the lines with `lapply()` in them, since you don't want either loop to fully execute before you're sure that the inner code is working as expected.
+Para lograr este tipo de chequeo, deberias de ejecutar el codigo para "congelar" los variables de iteracion en la primera iteracion de cada bucle ( o sea, inicializar `x` y `y` con el valor de uno). Luego deberias de ejecutar el codigo adentro de cada bucle, empezando con la creacion de `days_tmp`, luego las operaciones de indexar y filtrar el `dataframe`, y luego filtrar los nombres de los archivos. No deberias de ejecutar las lineas con `lapply()` porque quieres evitar ejecutar los bucles completos hasta que estes segura que el codigo adentro de cada bucle funciona de la forma que esperas. 
 
-As you test the code inside of each loop, you should see that between the outer and inner loops, you're using the name of the sensor for the given outer loop iteration ("RFID" for the first iteration) to set up the days over which the inner loop will iterate (in `days_tmp`). Inside of the inner loop, you're filtering the list of data frames by sensor, and then by the days that you want per sensor. Finally, you're indexing the file name for the right sensor type and day with a combination of double and single bracket filtering on the list of file names:
+*Nota importante*: Arriba aprendiste que los variables de iteracion no existen afuera de un bucle. Esta forma de probar el codigo adentro del bucle, en que no estas ejecutando los bucles mismos, es equivalente a probar el codigo afuera del bucle y por ende, los valores de los variables de iteracion que inicializes afuera del bucle se van a respetar.
+
+Mientras revisas el codigo adentro de cada bucle, deberias de ver que entre el bucle exterior y el bucle interior, vas a usar el nombre del sensor para la primera iteracion del bucle exterior ("RFID") para determinar los dias para las iteraciones del bucle interior (en `days_tmp`). Adentro del bucle interior, vas a filtrar el `list` de `dataframes` por sensor, y luego por los dias que quieres por sensor. Luego vas a indexar el nombre del archivo para el tipo de sensor actual y el dia actual con una combinacion de indexar la lista de nombres de los archivos con uno o dos pares de corchetes. Abajo, las lineas que abren y cierrn los bucles mismos estan comentados para guiar tu chequeo (o sea para guiar cuales lineas de codigo deberias de ejecutar):
 ```{r eval = FALSE}
 
-# Testing
+# Congela las variables de iteracion para el chequeo
 x <- 1
 y <- 1
 
-# Start by iterating over sensors
-invisible(lapply(1:length(sensors), function(x){
+# El bucle exterior: empieza con iterar a traves de los sensores
+# invisible(lapply(1:length(sensors), function(x){
   
-  # Index the named list of days to get the right days per sensor
-  # This indexing is important to set up the next loop correctly
+  # Para obtener los dias correctos para el tipo de sensor actual, deberias de indexar el list nombrado de dias
+  # Este paso de indexar es importante para que el bucle interior ejecute correctamente
+  sensors[x] # Una secuencia de caracteres con el nombre del sensor
   
-  sensors[x] # This is a string with the sensor name
-  
-  # Place the string with the sensor name inside of double square brackets to extract the vector of days for that sensor 
+  # Coloca la secuencia de caracteres con el nombre del sensor adentro de dos pares de corchetes para extraer el vector de dias para el tipo de sensor actual
   days_tmp <- days[[sensors[x]]]
   
   days_tmp
   
-  # For each sensor, iterate over days
-  lapply(1:length(days_tmp), function(y){
+  # El bucle interior: itera a traves de dias para cada tipo de sensor
+  # lapply(1:length(days_tmp), function(y){
     
-    # Get the data frame per sensor type using x inside of double square brackets to extract the given data frame from the list
+    # Para obtener el dataframe para el tipo de sensor actual, puedes usar x adentro de dos pares de corchetes para extraer el data frame del list
     dats[[x]] %>%
-      # Filter the data frame by one day at a time by using y to index the temporary vector of days (e.g. to extract a single element from that vector)
+      # Para filtrar el data frame por el dia actual puedes usar y para indexar el vector temporal de dias (para extraer un solo elemento de este vector)
       dplyr::filter(day == days_tmp[y]) %>% 
       glimpse()
     
-    # Use double bracket filtering to pull out the vector of file names for the given sensor from the overall list, then use y with single bracket filtering to pull a single file name from the resulting vector of names
+    # Usa dos pares de corchetes para acceder el vector de los nombres de los archivos para el tipo de sensor actual que esta adentro de la lista. Luego usa el variable y para indexar este vector con un par de corchetes para acceder el nombre de archivo correcto para esta iteracion
     files[[x]]
     
     files[[x]][y]
     
-    # You'll also combine the file name with the right path:
+    # Tambien vas a combinar el nombre del archivo con el path correcto:
     file.path(file_dirs[[x]], files[[x]][y])
     
-  })
+  # })
   
-}))
+# }))
 
 ```
 
-You should have a better sense now of how each loop operates over different data structures to carry out the operation that you want (writing out a single spreadsheet per sensor type and day). Next, you can modify the full loop to replace the lines written for testing with the final operations that you want to carry out: 
+Ahora deberias de tener una mejor idea sobre como cada bucle opera a traves de diferentes estructuras de datos para realizar la tarea que quieres (en este caso, escribir una hola de calculo por tipo de sensor y dia). Luego puedes modificar la estructura entera de los bucles para reemplazar las lineas que escribiste para eln chequeo con las operaciones finales que quieres realizar: 
 ```{r eval = FALSE}
 
-# Start by iterating over sensors
+# El bucle exterior: empieza con iterar a traves de los sensores
 invisible(lapply(1:length(sensors), function(x){
   
-  # Index the list of days to get the right days per sensor
-  # This indexing is important to set up the next loop correctly
+  # Para obtener los dias correctos para el tipo de sensor actual, deberias de indexar el list nombrado de dias
+  # Este paso de indexar es importante para que el bucle interior ejecute correctamente
   days_tmp <- days[[sensors[x]]]
   
-  # For the given sensor, iterate over days of data collection to write out a spreadsheet per sensor and day
+  # El bucle interior: itera a traves de dias para cada tipo de sensor para escribir una hoja de calculo por tipo de sensor y dia
   lapply(1:length(days_tmp), function(y){
     
-    # Get the data frame per sensor type using x and then filter by day using y
+    # Usa el variable x para acceder el dataframe para el tipo de sensor actual y luego usar el variable y para filtrar este dataframe por el dia actual
     dats[[x]] %>%
-      # Filter the data frame by one day at a time
+      # Filtra el dataframe por el dia actual
       dplyr::filter(day == days_tmp[y]) %>%
-      # Use double-bracket filtering to pull out the right file path per sensor
-      # Then use double and single bracket filtering to pull out the right file name per sensor and day
+      # Usa una operacion de indexar con doble corchetes para especificar el path correcto por tipo de sensor
+      # Luego usa operaciones de filtrar con doble corchetes y un par de corchetes para acceder el nombre correcto del archivo para el tipo de sensor y el dia actual
       write.csv(file = file.path(file_dirs[[x]], files[[x]][y]), row.names = FALSE)
     
   })
@@ -692,7 +690,7 @@ invisible(lapply(1:length(sensors), function(x){
 
 ```
 
-This loop should have created 1 file per sensor and day in the correct directory per sensor. Check that these 4 files now exist inside each directory per sensor within your working directory.
+Esta estructura de bucle deberia de haber creado un archivo por tipo de sensor y dia en el directorio correcto por tipo de sensor. Puedes revisar que estos seis archivos existen adentro del directorio para cada tipo de sensor en tu directorio de trabajo:
 ```{r eval = FALSE}
 
 list.files(file.path(path, "Data/RFID"))
@@ -701,4 +699,4 @@ list.files(file.path(path, "Data/IRBB"))
 
 ```
 
-You learned more about filtering data frames, writing them out to spreadsheets, and writing single-layer and nested loops in this vignette. In the next vignette, you'll use the spreadsheets of simulated RFID and IRBB data to start the ABISSMAL data processing and analysis workflow.
+En este tutorial aprendiste mas sobre como filtrar `dataframes` y guardar estos objetos como hojas de calculo, y como usar bucles de una capa y estructuras de bucles anidados. En el siguiente tutorial vas a usar las hojas de calculo que datos simulados de RFID y sensores infrarrojos para empezar a procesar y analizar datos con las funciones de ABISSMAL.
