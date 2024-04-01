@@ -34,9 +34,9 @@ En este cuarto tutorial, vas a guardar hojas de calculo de las detecciones simul
 
 ```{r message = FALSE, warning = FALSE}
 
-rm(list = ls()) # Limpiar tu ambiente global
+rm(list = ls()) # Limpia tu ambiente global
 
-library(tidyverse) # Cargar la coleccion de paquetes del tidyverse
+library(tidyverse) # Carga la coleccion de paquetes del tidyverse
 
 path <- "/home/gsvidaurre/Desktop/ABISSMAL_vignettes" # Inicializar un objeto con el path de tu directorio de trabajo
 
@@ -57,6 +57,7 @@ glimpse(rfid_ts)
 
 ```
 
+Aqui "IRBB" significa "infrared beam breakers" o sensores de infrarrojo.
 ```{r}
 
 # Simula marcas de tiempo para los pares externos ("o_") e internos ("i_") de sensores infrarrojos para una entrada y una salida, y luego otra entrada y salida

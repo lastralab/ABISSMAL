@@ -1,5 +1,5 @@
 ---
-title: "Vignette 05: Process and Plot Data"
+title: "Tutorial 04 05: Procesar Datos y Crear Graficas"
 author: "Grace Smith-Vidaurre"
 date: "2023-12-27"
 output: 
@@ -16,85 +16,88 @@ knitr::opts_chunk$set(echo = TRUE, eval = TRUE)
 
 ```
 
-<h2>Vignette overview and learning objectives</h2>
+<h2>Información sobre esta traducción</h2>
 
-In this fifth vignette, you will begin using the simulated detections of animal movements in the ABISSMAL data processing and analysis workflow, including combining raw data across days and pre-processing the raw data. You will also make visualizations of the processed data. You will continue to use coding skills that you learned in the previous vignettes, and you will learn additional skills that include:
+Este tutorial fue traducido al español por Grace Smith-Vidaurre, siguiendo las [convenciones de traducción de los Carpentries](https://github.com/Carpentries-ES/board/blob/master/Convenciones_Traduccion.md), incluyendo usar el género femenino por defecto. Si encuentras errores de ortografía que impiden tu habilidad de completar los tutoriales, por favor reporta los errores de ortografía a GitHub usando los pasos arriba para reportar un "Issue".
 
-1. Accessing custom functions
-2. Using custom functions
-3. Making graphs with `ggplot`
+<h2>Resumen del tutorial y objetivos de aprendizaje</h2>
 
-<h2>Load packages and your working directory path</h2>
+En este quinto tutorial, vas a empezar a usar las detecciones simuladas de movimientos de animales en el flujo de analisis de datos de ABISSMAL, incluyendo combinar los datos originales a traves de dias y procesar o limpiar los datos originales. Tambien vas a crear graficas de los datos procesados. Vas a continuar a usar habilidades que aprendiste en los tutoriales anteriores, y vas a aprender nuevas habilidades que incluyen:
+
+1. Acceder funciones customizadas
+2. Usar funciones customizadas
+3. Crear graficas con `ggplot` 
+
+<h2>Cargar paquetes e inicializar el `path` de tu directorio de trabajo</h2>
 
 ```{r message = FALSE, warning = FALSE}
 
-rm(list = ls()) # Clean global environment
+rm(list = ls()) # Limpia tu ambiente global
 
-library(tidyverse) # Load the set of tidyverse packages
-library(data.table) # Load other packages that the ABISSMAL functions require
+library(tidyverse) # Carga la coleccion de paquetes del tidyverse
+library(data.table) # Carga otros paquetes requiridos por las funciones de ABISSMAL
 
-# Initialize an object with the path that is your working directory
-path <- "/home/gsvidaurre/Desktop/ABISSMAL_vignettes"
+path <- "/home/gsvidaurre/Desktop/ABISSMAL_vignettes" # Inicializar un objeto con el path de tu directorio de trabajo
 
 ```
 
-<h2>Load ABISSMAL functions</h2>
+<h2>Cargar las funciones de ABISSMAL</h2>
 
-The custom R functions available through ABISSMAL are stored in physical files (extension .R) inside the local repository on your computer (which you should have downloaded in vignette 01). In order to start using the ABISSMAL functions, you need to load the physical .R files so that the functions are available in your global environment. In the code below, you will use the function `source()` to load 3 of the 5 main ABISSMAL functions, plus a script that holds a set of utility functions:
+Las funciones customizadas de R en ABISSMAL estan guardados en archivos fisicos (extension .R) adentro de la version local del repositorio en tu computadora (que descargaste en el primer tutorial). Para poder usar las funciones de ABISSMAL, vas a necesitar cargar los archivos fisicos de R para que las funciones esten disponibles en tu ambiente global. En el codigo abajo, vas a usar la funcion `source()` para cargar tres de las cinco funciones primarias de ABISSMAL, y tambien un archivo que contiene funciones de apoyo:
 ```{r}
 
-# Load the function that combines raw data
+# Carga la funcion que combina los datos originales
 source("/home/gsvidaurre/Desktop/GitHub_repos/ABISSMAL/R/combine_raw_data.R")
 
-# Load the function that detects perching events in the raw data
+# Carga la funcion que detecta eventos de posa en los datos originales
 source("/home/gsvidaurre/Desktop/GitHub_repos/ABISSMAL/R/detect_perching_events.R")
 
-# Load the function that pre-processes raw data
+# Carga la funcion que procesa los datos originales
 source("/home/gsvidaurre/Desktop/GitHub_repos/ABISSMAL/R/preprocess_detections.R")
 
-# Load a script with utility functions that each function above requires
+# Carga un archvio con funciones de apoyo que cada funcion arriba require
 source("/home/gsvidaurre/Desktop/GitHub_repos/ABISSMAL/R/utilities.R")
 
 ```
 
-<h2>Access ABISSMAL function information</h2>
+<h2>Accede informacion sobre las funciones de ABISSMAL</h2>
 
-After running the lines of code above, you should see that a whole set of functions have been loaded into your global environment (check the `Environment` pane). Many of these functions start with `check_`, and those are utility functions. If you scroll down, you'll see that the three of the main ABISSMAL functions above (`combine_raw_data`, `detect_perching_events`, `preprocess_detections`) are all loaded in your global environment as well. In the column to the right of the function names you can also see a preview of each function's arguments. 
+Despues de ejecutar las lineas de codigo arriba, deberias de ver que una coleccion entera de funciones estan disponibles en tu ambiente global (revisa la pestana de `Environment`). Las funciones que empiezan con `check_` son funciones de apoyo. Si haces `scroll` para abajo, puedes ver que tres de las funciones primarias de ABISSMAL (`combine_raw_data`, `detect_perching_events`, `preprocess_detections`) tambien estan disponsibles en tu ambiente global. En la columna al lado derecho de los nombres de las funciones tambien podras ver algo de informacion sobre los argumentos de cada funcion.
 
-To get more information about each of these three main functions, you can click the white square icon to the very right of each function in the `Environment` pane, or run the code `View(function_name)`. This will open the script for the given function a new tab in your Source pane. In each script for each function, you'll see lines of documentation starting with the symbols "`# @". You'll see the function name and description first, and then a description of each argument (parameter) for the function. If you keep scrolling down, you'll see a section with details about how the given function works, and the information that it returns. After the lines of documentation, you'll see the code that makes up the function itself. 
+Para obtener mas informacion sobre cada una de las tres funciones primarias, puedes hacer clic en el icono blanco cuadrado a la mera derecha de cada funcion en la pestana de `Environment`, o ejecutar el codigo `View(nombre_de_la_funcion)`. Este comando deberia de abrir el archivo de la funcion actual en una pestana nueva adentro de tu panel de fuente. En el archico de cada funcion, vas ver lineas de documentacion que empiezan con los simbolos "`#@", luego el nombre de la funcion y una descripcion, y luego una descripcion de cada argumento (paramtero) para la funcion. Si haces scroll para abajo, podras ver una seccion con detalles sobre la funcion misma, incluyendo la informacion que devuelve. Esta documentacion esta escrita en ingles por el momento. Despues de las lineas de documentacion veras el codigo de la funcion misma. 
 
-<h2>Combine raw data</h2>
+<h2>Combinar los datos originales</h2>
 
-Once you've loaded the ABISSMAL functions, you can start using the first function, `combine_raw_data()`, to combine data collected across days per sensor into a single spreadsheet per sensor. You'll start by combining raw data for the RFID sensor collected over different days into a single spreadsheet.
+Cuando hayas cargado las funciones de ABISSMAL, podras usar la primera funcion, `combine_raw_data()`, para combinar los datos colectados a traves de dias y tipos de sensors en una sola hoja de calculo por sensor. Vas a empezar con combinar los datos originales para el sensor de RFID que fueron colectados a traves de dias diferentes en una hoja de calculo para este sensor.
 
-Here goes more information about the arguments that you are supplying to the `combine_raw_data()` function below:
+Vas a proveerle informacion a la funcion `combine_raw_data()` a traves de los siguientes argumentos:
 
-* `sensors` is a vector containing the labels of the sensors for which you want to combine raw data. Below you're specifying RFID as a single sensor
+* `sensors` es un vector que contiene las etiquetas de los tipos de sensores para los cuales quieres combinar los datos originales. Abajo vas a especificar RFID como un solo sensor
 
-* `path` is your general working directory
+* `path` es tu directorio general de trabajo
 
-* `data_dir` is the folder that holds data inside of your working directory
+* `data_dir` es la carpeta que contiene datos adentro de tu directorio de trabajo
 
-* `out_dir` is the folder where you want to save the combined raw data spreadsheet. The function will create this folder if it does not already exist
+* `out_dir` es la carpeta donde quieres guardar la hoja de calculo de los datos originales combinados. La funcion creara esta carpeta si no existe en tu computadora
 
-* `tz` is the timezone for converting timestamps to POSIXct format. The default is "America/New York", and you can check out the "Time zones" section in the documentation for DateTimeClasses in R for more information (`?DateTimeClasses`)
+* `tz` es la zona de tiempo para convertir marcas de tiempo al formato `POSIXct` en R. La zona de tiempo por defecto es "America/New York", y puedes ver la seccion de "Time zones" en la documentacion para `DateTimeClasses` en R para mas informacion (`?DateTimeClasses`)
 
-* `POSIXct_format` is a string containing the POSIX formatting information for how dates and timestamps should be combined into a single column. The default is to encode the year as a 4 digit number and the month and day as 2 digit numbers, separated by dashes. The date is followed by a space, then the 2-digit hour, minute, and decimal second (separated by colons)
+* `POSIXct_format` es una secuencia de caracteres que contiene la informacion del formato `POSIXct` para combinar fechas y marcas de tiempo en una sola columna. Por defecto la funcion devolvera el año como un numero con cuatro digitos y el mes y el dia como numeros con dos digitos, separados por guiones. La fecha y el tiempo estaran separados por un espacio, y la hora, el minuto, y el segundo (en decimales), todos con dos digitos, estaran separados por dos puntos
 ```{r}
 
-# Combine raw data for the RFID and infrared beam breaker sensors separately
+# Combina los datos originales para los sensores de RFID e infrarrojo en procesos separados
 combine_raw_data(sensors = "RFID", path = path, data_dir = "Data", out_dir = "Data/raw_combined", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS")
 
 ```
 
-You can check that `combine_raw_data()` wrote a spreadsheet of raw RFID data to the new directory `raw_combined`:
+Puedes revisar que `combine_raw_data()` guardo una hoja de calculo con los datos originales combinados de RFID al directorio nuevo `raw_combined`:
 ```{r}
 
 list.files(file.path(path, "Data/raw_combined"), pattern = ".csv$")
 
 ```
 
-You can read the combined .csv file (called "combined_raw_data_RFID.csv") back into R to check out the structure of this spreadsheet:
+Puedes leer el archivo de datos combinados de RFID ("combined_raw_data_RFID.csv") a R para revisar la estructura de esta hoja de calculo:
 ```{r}
 
 rfid_data <- read.csv(file.path(path, "Data/raw_combined", "combined_raw_data_RFID.csv"))
@@ -103,36 +106,36 @@ glimpse(rfid_data)
 
 ```
 
-Reading this spreadsheet back into R created a data frame object. You should be able to see that there are some new columns created by the function, such as the column `data_type`. For this spreadsheet, the columns `sensor_id` and `data_type` contain the same information, but it's useful to have separate columns to keep track of the sensor id and type of sensor used to collect data when multiple sensors are used (e.g. two beam breaker pairs will each have a unique identifier in the `sensor_id` column).
+Leer estos datos a R creo un objeto `dataframe`. Deberias de poder ver que hay unas columnas nuevas creadas por la funcion, como la columna `data_type`. Para esta hoja de calculo, las columnas `sensor_id` y `data_type` contienen la misma informacion, pero es util tener columnas separadas para poder estar al tanto de la identidad unica del sensor y el tipo de sensor cuando usas multiples sensores del mismo tipo (por ejemplo, dos pares de sensores infrarrojos tendran numeros de identidad unicos en la columna de `senso_id`).
 
-The function `combine_raw_data()` also created a new timestamps column in POSIXct format for downsteam processing and analysis, but it kept the original timestamps column. The function then added columns to indicate the stage of data processing and the date that the raw data were combined. Finally, if you check the folders with the original raw RFID data, you'll see that the original spreadsheets per day were retained and were not overwritten.
+La funcion `combine_raw_data()` tambien creo una columna nueva de marcas de tiempo en formato POSIXct para los pasos que siguen de procesar y analizar datos, pero mantuvo la columna original de marcas de tiempo. La funcion anadio columnas para indicar la etapa de procesar datos y la fecha en que combinaste los datos originales. Finalmente, si revisas las carpetas con los datos originales de RFID, veras que las hojas de calculo originales por dia se preservaron y no fueron ni eliminados ni sobrescritos.
 
-You can also run `combine_raw_data()` with raw data from multiple sensors by supplying a vector with the sensor labels to the argument `sensors`. The function will still combine the raw data per sensor into separate spreadsheets per sensor, and in the process, you can avoid copy-pasting the code multiple times to run this process for multiple sensors:
+Tambien puedes ejecutar `combine_raw_data()` con los datos originales de multiples sensores a la vez con proveer un vector con las etiquetas de estos sensores al argumento `sensores`. Los datos para cada tipo de sensor todavia se guardaran en hojas de calculo separados, y evitas tener que escribir el mismo codigo varias veces para ejecutar `combine_raw_data()` para multiples sensores:
 ```{r}
 
 combine_raw_data(sensors = c("RFID", "IRBB"), path = path, data_dir = "Data", out_dir = "Data/raw_combined", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS")
 
 ```
 
-The RFID data will be overwritten, and you should see an additional spreadsheet with the raw IRBB data:
+Los datos de RFID se sobrescribiran, y deberias de ver una hoja de calculo adicional con los datos originales de los sensores infrarrojos:
 ```{r}
 
 list.files(file.path(path, "Data/raw_combined"), pattern = ".csv$")
 
 ```
 
-<h2>Detect perching events</h2>
+<h2>Detectar eventos de posar</h2>
 
-You can use the combined raw data from different sensors in subsequent ABISSMAL functions to start making behavioral inferences from the movement detection datasets. For instance, you can detect perching events in the raw RFID data with the function `detect_perching_events()`. You can read more about each argument in the R script that contains this function.
+Puedes usar los datos originales combinados de sensores diferentes en las siguientes funciones de ABISSMAL para empezar a hacer inferencias de comportamiento de los datos de deteccion de movimiento. Por ejemplo, puedes detectar eventos de posar en los datos originales de RFID con la funcion `detect_perching_events()`. Puedes leer mas sobre cada argumento en el archivo de R que contiene esta funcion.
 ```{r}
 
 detect_perching_events(file_nm = "combined_raw_data_RFID.csv", threshold = 2, run_length = 2, sensor_id_col_nm = "sensor_id", timestamps_col_nm = "timestamp_ms", PIT_tag_col_nm = "PIT_tag", rfid_label = "RFID", general_metadata_cols = c("chamber_id", "sensor_id"), path = file.path(path, "Data"), data_dir = "raw_combined", out_dir = "processed", out_file_prefix = "perching_events", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS")
 
 ```
 
-`detect_perching_events()` can only operate on a single file and sensor type at a time. The function will automatically create a new folder called "processed", and will save the .csv inside of that folder with perching events (if these were detected using the temporal threshold and run length above). 
+`detect_perching_events()` puede operar en solo un archivo y tipo de sensor a la vez. La funcion automaticamente crea una carpeta que se llama "prcoessed" (para datos procesados) y guardara un archivo de .csv adentro de esa carpeta si pudo detectar eventos de posar usando el umbral temporal actual (`threshold`, en segundos), y la duracion de secuencias de deteccion actual (`run_length`, en numero de detecciones).
 
-When we simulated data in the third and fourth vignettes, you simulated perching events in the RFID dataset only. Did the code above recover those perching events?
+Cuando creamos datos simulados en los ultimos tutoriales, simulaste eventos de posar en los datos de RFID. Pudiste recuperar estos eventos de posar usando `detect_perching_events()`?
 ```{r}
 
 perching <- read.csv(file.path(path, "Data", "processed", "perching_events_RFID.csv"))
@@ -141,30 +144,32 @@ glimpse(perching)
 
 ```
 
-`detect_perching_events()` identified 6 total perching events, which is the same number that you simulated in the previous vignette (two perching events per day). You can look at the values inside of data frame for more information about these perching events:
+`detect_perching_events()` identifico un total de seis eventos de posar, que es el mismo numero que simulaste en el tutorial anterior (dos eventos de posar por dia a traves de tres dias). Puedes revisar los valores adentro del `dataframe` para ver mas informacion sobre estos eventos de posar:
 ```{r}
 
-# The timestamps when each perching event started
+# Las marcas de tiempo cuando cada evento de posar empezo
 perching$perching_start
 
-# The timestamps when each perching event ended
+# Las marcas de tiempo cuando cada evento de posar termino
 perching$perching_end
 
-# The unique PIT tag identifier that tells you which individual was perched on the RFID antenna
+# La etiqueta unica de PIT que contiene informacion sobre la identidad del individuo que estuvo posando en la antena de RFID
 perching$PIT_tag
 
 ```
 
-You can also view the whole data frame in a separate pane:
+Tambien puedes visualizar el `dataframe` entero en un panel separado:
 ```{r eval = FALSE}
 
 View(perching)
 
 ```
 
-The information above tells you that there were 2 perching events detected at 8:00 each day, and 2 perching events detected at 11:30 each day (as expected). The PIT tag for each individual was detected once each day, so there was 1 perching event performed by each individual on each day.
+La informacion arriba te dice que hubo dos eventos de posar a las 8:00 cada dia, y dos eventos de posar a las 11:30 cada dia (como esperamos). La etiqueta de PIT para cada individuo se detecto una vez por dia, por ende, cada individuo realizo un evento de posar cada dia.
 
-Detecting perching events is not a requirement in the ABISSMAL workflow, but it can be a useful step to obtain as much information from the raw data before some detections are dropped during pre-processing (see below).
+Detectar eventos de posar no es un requisito en el flujo de analisis de ABISSMAl, pero puede ser un paso util para obtener la mayor cantidad de informacion que puedes de los datos originales antes de filtrar detecciones en el siguiente paso de procesar o limpiar los datos originales.
+
+TKTK continue translation
 
 <h2>Pre-process raw data</h2>
 
