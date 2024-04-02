@@ -457,7 +457,6 @@ Ahora deberias de ver que una leyenda de color aparece arriba de la grafica con 
 gg <- gg +
   
   # Aumenta el tamano de texto de cada leyenda y reduce el espacio blanco entre la grafica y las leyendas
-  # Increase the legend text size and reduce white space between the plot and legend
   theme(
     legend.text = element_text(size = 10),
     legend.margin = margin(-1, -1, -1, -1, unit = "pt")
@@ -473,26 +472,24 @@ gg
 
 ```
 
-TKTK continue
-
-Finally, you can save this plot as an image file:
+Finalmente puedes guardar esta grafica como un archivo:
 ```{r}
 
 gg
 
-# Save the image file to your computer
+# Guarda el archivo con la grafica en tu computadora
 ggsave(file.path(path, "behavioral_inferences.tiff"), width = 8, height = 6, units = "in", dpi = 300)
 
 ```
 
-You can continue to modify minor aesthetics to this image file to create a high-quality figure for a publication. For instance, you can change the final size of the image file (`width`, `height`), as well as the resolution (`dpi`). You can also change the size of the text on each axis and the axis titles, or the legend position, as you play around with the final image size.
+Puedes continuar con modificar esteticas menores a este archivo para crear una figura de alta calidad para una publicacion. Por ejemplo, puedes cambiar el tamano final del imagen (`width`, `height`), tanto como la resolution (`dpi`). Puedes tambien cambiar el tamano de texto en cada eje y los titulos de cada eje, o la posicion de la leyenda mientras determinas el tamano final del imagen en el archivo.
 
-This is the all of the code used for the final plot, condensed and reorganized:
+Abajo esta todo el codigo que escribiste para la grafica final, en una forma mas condensada y reorganizada:
 ```{r eval = FALSE}
 
 ggplot(data = scored_clusters_gg3) +
   
-  # Add a vertical line for each non-perching event assigned to the first individual
+  # Anade una linea vertical para cada evento que no fue un evento de posar y que fue asignado al primer individuo
   geom_segment(
     data = scored_clusters_gg3 %>% 
       dplyr::filter(individual_initiated == "1357aabbcc"),
@@ -501,7 +498,7 @@ ggplot(data = scored_clusters_gg3) +
     linewidth = 0.5
   ) +
   
-  # Add a vertical line for each non-perching event that was not assigned to either individual
+  # Anade una linea vertical para cada evento que no fue un evento de posar y que no fue asignado a unos de los dos individuos
   geom_segment(
     data = scored_clusters_gg3 %>% 
       dplyr::filter(individual_initiated == "unassigned"),
@@ -510,7 +507,7 @@ ggplot(data = scored_clusters_gg3) +
     linewidth = 0.5
   ) +
   
-  # Add the perching events as rounded segments, and now encode color through the column individual_initiated
+  # Anade los eventos de posar como lineas con orillas redondeadas, y puedes anadir colores que indican la identidad del individuo a traves de la columna individual_initiated
   geom_segment(
     data = scored_clusters_gg3 %>% 
       dplyr::filter(!is.na(perching_sensor)),
@@ -518,41 +515,40 @@ ggplot(data = scored_clusters_gg3) +
     linewidth = 2, lineend = "round"
   ) +
   
-  # Add the custom linetype values to this plot
+  # Anade los tipos de linea customizadas a la grafica
   scale_linetype_manual(values = ltys) +
   
-  # Add the custom colors
+  # Anade los colores customizados para estos eventos de posar. Los colores tambien aplican a las lineas de movimientos por individuo que no fueron eventos de posar que anadiste en capas anteriores de geom_segment()
   scale_color_manual(values = cols) +
   
-  # Change the legend titles
+  # Modifica los titulos de cada leyenda
   guides(
     linetype = guide_legend(title = "Direction"),
     color = guide_legend(title = "Individual")
   ) +
   
-  # Add an x-axis title
+  # Anade un titulo para el eje x
   xlab("Time of day (HH:MM)") +
   
-  # Remove the y-axis label
+  # Elimina el titulo del eje y
   ylab("") +
   
-  # Change the aesthetics of the x-axis labels
+  # Cambia la estetica de las etiquetas del eje x
   scale_x_datetime(
     date_breaks = "30 mins",
     date_labels = "%H:%M"
   ) +
   
-  # Facet the plot by day (e.g. create a panel per day)
-  # Use the new day labels here
+  # Crea paneles en la grafica por dia, aqui usaras las etiquetas nuevas de dia
   facet_wrap(~ day_label, nrow = 3, strip.position = "left") +
   
-  # Use this function to convert the plot background to black and white
+  # Usa esta funcion para convertir el fondo de la grafica a blanco y negro
   theme_bw() +
   
-  # Use aesthetics functions to remove the y-axis labels and ticks
-  # Add an argument to change where the legend is located in the plot
-  # Remove the y-axis grid lines (major and minor) inside of each panel
-  # Increase the legend text size and reduce white space between the plot and legend
+  # Usa estas funciones de estetica para elimninar el text y los rayos del eje y
+  # Anade un argumento para cambiar la posicion de la leyenda adentro de la grafica
+  # Puedes quitar la cuadricula en el eje (mayor y menor) adentro de cada panel
+  # Aumenta el tamano de texto de cada leyenda y reduce el espacio blanco entre la grafica y las leyendas
   theme(
     axis.text.y = element_blank(),
     axis.ticks.y = element_blank(),
@@ -565,4 +561,4 @@ ggplot(data = scored_clusters_gg3) +
 
 ```
 
-You completed the final vignette of the ABISSMAL data processing and analysis pipeline. You also practiced your coding and data science skills in a biological context. Well done! It would be very helpful if you could complete the brief Google form for a post-vignette evaluation that will help us continue to improve these vignettes over time. A link to this Google form will be available in the README file for the vignettes.
+Acabas de completar el tutorial final del `pipeline` de procesar y analizar datos de ABISSMAL. Tambien practicaste tus habilidades de programar y tus habilidades de la ciencia de datos en un contexto biologico. Muy bien hecho! Nos ayudaria mucho si puedes completar la forma de Google para una evaluacion de estos tutoriales ya que los terminaste. Tus respuestas nos ayudaran mejorar estos tutoriales en el futuro. Un enlace a la forma de Google estara disponible en el archivo README para los tutoriales.
