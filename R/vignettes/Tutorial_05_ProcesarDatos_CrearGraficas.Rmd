@@ -55,7 +55,7 @@ source("/home/gsvidaurre/Desktop/GitHub_repos/ABISSMAL/R/detect_perching_events.
 # Carga la funcion que procesa los datos originales
 source("/home/gsvidaurre/Desktop/GitHub_repos/ABISSMAL/R/preprocess_detections.R")
 
-# Carga un archvio con funciones de apoyo que cada funcion arriba require
+# Carga un archivo con funciones de apoyo que cada funcion arriba require
 source("/home/gsvidaurre/Desktop/GitHub_repos/ABISSMAL/R/utilities.R")
 
 ```
