@@ -22,7 +22,7 @@ Este tutorial fue traducido al español por Grace Smith-Vidaurre, siguiendo las 
 
 <h2>Resumen del tutorial y objetivos de aprendizaje</h2>
 
-En este quinto tutorial, vas a empezar a usar las detecciones simuladas de movimientos de animales en el flujo de analisis de datos de ABISSMAL, incluyendo combinar los datos originales a traves de dias y procesar o limpiar los datos originales. Tambien vas a crear graficas de los datos procesados. Vas a continuar a usar habilidades que aprendiste en los tutoriales anteriores, y vas a aprender nuevas habilidades que incluyen:
+En este quinto tutorial, vas a empezar a usar las detecciones simuladas de movimientos de animales en el `pipeline` de analisis de datos de ABISSMAL, incluyendo combinar los datos originales a traves de dias y procesar o limpiar los datos originales. Tambien vas a crear graficas de los datos procesados. Vas a continuar a usar habilidades que aprendiste en los tutoriales anteriores, y vas a aprender nuevas habilidades que incluyen:
 
 1. Acceder funciones customizadas
 2. Usar funciones customizadas
@@ -167,7 +167,7 @@ View(perching)
 
 La informacion arriba te dice que hubo dos eventos de posar a las 8:00 cada dia, y dos eventos de posar a las 11:30 cada dia (como esperamos). La etiqueta de PIT para cada individuo se detecto una vez por dia, por ende, cada individuo realizo un evento de posar cada dia.
 
-Detectar eventos de posar no es un requisito en el flujo de analisis de ABISSMAl, pero puede ser un paso util para obtener la mayor cantidad de informacion que puedes de los datos originales antes de filtrar detecciones en el siguiente paso de procesar o limpiar los datos originales.
+Detectar eventos de posar no es un requisito en el `pipeline` de analisis de ABISSMAl, pero puede ser un paso util para obtener la mayor cantidad de informacion que puedes de los datos originales antes de filtrar detecciones en el siguiente paso de procesar o limpiar los datos originales.
 
 <h2>Procesa los datos originales</h2>
 
