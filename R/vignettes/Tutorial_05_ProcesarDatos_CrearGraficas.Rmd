@@ -169,27 +169,25 @@ La informacion arriba te dice que hubo dos eventos de posar a las 8:00 cada dia,
 
 Detectar eventos de posar no es un requisito en el flujo de analisis de ABISSMAl, pero puede ser un paso util para obtener la mayor cantidad de informacion que puedes de los datos originales antes de filtrar detecciones en el siguiente paso de procesar o limpiar los datos originales.
 
-TKTK continue translation
+<h2>Procesa los datos originales</h2>
 
-<h2>Pre-process raw data</h2>
+Cuando hayas detectado los eventos de posar en los datos originales, puedes seguir con procesar o limpiar los datos originales con la funcion `preprocess_detections()`. Los datos originales a veces contienen multiple detecciones separadas por poco tiempo (como las detecciones de RFID cuando un individuo esta posando en la antena), y estos multiples detecciones pueden causar ruido cuando tratas de hacer inferencias de comportamiento con datos colectados por multiples sensores. Cuando le provees "thin" al argumento `mode`, `preprocess_detections()` elimina detecciones separaas por un periodo corto de tiempo (usando el valor del umbral temporal en segundos para el argumento `thin_threshold`), y devuelve datos filtrados de detecciones que todavia representan eventos discretos de movimiento.
 
-Once you've detected perching events in the raw data, you can move on to pre-processing the raw data itself with `preprocess_detections()`. The raw data can sometimes contain multiple detections separated by a short period of time (e.g. RFID detections when an individual is perching on the antenna), and these multiple detections can be a source of noise when you're trying to make behavioral inferences across data collected by multiple sensors. When the argument `mode` is set to "thin", `preprocess_detections()` removes detections separated by a very short period of time, and retains a reduced datasets of detections that still represents discrete movement events.
-
-`preprocess_detections()` also operates on a single sensor type at a time:
+`preprocess_detections()` opera en un solo tipo de sensor a la vez:
 ```{r}
 
 preprocess_detections(sensor = "RFID", timestamps_col_nm = "timestamp_ms", group_col_nm = "PIT_tag", mode = "thin", thin_threshold = 2, drop_tag = NULL, path = file.path(path, "Data"), data_dir = "raw_combined", out_dir = "processed", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS")
 
 ```
 
-You should now see an additional .csv file called "pre_processed_data_RFID.csv" in the "processed" folder:
+Ahora deberias de ver un archvio de `.csv` adicional que se llama "pre_processed_data_RFID.csv" en la carpeta "processed":
 ```{r}
 
 list.files(file.path(path, "Data/processed"))
 
 ```
 
-You can read this file into R to check out the data structure. You should see that there are fewer rows here compared to the spreadsheet of raw data:
+Puedes leer este archivo a R para ver su estructura. Deberias de ver menos filas en este `dataframe` comparado con la hoja de calculo de los datos originales:
 ```{r}
 
 rfid_pp <- read.csv(file.path(path, "Data/processed/pre_processed_data_RFID.csv"))
@@ -198,7 +196,7 @@ glimpse(rfid_pp)
 
 ```
 
-Next, you can pre-process the raw beam breaker data and check out the resulting .csv file:
+Luego puedes procesar los datos originales de los sensores infrarrojos y revisar el archivo de `.csv`:
 ```{r}
 
 preprocess_detections(sensor = "IRBB", timestamps_col_nm = "timestamp_ms", group_col_nm = "sensor_id", mode = "thin", thin_threshold = 2, drop_tag = NULL, path = file.path(path, "Data"), data_dir = "raw_combined", out_dir = "processed", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS")
@@ -211,28 +209,29 @@ glimpse(irbb_pp)
 
 ```
 
-<h2>Plot RFID data in a barcode plot</h2>
+<h2>Visualizar datos de RFID en una grafica de codigo de barras</h2>
 
-Now that you've combined and processed the raw data per sensor, it's time to visualize these different datasets. Making visualizations as you write code is important for generating high-quality figures for publications and presentations, but also for checking your work.
+Ahora que combinaste y procesaste los datos originales por sensor, es hora de visualizar estos conjuntos de datos diferentes. Hacer graficas mientras escribes codigo es importante para generar figures de alta calidad para publicaciones y presentaciones y tambien para revisar tu proceso de analizar datos.
 
-In the code below, you'll learn how to use functions from the `ggplot2` package to make a barcode style figure of the raw and pre-processed RFID detection datasets.
+En el codigo abajo, vas a aprender como usar funciones del paquete `ggplot2` para hacer una grafica del estilo de codigo de barras con los datos originales y procesados de RFID.
 
-Start by reading in the raw and pre-processed RFID data, as well as the RFID perching events, and convert the timestamps to POSIX format.
+Puedes empezar con leer los datos originales y procesados de RFID, tambien los eventos de posar de RFID, y convertir las marcas de tiempo al formato `POSIX`.
 ```{r}
 
 rfid_raw <- read.csv(file.path(path, "Data/raw_combined", "combined_raw_data_RFID.csv")) %>%
-  # The timestamps must be converted to POSIX format every time that the data is read back into R for plotting
+  # Tienes que convertir las marcas de tiempo al formato POSIX cada vez que los datos se leen a R para hacer graficas
   dplyr::mutate(
     timestamp_ms = as.POSIXct(format(as.POSIXct(timestamp_ms, tz = "America/New York"), "%Y-%m-%d %H:%M:%OS6"))
   ) %>%
-  # Arrange the timestamps from oldest to most recent
+  # Ordena las marcas de tiempo
+  # La expresion "-desc()" adentro de la funcion arrange() indica que las marcas de tiempo se ordenaran de menos a mas recientes
   dplyr::arrange(-desc(timestamp_ms))
 
-# You should see that the timestamp_ms is in "dttm" format, which means that the POSIX conversion was done correctly
+# Deberias de ver que la columna timestamp_ms con las marcas de tiempo esta en el formato "dttm", significando que la conversion a formato POSIX sea realizo bien
 glimpse(rfid_raw)
 
 rfid_pp <- read.csv(file.path(path, "Data/processed/pre_processed_data_RFID.csv")) %>%
-  # The timestamps must be converted to POSIX format every time that the data is read back into R for plotting
+  # Tienes que convertir las marcas de tiempo al formato POSIX cada vez que los datos se leen a R para hacer graficas
   dplyr::mutate(
     timestamp_ms = as.POSIXct(format(as.POSIXct(timestamp_ms, tz = "America/New York"), "%Y-%m-%d %H:%M:%OS6"))
   ) %>% 
@@ -241,7 +240,7 @@ rfid_pp <- read.csv(file.path(path, "Data/processed/pre_processed_data_RFID.csv"
 glimpse(rfid_pp)
 
 rfid_perch <- read.csv(file.path(path, "Data/processed/perching_events_RFID.csv")) %>%
-  # The start and end timestamps must be converted to POSIX format every time that the data is read back into R for plotting
+  # Tienes que convertir las marcas de tiempo de incio y final de cada evento de posar al formato POSIX cada vez que los datos se leen a R para hacer graficas
   dplyr::mutate(
     perching_start = as.POSIXct(format(as.POSIXct(perching_start, tz = "America/New York"), "%Y-%m-%d %H:%M:%OS6")),
     perching_end = as.POSIXct(format(as.POSIXct(perching_end, tz = "America/New York"), "%Y-%m-%d %H:%M:%OS6"))
@@ -252,7 +251,7 @@ glimpse(rfid_perch)
 
 ```
 
-Next, you can combine these datasets into a single data frame to facilitate combining them in the same plot. You will add a new column in order to identify the two different datasets.
+Luego puedes combinar los datos originales y procesados en un solo `dataframe` para facilitar visualizar todos estos datos en la misma grafica. Vas a anadir una columna nueva (`dataset`) con etiquetas para identificar los dos conjuntos de datos diferentes.
 ```{r}
 
 rfid_combined <- rfid_raw %>%
@@ -266,40 +265,39 @@ rfid_combined <- rfid_raw %>%
       dplyr::mutate(
         dataset = "pre-processed"
       ) 
-  ) %>% 
-  # Order the data frame by timestamps. The -desc() inside of arrange() means that the timestamps will be arranged in increasing order
+  ) %>%
   dplyr::arrange(-desc(timestamp_ms))
 
 glimpse(rfid_combined)
 
 ```
 
-You will start plotting the data using functions from `ggplot2`. This package is part of the `tidyverse`, but can also be installed and used separately. You can check out this [link](https://ggplot2.tidyverse.org/) for more resources to learn how to use ggplot to make different types of plots. These resources include sections of three different books with hands-on exercises at different levels, as well as an online course and a webinar.
+Vas a construir la grafica con estos datos usando funciones de `ggplot2`, un paquete que es parte del `tidyverse` pero que tambien se puede instalar y usar afuera del `tidyverse`. Puedes revisar este [enlace](https://ggplot2.tidyverse.org/) que tiene mas recursos (en ingles) para aprender como usar la notacion de `ggplot` para hacer diferentes tipos de graficas. Estos recursos incluyen secciones de tres libros diferentes con ejercicios para practicar hacer graficas a diferentes niveles de experiencia, y tambien un curso en linea y un seminario en linea. Puedes encontrar otros recursos en espanol en linea, como esta [guia para `ggplot2`](https://raw.githubusercontent.com/rstudio/cheatsheets/main/translations/spanish/data-visualization_es.pdf).
 
-The `ggplot2` package has a unique syntax for building plots, in which you start making a plot by calling the function `ggplot()`, and then add features by layering on other `ggplot2` functions with the `+` symbol.
+El paquete de `ggplot2` tiene una notacion unica para construir graficas, en que empiezas haciendo la grafica con llamar la funcion `ggplot()` y luego anades caracteristicas con anadir capas de otras funciones de `ggplot2` con el simbolo de `+`.
 
-If you call `ggplot()`, you'll see that the function immediately draws a blank plot in your Plots pane in RStudio.
+Si llamas `ggplot()`, veras que la funcion inmediatamente dijuba una grafica vacia en tu panel de `Plots` (graficas) en RStudio.
 ```{r}
 
 ggplot()
 
 ```
 
-The plot will still remain blank even when you supply information about your data in order to set up plot aesthetics.
+La grafica seguira vacia includo cuando le provees informacion sobre tus datos para poder configurar la estetica en los siguientes pasos.
 ```{r}
 
 ggplot(data = rfid_combined)
 
 ```
 
-You need to add other aesthetics functions to this base layer of the plot in order to see your data. The functions that you use to layer aesthetics over the empty plot will depend on the type of plot that you want to make. For this example, you will make a barcode style plot, in which each timestamp is shown as a thin vertical line. Barcode plots can be useful visualizations when you're working with timestamps, since the most important information is contained in one dimension (time on the x-axis). If you were to summarize the number of timestamps recorded on each day, then you could create a line plot instead.
+Necesitaras anadir otras funciones esteticas a esta capa fundamental de la grafica para poder ver tus datos. Las funciones que usaras para anadir detalles esteticos a la grafica vacia dependeran del tipo de grafica que quieres crear. En este ejemplo, vas a generar una grafica de codigo de barras, en que cada marca de tiempo esta representado por una linea vertical delgada. Las grafica de codigo de barra pueden ser graficas utiles cuando trabajas con marcas de tiempo, porque la informacion mas importante se contiene en una dimension (el tiempo en el eje x). Si fueras a resumir el numero de marcas de tiempo grabado cada dia, seria mejor hacer una grafica de lineas. 
 
-You can layer the function `geom_segment()` over the base plot layer. `geom_segment()` allows you to add lines to a plot, and the lines can communicate information in one or two dimensions (width on the x-axis and height on the x-axis). In the plot you'll make below, you'll use `geom_segment()` to add lines to the plot that contain temporal information in one dimension (timestamps that provide information on the x-axis only).
+Puedes anadir la funcion `geom_segment()` como la siguiente capa encima de la capa fundamental de la grafica. `geom_segment()` facilita anadir linea a una grafica, y las lineas pueden comunicar informacion en una o dos dimensiones (por su ancho en el eje x y su altura en el eje y).
 ```{r}
 
 ggplot(data = rfid_combined) +
   
-  # Add a vertical line for each timestamp
+  # Anade una linea vertical para cada marca de tiempo
   geom_segment(
     aes(x = timestamp_ms, y = 0, xend = timestamp_ms, yend = 1, color = dataset),
     linewidth = 0.3
@@ -307,14 +305,14 @@ ggplot(data = rfid_combined) +
   
 ```
 
-In the code above, `geom_segment()` adds a vertical line segment to the plot for each detection in the full dataset. Using the argument `color` inside of `geom_segment()`, you told the function that these line segments should be colored by dataset by supplying the column name that holds the dataset labels. The `color` argument must be inside of the `aes()` function in order for this color assignment by dataset to work correctly. 
+En el codigo arriba, `geom_segment()` anada una linea vertical a la grafica para cada deteccion en el `dataframe` completo. Con usar el argumento `color` adentro de `geom_segment()`, y proveer el nombre de la columna que contiene las etiquetas de los conjuntos de datos, le comunicaste a la funcion que las lineas deberian de tener colores que corresponden al conjunto particular de datos. El argumento `color` tiene que estar adentro de la funcion `aes()` (que controla la estetica de esta capa de informacion) para que esta asignacion de colores se realice por el conjunto de datos.
 
-The line segment colors are automatically assigned by `ggplot` using default colors, but you can change these colors using the function `scale_color_manual()`:
+Los colores de las lineas se asignaran automaticamente por `ggplot` usando los colores por defecto del paquete, pero puedes cambiar estso colores usando la funcion `scale_color_manual()`:
 ```{r}
 
 ggplot(data = rfid_combined) +
   
-  # Add a vertical line for each timestamp
+  # Anade una linea vertical para cada marca de tiempo
   geom_segment(
     aes(x = timestamp_ms, y = 0, xend = timestamp_ms, yend = 1, color = dataset),
     linewidth = 0.3
@@ -324,32 +322,32 @@ ggplot(data = rfid_combined) +
 
 ```
 
-The line segments are now colored with the new colors you specified. But in the legend, the pre-processed data shows up first. If you want to change the order of the dataset labels in the legend, and the colors assigned to them, you can modify the `dataset` column in the data frame that you used for plotting.
+Las lineas ahora tienen los colores nuevos que especificaste pero en la leyenda los datos procesados salen primero. Si quieres cambiar el orden de las etiquetas del conjunto de datos en la leyenda, y los colores asignados a los conjuntos de datos, puedes modificar la columna `dataset` en el `dataframe` que usaste para crear la grafica.
 
-`ggplot` functions use a data type called `factors` for automated encoding of aesthetics, such as the color encoding you used above. Columns (or vectors) in factor format can look like `character` type columns, but R stores the unique values of each column as integers, and stores the unique character values in a property called "levels". You can change the order in which values of a column are plotted by changing the order of these levels of a factor column:
+Las funciones de `ggplot` usan un tipo de datos que se llaman `factors` para automaticamente determinar la estetica de la grafica, como el metodo de asignar colores que usaste arriba con `geom_segment()`. Las columnas (o vectores) en formato `factor` se ven como columnas de tipo `character` (en que cada fila contiene una secuencia de caracteres),pero R guarda los valores unicos de cada columna como numeros enteros y luego guarda los valores unicos de las secuencias de caracteres en una propiedad que se llama `levels` ("niveles" o "categorias"). Puedes cambiar el orden en que los valores unicos de una columna en formato `factor` se anaden a la grafica cuando cambias el orden de los `levels` de la columna:
 ```{r}
 
-# Change the column dataset to data type "factor"
-# By specifying "raw" first in the argument levels, you are reordering the factor levels so that "raw" comes first 
+# Cambia la columna dataset al tipo de datos "factor"
+# Cuando especificas que el valor de "raw" ("original") venga primero en el argumento de levels, estas reorganizando los levels (niveles) de la columna para que este valor salga primero en la leyenda
 rfid_combined <- rfid_combined %>% 
   dplyr::mutate(
     dataset = factor(dataset, levels = c("raw", "pre-processed"))
   )
 
-# The dataset column is now type "fct", or "factor"
+# La columna de dataset ahora es tipo "fct" o "factor"
 glimpse(rfid_combined)
 
-# The levels of the factor column are ordered with "raw" first, rather than in alphabetical order
+# Los niveles de la columna ahora estan ordenados para que el valor "raw" venga primero, en vez de estar en orden alfabetico
 levels(rfid_combined$dataset)
 
 ```
 
-After converting the `dataset` column to type "factor" amnd reordering the levels of the unique character values in this column, the unique values should appear in the correct order in the plot legend (not in alphabetical order). You should also see that the colors assigned to each dataset changed.
+Despues de convertir la columna de `dataset` al tipo `factor` y reorganizar los `levels` de los valores unicos en esta columna, las categorias de esta columna deberian de aparecer en el orden correcto en la leyenda de la grafica y no en orden alfabetico. Tambien deberias de ver que los colores asignados a cada conjunto de datos acaba de cambiar.
 ```{r}
 
 ggplot(data = rfid_combined) +
   
-  # Add a vertical line for each timestamp
+  # Anade una linea vertical para cada marca de tiempo
   geom_segment(
     aes(x = timestamp_ms, y = 0, xend = timestamp_ms, yend = 1, color = dataset),
     linewidth = 0.3
@@ -359,12 +357,12 @@ ggplot(data = rfid_combined) +
 
 ```
 
-In the plot that you just made, it's very difficult to discriminate between the lines for each dataset however. You can use the function `facet_wrap()` to split up the two datasets into different panels:
+En la grafica que acabas de hacer, es muy dificil de discriminar entre las lineas para cada conjunto de datos. Puedes usar la funcion `facet_wrap()` para dividir los conjuntos de datos en paneles diferentes:
 ```{r}
 
 ggplot(data = rfid_combined) +
   
-  # Add a vertical line for each timestamp
+  # Anade una linea vertical para cada marca de tiempo
   geom_segment(
     aes(x = timestamp_ms, y = 0, xend = timestamp_ms, yend = 1, color = dataset),
     linewidth = 0.3
@@ -372,23 +370,25 @@ ggplot(data = rfid_combined) +
   
   scale_color_manual(values = c("orange", "darkgreen")) +
   
-  # ~ is equivalent to "by", so that you're creating panels by the unique values in the column dataset
+  # El simbolo de ~ significa "por", asi que estas creando un panel por cada valor unico (o categoria) en la columna dataset
   facet_wrap(~ dataset, nrow = 2, strip.position = "left")
 
 ```
 
-By faceting this plot, you split up the datasets into different panels but also lined them up on the x-axis so that it's easier to compare temporal patterns. 
+Acabas de crear paneles diferentes adentro de esta grafica y cada panel contiene datos un solo conjunto de datos. Con este cambio estructural tambien alineaste los panels en el mismo eje x para que sea mas facil comparar patrones temporales.
 
-From this point of view though, it's hard to see how the raw and pre-processed datasets differ. You can filter the data with `tidyverse` functions to plot the first 2 detections for each of the raw and pre-processed datasets:
+Desde este punto de vista es dificil ver como los dos conjuntos de datos (originales y procesados) son diferentes. Puedes filtrar el `dataframe` con functiones del `tidyverse` para visualizar solo las primeras dos detecciones para cada conjunto de datos:
 ```{r}
 
 ggplot(data = rfid_combined %>%
+         # Crea grupos por las categorias o levels en la columna dataset
          group_by(dataset) %>% 
+         # Selecciona las primas dos filas para cada grupo 
          slice(1:2) %>% 
          ungroup()
        ) +
   
-  # Add a vertical line for each timestamp
+  # Anade una linea vertical para cada marca de tiempo
   geom_segment(
     aes(x = timestamp_ms, y = 0, xend = timestamp_ms, yend = 1, color = dataset),
     linewidth = 0.3
@@ -396,19 +396,19 @@ ggplot(data = rfid_combined %>%
   
   scale_color_manual(values = c("orange", "darkgreen")) +
   
-  # ~ is equivalent to "by", so that you're creating panels by the unique values in the column dataset
+  # El simbolo de ~ significa "por", asi que estas creando un panel por cada valor unico (o categoria) en la columna dataset
   facet_wrap(~ dataset, nrow = 2, strip.position = "left")
 
 ```
 
-You should be able to see that the second timestamp in the raw data was dropped from the pre-processed dataset.
+Ahora deberias de ver que la segunda marca de tiempo en los datos originales se elimino del conjunto de datos procesados (fue filtrado usando el umbral temporal en `preprocess_detections`).
 
-Next, you can add the perching data to the plot. This dataset doesn't have a single timestamps column, but rather has two columns that indicate the start and the end of each perching event, respectively. You can add this dataset to the full plot by using another `geom_segment()` layer. You'll use `geom_segment()` to add lines to the plot that contain temporal information about when perching events started and ended.
+Luego puedes anadir los datos de eventos de posar en el `dataframe` `rfid_perch`, que no combinaste con los otros conjuntos de datos. En cambio a `rfid_raw` y `rfid_pp`, este conjunto de datos tiene dos columnas de marcas de tiempo que contienen informacion sobre el inicio y el fin de cada evento de posar. Puedes anadir este conjunto de datos a la grafica con otra llamada de la funcion `geom_segment()`. Usaras esta capa de `geom_segment()` para anadir lineas que contienen informacion temporal sobre cuando los eventos de posar empezaron y terminaron.
 ```{r}
 
 ggplot(data = rfid_combined) +
   
-  # Add a vertical line for each timestamp
+  # Anade una linea vertical para cada marca de tiempo
   geom_segment(
     aes(x = timestamp_ms, y = 0, xend = timestamp_ms, yend = 1, color = dataset),
     linewidth = 0.3
@@ -416,10 +416,10 @@ ggplot(data = rfid_combined) +
   
   scale_color_manual(values = c("orange", "darkgreen")) +
   
-  # ~ is equivalent to "by", so that you're creating panels by the unique values in the column dataset
+  # El simbolo de ~ significa "por", asi que estas creando un panel por cada valor unico (o categoria) en la columna dataset
   facet_wrap(~ dataset, nrow = 2, strip.position = "left") +
   
-  # Add the perching events to the plot
+  # Anade los eventos de posar
   geom_segment(
     data = rfid_perch,
     aes(x = perching_start, xend = perching_end, y = 1.2, yend = 1.5),
@@ -429,14 +429,14 @@ ggplot(data = rfid_combined) +
 
 ```
 
-In the code above for `geom_segment()`, you specified that you wanted to add another dataset to the plot using the argument `data`. The arguments `x` and `y` determine where the beginning of each line segment is drawn on the x and y-axes, respectively. You also need to specify where you want the line segment to end on each axis. On the x-axis, by supplying the column name `perching_start` to the argument `x`, and `perching_end` to the argument `xend`, you're indicating that you want the line segment to start and end at the times when perching was inferred to start and end. On the y-axis, the numbers that you supplied to `y` and `yend` determined where the line segments for perching events were drawn, which was just above the other datasets. Note that the perching events were layered over each facet of the plot by default.
+En el codigo arriba para `geom_segment()`, especificaste que querias anadir otro conjunto de datos a la grafica cuando usaste el argumento `data`. Los argumentos `x` y `y` determinan donde va a empezar cada linea en ambos ejes de la grafica, respectivamente. Tambien vas a tener que especificar donde quieres que cada linea termina en cada eje. En el eje x, indicaste que quieres que la linea empiece y termine cuando los eventos de posar empezaron y terminaron con proveer la columna `perching_start` al argumento `x` y `perching_end` al argumento `xend`. En el eje y, los numeros que usaste para los argumentos `y` y `yend` determinan donde las lineas para los eventos de posar se dibujaran, que en este caso es justamente arriba de las lineas para los otros conjuntos de datos. Las lineas para los eventos de posar se dibujaron como otra capa de informacion encima de cada panel de la grafica por defecto.
 
-There are some additional changes you can make to this plot to make it more interpretable. You can change the position of the legend using the argument `legend.position` inside of the general function `theme()`. Below you will also save the plot inside of an object, so that you don't have to write out all of the code over and over.
+Puedes hacer unos cambios a la grafica para que sea mas facil de interpretar. Puedes cambiar la posicion de la leyenda usando el argumento `legend.position` adentro de la funcion general de `theme()`. Abajo puedes guardar la grafica adentro de un objeto, para que no tengas que escribir todo el codigo de la grafica de nuevo cuando quieres anadirle mas informacion.
 ```{r}
 
 gg <- ggplot(data = rfid_combined) +
   
-  # Add a vertical line for each timestamp
+  # Anade una linea vertical para cada marca de tiempo
   geom_segment(
     aes(x = timestamp_ms, y = 0, xend = timestamp_ms, yend = 1, color = dataset),
     linewidth = 0.3
@@ -444,10 +444,10 @@ gg <- ggplot(data = rfid_combined) +
   
   scale_color_manual(values = c("orange", "darkgreen")) +
   
-  # ~ is equivalent to "by", so that you're creating panels by the unique values in the column dataset
+  # El simbolo de ~ significa "por", asi que estas creando un panel por cada valor unico (o categoria) en la columna dataset
   facet_wrap(~ dataset, nrow = 2, strip.position = "left") +
   
-  # Add the perching events to the plot
+  # Anade los eventos de posar
   geom_segment(
     data = rfid_perch,
     aes(x = perching_start, xend = perching_end, y = 1.2, yend = 1.5),
@@ -463,21 +463,21 @@ gg
 
 ```
 
-You can make some minor adjustments to the plot to make it easier on the eyes, including changing the axis titles to be more informative, changing the background to be white, and removing the y-axis text and axis ticks(since the y-axis does not contain information for interpretation (the height of each segment does not reflect data that you want to interpret). You can also change the position of the legend so that it sits on top of the plot.
+Ahora puedes hacer unos ajustes menores para seguir mejorando a la grafica, incluyendo cambiar los titulos de los ejes para que sean mas informativos, cambiar el color de fondo a blanco, y eliminar el text en el eje y tnato como las rayas en el eje y, porque este eje no contiene informacion para interpretacion de los datos (o sea, la altura de cada linea no contiene informacion para interpretacion).
 ```{r}
 
 gg <- gg +
   
-  # Change the x and y axis labels
+  # Cambia los titulos de ambos ejes
   xlab("Date and time") +
   
-  # The y-axis does not contain information right now, so it can be blank
+  # El eje y no contiene informacion y por ende puedes eliminar este titulo
   ylab("") +
   
-  # Use this function to convert the plot background to black and white
+  # Usa esta funcion para cambiar el color de fondo a blanco y negro
   theme_bw() +
   
-  # Use aesthetics functions to remove the y-axis labels and ticks
+  # Usa funciones de estetica para eliminar el texto en el eje y y tambien los rayos en este eje
   theme(
     axis.text.y = element_blank(),
     axis.ticks.y = element_blank(),
@@ -488,16 +488,16 @@ gg
 
 ```
 
-You can save plots that you make in R as physical image files. Below you'll use the function `ggsave()` to write the plot to an image file on your computer.
+Puedes guardar las graficas que creas en R como archivos fisicos. Abajo usaras la funcion `ggsave()` para escribir la grafica que hiciste arriba como un archico en tu computadora.
 ```{r}
 
 gg
 
-# Save the image file to your computer
+# Guarda la grafica como un archivo en tu computadora
 ggsave(file.path(path, "raw_processed_perching.tiff"), width = 8, height = 6, units = "in", dpi = 300)
 
 ```
 
-You can continue to modify minor aesthetics to this image file to create a high-quality figure for a publication. For instance, you can change the final size of the image file (`width`, `height`), as well as the resolution (`dpi`). You can also change the size of the text on each axis and the axis titles, or the legend position, as you play around with the final image size.
+Puedes continuar con modificaciones a este archivo para crear una figura de alta calidad para una publicacion. Por ejemplo, puedes cambiar el tamano final del archivo (`width` o "lo ancho", `height` o "la altura"), tanto como la resolucion en pixeles (`dpi`). Tambien puedes cambiar el tamano de texto en cada eje o del titulo de cada eje, o la posicion de la layenda mientras determinas el tamano final del imagen.
 
-In the next vignette, you will continue the ABISSMAL data analysis pipeline and make a more complex and refined barcode style figure.
+En el siguiente tutorial vas a continuar analizando datos con ABISSMAL y vas a crear una grafica de codigo de barras mas compleja y refinada.

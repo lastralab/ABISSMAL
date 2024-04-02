@@ -168,7 +168,7 @@ Detecting perching events is not a requirement in the ABISSMAL workflow, but it 
 
 <h2>Pre-process raw data</h2>
 
-Once you've detected perching events in the raw data, you can move on to pre-processing the raw data itself with `preprocess_detections()`. The raw data can sometimes contain multiple detections separated by a short period of time (e.g. RFID detections when an individual is perching on the antenna), and these multiple detections can be a source of noise when you're trying to make behavioral inferences across data collected by multiple sensors. When the argument `mode` is set to "thin", `preprocess_detections()` removes detections separated by a very short period of time, and retains a reduced datasets of detections that still represents discrete movement events.
+Once you've detected perching events in the raw data, you can move on to pre-processing the raw data itself with `preprocess_detections()`. The raw data can sometimes contain multiple detections separated by a short period of time (e.g. RFID detections when an individual is perching on the antenna), and these multiple detections can be a source of noise when you're trying to make behavioral inferences across data collected by multiple sensors. When the argument `mode` is set to "thin", `preprocess_detections()` removes detections separated by a very short period of time (determined by the temporal threshold in seconds passed to the argument `thin_threshold`), and retains a reduced datasets of detections that still represents discrete movement events.
 
 `preprocess_detections()` also operates on a single sensor type at a time:
 ```{r}
@@ -220,7 +220,7 @@ rfid_raw <- read.csv(file.path(path, "Data/raw_combined", "combined_raw_data_RFI
   dplyr::mutate(
     timestamp_ms = as.POSIXct(format(as.POSIXct(timestamp_ms, tz = "America/New York"), "%Y-%m-%d %H:%M:%OS6"))
   ) %>%
-  # Arrange the timestamps from oldest to most recent
+  # Order the data frame by timestamps. The -desc() inside of arrange() means that the timestamps will be arranged in increasing order (less to more recent)
   dplyr::arrange(-desc(timestamp_ms))
 
 # You should see that the timestamp_ms is in "dttm" format, which means that the POSIX conversion was done correctly
@@ -247,7 +247,7 @@ glimpse(rfid_perch)
 
 ```
 
-Next, you can combine these datasets into a single data frame to facilitate combining them in the same plot. You will add a new column in order to identify the two different datasets.
+Next, you can combine the original and pre-processed datasets into a single data frame to facilitate combining them in the same plot. You will add a new column (`dataset`) with labels in order to identify the two different datasets.
 ```{r}
 
 rfid_combined <- rfid_raw %>%
@@ -262,14 +262,13 @@ rfid_combined <- rfid_raw %>%
         dataset = "pre-processed"
       ) 
   ) %>% 
-  # Order the data frame by timestamps. The -desc() inside of arrange() means that the timestamps will be arranged in increasing order
   dplyr::arrange(-desc(timestamp_ms))
 
 glimpse(rfid_combined)
 
 ```
 
-You will start plotting the data using functions from `ggplot2`. This package is part of the `tidyverse`, but can also be installed and used separately. You can check out this [link](https://ggplot2.tidyverse.org/) for more resources to learn how to use ggplot to make different types of plots. These resources include sections of three different books with hands-on exercises at different levels, as well as an online course and a webinar.
+You will start plotting the data using functions from `ggplot2`. This package is part of the `tidyverse`, but can also be installed and used separately. You can check out this [link](https://ggplot2.tidyverse.org/) for more resources to learn how to use ggplot notation to make different types of plots. These resources include sections of three different books with hands-on exercises at different levels, as well as an online course and a webinar.
 
 The `ggplot2` package has a unique syntax for building plots, in which you start making a plot by calling the function `ggplot()`, and then add features by layering on other `ggplot2` functions with the `+` symbol.
 
@@ -289,7 +288,7 @@ ggplot(data = rfid_combined)
 
 You need to add other aesthetics functions to this base layer of the plot in order to see your data. The functions that you use to layer aesthetics over the empty plot will depend on the type of plot that you want to make. For this example, you will make a barcode style plot, in which each timestamp is shown as a thin vertical line. Barcode plots can be useful visualizations when you're working with timestamps, since the most important information is contained in one dimension (time on the x-axis). If you were to summarize the number of timestamps recorded on each day, then you could create a line plot instead.
 
-You can layer the function `geom_segment()` over the base plot layer. `geom_segment()` allows you to add lines to a plot, and the lines can communicate information in one or two dimensions (width on the x-axis and height on the x-axis). In the plot you'll make below, you'll use `geom_segment()` to add lines to the plot that contain temporal information in one dimension (timestamps that provide information on the x-axis only).
+You can layer the function `geom_segment()` over the base plot layer. `geom_segment()` allows you to add lines to a plot, and the lines can communicate information in one or two dimensions (width on the x-axis and height on the y-axis). In the plot you'll make below, you'll use `geom_segment()` to add lines to the plot that contain temporal information in one dimension (timestamps that provide information on the x-axis only).
 ```{r}
 
 ggplot(data = rfid_combined) +
@@ -302,7 +301,7 @@ ggplot(data = rfid_combined) +
   
 ```
 
-In the code above, `geom_segment()` adds a vertical line segment to the plot for each detection in the full dataset. Using the argument `color` inside of `geom_segment()`, you told the function that these line segments should be colored by dataset by supplying the column name that holds the dataset labels. The `color` argument must be inside of the `aes()` function in order for this color assignment by dataset to work correctly. 
+In the code above, `geom_segment()` adds a vertical line segment to the plot for each detection in the full dataset. Using the argument `color` inside of `geom_segment()`, you told the function that these line segments should be colored by dataset by supplying the column name that holds the dataset labels. The `color` argument must be inside of the `aes()` function (that controls the aesthetics for this layer of information) in order for this color assignment by dataset to work correctly. 
 
 The line segment colors are automatically assigned by `ggplot` using default colors, but you can change these colors using the function `scale_color_manual()`:
 ```{r}
@@ -378,7 +377,9 @@ From this point of view though, it's hard to see how the raw and pre-processed d
 ```{r}
 
 ggplot(data = rfid_combined %>%
-         group_by(dataset) %>% 
+         # Group the data frame by each level in the column dataset
+         group_by(dataset) %>%
+         # For each unique dataset in the data frame, select the first two rows of data
          slice(1:2) %>% 
          ungroup()
        ) +
@@ -396,9 +397,9 @@ ggplot(data = rfid_combined %>%
 
 ```
 
-You should be able to see that the second timestamp in the raw data was dropped from the pre-processed dataset.
+You should be able to see that the second timestamp in the raw data was dropped from the pre-processed dataset (it was removed under the temporal threshold used by `preprocess_detections`).
 
-Next, you can add the perching data to the plot. This dataset doesn't have a single timestamps column, but rather has two columns that indicate the start and the end of each perching event, respectively. You can add this dataset to the full plot by using another `geom_segment()` layer. You'll use `geom_segment()` to add lines to the plot that contain temporal information about when perching events started and ended.
+Next, you can add the perching data in the data frame `rfid_perch` that you didn't combine with the other two datasets. This dataset doesn't have a single timestamps column, but rather has two columns that indicate the start and the end of each perching event, respectively. You can add this dataset to the full plot by using another `geom_segment()` layer. You'll use `geom_segment()` to add lines to the plot that contain temporal information about when perching events started and ended.
 ```{r}
 
 ggplot(data = rfid_combined) +
@@ -458,21 +459,21 @@ gg
 
 ```
 
-You can make some minor adjustments to the plot to make it easier on the eyes, including changing the axis titles to be more informative, changing the background to be white, and removing the y-axis text and axis ticks(since the y-axis does not contain information for interpretation (the height of each segment does not reflect data that you want to interpret). You can also change the position of the legend so that it sits on top of the plot.
+You can make some minor adjustments to the plot to make it easier on the eyes, including changing the axis titles to be more informative, changing the background to be white, and removing the y-axis text and axis ticks. The y-axis does not contain information for interpretation because the height of each segment does not reflect data that you want to interpret.
 ```{r}
 
 gg <- gg +
   
-  # Change the x and y axis labels
+  # Change the x and y axis title
   xlab("Date and time") +
   
-  # The y-axis does not contain information right now, so it can be blank
+  # The y-axis does not contain information right now, so this title can be blank
   ylab("") +
   
   # Use this function to convert the plot background to black and white
   theme_bw() +
   
-  # Use aesthetics functions to remove the y-axis labels and ticks
+  # Use aesthetics functions to remove the y-axis text and ticks
   theme(
     axis.text.y = element_blank(),
     axis.ticks.y = element_blank(),
