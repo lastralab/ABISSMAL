@@ -18,11 +18,11 @@ knitr::opts_chunk$set(echo = TRUE, eval = TRUE)
 
 <h2>Información sobre esta traducción</h2>
 
-Este tutorial fue traducido al español por Grace Smith-Vidaurre, siguiendo las [convenciones de traducción de los Carpentries](https://github.com/Carpentries-ES/board/blob/master/Convenciones_Traduccion.md), incluyendo usar el género femenino por defecto. Si encuentras errores de ortografía que impiden tu habilidad de completar los tutoriales, por favor reporta los errores de ortografía a GitHub usando los pasos arriba para reportar un "Issue".
+Este tutorial fue traducido al español por Grace Smith-Vidaurre, siguiendo las [convenciones de traducción de los Carpentries](https://github.com/Carpentries-ES/board/blob/master/Convenciones_Traduccion.md), incluyendo usar el género femenino por defecto. Si encuentras errores de ortografía que impiden tu habilidad de completar los tutoriales, por favor reporta los errores de ortografía a GitHub usando los pasos en el primer tutorial para reportar un "Issue".
 
 <h2>Resumen del tutorial y objetivos de aprendizaje</h2>
 
-En este quinto tutorial, vas a empezar a usar las detecciones simuladas de movimientos de animales en el `pipeline` de análisis de datos de ABISSMAL, incluyendo combinar los datos originales a través de días y procesar o limpiar los datos originales. También vas a crear gráficas de los datos procesados. Vas a continuar a usar habilidades que aprendiste en los tutoriales anteriores, y vas a aprender nuevas habilidades que incluyen:
+En este quinto tutorial, vas a empezar a usar las detecciones simuladas de movimientos de animales en el `pipeline` de análisis de datos de ABISSMAL, incluyendo combinar los datos originales a través de días y procesar o limpiar los datos originales. También vas a crear gráficas de los datos procesados. Vas a continuar a usar habilidades que aprendiste en los tutoriales anteriores, y vas a aprender nuevas habilidades cómo:
 
 1. Acceder funciones customizadas
 2. Usar funciones customizadas
@@ -62,9 +62,9 @@ source("/home/gsvidaurre/Desktop/GitHub_repos/ABISSMAL/R/utilities.R")
 
 <h2>Accede información sobre las funciones de ABISSMAL</h2>
 
-Después de ejecutar las lineas de código arriba, deberías de ver que una colección entera de funciones están disponibles en tu ambiente global (revisa la pestaña de `Environment`). Las funciones que empiezan con `check_` son funciones de apoyo. Si haces `scroll` para abajo, puedes ver que tres de las funciones primarias de ABISSMAL (`combine_raw_data`, `detect_perching_events`, `preprocess_detections`) también están disponibles en tu ambiente global. En la columna al lado derecho de los nombres de las funciones también podrás ver algo de información sobre los argumentos de cada función.
+Después de ejecutar las líneas de código arriba, deberías de ver que una colección entera de funciones están disponibles en tu ambiente global (revisa la pestaña de `Environment`). Las funciones que empiezan con `check_` son funciones de apoyo. Si haces `scroll` para abajo, puedes ver que tres de las funciones primarias de ABISSMAL (`combine_raw_data`, `detect_perching_events`, `preprocess_detections`) también están disponibles en tu ambiente global. En la columna al lado derecho de los nombres de las funciones también podrás ver algo de información sobre los argumentos de cada función.
 
-Para obtener mas información sobre cada una de las tres funciones primarias, puedes hacer clic en el icono blanco cuadrado a la mera derecha de cada función en la pestaña de `Environment`, o ejecutar el código `View(nombre_de_la_funcion)`. Este comando debería de abrir el archivo de la función actual en una pestaña nueva adentro de tu panel de fuente. En el archivo de cada función, vas ver lineas de documentación que empiezan con los símbolos "`#@", luego el nombre de la función y una descripción, y luego una descripción de cada argumento (parámetro) para la función. Si haces scroll para abajo, podrás ver una sección con detalles sobre la función misma, incluyendo la información que devuelve. Esta documentación esta escrita en ingles por el momento. Después de las lineas de documentación veras el código de la función misma. 
+Para obtener mas información sobre cada una de las tres funciones primarias, puedes hacer clic en el ícono blanco cuadrado a la mera derecha de cada función en la pestaña de `Environment`, o ejecutar el código `View(nombre_de_la_funcion)`. Este comando debería de abrir el archivo de la función actual en una pestaña nueva adentro de tu panel de fuente. En el archivo de cada función, vas ver líneas de documentación que empiezan con los símbolos "`#@", luego el nombre de la función y una descripción, y luego una descripción de cada argumento (parámetro) para la función. Si haces scroll para abajo, podrás ver una sección con detalles sobre la función misma, incluyendo la información que devuelve. Esta documentación esta escrita en ingles por el momento. Después de las líneas de documentación veras el código de la función misma. 
 
 <h2>Combinar los datos originales</h2>
 
@@ -272,7 +272,7 @@ glimpse(rfid_combined)
 
 ```
 
-Vas a construir la gráfica con estos datos usando funciones de `ggplot2`, un paquete que es parte del `tidyverse` pero que también se puede instalar y usar afuera del `tidyverse`. Puedes revisar este [enlace](https://ggplot2.tidyverse.org/) que tiene mas recursos (en ingles) para aprender como usar la notación de `ggplot` para hacer diferentes tipos de gráficas. Estos recursos incluyen secciones de tres libros diferentes con ejercicios para practicar hacer gráficas a diferentes niveles de experiencia, y también un curso en linea y un seminario en linea. Puedes encontrar otros recursos en español en linea, como esta [guia para `ggplot2`](https://raw.githubusercontent.com/rstudio/cheatsheets/main/translations/spanish/data-visualization_es.pdf).
+Vas a construir la gráfica con estos datos usando funciones de `ggplot2`, un paquete que es parte del `tidyverse` pero que también se puede instalar y usar afuera del `tidyverse`. Puedes revisar este [enlace](https://ggplot2.tidyverse.org/) que tiene mas recursos (en ingles) para aprender como usar la notación de `ggplot` para hacer diferentes tipos de gráficas. Estos recursos incluyen secciones de tres libros diferentes con ejercicios para practicar hacer gráficas a diferentes niveles de experiencia, y también un curso en línea y un seminario en línea. Puedes encontrar otros recursos en español en línea, como esta [guia para `ggplot2`](https://raw.githubusercontent.com/rstudio/cheatsheets/main/translations/spanish/data-visualization_es.pdf).
 
 El paquete de `ggplot2` tiene una notación única para construir gráficas, en que empiezas haciendo la gráfica con llamar la función `ggplot()` y luego añades características con añadir capas de otras funciones de `ggplot2` con el símbolo de `+`.
 
@@ -290,14 +290,14 @@ ggplot(data = rfid_combined)
 
 ```
 
-Necesitaras añadir otras funciones estéticas a esta capa fundamental de la gráfica para poder ver tus datos. Las funciones que usaras para añadir detalles estéticos a la gráfica vacía dependerán del tipo de gráfica que quieres crear. En este ejemplo, vas a generar una gráfica de código de barras, en que cada marca de tiempo esta representado por una linea vertical delgada. Las gráfica de código de barra pueden ser gráficas útiles cuando trabajas con marcas de tiempo, porque la información mas importante se contiene en una dimensión (el tiempo en el eje x). Si fueras a resumir el numero de marcas de tiempo grabado cada día, seria mejor hacer una gráfica de lineas. 
+Necesitaras añadir otras funciones estéticas a esta capa fundamental de la gráfica para poder ver tus datos. Las funciones que usaras para añadir detalles estéticos a la gráfica vacía dependerán del tipo de gráfica que quieres crear. En este ejemplo, vas a generar una gráfica de código de barras, en que cada marca de tiempo esta representado por una línea vertical delgada. Las gráfica de código de barra pueden ser gráficas útiles cuando trabajas con marcas de tiempo, porque la información mas importante se contiene en una dimensión (el tiempo en el eje x). Si fueras a resumir el numero de marcas de tiempo grabado cada día, seria mejor hacer una gráfica de líneas. 
 
-Puedes añadir la función `geom_segment()` como la siguiente capa encima de la capa fundamental de la gráfica. `geom_segment()` facilita añadir linea a una gráfica, y las lineas pueden comunicar información en una o dos dimensiones (por su ancho en el eje x y su altura en el eje y).
+Puedes añadir la función `geom_segment()` como la siguiente capa encima de la capa fundamental de la gráfica. `geom_segment()` facilita añadir línea a una gráfica, y las líneas pueden comunicar información en una o dos dimensiones (por su ancho en el eje x y su altura en el eje y).
 ```{r}
 
 ggplot(data = rfid_combined) +
   
-  # Añade una linea vertical para cada marca de tiempo
+  # Añade una línea vertical para cada marca de tiempo
   geom_segment(
     aes(x = timestamp_ms, y = 0, xend = timestamp_ms, yend = 1, color = dataset),
     linewidth = 0.3
@@ -305,14 +305,14 @@ ggplot(data = rfid_combined) +
   
 ```
 
-En el código arriba, `geom_segment()` añade una linea vertical a la gráfica para cada detección en el `dataframe` completo. Con usar el argumento `color` adentro de `geom_segment()`, y proveer el nombre de la columna que contiene las etiquetas de los conjuntos de datos, le comunicaste a la función que las lineas deberían de tener colores que corresponden al conjunto particular de datos. El argumento `color` tiene que estar adentro de la función `aes()` (que controla la estética de esta capa de información) para que esta asignación de colores se realice por el conjunto de datos.
+En el código arriba, `geom_segment()` añade una línea vertical a la gráfica para cada detección en el `dataframe` completo. Con usar el argumento `color` adentro de `geom_segment()`, y proveer el nombre de la columna que contiene las etiquetas de los conjuntos de datos, le comunicaste a la función que las líneas deberían de tener colores que corresponden al conjunto particular de datos. El argumento `color` tiene que estar adentro de la función `aes()` (que controla la estética de esta capa de información) para que esta asignación de colores se realice por el conjunto de datos.
 
-Los colores de las lineas se asignaran automáticamente por `ggplot` usando los colores por defecto del paquete, pero puedes cambiar estos colores usando la función `scale_color_manual()`:
+Los colores de las líneas se asignaran automáticamente por `ggplot` usando los colores por defecto del paquete, pero puedes cambiar estos colores usando la función `scale_color_manual()`:
 ```{r}
 
 ggplot(data = rfid_combined) +
   
-  # Añade una linea vertical para cada marca de tiempo
+  # Añade una línea vertical para cada marca de tiempo
   geom_segment(
     aes(x = timestamp_ms, y = 0, xend = timestamp_ms, yend = 1, color = dataset),
     linewidth = 0.3
@@ -322,7 +322,7 @@ ggplot(data = rfid_combined) +
 
 ```
 
-Las lineas ahora tienen los colores nuevos que especificaste pero en la leyenda los datos procesados salen primero. Si quieres cambiar el orden de las etiquetas del conjunto de datos en la leyenda, y los colores asignados a los conjuntos de datos, puedes modificar la columna `dataset` en el `dataframe` que usaste para crear la gráfica.
+Las líneas ahora tienen los colores nuevos que especificaste pero en la leyenda los datos procesados salen primero. Si quieres cambiar el orden de las etiquetas del conjunto de datos en la leyenda, y los colores asignados a los conjuntos de datos, puedes modificar la columna `dataset` en el `dataframe` que usaste para crear la gráfica.
 
 Las funciones de `ggplot` usan un tipo de datos que se llaman `factors` para automáticamente determinar la estética de la gráfica, como el método de asignar colores que usaste arriba con `geom_segment()`. Las columnas (o vectores) en formato `factor` se ven como columnas de tipo `character` (en que cada fila contiene una secuencia de caracteres),pero R guarda los valores únicos de cada columna como números enteros y luego guarda los valores únicos de las secuencias de caracteres en una propiedad que se llama `levels` ("niveles" o "categorías"). Puedes cambiar el orden en que los valores únicos de una columna en formato `factor` se añaden a la gráfica cuando cambias el orden de los `levels` de la columna:
 ```{r}
@@ -347,7 +347,7 @@ Después de convertir la columna de `dataset` al tipo `factor` y reorganizar los
 
 ggplot(data = rfid_combined) +
   
-  # Añade una linea vertical para cada marca de tiempo
+  # Añade una línea vertical para cada marca de tiempo
   geom_segment(
     aes(x = timestamp_ms, y = 0, xend = timestamp_ms, yend = 1, color = dataset),
     linewidth = 0.3
@@ -357,12 +357,12 @@ ggplot(data = rfid_combined) +
 
 ```
 
-En la gráfica que acabas de hacer, es muy difícil de discriminar entre las lineas para cada conjunto de datos. Puedes usar la función `facet_wrap()` para dividir los conjuntos de datos en paneles diferentes:
+En la gráfica que acabas de hacer, es muy difícil de discriminar entre las líneas para cada conjunto de datos. Puedes usar la función `facet_wrap()` para dividir los conjuntos de datos en paneles diferentes:
 ```{r}
 
 ggplot(data = rfid_combined) +
   
-  # Añade una linea vertical para cada marca de tiempo
+  # Añade una línea vertical para cada marca de tiempo
   geom_segment(
     aes(x = timestamp_ms, y = 0, xend = timestamp_ms, yend = 1, color = dataset),
     linewidth = 0.3
@@ -388,7 +388,7 @@ ggplot(data = rfid_combined %>%
          ungroup()
        ) +
   
-  # Añade una linea vertical para cada marca de tiempo
+  # Añade una línea vertical para cada marca de tiempo
   geom_segment(
     aes(x = timestamp_ms, y = 0, xend = timestamp_ms, yend = 1, color = dataset),
     linewidth = 0.3
@@ -403,12 +403,12 @@ ggplot(data = rfid_combined %>%
 
 Ahora deberías de ver que la segunda marca de tiempo en los datos originales se elimino del conjunto de datos procesados (fue filtrado usando el umbral temporal en `preprocess_detections`).
 
-Luego puedes añadir los datos de eventos de posar en el `dataframe` `rfid_perch`, que no combinaste con los otros conjuntos de datos. En cambio a `rfid_raw` y `rfid_pp`, este conjunto de datos tiene dos columnas de marcas de tiempo que contienen información sobre el inicio y el fin de cada evento de posar. Puedes añadir este conjunto de datos a la gráfica con otra llamada de la función `geom_segment()`. Usaras esta capa de `geom_segment()` para añadir lineas que contienen información temporal sobre cuando los eventos de posar empezaron y terminaron.
+Luego puedes añadir los datos de eventos de posar en el `dataframe` `rfid_perch`, que no combinaste con los otros conjuntos de datos. En cambio a `rfid_raw` y `rfid_pp`, este conjunto de datos tiene dos columnas de marcas de tiempo que contienen información sobre el inicio y el fin de cada evento de posar. Puedes añadir este conjunto de datos a la gráfica con otra llamada de la función `geom_segment()`. Usaras esta capa de `geom_segment()` para añadir líneas que contienen información temporal sobre cuando los eventos de posar empezaron y terminaron.
 ```{r}
 
 ggplot(data = rfid_combined) +
   
-  # Añade una linea vertical para cada marca de tiempo
+  # Añade una línea vertical para cada marca de tiempo
   geom_segment(
     aes(x = timestamp_ms, y = 0, xend = timestamp_ms, yend = 1, color = dataset),
     linewidth = 0.3
@@ -429,14 +429,14 @@ ggplot(data = rfid_combined) +
 
 ```
 
-En el código arriba para `geom_segment()`, especificaste que querías añadir otro conjunto de datos a la gráfica cuando usaste el argumento `data`. Los argumentos `x` y `y` determinan donde va a empezar cada linea en ambos ejes de la gráfica, respectivamente. También vas a tener que especificar donde quieres que cada linea termina en cada eje. En el eje x, indicaste que quieres que la linea empiece y termine cuando los eventos de posar empezaron y terminaron con proveer la columna `perching_start` al argumento `x` y `perching_end` al argumento `xend`. En el eje y, los números que usaste para los argumentos `y` y `yend` determinan donde las lineas para los eventos de posar se dibujaran, que en este caso es justamente arriba de las lineas para los otros conjuntos de datos. Las lineas para los eventos de posar se dibujaron como otra capa de información encima de cada panel de la gráfica por defecto.
+En el código arriba para `geom_segment()`, especificaste que querías añadir otro conjunto de datos a la gráfica cuando usaste el argumento `data`. Los argumentos `x` y `y` determinan donde va a empezar cada línea en ambos ejes de la gráfica, respectivamente. También vas a tener que especificar donde quieres que cada línea termina en cada eje. En el eje x, indicaste que quieres que la línea empiece y termine cuando los eventos de posar empezaron y terminaron con proveer la columna `perching_start` al argumento `x` y `perching_end` al argumento `xend`. En el eje y, los números que usaste para los argumentos `y` y `yend` determinan donde las líneas para los eventos de posar se dibujaran, que en este caso es justamente arriba de las líneas para los otros conjuntos de datos. Las líneas para los eventos de posar se dibujaron como otra capa de información encima de cada panel de la gráfica por defecto.
 
 Puedes hacer unos cambios a la gráfica para que sea mas fácil de interpretar. Puedes cambiar la posición de la leyenda usando el argumento `legend.position` adentro de la función general de `theme()`. Abajo puedes guardar la gráfica adentro de un objeto, para que no tengas que escribir todo el código de la gráfica de nuevo cuando quieres añadirle mas información.
 ```{r}
 
 gg <- ggplot(data = rfid_combined) +
   
-  # Añade una linea vertical para cada marca de tiempo
+  # Añade una línea vertical para cada marca de tiempo
   geom_segment(
     aes(x = timestamp_ms, y = 0, xend = timestamp_ms, yend = 1, color = dataset),
     linewidth = 0.3
@@ -463,7 +463,7 @@ gg
 
 ```
 
-Ahora puedes hacer unos ajustes menores para seguir mejorando a la gráfica, incluyendo cambiar los títulos de los ejes para que sean mas informativos, cambiar el color de fondo a blanco, y eliminar el texto en el eje y tanto como las rayas en el eje y, porque este eje no contiene información para interpretación de los datos (o sea, la altura de cada linea no contiene información para interpretación).
+Ahora puedes hacer unos ajustes menores para seguir mejorando a la gráfica, incluyendo cambiar los títulos de los ejes para que sean mas informativos, cambiar el color de fondo a blanco, y eliminar el texto en el eje y tanto como las rayas en el eje y, porque este eje no contiene información para interpretación de los datos (o sea, la altura de cada línea no contiene información para interpretación).
 ```{r}
 
 gg <- gg +
@@ -498,6 +498,6 @@ ggsave(file.path(path, "raw_processed_perching.tiff"), width = 8, height = 6, un
 
 ```
 
-Puedes continuar con modificaciones a este archivo para crear una figura de alta calidad para una publicación. Por ejemplo, puedes cambiar el tamaño final del archivo (`width` o "lo ancho", `height` o "la altura"), tanto como la resolución en píxeles (`dpi`). También puedes cambiar el tamaño de texto en cada eje o del titulo de cada eje, o la posición de la leyenda mientras determinas el tamaño final del imagen.
+Puedes continuar con modificaciones a este archivo para crear una figura de alta calidad para una publicación. Por ejemplo, puedes cambiar el tamaño final del archivo (`width` o "lo ancho", `height` o "la altura"), tanto como la resolución en píxeles (`dpi`). También puedes cambiar el tamaño de texto en cada eje o del titulo de cada eje, o la posición de la leyenda mientras determinas el tamaño final de la imagen.
 
 En el siguiente tutorial vas a continuar analizando datos con ABISSMAL y vas a crear una gráfica de código de barras mas compleja y refinada.

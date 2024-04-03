@@ -18,7 +18,7 @@ knitr::opts_chunk$set(echo = TRUE, eval = TRUE)
 
 <h2>Información sobre esta traducción</h2>
 
-Este tutorial fue traducido al español por Grace Smith-Vidaurre, siguiendo las [convenciones de traducción de los Carpentries](https://github.com/Carpentries-ES/board/blob/master/Convenciones_Traduccion.md), incluyendo usar el género femenino por defecto. Si encuentras errores de ortografía que impiden tu habilidad de completar los tutoriales, por favor reporta los errores de ortografía a GitHub usando los pasos arriba para reportar un "Issue".
+Este tutorial fue traducido al español por Grace Smith-Vidaurre, siguiendo las [convenciones de traducción de los Carpentries](https://github.com/Carpentries-ES/board/blob/master/Convenciones_Traduccion.md), incluyendo usar el género femenino por defecto. Si encuentras errores de ortografía que impiden tu habilidad de completar los tutoriales, por favor reporta los errores de ortografía a GitHub usando los pasos en el primer tutorial para reportar un "Issue".
 
 <h2>Resumen del tutorial y objetivos de aprendizaje</h2>
 
@@ -222,7 +222,7 @@ Los `dataframes` que creas y manipulas en R se pueden guardar como archivos fís
 
 ```
 
-Para escribir un archivo físico a tu directorio de trabajo, necesitas comunicarle a R 1) donde guardar el archivo y 2) el nombre del archivo que quieres crear. Puedes pasarle ambas piezas de información a `write.csv()` con combinar tu directorio de trabajo y el nombre del archivo usando la función `file.path()`. Para este ejemplo, vas a crear un archivo de prueba mientras practicas como usar `write.csv()`:
+Para escribir un archivo físico a tu directorio de trabajo, necesitas comunicarle a R 1) donde guardar el archivo y 2) el nombre del archivo que quieres crear. Puedes pasarle ambas piezas de información a `write.csv()` con combinar tu directorio de trabajo y el nombre del archivo usando la función `file.path()`. Para este ejemplo, vas a crear un archivo de prueba mientras practicas cómo usar `write.csv()`:
 ```{r}
 
 # Combina el path para tu directorio de trabajo con el nombre del archivo que quieres escribir
@@ -288,7 +288,7 @@ En el código abajo, vas a trabajar con una serie de pasos para guardar los dato
 
 <h3>Filtrar un `dataframe`</h3>
 
-Vas a practicar como usar la función `dplyr::filter()` para filtrar filas de un `dataframe` por día y luego guardar un `dataframe` filtrado con `write.csv()`. Para filtrar un `dataframe`, puedes usar una frase condicional adentro de la función `dplyr::filter()`:
+Vas a practicar cómo usar la función `dplyr::filter()` para filtrar filas de un `dataframe` por día y luego guardar un `dataframe` filtrado con `write.csv()`. Para filtrar un `dataframe`, puedes usar una frase condicional adentro de la función `dplyr::filter()`:
 ```{r}
 
 # Provee el dataframe a la función filter() con un "pipe"
@@ -362,7 +362,7 @@ file.remove(rfid_file)
 
 Podrías repetir el código arriba seis veces (tres veces por sensor) para escribir un `dataframe` por cada día de colección de datos por sensor. Pero es mejor evitar repetir el mismo código varias veces, porque cuando escribes código de esta forma es mas difícil mantener archivos organizados de código y también es mas fácil introducir errores mientras procesas y analizas datos. Cuando necesitas ejecutar el mismo código varias veces, es mejor escribir un bucle. Escribir bucles es una habilidad muy importante y vamos a construir un bucle paso por paso.
 
-Vas a practicar como escribir un bucle con la función `lapply()`.
+Vas a practicar cómo escribir un bucle con la función `lapply()`.
 ```{r}
 
 ?lapply
@@ -390,7 +390,7 @@ lapply(X = 1:length(files), FUN = function(x){
 
 Como puedes ver, el resultado de este bucle es una lista con dos elementos. Cada elemento de la lista esta rodeado de dos pares de corchetes ([[1]] y [[2]]) y contiene un vector con un largo de uno que contiene el valor del variable de iteración (uno y dos, respectivamente). 
 
-El variable de iteración, o `x`, no existe como un objeto afuera de la función del bucle. Si imprimes `x` afuera del bucle, no se va a encontrar ese objeto. Si creaste un objeto `x` afuera del bucle arria, veras los contenidos de este objeto cuando imprimes `x`. O sea, escribir un bucle que usa `x` como el variable de iteración no afectara otras lineas de código que usan un objeto que se llama `x` afuera de la función, y viceversa.
+El variable de iteración, o `x`, no existe como un objeto afuera de la función del bucle. Si imprimes `x` afuera del bucle, no se va a encontrar ese objeto. Si creaste un objeto `x` afuera del bucle arria, veras los contenidos de este objeto cuando imprimes `x`. O sea, escribir un bucle que usa `x` como el variable de iteración no afectara otras líneas de código que usan un objeto que se llama `x` afuera de la función, y viceversa.
 
 El variable de iteración de una función puede ser otras letras del alfabeto como `i`, `j`, `y`, `z`, o una combinación de múltiples letras, números, guiones bajo, o periodos, siempre y cuando el nombre de la variable empieza con una letra.
 
@@ -604,7 +604,7 @@ days <- list(
 
 days
 
-# Ahora necesitas crear un list de los dataframes que quieres usar para crear los archivos. Como ya sabes como filtrar dataframes por día, ese código puede ir adentro de los bucles para minimizar la cantidad de código que escribes. Aquí vas a especificar el dataframe que usaras en las operaciones de filtrar para cada tipo de sensor
+# Ahora necesitas crear un list de los dataframes que quieres usar para crear los archivos. Como ya sabes cómo filtrar dataframes por día, ese código puede ir adentro de los bucles para minimizar la cantidad de código que escribes. Aquí vas a especificar el dataframe que usaras en las operaciones de filtrar para cada tipo de sensor
 dats <- list(
   `RFID` = sim_dats_rfid,
   `IRBB` = sim_dats_irbb
@@ -618,11 +618,11 @@ Cuando hayas establecido las estructuras de datos para informar la operación de
 
 Después de escribir este bucle pero antes de ejecutar la estructura completa del bucle, deberías de probar el código adentro de cada capa del bucle. Para lograr esto, puedes inicializar los valores de los variables de iteración y luego correr el código adentro de cada bucle (pero sin ejecutar el bucle entero). Esta forma de revisar el bucle es equivalente a congelar el bucle en el tiempo, para que puedas ver el resultado del código para una sola iteración (abajo vas a ver la primera iteración para cada capa del bucle cuando ambos `x` y `y` tiene el valor numérico de uno).
 
-Para lograr este tipo de chequeo, deberías de ejecutar el código para "congelar" los variables de iteración en la primera iteración de cada bucle ( o sea, inicializar `x` y `y` con el valor de uno). Luego deberías de ejecutar el código adentro de cada bucle, empezando con la creación de `days_tmp`, luego las operaciones de indexar y filtrar el `dataframe`, y luego filtrar los nombres de los archivos. No deberías de ejecutar las lineas con `lapply()` porque quieres evitar ejecutar los bucles completos hasta que estés segura que el código adentro de cada bucle funciona de la forma que esperas. 
+Para lograr este tipo de chequeo, deberías de ejecutar el código para "congelar" los variables de iteración en la primera iteración de cada bucle ( o sea, inicializar `x` y `y` con el valor de uno). Luego deberías de ejecutar el código adentro de cada bucle, empezando con la creación de `days_tmp`, luego las operaciones de indexar y filtrar el `dataframe`, y luego filtrar los nombres de los archivos. No deberías de ejecutar las líneas con `lapply()` porque quieres evitar ejecutar los bucles completos hasta que estés segura que el código adentro de cada bucle funciona de la forma que esperas. 
 
 *Nota importante*: Arriba aprendiste que los variables de iteración no existen afuera de un bucle. Esta forma de probar el código adentro del bucle, en que no estas ejecutando los bucles mismos, es equivalente a probar el código afuera del bucle y por ende, los valores de los variables de iteración que inicializes afuera del bucle se van a respetar.
 
-Mientras revisas el código adentro de cada bucle, deberías de ver que entre el bucle exterior y el bucle interior, vas a usar el nombre del sensor para la primera iteración del bucle exterior ("RFID") para determinar los días para las iteraciones del bucle interior (en `days_tmp`). Adentro del bucle interior, vas a filtrar el `list` de `dataframes` por sensor, y luego por los días que quieres por sensor. Luego vas a indexar el nombre del archivo para el tipo de sensor actual y el día actual con una combinación de indexar la lista de nombres de los archivos con uno o dos pares de corchetes. Abajo, las lineas que abren y cierran los bucles mismos están comentados para guiar tu chequeo (o sea para guiar cuales lineas de código deberías de ejecutar):
+Mientras revisas el código adentro de cada bucle, deberías de ver que entre el bucle exterior y el bucle interior, vas a usar el nombre del sensor para la primera iteración del bucle exterior ("RFID") para determinar los días para las iteraciones del bucle interior (en `days_tmp`). Adentro del bucle interior, vas a filtrar el `list` de `dataframes` por sensor, y luego por los días que quieres por sensor. Luego vas a indexar el nombre del archivo para el tipo de sensor actual y el día actual con una combinación de indexar la lista de nombres de los archivos con uno o dos pares de corchetes. Abajo, las líneas que abren y cierran los bucles mismos están comentados para guiar tu chequeo (o sea para guiar cuales líneas de código deberías de ejecutar):
 ```{r eval = FALSE}
 
 # Congela las variables de iteración para el chequeo
@@ -664,7 +664,7 @@ y <- 1
 
 ```
 
-Ahora deberías de tener una mejor idea sobre como cada bucle opera a través de diferentes estructuras de datos para realizar la tarea que quieres (en este caso, escribir una hola de calculo por tipo de sensor y día). Luego puedes modificar la estructura entera de los bucles para reemplazar las lineas que escribiste para el chequeo con las operaciones finales que quieres realizar: 
+Ahora deberías de tener una mejor idea sobre cómo cada bucle opera a través de diferentes estructuras de datos para realizar la tarea que quieres (en este caso, escribir una hola de calculo por tipo de sensor y día). Luego puedes modificar la estructura entera de los bucles para reemplazar las líneas que escribiste para el chequeo con las operaciones finales que quieres realizar: 
 ```{r eval = FALSE}
 
 # El bucle exterior: empieza con iterar a través de los sensores
@@ -700,4 +700,4 @@ list.files(file.path(path, "Data/IRBB"))
 
 ```
 
-En este tutorial aprendiste mas sobre como filtrar `dataframes` y guardar estos objetos como hojas de calculo, y como usar bucles de una capa y estructuras de bucles anidados. En el siguiente tutorial vas a usar las hojas de calculo que datos simulados de RFID y sensores infrarrojos para empezar a procesar y analizar datos con las funciones de ABISSMAL.
+En este tutorial aprendiste mas sobre cómo filtrar `dataframes` y guardar estos objetos como hojas de calculo, y cómo usar bucles de una capa y estructuras de bucles anidados. En el siguiente tutorial vas a usar las hojas de calculo que datos simulados de RFID y sensores infrarrojos para empezar a procesar y analizar datos con las funciones de ABISSMAL.

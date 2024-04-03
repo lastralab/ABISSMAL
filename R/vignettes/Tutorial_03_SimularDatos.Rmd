@@ -18,7 +18,7 @@ knitr::opts_chunk$set(echo = TRUE, eval = TRUE)
 
 <h2>Información sobre esta traducción</h2>
 
-Este tutorial fue traducido al español por Grace Smith-Vidaurre, siguiendo las [convenciones de traducción de los Carpentries](https://github.com/Carpentries-ES/board/blob/master/Convenciones_Traduccion.md), incluyendo usar el género femenino por defecto. Si encuentras errores de ortografía que impiden tu habilidad de completar los tutoriales, por favor reporta los errores de ortografía a GitHub usando los pasos arriba para reportar un "Issue".
+Este tutorial fue traducido al español por Grace Smith-Vidaurre, siguiendo las [convenciones de traducción de los Carpentries](https://github.com/Carpentries-ES/board/blob/master/Convenciones_Traduccion.md), incluyendo usar el género femenino por defecto. Si encuentras errores de ortografía que impiden tu habilidad de completar los tutoriales, por favor reporta los errores de ortografía a GitHub usando los pasos en el primer tutorial para reportar un "Issue".
 
 <h2>Resumen del tutorial y objetivos de aprendizaje</h2>
 
@@ -302,7 +302,7 @@ glimpse(sim_dats)
 
 <h2>Crear `dataframes` usando el `tidyverse`</h2>
 
-En el código arriba, usaste código de R base para añadir una columna nueva y actualizar el nombre de esa columna. Te tomo varias lineas de código para completar estas operaciones. Puedes reducir la cantidad de código que necesitas para estos pasos si eliminas las lineas de código que usaste para revisar las operaciones. Pero otra forma para reducir la cantidad de código que escribes para esta serie de operaciones es usar la notación y colección de funciones del `tidyverse`:
+En el código arriba, usaste código de R base para añadir una columna nueva y actualizar el nombre de esa columna. Te tomo varias líneas de código para completar estas operaciones. Puedes reducir la cantidad de código que necesitas para estos pasos si eliminas las líneas de código que usaste para revisar las operaciones. Pero otra forma para reducir la cantidad de código que escribes para esta serie de operaciones es usar la notación y colección de funciones del `tidyverse`:
 ```{r}
 
 # Crear el `dataframe` de nuevo con dos columnas
@@ -318,7 +318,7 @@ glimpse(sim_dats)
 
 ```
 
-Acabas de añadir una columna para el año con el nombre correcto en menos lineas de código. En la notación del `tidyverse`, el símbolo de `%>%` significa una operación de `pipe`, en que usas el objeto antes del símbolo de `%>%` como entrada para la operación o función que sigue el símbolo de `%>%`. Arriba usaste el objeto de `sim_dats` como entrada para la función `mutate()`, que usaste para crear la columna `year`.
+Acabas de añadir una columna para el año con el nombre correcto en menos líneas de código. En la notación del `tidyverse`, el símbolo de `%>%` significa una operación de `pipe`, en que usas el objeto antes del símbolo de `%>%` como entrada para la operación o función que sigue el símbolo de `%>%`. Arriba usaste el objeto de `sim_dats` como entrada para la función `mutate()`, que usaste para crear la columna `year`.
 
 La notación `dplyr::` antes de `mutate()` indica que la función `mutate()` se debería de acceder desde el paquete que se llama `dplyr`. Incluir el nombre del paquete con dos puntos repetidos dos veces es una notación importante para usar cuando hay múltiples funciones accesibles en tu ambiente global con el mismo nombre. Por ejemplo, si usas otros paquetes aparte de `dplyr` que también tienen funciones que se llaman `mutate()`, y no especificas cual paquete quieres usar, puedes terminar con errores inmediatos (como cuando el código no se puede ejecutar). Incluso si el código ejecuta, usar la operación equivocada de otra función de `mutate()` puede introducir errores a tus análisis mas adelante que son difíciles de identificar.
 
@@ -339,7 +339,7 @@ sim_dats %>%
 
 ```
 
-En el código arriba, también aprendiste una forma nueva para repetir un valor adentro de una operación de `piping` con la notación `.` adentro de una función, que significa que la operación ejecutara con el objeto actual. En el ejemplo arriba, `.` se refiere al objeto `sim_dats` que se uso como entrada para la operación entera de `piping`. Como el símbolo `.` esta adentro de la función `nrow()`, la función debería de devolver el numero de filas de `sim_dat`.
+En el código arriba, también aprendiste una forma nueva para repetir un valor adentro de una operación de `piping` con la notación `.` adentro de una función, que significa que la operación ejecutara con el objeto actual. En el ejemplo arriba, `.` se refiere al objeto `sim_dats` que se usó como entrada para la operación entera de `piping`. Como el símbolo `.` esta adentro de la función `nrow()`, la función debería de devolver el numero de filas de `sim_dat`.
 
 Puedes usar una operación parecida para añadir dos columnas al `dataframe` que contienen información del mes y día:
 ```{r}

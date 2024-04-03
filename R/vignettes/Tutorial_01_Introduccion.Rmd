@@ -12,31 +12,31 @@ output:
 
 <h2>Información sobre esta traducción</h2>
 
-Este tutorial fue traducido al español por Grace Smith-Vidaurre, siguiendo las [convenciones de traducción de los Carpentries](https://github.com/Carpentries-ES/board/blob/master/Convenciones_Traduccion.md), incluyendo usar el género femenino por defecto. Si encuentras errores de ortografía que impiden tu habilidad de completar los tutoriales, por favor reporta los errores de ortografía a GitHub usando los pasos arriba para reportar un "Issue".
+Este tutorial fue traducido al español por Grace Smith-Vidaurre, siguiendo las [convenciones de traducción de los Carpentries](https://github.com/Carpentries-ES/board/blob/master/Convenciones_Traduccion.md), incluyendo usar el género femenino por defecto. Si encuentras errores de ortografía que impiden tu habilidad de completar los tutoriales, por favor reporta los errores de ortografía a GitHub usando los pasos en este primer tutorial para reportar un "Issue".
 
 <h2>Resumen del tutorial y objetivos de aprendizaje</h2>
 
-Sería una gran ayuda si antes de empezar este tutorial puedes completar una encuesta a través de Google Forms. La información que compartes nos ayudará saber más de tu experiencia en R y analizando datos biológicos antes de empezar los tutoriales mismos, tanto como las habilidades que buscas mejorar a través de completar esta colección de tutoriales, y también nos ayudara mejorar estos tutoriales en el futuro. Puedes encontrar el enlace para la encuesta en el archivo README de los tutoriales.
+Sería una gran ayuda si antes de empezar este tutorial puedes completar una encuesta a través de Google Forms. La información que compartes nos ayudará saber más de tu experiencia en R y analizando datos biológicos antes de empezar los tutoriales mismos, tanto como las habilidades que buscas mejorar a través de completar esta colección de tutoriales. También nos ayudara mejorar los tutoriales en el futuro. Puedes encontrar el enlace para la encuesta en el archivo README de los tutoriales.
 
-En este primer tutorial, vas a leer sobre el programa RStudio, aprender como crear una versión local de el repositorio de ABISSMAL en GitHub, y aprender más sobre el `pipeline` de analisis de datos en ABISSMAL. En este tutorial vas a aprender como:
+En este primer tutorial, vas a leer sobre el programa RStudio, aprender cómo crear una versión local de el repositorio de ABISSMAL en GitHub, y aprender más sobre el `pipeline` de analisis de datos en ABISSMAL. En este tutorial vas a aprender cómo:
 
 1. Configurar tu sesión de RStudio
 2. Crear una versión local de un repositorio de GitHub
 3. Usar ABISSMAL para procesar y analizar datos
-4. Solucionar problemas con tu código usando recursos en linea
+4. Solucionar problemas con tu código usando recursos en línea
 5. Reportar problemas de código a GitHub
 
-Hay muchas formas de hacer una sola tarea o solucionar un problema en R, y deberías de mantener esto en mente mientras completas estos tutoriales. En cada tutorial, vas a aprender diferentes ejemplos sobre como manejar ciertas tares o solucionar problemas especificas con código, pero estos ejemplos no son un resumen exhaustivo de como manejar cada tarea ni solucionar cada problema. Más bien recomiendo que uses estos tutoriales como una oportunidad para practicar como usar tus habilidades de escribir código en un contexto biológico.
+Hay muchas formas de hacer una sola tarea o solucionar un problema en R, y deberías de mantener esto en mente mientras completas estos tutoriales. En cada tutorial, vas a aprender diferentes ejemplos sobre cómo manejar ciertas tares o solucionar problemas especificas con código, pero estos ejemplos no son un resumen exhaustivo de cómo manejar cada tarea ni cómo solucionar cada problema. Más bien recomiendo que usas estos tutoriales como una oportunidad para practicar cómo usar tus habilidades de escribir código en un contexto biológico.
 
 <h2>Configurar tu sesión de RStudio</h2>
 
 Si nunca has usado R, un lenguaje de programación para análisis estadísticos, ni RStudio, una interfaz gráfica de usuario, recomiendo revisar el tutorial [R for Reproducible Scientific Analysis](https://swcarpentry.github.io/r-novice-gapminder-es/) de [Software Carpentry](https://software-carpentry.org/).
 
-Cuando hayas instalado R y RStudio en tu computadora, puedes hacer clic en el icono de RStudio para abrir el programa. La configuración predeterminada de los paneles de RStudio se debería de ver algo así, aunque el color de fondo puede ser diferente:
+Cuando hayas instalado R y RStudio en tu computadora, puedes hacer clic en el ícono de RStudio para abrir el programa. La configuración predeterminada de los paneles de RStudio se debería de ver algo así, aunque el color de fondo puede ser diferente:
 
 <br>
-![Un imagen de la configuracion predeterminada de los paneles de RStudio, con el panel de la consola debajo del panel de la fuente](/home/gsvidaurre/Desktop/GitHub_repos/ABISSMAL/R/vignettes/images/RStudio_01.png)
-Con esta configuración de paneles es difícil de ver el código que escribes y guardas en archivos físicos en el panel de la fuente, tanto como el resultado de ese código en el panel de la consola. Puedes reconfigurar los paneles para que el panel de la fuente este al lado izquierdo del panel de la consola, y así sera más fácil de ver los resultados de tu código inmediatamente. Puedes seguir los siguientes pasos para reconfigurar los paneles en RStudio:
+![Una imagen de la configuración predeterminada de los paneles de RStudio, con el panel de la consola debajo del panel de la fuente](/home/gsvidaurre/Desktop/GitHub_repos/ABISSMAL/R/vignettes/images/RStudio_01.png)
+Con esta configuración de paneles es difícil de ver el código que escribes y guardas en archivos físicos en el panel de la fuente, tanto como el resultado de ese código en el panel de la consola. Puedes reconfigurar los paneles para que el panel de la fuente esté al lado izquierdo del panel de la consola, y así será más fácil de ver los resultados de tu código inmediatamente. Puedes seguir los siguientes pasos para reconfigurar los paneles en RStudio:
 
 * Selecciona la opción "Tools" en el menú 
 
@@ -51,20 +51,20 @@ Con esta configuración de paneles es difícil de ver el código que escribes y 
 Tu configuración de paneles en RStudio ahora se debería de ver así:
 
 <br>
-![Un imagen de la configuracion modificada de los paneles de RStudio, con el panel de la consola al lado derecho y el panel de la fuente al lado izquierdo](/home/gsvidaurre/Desktop/GitHub_repos/ABISSMAL/R/vignettes/images/RStudio_02.png)
+![Una imagen de la configuración modificada de los paneles de RStudio, con el panel de la consola al lado derecho y el panel de la fuente al lado izquierdo](/home/gsvidaurre/Desktop/GitHub_repos/ABISSMAL/R/vignettes/images/RStudio_02.png)
 
-Otro cambio que puedes implementar en tu configuración de RStudio es el retorno automático, para no tener que hacer scroll a tu derecha cada vez que quieres leer una linea completa de texto o código. Para implementar este cambio, puedes ir a "Tools", luego "Global Options", seleccionar "Code", y seleccionar la caja para la opción "Soft-wrap R source files", luego hacer clic en "Apply" y "Ok".
+Otro cambio que puedes implementar en tu configuración de RStudio es el retorno automático, para no tener que hacer scroll a tu derecha cada vez que quieres leer una línea completa de texto o código. Para implementar este cambio, puedes ir a "Tools", luego "Global Options", seleccionar "Code", y seleccionar la caja para la opción "Soft-wrap R source files", luego hacer clic en "Apply" y "Ok".
 
 
 También puedes cambiar el tamaño de la fuente del texto y código que escribes, tanto como el color de texto y código, y el color de fondo de tu ventana de RStudio. Después de seleccionar "Tools" y "Global Options", puedes seleccionar "Appearance" para ver diferentes opciones.
 
 <h2>Crear una versión local de un repositorio de GitHub</h2>
 
-Si nunca has usado GitHub, recomiendo bajar el programa [GitHub Desktop](https://docs.github.com/es/desktop). Este programa es una interfaz gráfica de usuario para el plataforma de GitHub, que provee un sistema de control de versiones. Vamos a seguir unos pasos para crear una versión local del repositorio de ABISSMAL que esta en GitHub para que puedas acceder las funciones de R de ABISSMAL en tu propia computadora. Si ya sabes como usar GitHub y como usar Git en el terminal, puedes seguir las instrucciones que tenemos en el [README de ABISSMAL](https://github.com/lastralab/ABISSMAL).
+Si nunca has usado GitHub, recomiendo bajar el programa [GitHub Desktop](https://docs.github.com/es/desktop). Este programa es una interfaz gráfica de usuario para el plataforma de GitHub, que provee un sistema de control de versiones. Vamos a seguir unos pasos para crear una versión local del repositorio de ABISSMAL que esta en GitHub para que puedas acceder las funciones de R de ABISSMAL en tu propia computadora. Si ya sabes cómo usar GitHub y cómo usar Git en el terminal, puedes seguir las instrucciones que tenemos en el [README de ABISSMAL](https://github.com/lastralab/ABISSMAL).
 
 Cuando hayas instalado GitHub Desktop, puedes:
 
-* Hacer clic en el icono de GitHub Desktop para abrir el programa
+* Hacer clic en el ícono de GitHub Desktop para abrir el programa
 
 * Abrir tu navegador web e ir al repositorio de ABISSMAL en GitHub: https://github.com/lastralab/ABISSMAL
 
@@ -85,7 +85,7 @@ Cuando hayas instalado GitHub Desktop, puedes:
 Cuando el repositorio se ha instalado en tu computadora, deberías de poder ver el siguiente directorio y lista de archivos adentro de una carpeta llamada "ABISSMAL":
 
 <br>
-![Un imagen del directorio de la version local del repositorio de ABISSMAL](/home/gsvidaurre/Desktop/GitHub_repos/ABISSMAL/R/vignettes/images/ABISSMAL_localrepo.png)
+![Una imagen del directorio de la version local del repositorio de ABISSMAL](/home/gsvidaurre/Desktop/GitHub_repos/ABISSMAL/R/vignettes/images/ABISSMAL_localrepo.png)
 
 Los archivos que vamos a usar en los siguientes tutoriales están adentro de la carpeta "R". Esta carpeta contiene 6 archivos de R (extensión ".R"), un archivo README que contiene más información sobre cada archivo de R, y carpetas con los tutoriales en formato RMarkdown (extensión ".Rmd"), y también código para pruebas unitarias automatizadas.
 
@@ -107,11 +107,11 @@ ABISSMAL provee 5 funciones diferentes de R para procesar y analizar datos, y de
 ![Figure 4 del manuscrito de ABISSMAL con un `pipeline` con las 5 funciones primarias](/home/gsvidaurre/Desktop/GitHub_repos/ABISSMAL/R/vignettes/images/Figure4_ComputationalAnalyses.png)
 * Esta figura es de Smith-Vidaurre, G., Molina, T., Jarvis, E.D., and E.A. Hobson. 2023. Automated tracking of avian parental care. [EcoEvoRxiv preprint]((https://ecoevorxiv.org/repository/view/6268/)).
 
-<h2>Solucionar errores en linea</h2>
+<h2>Solucionar errores en línea</h2>
 
 Mientras escribes y ejecutas código encontraras errores que a veces pueden ser frustrantes. Experimentar y solucionar errores es una parte muy importante de tu proceso de aprendizaje en R (u otros lenguajes de programación). Los errores surgen por diferentes razones, incluyendo errores de tipeo mientras escribes código, problemas con las versiones de paquetes externos de R que instalaste, o posiblemente por necesitar funciones de paquetes que no has instalado en tu computadora. Los errores a veces pueden surgir por problemas con las funciones de ABISSMAL que usaras en los siguientes tutoriales, o por errores con el código en los tutoriales mismos.
 
-Cuando experimentas un error con tu condigo, es importante intentar solucionar el error independientemente antes de suponer que el error nació de errores de las funciones de ABISSMAL o los tutoriales. Hay muchos recursos en linea que puedes usar para solucionar errores comunes o inusuales en R. Puedes empezar con copiar y pegar el mensaje de error que ves en tu consola en un buscador, y así deberías de ver varias opciones de foros públicos donde otras personas han preguntado por y solucionado errores similares. También deberías de poder de usar herramientas de IA generativo como ChatGPT para buscar errores de tipeo u otros problemas con tu código. Otra opción útil es leer la documentación de R para investigar si el error que ves esta relacionado con un paquete o función que puede ser una dependencia de ABISSMAL.
+Cuando experimentas un error con tu condigo, es importante intentar solucionar el error independientemente antes de suponer que el error nació de errores de las funciones de ABISSMAL o los tutoriales. Hay muchos recursos en línea que puedes usar para solucionar errores comunes o inusuales en R. Puedes empezar con copiar y pegar el mensaje de error que ves en tu consola en un buscador, y así deberías de ver varias opciones de foros públicos donde otras personas han preguntado por y solucionado errores similares. También deberías de poder de usar herramientas de IA generativo como ChatGPT para buscar errores de tipeo u otros problemas con tu código. Otra opción útil es leer la documentación de R para investigar si el error que ves esta relacionado con un paquete o función que puede ser una dependencia de ABISSMAL.
 
 Ya cuando hayas investigado cuidadosamente un error, y estas segura que el error no se debe a un error de tipeo o problemas con la estructura de tus datos, luego puedes considerar si el error se debe a un problema con las funciones de ABISSMAL o los tutoriales mismos, y puedes reportar el error a las desarolladoras de ABISSMAL en GitHub (ver la siguiente sección).
 
@@ -119,4 +119,4 @@ Ya cuando hayas investigado cuidadosamente un error, y estas segura que el error
 
 Es posible que encuentres errores mientras trabajas en cada tutorial, incluyendo errores con código que no ejecuta, y que devuelve resultados incorrectos. Estos errores pueden manifestar de las funciones de ABISSMAL o con el código de algún tutorial. Cuando encuentras un error en una función de ABISSMAL, puedes crear un "Issue" (asunto o problema) en el repositorio de GitHub. Para crear un asunto nuevo, puedes seleccionar "New Issue" en la pagina de [Issues](https://github.com/lastralab/ABISSMAL/issues) en el repositorio de ABISSMAL, y seguir las instrucciones en el esquema del "Issue" nuevo para añadir la información que las desarrolladoras necesitan para trabajar efectivamente en el error. También puedes añadir la etiqueta de "bug" (o error) a tu "Issue". Si encuentras un error con los tutoriales puedes crear un "Issue" usando los mismos pasos, y deberías de clarificar que el error esta relacionado al código de algún tutorial en particular.
 
-En el siguiente tutorial, vamos a crear datos simulados de movimiento de animales para aprender como usar las cinco funciones primarias de ABISSMAL.
+En el siguiente tutorial, vamos a crear datos simulados de movimiento de animales para aprender cómo usar las cinco funciones primarias de ABISSMAL.
