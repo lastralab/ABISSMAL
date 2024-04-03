@@ -22,7 +22,7 @@ Este tutorial fue traducido al español por Grace Smith-Vidaurre, siguiendo las 
 
 <h2>Resumen del tutorial y objetivos de aprendizaje</h2>
 
-En este sexto y ultimo tutorial, vas a terminar de usar las detecciones simuladas de movimientos de animales el `pipeline` de procesar y analizar datos de ABISSMAL. Vas a detectar `clusters` ("cumulos") de detecciones que representan eventos de movimientos distintos y luego vas a anotar inferencias de comportamiento de estos eventos de movimiento. Tambien vas a crear graficas para visualizar las inferencias de comportamiento. Vas a continuar a usar habilidades que aprendistes en los tutoriales anteriores, y tambien vas a aprender como crear visualizaciones mas complejas con `ggplot()`.
+En este sexto y ultimo tutorial, vas a terminar de usar las detecciones simuladas de movimientos de animales el `pipeline` de procesar y analizar datos de ABISSMAL. Vas a detectar `clusters` ("cúmulos") de detecciones que representan eventos de movimientos distintos y luego vas a anotar inferencias de comportamiento de estos eventos de movimiento. También vas a crear gráficas para visualizar las inferencias de comportamiento. Vas a continuar a usar habilidades que aprendiste en los tutoriales anteriores, y también vas a aprender como crear visualizaciones mas complejas con `ggplot()`.
 
 <h2>Cargar paquetes e inicializar el `path` de tu directorio de trabajo</h2>
 
@@ -30,10 +30,10 @@ En este sexto y ultimo tutorial, vas a terminar de usar las detecciones simulada
 
 rm(list = ls()) # Limpia tu ambiente global
 
-library(tidyverse) # Carga la coleccion de paquetes del tidyverse
-library(data.table) # Carga otros paquetes requiridos por las funciones de ABISSMAL
+library(tidyverse) # Carga la colección de paquetes del tidyverse
+library(data.table) # Carga otros paquetes requeridos por las funciones de ABISSMAL
 
-path <- "/home/gsvidaurre/Desktop/ABISSMAL_vignettes" # Inicializar un objeto con el path de tu directorio de trabajo
+path <- "/home/gsvidaurre/Desktop/ABISSMAL_vignettes" # Inicializa un objeto con el path de tu directorio de trabajo
 
 ```
 
@@ -41,28 +41,28 @@ path <- "/home/gsvidaurre/Desktop/ABISSMAL_vignettes" # Inicializar un objeto co
 
 ```{r}
 
-# Carga la funcion que detecta clusters en los datos procesados
+# Carga la función que detecta clusters en los datos procesados
 source("/home/gsvidaurre/Desktop/GitHub_repos/ABISSMAL/R/detect_clusters.R")
 
-# Carga la funcion que anota inferencias de comportamiento sobre los clusters
+# Carga la función que anota inferencias de comportamiento sobre los clusters
 source("/home/gsvidaurre/Desktop/GitHub_repos/ABISSMAL/R/score_clusters.R")
 
-# Carga un archivo con funciones de apoyo que cada funcion arriba require
+# Carga un archivo con funciones de apoyo que cada función arriba requiere
 source("/home/gsvidaurre/Desktop/GitHub_repos/ABISSMAL/R/utilities.R")
 
 ```
 
 <h2>Termina el `pipeline` de ABISSMAL</h2>
 
-Aqui usaras la funcion de ABISSMAL que se llama `detect_clusters()` para identificar `clusters` de detecciones a traves de los tipos de sensores (detecciones de diferentes sensores que se grabaran juntos en el tiempo).
+Aquí usaras la función de ABISSMAL que se llama `detect_clusters()` para identificar `clusters` de detecciones a través de los tipos de sensores (detecciones de diferentes sensores que se grabaran juntos en el tiempo).
 ```{r}
 
-# El argumento run length, o lo largo de cada serie de detecciones que ocurrieron juntos en el tiempo (cluster) tiene que ser 1 para poder detectar clusters con un largo de 2 detecciones
+# El argumento run_length, o lo largo de cada serie de detecciones que ocurrieron juntos en el tiempo (cluster) tiene que ser 1 para poder detectar clusters con un largo de 2 detecciones
 detect_clusters(file_nms = c("pre_processed_data_RFID.csv", "pre_processed_data_IRBB.csv"), threshold = 2, run_length = 1, sensor_id_col_nm = "sensor_id", timestamps_col_nm = "timestamp_ms", PIT_tag_col_nm = "PIT_tag", rfid_label = "RFID", preproc_metadata_col_nms = c("thin_threshold_s", "data_stage", "date_pre_processed"), general_metadata_col_nms = c("chamber_id", "year", "month", "day"), path = path, data_dir = "Data/processed", out_dir = "Data/processed", out_file_nm = "detection_clusters.csv", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS")
 
 ```
 
-Luego vas a anotar inferencias de comportamiento de estos `clusters` de detecciones con la funcion `score_clusters()`.
+Luego vas a anotar inferencias de comportamiento de estos `clusters` de detecciones con la función `score_clusters()`.
 ```{r}
 
 score_clusters(file_nm = "detection_clusters.csv", rfid_label = "RFID", camera_label = NULL, outer_irbb_label = "Outer Beam Breakers", inner_irbb_label = "Inner Beam Breakers", video_metadata_col_nms = NULL, integrate_perching = TRUE, perching_dataset = "RFID", perching_prefix = "perching_events_", sensor_id_col_nm = "sensor_id", PIT_tag_col_nm = "PIT_tag", pixel_col_nm = NULL, video_width = NULL, video_height = NULL, integrate_preproc_video = FALSE, video_file_nm = NULL, timestamps_col_nm = NULL, path = path, data_dir = "Data/processed", out_dir = "Data/processed", out_file_nm = "scored_detectionClusters.csv", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS")
@@ -75,7 +75,7 @@ Puedes revisar los resultados finales ahora que terminaste de ejecutar el `pipel
 ```{r}
 
 scored_clusters <- read.csv(file.path(path, "Data/processed", "scored_detectionClusters.csv")) %>% 
-   # Tienes que convertir las marcas de tiempo al formato POSIX cada vez que los datos se leen a R para hacer graficas
+   # Tienes que convertir las marcas de tiempo al formato POSIX cada vez que los datos se leen a R para hacer gráficas
   dplyr::mutate(
     start = as.POSIXct(format(as.POSIXct(start, tz = "America/New York"), "%Y-%m-%d %H:%M:%OS6")),
     end = as.POSIXct(format(as.POSIXct(end, tz = "America/New York"), "%Y-%m-%d %H:%M:%OS6"))
@@ -87,11 +87,11 @@ glimpse(scored_clusters)
 
 ```
 
-Cuantos eventos de entrada y salida se anotaron por dia?
+Cuantos eventos de entrada y salida se anotaron por día?
 
-<h2>Datos ausentos en R</h2>
+<h2>Datos ausentes en R</h2>
 
-Para poder contra la cantidad de cada uno de estos eventos que ABISSMAL anoto por dia, necesitas saber como manejar datos ausentes en R. Los datos ausentes se suelen representar usando el valor `NA` ("not available" o "no disponible"), que es un tipo de dato especifico en R. Puedes determinar si un vector (o una columna en un `dataframe`) contiene datos ausentes si usas la funcion `is.na()`, que develovera `TRUE` cuando encuentra un valor de `NA` (un valor ausente) en el vector actual.
+Para poder contra la cantidad de cada uno de estos eventos que ABISSMAL anoto por día, necesitas saber como manejar datos ausentes en R. Los datos ausentes se suelen representar usando el valor `NA` ("not available" o "no disponible"), que es un tipo de dato especifico en R. Puedes determinar si un vector (o una columna en un `dataframe`) contiene datos ausentes si usas la función `is.na()`, que devolverá `TRUE` cuando encuentra un valor de `NA` (un valor ausente) en el vector actual.
 ```{r}
 
 ?is.na()
@@ -102,67 +102,65 @@ is.na(x)
 
 ```
 
-En el codigo arriba, creaste un vector que se llama `x` que tiene dos valores de `NA`. La funcion `is.na()` revisa si cada elemento de `x` es equivalente a `NA`, y devuelve `TRUE` cuando se cumple esa condicion (o sea, cuando encuentra un dato ausente).
+En el código arriba, creaste un vector que se llama `x` que tiene dos valores de `NA`. La función `is.na()` revisa si cada elemento de `x` es equivalente a `NA`, y devuelve `TRUE` cuando se cumple esa condición (o sea, cuando encuentra un dato ausente).
 
-Como `is.na()` es una frase condicional, tambien puedes usar otros simbolos especiales que son relevantes a frases condicionales, como el simbolo de `!`, que sirve para invertir una frase condicional. Por ejemplo, en el codigo abajo, cuando anades `!` antes de `is.na()`, estas preguntando si cada elemento de `x` *no* es equivalente a `NA`:
+Como `is.na()` es una frase condicional, también puedes usar otros símbolos especiales que son relevantes a frases condicionales, como el símbolo de `!`, que sirve para invertir una frase condicional. Por ejemplo, en el código abajo, cuando añades `!` antes de `is.na()`, estas preguntando si cada elemento de `x` *no* es equivalente a `NA`:
 ```{r}
 
 !is.na(x)
 
 ```
 
-Como puedes ver, anadir el `!` en frente del `is.na()` resulta en valores binarios invertidos comparado con usar solo `is.na()`, y ahora cada valor que antes era `TRUE` se convirtio a `FALSE`. Juntos, la habilidad de invertir la frase condicional de `is.na()`, tanto como el resultado binario que devuelve `is.na()` son propiedades muy utiles para encontrar y filtrar las filas de un `dataframe`.
+Como puedes ver, añadir el `!` en frente del `is.na()` resulta en valores binarios invertidos comparado con usar solo `is.na()`, y ahora cada valor que antes era `TRUE` se convirtió a `FALSE`. Juntos, la habilidad de invertir la frase condicional de `is.na()`, tanto como el resultado binario que devuelve `is.na()` son propiedades muy útiles para encontrar y filtrar las filas de un `dataframe`.
 
-Por ejemplo, la funcion `dplyr::filter()` eliminara una fila cada vez que encuentra un valor de `FALSE` en la columna actual y en cambio no eliminara una fila cada vez que encuentra un valor de `TRUE`. O sea, si quieres eliminar files que contienen valores de `NA` para una columna actual, anadirias `!is.na(name_of_column)` adentro de `dplyr::filter()`, que deberia de devolver `FALSE` cada vez que encuentra una fila con `NA`, y eliminara esa fila como parte de la operacion de filtrar.
+Por ejemplo, la función `dplyr::filter()` eliminara una fila cada vez que encuentra un valor de `FALSE` en la columna actual y en cambio no eliminara una fila cada vez que encuentra un valor de `TRUE`. O sea, si quieres eliminar files que contienen valores de `NA` para una columna actual, añadirías `!is.na(name_of_column)` adentro de `dplyr::filter()`, que debería de devolver `FALSE` cada vez que encuentra una fila con `NA`, y eliminara esa fila como parte de la operación de filtrar.
 
-For instance, the function `dplyr::filter()` will drop a row whenever it encounters a value of `FALSE` in a given column, and will retain a row whenever it encounters a value of `TRUE`. If you want to drop rows that contain NA values for a given column, you would add `!is.na(name_of_column)` inside of `dplyr::filter()`, which should return `FALSE` every time it encounters a row with `NA`, and will remove that row during filtering. 
+<h2>Cuenta eventos por día</h2>
 
-<h2>Cuenta eventos por dia</h2>
-
-Ahora puedes escribir codigo para contar el numero de eventos de entrada y salida que ABISSMAL anoto por dia. Vas a necesitar 1) crear una columna nueva con la informacion sobre el dia para cada marca de tiempo, 2) eliminar filas con datos ausentes para la informacion anotada de la direccion del movimiento (la columna `direction_scored`, porque esta informacion no se puede anotar para algunos movimientos), 3) agrupar el `dataframe` por dia y por la direccion anotada, y luego 4) contar el numero de filas por grupo.
+Ahora puedes escribir código para contar el numero de eventos de entrada y salida que ABISSMAL anoto por día. Vas a necesitar 1) crear una columna nueva con la información sobre el día para cada marca de tiempo, 2) eliminar filas con datos ausentes para la información anotada de la dirección del movimiento (la columna `direction_scored`, porque esta información no se puede anotar para algunos movimientos), 3) agrupar el `dataframe` por día y por la dirección anotada, y luego 4) contar el numero de filas por grupo.
 ```{r}
 
 scored_clusters %>%
-  # Extrae el dia de cada marca de tiempo y crea una columna nueva con esta informacion
+  # Extrae el día de cada marca de tiempo y crea una columna nueva con esta información
   dplyr::mutate(
     day = lubridate::day(start)
   ) %>%
-  # Aqui estas usando la funcion is.na() que devolvera TRUE cuando encuentra un valo ausente (NA) en la columna actual. Con colocar el simbolo de ! antes de is.na(), estas invirtiendo la frase condicional y tambien el resultado, asi que todos los valores TRUE se convertiran a FALSE. Por ende, dplyr::filter eliminara todas las filas que devuelven el valor de FALSE en esta expresion (o sea, todas las filas con valores ausentes en la columna direction_scored con informacion sobre la direccion anotada de movimiento)
+  # Aquí estas usando la función is.na() que devolverá TRUE cuando encuentra un valor ausente (NA) en la columna actual. Con colocar el símbolo de ! antes de is.na(), estas invirtiendo la frase condicional y también el resultado, así que todos los valores TRUE se convertirán a FALSE. Por ende, dplyr::filter eliminara todas las filas que devuelven el valor de FALSE en esta expresión (o sea, todas las filas con valores ausentes en la columna direction_scored con información sobre la dirección anotada de movimiento)
   dplyr::filter(!is.na(direction_scored)) %>%
-  # Agrupa el dataframe por ambas columnas para las cuales quieres contrar filas (eventos). Aqui quieres saber el numero de entradas y salidas (categorias en la columna direction_scored) por dia (categorias en la columna day)
+  # Agrupa el dataframe por ambas columnas para las cuales quieres contar filas (eventos). Aquí quieres saber el numero de entradas y salidas (categorías en la columna direction_scored) por día (categorías en la columna day)
   group_by(day, direction_scored) %>%
-  # Luego puedes resumir los datos: el numero de filas aqui es el numero de entradas o salidas anotadas por dia
+  # Luego puedes resumir los datos: el numero de filas aquí es el numero de entradas o salidas anotadas por día
   dplyr::summarise(
     n = n()
   )
 
 ```
 
-Cuatro entradas y salidas se anotaron por dia. Como se compara este resultado con el numero de entradas y salidas que esperabas por dia? Si regresas al codigo en los tutoriales anteriores (el tercer y el cuarto tutorial) donde creaste los datos originales simulados, deberias de poder ver que empezaste por simular dos entradas y dos salidas por dia en los datos para el sistema de RFID y los sensores de infrarrojo. Luego anadiste dos entradas y dos salidas mas por dia cuando simulaste fallas de deteccion del sistema de RFID (o sea, estos fueron movimientos capturados solamente por los sensores de infrarrojo). `score_clusters` detecto el numero correcto de entradas y salidas por dia.
+Cuatro entradas y salidas se anotaron por día. Como se compara este resultado con el numero de entradas y salidas que esperabas por día? Si regresas al código en los tutoriales anteriores (el tercer y el cuarto tutorial) donde creaste los datos originales simulados, deberías de poder ver que empezaste por simular dos entradas y dos salidas por día en los datos para el sistema de RFID y los sensores de infrarrojo. Luego añadiste dos entradas y dos salidas mas por día cuando simulaste fallas de detección del sistema de RFID (o sea, estos fueron movimientos capturados solamente por los sensores de infrarrojo). `score_clusters` detecto el numero correcto de entradas y salidas por día.
 
-Ahora puedes revisar los eventos de posar, empezando con filtrar todas las filas que no se anotaron como eventos de posar (o sea, filas con valores de `NA` en la columna "perching_PIT_tag" que contiene informacion sobre las etiquetas de PIT). Luego puedes seleccionar solo las columnas que contienen informacion que es util revisar, como las identidades de las etiquetas PIT, y tambien las marcas de tiempo para el inicio y fin de cada evento de posar.
+Ahora puedes revisar los eventos de posar, empezando con filtrar todas las filas que no se anotaron como eventos de posar (o sea, filas con valores de `NA` en la columna "perching_PIT_tag" que contiene información sobre las etiquetas de PIT). Luego puedes seleccionar solo las columnas que contienen información que es útil revisar, como las identidades de las etiquetas PIT, y también las marcas de tiempo para el inicio y fin de cada evento de posar.
 ```{r}
 
 scored_clusters %>%
-  # Usa una frase condicional con is.na() para retener solo las filas que tienen codigos de etiquetas PIT que fueron asociados con eventos de posar
+  # Usa una frase condicional con is.na() para retener solo las filas que tienen códigos de etiquetas PIT que fueron asociados con eventos de posar
   dplyr::filter(!is.na(perching_PIT_tag)) %>%
   # Luego selecciona colo las columnas que quieres revisar visualmente
   dplyr::select(start, end, perching_PIT_tag)
 
 ```
 
-Como aprendiste en el tercer y el cuarto tutorial, el primer evento de posar por dia se realizo por el primer individuo (con la etiqueta de PIT "1357aabbcc"), y el segundo evento de posar por dia fue realizado por el segundo individuo (con la etiqueta de PIT "2468zzyyxx").
+Como aprendiste en el tercer y el cuarto tutorial, el primer evento de posar por día se realizo por el primer individuo (con la etiqueta de PIT "1357aabbcc"), y el segundo evento de posar por día fue realizado por el segundo individuo (con la etiqueta de PIT "2468zzyyxx").
 
-Cuantos eventos de movimento que no fueron eventos de posar fueron asignados a cada individuo?
+Cuantos eventos de movimiento que no fueron eventos de posar fueron asignados a cada individuo?
 ```{r}
 
 scored_clusters %>%
-  # Extrae el dia de cada marca de tiempo y crea una columna nueva con esta informacion
+  # Extrae el día de cada marca de tiempo y crea una columna nueva con esta información
   dplyr::mutate(
     day = lubridate::day(start)
   ) %>%
-  # Usa una frase condicional con is.na() para retener solo las filas que tienen codigos de las etiquetas de PIT que no fueron asociados con eventos de posar
-  # Aqui estas combinando dos frases condicionales para poder buscar filas en la columna individual_initiated (o el individuo que inicio el movimiento) que tienen codigos de etiquetas PIT, pero que tambien no tienen una etiqueta de sensor el la columna perching_sensor (o sea, eventos de movimiento que no fueron eventos de posar)
+  # Usa una frase condicional con is.na() para retener solo las filas que tienen códigos de las etiquetas de PIT que no fueron asociados con eventos de posar
+  # Aquí estas combinando dos frases condicionales para poder buscar filas en la columna individual_initiated (o el individuo que inicio el movimiento) que tienen códigos de etiquetas PIT, pero que también no tienen una etiqueta de sensor el la columna perching_sensor (o sea, eventos de movimiento que no fueron eventos de posar)
   dplyr::filter(!is.na(individual_initiated) & is.na(perching_sensor)) %>%
   group_by(day, individual_initiated) %>% 
   dplyr::summarise(
@@ -171,17 +169,17 @@ scored_clusters %>%
 
 ```
 
-Como puedes ver, cuatro eventos de movimiento que no fueron eventos de posar se asignaron al primer individuo (con la etiqueta PIT "1357aabbcc") en cada dia, que es exactamente lo que simulaste en el tercer y el cuarto tutorial. Mas movimientos que no fueron eventos de posar se detectaron a traves de estos dias tambien, pero como esos eventos no fueron capturados por la antena de RFID (o sea fueron fallas simuladas de la antena de RFID), estos movimientos fueron capturados por solo los sensores de infrarrojo que no pueden grabar informacion sobre la identidad de individuos.
+Como puedes ver, cuatro eventos de movimiento que no fueron eventos de posar se asignaron al primer individuo (con la etiqueta PIT "1357aabbcc") en cada día, que es exactamente lo que simulaste en el tercer y el cuarto tutorial. Mas movimientos que no fueron eventos de posar se detectaron a través de estos días también, pero como esos eventos no fueron capturados por la antena de RFID (o sea fueron fallas simuladas de la antena de RFID), estos movimientos fueron capturados por solo los sensores de infrarrojo que no pueden grabar información sobre la identidad de individuos.
 
-<h2>Construye una grafica compleja de codigo de barras</h2>
+<h2>Construye una gráfica compleja de código de barras</h2>
 
-Ahora puedes visualizar los resultados finales. En el codigo abajo vas a aprender como crear una grafica de codigo de barras que es mas compleja de lo que viste en el tutorial anterior, pero que es mas facil que interpretar que esa grafica anterior. Para esta grafica seria util poder visualizar tres tipos de inferencias de comportamiento o tipos de informacion a traves del tiempo: la direccion de movimiento (cuando esta disponsible), la identidad del individuo (cuando esta disponible), y los eventos de posar.
+Ahora puedes visualizar los resultados finales. En el código abajo vas a aprender como crear una gráfica de código de barras que es mas compleja de lo que viste en el tutorial anterior, pero que es mas fácil que interpretar que esa gráfica anterior. Para esta gráfica seria útil poder visualizar tres tipos de inferencias de comportamiento o tipos de información a través del tiempo: la dirección de movimiento (cuando esta disponible), la identidad del individuo (cuando esta disponible), y los eventos de posar.
 
-Puedes empezar con construir la grafica con anadir lineas verticles para los eventos que no fueron eventos de posar. El color de cada linea indicara la identidad del individuo, incluyendo cuando esta informacion no estaba disponible. El tipo de linea va a contener informacion sobre la direccion de movimiento, y tambien cuando esta informacion no se pudo anotar.
+Puedes empezar con construir la gráfica con añadir lineas verticales para los eventos que no fueron eventos de posar. El color de cada linea indicara la identidad del individuo, incluyendo cuando esta información no estaba disponible. El tipo de linea va a contener información sobre la dirección de movimiento, y también cuando esta información no se pudo anotar.
 
-Para poder asignar colores y tipos de lineas de la forma que quieres en la grafica, vas a necesitar modificar el `dataframe` de los resultados finales para convertir los `NAs` en las dos columnas asociadas con estos detalles de estetica para convertir los datos ausentes en informacion util. Por ejemplo, cuando no hay informacion sobre la identidad del individuo, seria muy util convertir los valores asociados de `NA` a un valor como "unassigned" ("no asignado"). En el codigo abajo vas a usar la funcion `is.na()` adentro de frases condicionales de `ifelse()` para convertir los valores de `NA` adentro de las columnas "individual_initiated" y "direction_scored" para poder tener informacion mas util parala grafica que vas a hacer mas adelante.
+Para poder asignar colores y tipos de lineas de la forma que quieres en la gráfica, vas a necesitar modificar el `dataframe` de los resultados finales para convertir los `NAs` en las dos columnas asociadas con estos detalles de estética para convertir los datos ausentes en información útil. Por ejemplo, cuando no hay información sobre la identidad del individuo, seria muy útil convertir los valores asociados de `NA` a un valor como "unassigned" ("no asignado"). En el código abajo vas a usar la función `is.na()` adentro de frases condicionales de `ifelse()` para convertir los valores de `NA` adentro de las columnas "individual_initiated" y "direction_scored" para poder tener información mas útil para la gráfica que vas a hacer mas adelante.
 
-Primero puedes practicar usar `is.na()` adentro de `ifelse()` para crear un vector nuevo. En el codigo abajo, vas a proveer la frase condicional que quieres probar (aqui vas a probar si la columna que contiene las etiquetas PIT del individuo que inicio el movimiento tiene valores de `NA`), el valor que quieres anadir al vetcor si la condicion se cumple (el valor "unassigned" cuando no hay informacion sobre la etiqueta PIT), y luego el valor que quieres anadirn si la condicion no se cumple (en este caso es devolver la etiqueta PIT en la columna individual_initiated si el valor actual no es `NA`).
+Primero puedes practicar usar `is.na()` adentro de `ifelse()` para crear un vector nuevo. En el código abajo, vas a proveer la frase condicional que quieres probar (aquí vas a probar si la columna que contiene las etiquetas PIT del individuo que inicio el movimiento tiene valores de `NA`), el valor que quieres añadir al vector si la condición se cumple (el valor "unassigned" cuando no hay información sobre la etiqueta PIT), y luego el valor que quieres añadir si la condición no se cumple (en este caso es devolver la etiqueta PIT en la columna individual_initiated si el valor actual no es `NA`).
 ```{r}
 
 # is.na() devuelve TRUE cuando encuentra valores de NA adentro de un vector (o columna) y FALSE cuando el valor actual no es NA
@@ -200,44 +198,44 @@ scored_clusters_gg <- scored_clusters %>%
     # Si esta columna tiene un valor de NA, cambia el valor actual a "unassigned"
     # Pero si el valor actual no es NA, no cambies el valor actual de esta columna
     individual_initiated = ifelse(is.na(individual_initiated), "unassigned", individual_initiated),
-    # Repita este proceso para la columna direction_scored pero con un valor diferente (aqui "not_scored" significa que la direccion no sen pudo anotar)
-    # En la frase condicional abajo anadiste is.na(perching_sensor) (despues del simbolo de &) para solo convertir los valores de NA en la columna de direction_scored si tambien no fueron anotados como eventos de posar en la columna perching_sensor
+    # Repita este proceso para la columna direction_scored pero con un valor diferente (aquí "not_scored" significa que la dirección no sen pudo anotar)
+    # En la frase condicional abajo añadiste is.na(perching_sensor) (después del símbolo de &) para solo convertir los valores de NA en la columna de direction_scored si también no fueron anotados como eventos de posar en la columna perching_sensor
     direction_scored = ifelse(is.na(direction_scored) & is.na(perching_sensor), "not scored", direction_scored)
   ) %>%
-  # Luego vas a convertir cada una de estas columnas al tipo factor y ordenar los levels (categorias) para crear la grafica de la forma que queremos (por ejemplo, los valores de "unassigned" y "not scored" deberian de ser los ultimos valores en la leyenda)
+  # Luego vas a convertir cada una de estas columnas al tipo factor y ordenar los levels (categorías) para crear la gráfica de la forma que queremos (por ejemplo, los valores de "unassigned" y "not scored" deberían de ser los últimos valores en la leyenda)
   dplyr::mutate(
     individual_initiated = factor(individual_initiated, levels = c("1357aabbcc", "2468zzyyxx", "unassigned")),
     direction_scored = factor(direction_scored, levels = c("entrance", "exit", "not scored"))
   )
 
-# Revisa los cambios que hiciste arriba usando la funcion distinct() para ver que todos los valores unicos de cada columna si fueron modificados
+# Revisa los cambios que hiciste arriba usando la función distinct() para ver que todos los valores únicos de cada columna si fueron modificados
 # Los valores de NA en la columna de direction_scored se esperan porque se refieren a los eventos de posar
 scored_clusters_gg %>% 
   distinct(individual_initiated, direction_scored)
 
 ```
 
-Este resultado se ve bien. Deberias de ver valores de `NA` en el `dataframe` pero estan en la columna "direction_scored" y asociados con los eventos de posar, que vas a anadir a la grafica en otra capa diferente de codigo mas adelante.
+Este resultado se ve bien. Deberías de ver valores de `NA` en el `dataframe` pero están en la columna "direction_scored" y asociados con los eventos de posar, que vas a añadir a la gráfica en otra capa diferente de código mas adelante.
 
-Puedes usar este `dataframe` modificado para crear la grafica. En el codigo abajo, vas a anadir lineas con colores asignados por la identidad de individuos, y los tipos de linea van a representar la direccion de movimiento. Primero vas a especificar los detalles esteticos de la grafica:
+Puedes usar este `dataframe` modificado para crear la gráfica. En el código abajo, vas a añadir lineas con colores asignados por la identidad de individuos, y los tipos de linea van a representar la dirección de movimiento. Primero vas a especificar los detalles estéticos de la gráfica:
 ```{r}
 
-# Los colores estan el el mismo order que los levels (categorias) de la columna individual_initiated, asi que el color naranja va a representar la etiqueta PIT "1357aabbcc"
+# Los colores están el el mismo orden que los levels (categorías) de la columna individual_initiated, así que el color naranja va a representar la etiqueta PIT "1357aabbcc"
 levels(scored_clusters_gg$individual_initiated)
 cols <- c("orange", "darkgreen", "black")
 
-# Los tipos de linea estan el el mismo order que los levels de la columna direction_scored, asi que el valor "dotted" ("puntos) va a representar "not scored" (cuando la direccion no se pudo anotar)
+# Los tipos de linea están el el mismo orden que los levels de la columna direction_scored, así que el valor "dotted" ("puntos) va a representar "not scored" (cuando la dirección no se pudo anotar)
 levels(scored_clusters_gg$direction_scored)
 ltys <- c("solid", "longdash", "dotted")
   
 ```
 
-Luego puedes anadir lineas a la grafica por identidad de individuo. Aqui estas dividiendo las llamadas de `geom_segment()` por los levels (categorias o valores unicos) en la columna individual_initiated. Solo anadiste lineas para el primer individuo y todos los movimientos que no fueron eventos de posar que no fueron asignados a un individuo porque despues de revisar los resultados finales, sabes que ningun movimiento (que no fue evento de posar) fue asignado al segundo individuo.
+Luego puedes añadir lineas a la gráfica por identidad de individuo. Aquí estas dividiendo las llamadas de `geom_segment()` por los levels (categorías o valores únicos) en la columna individual_initiated. Solo añadiste lineas para el primer individuo y todos los movimientos que no fueron eventos de posar que no fueron asignados a un individuo porque después de revisar los resultados finales, sabes que ningún movimiento (que no fue evento de posar) fue asignado al segundo individuo.
 ```{r}
 
 ggplot() +
   
-  # Anade una linea vertical para cada evento que no fue un evento de posar y que fue asignado al primer individuo
+  # Añade una linea vertical para cada evento que no fue un evento de posar y que fue asignado al primer individuo
   geom_segment(
     data = scored_clusters_gg %>% 
       dplyr::filter(individual_initiated == "1357aabbcc"),
@@ -246,7 +244,7 @@ ggplot() +
     linewidth = 0.5
   ) +
 
-  # Anade una linea vertical para cada evento que no fue un evento de posar y que no fue asignado a unos de los dos individuos
+  # Añade una linea vertical para cada evento que no fue un evento de posar y que no fue asignado a unos de los dos individuos
   geom_segment(
     data = scored_clusters_gg %>% 
       dplyr::filter(individual_initiated == "unassigned"),
@@ -255,17 +253,17 @@ ggplot() +
     linewidth = 0.5
   ) +
   
-  # Anade los tipos de linea customizadas a la grafica
+  # Añade los tipos de linea customizadas a la gráfica
   scale_linetype_manual(values = ltys) +
   
   # Elimina el titulo del eje y
   ylab("") +
   
-  # Usa esta funcion para convertir el fondo de la grafica a blanco y negro
+  # Usa esta función para convertir el fondo de la gráfica a blanco y negro
   theme_bw() +
   
-  # Usa estas funciones de estetica para elimninar el text y los rayos del eje y
-  # Anade un argumento para cambiar la posicion de la leyenda adentro de la grafica
+  # Usa estas funciones de estética para eliminar el texto y los rayos del eje y
+  # Añade un argumento para cambiar la posición de la leyenda adentro de la gráfica
   theme(
     axis.text.y = element_blank(),
     axis.ticks.y = element_blank(),
@@ -274,22 +272,22 @@ ggplot() +
   
 ```
 
-Para hacer esta grafica organizaste las lineas verticales para separar los movimientos asignados al primer individuo y los movimientos que no fueron asignados. Esta separacion vertical entre estos dos conjuntos de datos facilita las comparaciones visuales de patrones de variacion en los movimientos a traves del tiempo. Creaste esta separacion vertical con cambiar los valores que usaste para `y` y `yend` en la segunda capa de `geom_segment()` para que esas lineas empezarian mas arriba que las lineas de la primera capa de `geom_segment()`.
+Para hacer esta gráfica organizaste las lineas verticales para separar los movimientos asignados al primer individuo y los movimientos que no fueron asignados. Esta separación vertical entre estos dos conjuntos de datos facilita las comparaciones visuales de patrones de variación en los movimientos a través del tiempo. Creaste esta separación vertical con cambiar los valores que usaste para `y` y `yend` en la segunda capa de `geom_segment()` para que esas lineas empezarían mas arriba que las lineas de la primera capa de `geom_segment()`.
 
-Puedes hacer mas modificaciones que ayudarian con interpretar esta grafica. En primerm lugar, las etiquetas de los paneles que estan al lado izquierdo se pueden cambiar para demostrar el dia general de coleccion de datos (como "Day 1" para el primer dia) en vez de la fecha. El texto en en eje x tambien se puede cambiar para demostrar solo el tiempo (o sea eliminar la informacion sobre el mes y el dia), y tambien puedes anadir mas etiquetas (por ejemplo, una etiqueta cada media hora).
+Puedes hacer mas modificaciones que ayudarían con interpretar esta gráfica. En primer lugar, las etiquetas de los paneles que están al lado izquierdo se pueden cambiar para demostrar el día general de colección de datos (como "Day 1" para el primer día) en vez de la fecha. El texto en en eje x también se puede cambiar para demostrar solo el tiempo (o sea eliminar la información sobre el mes y el día), y también puedes añadir mas etiquetas (por ejemplo, una etiqueta cada media hora).
 
-Puedes emmpezar con modificar el `dataframe` para anadir la informacion sobre el dia de coleccion de datos. Vas a crear esta columna nueva con frases condicionales a traves de la funcion `ifelse` porque solo hay tres dias de coleccion de datos con etiquetas que tienes que cambiar.
+Puedes empezar con modificar el `dataframe` para añadir la información sobre el día de colección de datos. Vas a crear esta columna nueva con frases condicionales a través de la función `ifelse` porque solo hay tres días de colección de datos con etiquetas que tienes que cambiar.
 ```{r}
 
-# Crea una columna nueva en los datos originales para la fecha de coleccion de datos
+# Crea una columna nueva en los datos originales para la fecha de colección de datos
 scored_clusters_gg2 <- scored_clusters_gg %>%
-  # Primero necesitas crear una columna con informacion sobre el dia
+  # Primero necesitas crear una columna con información sobre el día
   dplyr::mutate(
     day = lubridate::day(start)
   ) %>% 
   dplyr::mutate(
-    # Luego deberias de reemplazar la etiqueta para cada dia y guardar estos resultados en una columna nueva
-    day_label = ifelse(day == 1, "Day 1", day), # Aqui el ultimo argumento es la columna day porque la columna day_label no se ha creado todavia
+    # Luego deberías de reemplazar la etiqueta para cada día y guardar estos resultados en una columna nueva
+    day_label = ifelse(day == 1, "Day 1", day), # Aquí el ultimo argumento es la columna day porque la columna day_label no se ha creado todavía
     day_label = ifelse(day == 2, "Day 2", day_label),
     day_label = ifelse(day == 3, "Day 3", day_label)
   )
@@ -302,13 +300,13 @@ scored_clusters_gg2 %>%
 
 ```
 
-Ahora puedes actualizar el codigo para incluir las etiquetas nuevas de las fechas:
+Ahora puedes actualizar el código para incluir las etiquetas nuevas de las fechas:
 ```{r}
 
-# Anade el dataframe como el conjunto de datos por defecto para la capa fundamental de la grafica para que la funcion facet_wrap() tenga datos
+# Añade el dataframe como el conjunto de datos por defecto para la capa fundamental de la gráfica para que la función facet_wrap() tenga datos
 ggplot(data = scored_clusters_gg2) +
   
-  # Anade una linea vertical para cada evento que no fue un evento de posar y que fue asignado al primer individuo
+  # Añade una linea vertical para cada evento que no fue un evento de posar y que fue asignado al primer individuo
   geom_segment(
     data = scored_clusters_gg2 %>% 
       dplyr::filter(individual_initiated == "1357aabbcc"),
@@ -317,7 +315,7 @@ ggplot(data = scored_clusters_gg2) +
     linewidth = 0.5
   ) +
   
-  # Anade una linea vertical para cada evento que no fue un evento de posar y que no fue asignado a unos de los dos individuos
+  # Añade una linea vertical para cada evento que no fue un evento de posar y que no fue asignado a unos de los dos individuos
   geom_segment(
     data = scored_clusters_gg2 %>% 
       dplyr::filter(individual_initiated == "unassigned"),
@@ -326,31 +324,31 @@ ggplot(data = scored_clusters_gg2) +
     linewidth = 0.5
   ) +
   
-  # Anade los tipos de linea customizadas a la grafica
+  # Añade los tipos de linea customizadas a la gráfica
   scale_linetype_manual(values = ltys) +
   
   # Elimina el titulo del eje y
   ylab("") +
   
-  # Usa esta funcion para convertir el fondo de la grafica a blanco y negro
+  # Usa esta función para convertir el fondo de la gráfica a blanco y negro
   theme_bw() +
   
-  # Usa estas funciones de estetica para elimninar el text y los rayos del eje y
-  # Anade un argumento para cambiar la posicion de la leyenda adentro de la grafica
+  # Usa estas funciones de estética para eliminar el texto y los rayos del eje y
+  # Añade un argumento para cambiar la posición de la leyenda adentro de la gráfica
   theme(
     axis.text.y = element_blank(),
     axis.ticks.y = element_blank(),
     legend.position = "top"
   ) +
   
-  # Crea paneles en la grafica por dia, aqui usaras las etiquetas nuevas de dia
+  # Crea paneles en la gráfica por día, aquí usaras las etiquetas nuevas de día
   facet_wrap(~ day_label, nrow = 3, strip.position = "left")
 
 ```
 
-Ahora que moviste la informacion sobre el dia de coleccion de datos a las etiquetas de los paneles de la grafica, necesitas componer el texto en el eje x. La grafica sera mas facil de interpretar si puedes alinear las marcas de tiempo por hora y minuto para una comparacion directa a traves de dias diferentes.
+Ahora que moviste la información sobre el día de colección de datos a las etiquetas de los paneles de la gráfica, necesitas componer el texto en el eje x. La gráfica sera mas fácil de interpretar si puedes alinear las marcas de tiempo por hora y minuto para una comparación directa a través de días diferentes.
 
-Para alinear las marcas de tiempo a traves de dias, necesitas actualizar el formato de las columnas que contienen las marcas de tiempo. El codigo para convertir las marcas de tiempo a un formato diferente es anidado y repetitivo pero la conversion se realizara correctamente. Cuando le comunicas a R que deberias de convertir las marcas de tiempo a un formato con horas, minutos, y segundos solamente, R va a anadir un año, un mes, y un dia por defecto antes de la marca de tiempo (lo mas comun es que usara la fecha actual). Este comportamiento es esperado y no es un error, mas bien facilita que las marcas de tiempo se alinean de la forma correcta a traves de dias (paneles) en la grafica (porque R considera todas las marcas de tiempo como si ocurrieron en un solo dia).
+Para alinear las marcas de tiempo a través de días, necesitas actualizar el formato de las columnas que contienen las marcas de tiempo. El código para convertir las marcas de tiempo a un formato diferente es anidado y repetitivo pero la conversión se realizara correctamente. Cuando le comunicas a R que deberías de convertir las marcas de tiempo a un formato con horas, minutos, y segundos solamente, R va a añadir un año, un mes, y un día por defecto antes de la marca de tiempo (lo mas común es que usara la fecha actual). Este comportamiento es esperado y no es un error, mas bien facilita que las marcas de tiempo se alinean de la forma correcta a través de días (paneles) en la gráfica (porque R considera todas las marcas de tiempo como si ocurrieron en un solo día).
 ```{r}
 
 scored_clusters_gg3 <- scored_clusters_gg2 %>% 
@@ -359,17 +357,17 @@ scored_clusters_gg3 <- scored_clusters_gg2 %>%
     end_gg = as.POSIXct(strptime(format(as.POSIXct(end), "%H:%M:%S"), format = "%H:%M:%S"))
   )
 
-# Deberias de ver que un año, mes, y dia nuevo fueron adjuntados a las marcas de tiempo modificadas, pero este resultado es esperado (ve arriba)
+# Deberías de ver que un año, mes, y día nuevo fueron adjuntados a las marcas de tiempo modificadas, pero este resultado es esperado (ve arriba)
 glimpse(scored_clusters_gg3)
 
 ```
 
-Ahora puedes actualizar el codigo de crear la grafica para cambiar la estetica del eje x usando la funcion `scale_x_datetime()` para especificar que quieres etiquetas cada media hora en este eje. Tambien vas a anadir un titulo para el eje x y eliminar la cuadricula en el eje y adentro de cada panel:
+Ahora puedes actualizar el código de crear la gráfica para cambiar la estética del eje x usando la función `scale_x_datetime()` para especificar que quieres etiquetas cada media hora en este eje. También vas a añadir un titulo para el eje x y eliminar la cuadricula en el eje y adentro de cada panel:
 ```{r}
 
 gg <- ggplot(data = scored_clusters_gg3) +
   
-  # Anade una linea vertical para cada evento que no fue un evento de posar y que fue asignado al primer individuo
+  # Añade una linea vertical para cada evento que no fue un evento de posar y que fue asignado al primer individuo
   geom_segment(
     data = scored_clusters_gg3 %>% 
       dplyr::filter(individual_initiated == "1357aabbcc"),
@@ -378,7 +376,7 @@ gg <- ggplot(data = scored_clusters_gg3) +
     linewidth = 0.5
   ) +
   
-  # Anade una linea vertical para cada evento que no fue un evento de posar y que no fue asignado a unos de los dos individuos
+  # Añade una linea vertical para cada evento que no fue un evento de posar y que no fue asignado a unos de los dos individuos
   geom_segment(
     data = scored_clusters_gg3 %>% 
       dplyr::filter(individual_initiated == "unassigned"),
@@ -387,33 +385,33 @@ gg <- ggplot(data = scored_clusters_gg3) +
     linewidth = 0.5
   ) +
   
-  # Anade los tipos de linea customizadas a la grafica
+  # Añade los tipos de linea customizadas a la gráfica
   scale_linetype_manual(values = ltys) +
   
   # Elimina el titulo del eje y
   ylab("") +
   
-  # Usa esta funcion para convertir el fondo de la grafica a blanco y negro
+  # Usa esta función para convertir el fondo de la gráfica a blanco y negro
   theme_bw() +
   
-  # Usa estas funciones de estetica para elimninar el text y los rayos del eje y
-  # Anade un argumento para cambiar la posicion de la leyenda adentro de la grafica
+  # Usa estas funciones de estética para eliminar el texto y los rayos del eje y
+  # Añade un argumento para cambiar la posición de la leyenda adentro de la gráfica
   theme(
     axis.text.y = element_blank(),
     axis.ticks.y = element_blank(),
     legend.position = "top"
   ) +
   
-  # Crea paneles en la grafica por dia, aqui usaras las etiquetas nuevas de dia
+  # Crea paneles en la gráfica por día, aquí usaras las etiquetas nuevas de día
   facet_wrap(~ day_label, nrow = 3, strip.position = "left") +
   
-  # Cambia la estetica de las etiquetas del eje x
+  # Cambia la estética de las etiquetas del eje x
   scale_x_datetime(
     date_breaks = "30 mins",
     date_labels = "%H:%M"
   ) +
   
-  # Anade un titulo para el eje x
+  # Añade un titulo para el eje x
   xlab("Time of day (HH:MM)") +
   
   # Puedes quitar la cuadricula en el eje (mayor y menor) adentro de cada panel
@@ -426,12 +424,12 @@ gg
   
 ```
 
-Todavia falta un tipo de informacion importante que necesitas anadir a esta grafica: los eventos de posar. Vas a anadir esta informacion con otra capa de `geom_segment()` pero ahora vas a crear lineas cortas y anchas para que aparezan mas como puntos en la grafica:
+Todavía falta un tipo de información importante que necesitas añadir a esta gráfica: los eventos de posar. Vas a añadir esta información con otra capa de `geom_segment()` pero ahora vas a crear lineas cortas y anchas para que aparezcan mas como puntos en la gráfica:
 ```{r}
 
 gg <- gg + 
   
-  # Anade los eventos de posar como lineas con orillas redondeadas, y puedes anadir colores que indican la identidad del individuo a traves de la columna individual_initiated
+  # Añade los eventos de posar como lineas con orillas redondeadas, y puedes añadir colores que indican la identidad del individuo a través de la columna individual_initiated
   geom_segment(
     data = scored_clusters_gg3 %>% 
       dplyr::filter(!is.na(perching_sensor)),
@@ -439,28 +437,28 @@ gg <- gg +
     linewidth = 2, lineend = "round"
   ) +
   
-  # Anade los colores customizados para estos eventos de posar. Los colores tambien aplican a las lineas de movimientos por individuo que no fueron eventos de posar que anadiste en capas anteriores de geom_segment()
+  # Añade los colores customizados para estos eventos de posar. Los colores también aplican a las lineas de movimientos por individuo que no fueron eventos de posar que añadiste en capas anteriores de geom_segment()
   scale_color_manual(values = cols)
 
 gg
 
 ```
 
-Ahora deberias de ver que una leyenda de color aparece arriba de la grafica con la adicion de esta capa adicional de `geom_segment()`. Ambas de las leyendas se pueden mejorar. Puedes modificar la grafica con actualizar el titulo de cada leyenda, aumentar el tamano de texto de cada leyenda, y reducir el espacio blanco ente las leyendas y la grafica. Para modificar los titulos de cada leyenda, vas a usar las funciones `guides()` y `guide_legend()`. Para aumentar el tamano de texto en la leyenda, vas a usar el argumento `legend.text` adentro de la funcion `theme()`, y para reducir el espacio blanco entre la grafica y las leyendas, vas a usar el argumento `legend.margin` adentro de la funcion `theme()`.
+Ahora deberías de ver que una leyenda de color aparece arriba de la gráfica con la adición de esta capa adicional de `geom_segment()`. Ambas de las leyendas se pueden mejorar. Puedes modificar la gráfica con actualizar el titulo de cada leyenda, aumentar el tamaño de texto de cada leyenda, y reducir el espacio blanco ente las leyendas y la gráfica. Para modificar los títulos de cada leyenda, vas a usar las funciones `guides()` y `guide_legend()`. Para aumentar el tamaño de texto en la leyenda, vas a usar el argumento `legend.text` adentro de la función `theme()`, y para reducir el espacio blanco entre la gráfica y las leyendas, vas a usar el argumento `legend.margin` adentro de la función `theme()`.
 ```{r}
 
-# Ve mas informacion sobre la funcion que controla los margenes (espacio blanco) alrededor de la leyenda
+# Ve mas información sobre la función que controla los margenes (espacio blanco) alrededor de la leyenda
 ?margin
 
 gg <- gg +
   
-  # Aumenta el tamano de texto de cada leyenda y reduce el espacio blanco entre la grafica y las leyendas
+  # Aumenta el tamaño de texto de cada leyenda y reduce el espacio blanco entre la gráfica y las leyendas
   theme(
     legend.text = element_text(size = 10),
     legend.margin = margin(-1, -1, -1, -1, unit = "pt")
   ) +
 
-  # Modifica los titulos de cada leyenda
+  # Modifica los títulos de cada leyenda
   guides(
     linetype = guide_legend(title = "Direction"),
     color = guide_legend(title = "Individual")
@@ -470,24 +468,24 @@ gg
 
 ```
 
-Finalmente puedes guardar esta grafica como un archivo:
+Finalmente puedes guardar esta gráfica como un archivo:
 ```{r}
 
 gg
 
-# Guarda el archivo con la grafica en tu computadora
+# Guarda el archivo con la gráfica en tu computadora
 ggsave(file.path(path, "behavioral_inferences.tiff"), width = 8, height = 6, units = "in", dpi = 300)
 
 ```
 
-Puedes continuar con modificar esteticas menores a este archivo para crear una figura de alta calidad para una publicacion. Por ejemplo, puedes cambiar el tamano final del imagen (`width`, `height`), tanto como la resolution (`dpi`). Puedes tambien cambiar el tamano de texto en cada eje y los titulos de cada eje, o la posicion de la leyenda mientras determinas el tamano final del imagen en el archivo.
+Puedes continuar con modificar estéticas menores a este archivo para crear una figura de alta calidad para una publicación. Por ejemplo, puedes cambiar el tamaño final del imagen (`width`, `height`), tanto como la resolución (`dpi`). Puedes también cambiar el tamaño de texto en cada eje y los títulos de cada eje, o la posición de la leyenda mientras determinas el tamaño final del imagen en el archivo.
 
-Abajo esta todo el codigo que escribiste para la grafica final, en una forma mas condensada y reorganizada:
+Abajo esta todo el código que escribiste para la gráfica final, en una forma mas condensada y reorganizada:
 ```{r eval = FALSE}
 
 ggplot(data = scored_clusters_gg3) +
   
-  # Anade una linea vertical para cada evento que no fue un evento de posar y que fue asignado al primer individuo
+  # Añade una linea vertical para cada evento que no fue un evento de posar y que fue asignado al primer individuo
   geom_segment(
     data = scored_clusters_gg3 %>% 
       dplyr::filter(individual_initiated == "1357aabbcc"),
@@ -496,7 +494,7 @@ ggplot(data = scored_clusters_gg3) +
     linewidth = 0.5
   ) +
   
-  # Anade una linea vertical para cada evento que no fue un evento de posar y que no fue asignado a unos de los dos individuos
+  # Añade una linea vertical para cada evento que no fue un evento de posar y que no fue asignado a unos de los dos individuos
   geom_segment(
     data = scored_clusters_gg3 %>% 
       dplyr::filter(individual_initiated == "unassigned"),
@@ -505,7 +503,7 @@ ggplot(data = scored_clusters_gg3) +
     linewidth = 0.5
   ) +
   
-  # Anade los eventos de posar como lineas con orillas redondeadas, y puedes anadir colores que indican la identidad del individuo a traves de la columna individual_initiated
+  # Añade los eventos de posar como lineas con orillas redondeadas, y puedes añadir colores que indican la identidad del individuo a través de la columna individual_initiated
   geom_segment(
     data = scored_clusters_gg3 %>% 
       dplyr::filter(!is.na(perching_sensor)),
@@ -513,40 +511,40 @@ ggplot(data = scored_clusters_gg3) +
     linewidth = 2, lineend = "round"
   ) +
   
-  # Anade los tipos de linea customizadas a la grafica
+  # Añade los tipos de linea customizadas a la gráfica
   scale_linetype_manual(values = ltys) +
   
-  # Anade los colores customizados para estos eventos de posar. Los colores tambien aplican a las lineas de movimientos por individuo que no fueron eventos de posar que anadiste en capas anteriores de geom_segment()
+  # Añade los colores customizados para estos eventos de posar. Los colores también aplican a las lineas de movimientos por individuo que no fueron eventos de posar que añadiste en capas anteriores de geom_segment()
   scale_color_manual(values = cols) +
   
-  # Modifica los titulos de cada leyenda
+  # Modifica los títulos de cada leyenda
   guides(
     linetype = guide_legend(title = "Direction"),
     color = guide_legend(title = "Individual")
   ) +
   
-  # Anade un titulo para el eje x
+  # Añade un titulo para el eje x
   xlab("Time of day (HH:MM)") +
   
   # Elimina el titulo del eje y
   ylab("") +
   
-  # Cambia la estetica de las etiquetas del eje x
+  # Cambia la estética de las etiquetas del eje x
   scale_x_datetime(
     date_breaks = "30 mins",
     date_labels = "%H:%M"
   ) +
   
-  # Crea paneles en la grafica por dia, aqui usaras las etiquetas nuevas de dia
+  # Crea paneles en la gráfica por día, aquí usaras las etiquetas nuevas de día
   facet_wrap(~ day_label, nrow = 3, strip.position = "left") +
   
-  # Usa esta funcion para convertir el fondo de la grafica a blanco y negro
+  # Usa esta función para convertir el fondo de la gráfica a blanco y negro
   theme_bw() +
   
-  # Usa estas funciones de estetica para elimninar el text y los rayos del eje y
-  # Anade un argumento para cambiar la posicion de la leyenda adentro de la grafica
+  # Usa estas funciones de estética para eliminar el texto y los rayos del eje y
+  # Añade un argumento para cambiar la posición de la leyenda adentro de la gráfica
   # Puedes quitar la cuadricula en el eje (mayor y menor) adentro de cada panel
-  # Aumenta el tamano de texto de cada leyenda y reduce el espacio blanco entre la grafica y las leyendas
+  # Aumenta el tamaño de texto de cada leyenda y reduce el espacio blanco entre la gráfica y las leyendas
   theme(
     axis.text.y = element_blank(),
     axis.ticks.y = element_blank(),
@@ -559,4 +557,4 @@ ggplot(data = scored_clusters_gg3) +
 
 ```
 
-Acabas de completar el tutorial final del `pipeline` de procesar y analizar datos de ABISSMAL. Tambien practicaste tus habilidades de programar y tus habilidades de la ciencia de datos en un contexto biologico. Muy bien hecho! Nos ayudaria mucho si puedes completar la forma de Google para una evaluacion de estos tutoriales ya que los terminaste. Tus respuestas nos ayudaran mejorar estos tutoriales en el futuro. Un enlace a la forma de Google estara disponible en el archivo README para los tutoriales.
+Acabas de completar el tutorial final del `pipeline` de procesar y analizar datos de ABISSMAL. También practicaste tus habilidades de programar y tus habilidades de la ciencia de datos en un contexto biológico. Muy bien hecho! Nos ayudaría mucho si puedes completar la forma de Google para una evaluación de estos tutoriales ya que los terminaste. Tus respuestas nos ayudaran mejorar estos tutoriales en el futuro. Un enlace a la forma de Google estará disponible en el archivo README para los tutoriales.
