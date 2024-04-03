@@ -18,7 +18,7 @@ Este tutorial fue traducido al español por Grace Smith-Vidaurre, siguiendo las 
 
 Sería una gran ayuda si antes de empezar este tutorial puedes completar una encuesta a través de Google Forms. La información que compartes nos ayudará saber más de tu experiencia en R y analizando datos biológicos antes de empezar los tutoriales mismos, tanto como las habilidades que buscas mejorar a través de completar esta colección de tutoriales. También nos ayudara mejorar los tutoriales en el futuro. Puedes encontrar el enlace para la encuesta en el archivo README de los tutoriales.
 
-En este primer tutorial, vas a leer sobre el programa RStudio, aprender cómo crear una versión local de el repositorio de ABISSMAL en GitHub, y aprender más sobre el `pipeline` de analisis de datos en ABISSMAL. En este tutorial vas a aprender cómo:
+En este primer tutorial, vas a leer sobre el programa RStudio, aprender cómo crear una versión local de el repositorio de ABISSMAL en GitHub, y aprender más sobre el `pipeline` de análisis de datos en ABISSMAL. En este tutorial vas a aprender cómo:
 
 1. Configurar tu sesión de RStudio
 2. Crear una versión local de un repositorio de GitHub
@@ -26,7 +26,7 @@ En este primer tutorial, vas a leer sobre el programa RStudio, aprender cómo cr
 4. Solucionar problemas con tu código usando recursos en línea
 5. Reportar problemas de código a GitHub
 
-Hay muchas formas de hacer una sola tarea o solucionar un problema en R, y deberías de mantener esto en mente mientras completas estos tutoriales. En cada tutorial, vas a aprender diferentes ejemplos sobre cómo manejar ciertas tares o solucionar problemas especificas con código, pero estos ejemplos no son un resumen exhaustivo de cómo manejar cada tarea ni cómo solucionar cada problema. Más bien recomiendo que usas estos tutoriales como una oportunidad para practicar cómo usar tus habilidades de escribir código en un contexto biológico.
+Hay muchas formas de hacer una sola tarea o solucionar un problema en R, y deberías de mantener esto en mente mientras completas estos tutoriales. En cada tutorial, vas a aprender diferentes ejemplos sobre cómo manejar ciertas tares o solucionar problemas específicas con código, pero estos ejemplos no son un resumen exhaustivo de cómo manejar cada tarea ni cómo solucionar cada problema. Más bien recomiendo que usas estos tutoriales como una oportunidad para practicar cómo usar tus habilidades de escribir código en un contexto biológico.
 
 <h2>Configurar tu sesión de RStudio</h2>
 
