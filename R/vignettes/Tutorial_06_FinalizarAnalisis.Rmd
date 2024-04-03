@@ -169,7 +169,7 @@ scored_clusters %>%
 
 ```
 
-Como puedes ver, cuatro eventos de movimiento que no fueron eventos de posar se asignaron al primer individuo (con la etiqueta PIT "1357aabbcc") en cada día, que es exactamente lo que simulaste en el tercer y el cuarto tutorial. Más movimientos que no fueron eventos de posar se detectaron a través de estos días también, pero como esos eventos no fueron capturados por la antena de RFID (o sea fueron fallas simuladas de la antena de RFID), estos movimientos fueron capturados por solo los sensores de infrarrojo que no pueden grabar información sobre la identidad de individuos.
+Como puedes ver, cuatro eventos de movimiento que no fueron eventos de posar se asignaron al primer individuo (con la etiqueta PIT "1357aabbcc") en cada día, que es exactamente lo que simulaste en el tercer y el cuarto tutorial. Más movimientos que no fueron eventos de posar se detectaron a través de estos días también, pero como esos eventos no fueron capturados por la antena de RFID (o sea fueron fallas simuladas de la antena de RFID), estos movimientos fueron capturados por solo los sensores infrarrojo que no pueden grabar información sobre la identidad de individuos.
 
 <h2>Construye una gráfica compleja de código de barras</h2>
 

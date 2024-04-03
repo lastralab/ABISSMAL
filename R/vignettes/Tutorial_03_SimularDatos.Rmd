@@ -71,7 +71,7 @@ Puedes practicar eliminar solamente el objeto `path` de tu ambiente global con e
 
 Los datos primarios que colecta ABISSMAL son marcas de tiempo que indican el momento en el tiempo cuando un sensor se activó y grabó movimiento. Muchas (pero no todas) de estas detecciones se pueden asignar a uno o más animales que se movieron cerca de un sensor, por ejemplo, cuando un pájaro entra a un contenedor de nido a través de una antena circular de RFID ("radio frequency identification") montado en la entrada del contenedor. En los siguientes trozos de código, vamos a generar datos simulados que representan datos de detecciones grabados por el sensor de RFID y también sensores de infrarrojo.
 
-Digamos que estamos recolectando datos para dos pájaros adultos a través de sensores de ABISSMAL montados en un contenedor de nido. La antena de RFID está montada en la entrada del contenedor, y un par de sensores de infrarrojo, el par "externo", está montado en frente de la antena de RFID para capturar movimientos afuera de la entrada del contenedor. Un segundo par de sensores de infrarrojo, el par "interno", está montado detrás de la antena de RFID para capturar movimientos adentro de la entrada del contenedor. En este ejemplo simulado, el par externo de sensores infrarrojo va a activar cuando un pájaro entra al contenedor de nido, luego la antena de RFID, y luego el par interno de sensores infrarrojos. Cuando un pájaro sale del contenedor, el par interno de sensores infrarrojos debería de activar primero, luego la antena de RFID, y luego el par externo de sensores infrarrojos.
+Digamos que estamos recolectando datos para dos pájaros adultos a través de sensores de ABISSMAL montados en un contenedor de nido. La antena de RFID está montada en la entrada del contenedor, y un par de sensores de infrarrojo, el par "externo", está montado en frente de la antena de RFID para capturar movimientos afuera de la entrada del contenedor. Un segundo par de sensores de infrarrojo, el par "interno", está montado detrás de la antena de RFID para capturar movimientos adentro de la entrada del contenedor. En este ejemplo simulado, el par externo de sensores infrarrojo va a activar cuando un pájaro entra al contenedor de nido, luego la antena de RFID, y luego el par interno de sensores infrarrojo. Cuando un pájaro sale del contenedor, el par interno de sensores infrarrojo debería de activar primero, luego la antena de RFID, y luego el par externo de sensores infrarrojo.
 
 Empezaremos con crear un objeto que contiene las marcas de tiempo simuladas para la antena de RFID. Este objecto se llamara `rfid_ts` y va a contener cuatro marcas de tiempo en formato de horas:minutos:segundos. Cada marca de tiempo estará entrecomillas para indicar que estamos usando información de texto o secuencia de caracteres en el formato `string` de R.
 
@@ -96,7 +96,7 @@ length(rfid_ts) # Este vector tiene cuatro elementos
 
 ```
 
-Continuemos por simular dos movimientos de entrada y dos movimientos de salida del contenedor. Podemos escoger marcas de tiempo para el par externo de sensores de infrarrojo que preceden las marcas de tiempo de RFID y marcas de tiempo del par interno de sensores infrarrojo que siguen las marcas de tiempo de RFID para simular un evento de entrada. Podemos simular eventos de salida con las marcas de tiempo en el orden opuesto (el par interno de sensores se activa primero, luego RFID, luego el par externo de sensores de infrarrojo). Vamos a separar las detecciones de cada sensor adentro de cada movimiento de entrada y salida por un segundo.
+Continuemos por simular dos movimientos de entrada y dos movimientos de salida del contenedor. Podemos escoger marcas de tiempo para el par externo de sensores de infrarrojo que preceden las marcas de tiempo de RFID y marcas de tiempo del par interno de sensores infrarrojo que siguen las marcas de tiempo de RFID para simular un evento de entrada. Podemos simular eventos de salida con las marcas de tiempo en el orden opuesto (el par interno de sensores se activa primero, luego RFID, luego el par externo de sensores de infrarrojo). Vamos a separar las detecciones de cada sensor adentro de cada movimiento de entrada y salida por un segundo. Aquí "IRBB" significa "infrared beam breakers" o sensores de infrarrojo.
 ```{r}
 
 # Simula marcas de tiempo para el par externo ("o_") e interno ("i_") de sensores infrarrojo para una entrada, una salida, y luego otra entrada y salida
@@ -120,10 +120,10 @@ glimpse(rfid_ts)
 
 ```
 
-Otro tipo de información importante es simular ruido en las detecciones de los sensores. Por ejemplo, la antena de RFID puede fallar en detectar la etiqueta PIT ("passive integrated transponder") de un individuo, y los sensores de infrarrojo pueden activarse cuando los pájaros dejan material de nido colgando en la entrada del contenedor. En ambos casos, los sensores infrarrojos deberían de activar pero no la antena de RFID.
+Otro tipo de información importante es simular ruido en las detecciones de los sensores. Por ejemplo, la antena de RFID puede fallar en detectar la etiqueta PIT ("passive integrated transponder") de un individuo, y los sensores de infrarrojo pueden activarse cuando los pájaros dejan material de nido colgando en la entrada del contenedor. En ambos casos, los sensores infrarrojo deberían de activar pero no la antena de RFID.
 ```{r}
 
-# Simula unas fallas de detección de la antena de RFID a través de ambos pares de sensores infrarrojos
+# Simula unas fallas de detección de la antena de RFID a través de ambos pares de sensores infrarrojo
 # Estas fallas de detección del sensor de RFID surgieron en cuatro eventos simulados adicionales (dos entradas y dos salidas)
 o_irbb_ts <- c(o_irbb_ts, "06:05:05", "06:35:08", "07:15:40", "11:10:25")
 i_irbb_ts <- c(i_irbb_ts, "06:05:04", "06:35:09", "07:15:41", "11:10:24")

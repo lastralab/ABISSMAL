@@ -106,9 +106,9 @@ glimpse(rfid_data)
 
 ```
 
-Leer estos datos a R creo un objeto `dataframe`. Deberías de poder ver que hay unas columnas nuevas creadas por la función, como la columna `data_type`. Para esta hoja de cálculo, las columnas `sensor_id` y `data_type` contienen la misma información, pero es útil tener columnas separadas para poder estar al tanto de la identidad única del sensor y el tipo de sensor cuando usas múltiples sensores del mismo tipo (por ejemplo, dos pares de sensores infrarrojos tendrán números de identidad únicos en la columna de `senso_id`).
+Leer estos datos a R creó un objeto `dataframe`. Deberías de poder ver que hay unas columnas nuevas creadas por la función, como la columna `data_type`. Para esta hoja de cálculo, las columnas `sensor_id` y `data_type` contienen la misma información, pero es útil tener columnas separadas para poder estar al tanto de la identidad única del sensor y el tipo de sensor cuando usas múltiples sensores del mismo tipo (por ejemplo, dos pares de sensores infrarrojo tendrán números de identidad únicos en la columna de `senso_id`).
 
-La función `combine_raw_data()` también creo una columna nueva de marcas de tiempo en formato POSIXct para los pasos que siguen de procesar y analizar datos, pero mantuvo la columna original de marcas de tiempo. La función añadió columnas para indicar la etapa de procesar datos y la fecha en que combinaste los datos originales. Finalmente, si revisas las carpetas con los datos originales de RFID, veras que las hojas de cálculo originales por día se preservaron y no fueron ni eliminados ni sobrescritos.
+La función `combine_raw_data()` también creó una columna nueva de marcas de tiempo en formato POSIXct para los pasos que siguen de procesar y analizar datos, pero mantuvo la columna original de marcas de tiempo. La función añadió columnas para indicar la etapa de procesar datos y la fecha en que combinaste los datos originales. Finalmente, si revisas las carpetas con los datos originales de RFID, veras que las hojas de cálculo originales por día se preservaron y no fueron ni eliminados ni sobrescritos.
 
 También puedes ejecutar `combine_raw_data()` con los datos originales de múltiples sensores a la vez con proveer un vector con las etiquetas de estos sensores al argumento `sensores`. Los datos para cada tipo de sensor todavía se guardaran en hojas de cálculo separados, y evitas tener que escribir el mismo código varias veces para ejecutar `combine_raw_data()` para múltiples sensores:
 ```{r}
@@ -117,7 +117,7 @@ combine_raw_data(sensors = c("RFID", "IRBB"), path = path, data_dir = "Data", ou
 
 ```
 
-Los datos de RFID se sobrescribirán, y deberías de ver una hoja de cálculo adicional con los datos originales de los sensores infrarrojos:
+Los datos de RFID se sobrescribirán, y deberías de ver una hoja de cálculo adicional con los datos originales de los sensores infrarrojo:
 ```{r}
 
 list.files(file.path(path, "Data/raw_combined"), pattern = ".csv$")
@@ -196,7 +196,7 @@ glimpse(rfid_pp)
 
 ```
 
-Luego puedes procesar los datos originales de los sensores infrarrojos y revisar el archivo de `.csv`:
+Luego puedes procesar los datos originales de los sensores infrarrojo y revisar el archivo de `.csv`:
 ```{r}
 
 preprocess_detections(sensor = "IRBB", timestamps_col_nm = "timestamp_ms", group_col_nm = "sensor_id", mode = "thin", thin_threshold = 2, drop_tag = NULL, path = file.path(path, "Data"), data_dir = "raw_combined", out_dir = "processed", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS")
