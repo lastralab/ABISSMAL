@@ -114,9 +114,9 @@ glimpse(sim_dats_rfid)
 
 ```
 
-Ahora puedes usar este `dataframe` para simular el proceso de colección de datos a través de dos días mas. Para crear mas observaciones (filas) para dos días adicionales, puedes adjuntar filas de una copia modificada de `sim_dats_rfid` al objeto original de `sim_dats_rfid`.
+Ahora puedes usar este `dataframe` para simular el proceso de colección de datos a través de dos días más. Para crear más observaciones (filas) para dos días adicionales, puedes adjuntar filas de una copia modificada de `sim_dats_rfid` al objeto original de `sim_dats_rfid`.
 
-En el código abajo, estas usando una operación `pipe` para usar `sim_dats_rfid` como entrada en `bind_rows()`, y con esta notación estas especificando que `sim_dats_rfid` es el objeto original al cual quieres adjuntar mas filas. Luego el código adentro de `bind_rows()` especifica el `dataframe`, o las filas nuevas, que quieres adjuntar a `sim_dats_rfid`. En este case, el código adentro de `bind_rows()` provee `sim_dats_rfid` a `dplyr::mutate()` para modificar la columna de `day` para representar un día adicional de colección de datos. Luego repites este proceso para añadir un tercer días de recolectar datos:
+En el código abajo, estas usando una operación `pipe` para usar `sim_dats_rfid` como entrada en `bind_rows()`, y con esta notación estas especificando que `sim_dats_rfid` es el objeto original al cual quieres adjuntar más filas. Luego el código adentro de `bind_rows()` especifica el `dataframe`, o las filas nuevas, que quieres adjuntar a `sim_dats_rfid`. En este case, el código adentro de `bind_rows()` provee `sim_dats_rfid` a `dplyr::mutate()` para modificar la columna de `day` para representar un día adicional de colección de datos. Luego repites este proceso para añadir un tercer días de recolectar datos:
 ```{r}
 
 sim_dats_rfid <- sim_dats_rfid %>% 
@@ -222,14 +222,14 @@ Los `dataframes` que creas y manipulas en R se pueden guardar como archivos fís
 
 ```
 
-Para escribir un archivo físico a tu directorio de trabajo, necesitas comunicarle a R 1) donde guardar el archivo y 2) el nombre del archivo que quieres crear. Puedes pasarle ambas piezas de información a `write.csv()` con combinar tu directorio de trabajo y el nombre del archivo usando la función `file.path()`. Para este ejemplo, vas a crear un archivo de prueba mientras practicas cómo usar `write.csv()`:
+Para escribir un archivo físico a tu directorio de trabajo, necesitas comunicarle a R 1) dónde guardar el archivo y 2) el nombre del archivo que quieres crear. Puedes pasarle ambas piezas de información a `write.csv()` con combinar tu directorio de trabajo y el nombre del archivo usando la función `file.path()`. Para este ejemplo, vas a crear un archivo de prueba mientras practicas cómo usar `write.csv()`:
 ```{r}
 
 # Combina el path para tu directorio de trabajo con el nombre del archivo que quieres escribir
 # La función file.path() combinara ambas piezas de información en un solo path para este archivo
 rfid_file <- file.path(path, "test_file.csv")
 
-# Este objeto contiene la ubicación donde vas a guardar el archivo, y luego el nombre del archivo
+# Este objeto contiene la ubicación dónde vas a guardar el archivo, y luego el nombre del archivo
 rfid_file
 
 ```
@@ -360,7 +360,7 @@ file.remove(rfid_file)
 
 <h3>Practicar escribir un bucle</h3>
 
-Podrías repetir el código arriba seis veces (tres veces por sensor) para escribir un `dataframe` por cada día de colección de datos por sensor. Pero es mejor evitar repetir el mismo código varias veces, porque cuando escribes código de esta forma es mas difícil mantener archivos organizados de código y también es mas fácil introducir errores mientras procesas y analizas datos. Cuando necesitas ejecutar el mismo código varias veces, es mejor escribir un bucle. Escribir bucles es una habilidad muy importante y vamos a construir un bucle paso por paso.
+Podrías repetir el código arriba seis veces (tres veces por sensor) para escribir un `dataframe` por cada día de colección de datos por sensor. Pero es mejor evitar repetir el mismo código varias veces, porque cuando escribes código de esta forma es más difícil mantener archivos organizados de código y también es más fácil introducir errores mientras procesas y analizas datos. Cuando necesitas ejecutar el mismo código varias veces, es mejor escribir un bucle. Escribir bucles es una habilidad muy importante y vamos a construir un bucle paso por paso.
 
 Vas a practicar cómo escribir un bucle con la función `lapply()`.
 ```{r}
@@ -506,7 +506,7 @@ file.remove(files)
 
 ```
 
-Si quieres mas practica escribiendo bucles, puedes escribir un bucle para guardar una hoja de calculo para cada día de colección de datos para los sensores infrarrojo.
+Si quieres más práctica escribiendo bucles, puedes escribir un bucle para guardar una hoja de calculo para cada día de colección de datos para los sensores infrarrojo.
 
 <h3>Escribe un bucle anidado para crear hojas de calculo</h3>
 
@@ -700,4 +700,4 @@ list.files(file.path(path, "Data/IRBB"))
 
 ```
 
-En este tutorial aprendiste mas sobre cómo filtrar `dataframes` y guardar estos objetos como hojas de calculo, y cómo usar bucles de una capa y estructuras de bucles anidados. En el siguiente tutorial vas a usar las hojas de calculo que datos simulados de RFID y sensores infrarrojos para empezar a procesar y analizar datos con las funciones de ABISSMAL.
+En este tutorial aprendiste más sobre cómo filtrar `dataframes` y guardar estos objetos como hojas de calculo, y cómo usar bucles de una capa y estructuras de bucles anidados. En el siguiente tutorial vas a usar las hojas de calculo que datos simulados de RFID y sensores infrarrojos para empezar a procesar y analizar datos con las funciones de ABISSMAL.

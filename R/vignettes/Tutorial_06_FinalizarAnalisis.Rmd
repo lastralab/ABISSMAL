@@ -22,7 +22,7 @@ Este tutorial fue traducido al español por Grace Smith-Vidaurre, siguiendo las 
 
 <h2>Resumen del tutorial y objetivos de aprendizaje</h2>
 
-En este sexto y ultimo tutorial, vas a terminar de usar las detecciones simuladas de movimientos de animales el `pipeline` de procesar y analizar datos de ABISSMAL. Vas a detectar `clusters` ("cúmulos") de detecciones que representan eventos de movimientos distintos y luego vas a anotar inferencias de comportamiento de estos eventos de movimiento. También vas a crear gráficas para visualizar las inferencias de comportamiento. Vas a continuar a usar habilidades que aprendiste en los tutoriales anteriores, y también vas a aprender cómo crear visualizaciones mas complejas con `ggplot()`.
+En este sexto y ultimo tutorial, vas a terminar de usar las detecciones simuladas de movimientos de animales el `pipeline` de procesar y analizar datos de ABISSMAL. Vas a detectar `clusters` ("cúmulos") de detecciones que representan eventos de movimientos distintos y luego vas a anotar inferencias de comportamiento de estos eventos de movimiento. También vas a crear gráficas para visualizar las inferencias de comportamiento. Vas a continuar a usar habilidades que aprendiste en los tutoriales anteriores, y también vas a aprender cómo crear visualizaciones más complejas con `ggplot()`.
 
 <h2>Cargar paquetes e inicializar el `path` de tu directorio de trabajo</h2>
 
@@ -136,7 +136,7 @@ scored_clusters %>%
 
 ```
 
-Cuatro entradas y salidas se anotaron por día. Cómo se compara este resultado con el numero de entradas y salidas que esperabas por día? Si regresas al código en los tutoriales anteriores (el tercer y el cuarto tutorial) donde creaste los datos originales simulados, deberías de poder ver que empezaste por simular dos entradas y dos salidas por día en los datos para el sistema de RFID y los sensores de infrarrojo. Luego añadiste dos entradas y dos salidas mas por día cuando simulaste fallas de detección del sistema de RFID (o sea, estos fueron movimientos capturados solamente por los sensores de infrarrojo). `score_clusters` detecto el numero correcto de entradas y salidas por día.
+Cuatro entradas y salidas se anotaron por día. Cómo se compara este resultado con el numero de entradas y salidas que esperabas por día? Si regresas al código en los tutoriales anteriores (el tercer y el cuarto tutorial) dónde creaste los datos originales simulados, deberías de poder ver que empezaste por simular dos entradas y dos salidas por día en los datos para el sistema de RFID y los sensores de infrarrojo. Luego añadiste dos entradas y dos salidas más por día cuando simulaste fallas de detección del sistema de RFID (o sea, estos fueron movimientos capturados solamente por los sensores de infrarrojo). `score_clusters` detecto el numero correcto de entradas y salidas por día.
 
 Ahora puedes revisar los eventos de posar, empezando con filtrar todas las filas que no se anotaron como eventos de posar (o sea, filas con valores de `NA` en la columna "perching_PIT_tag" que contiene información sobre las etiquetas de PIT). Luego puedes seleccionar solo las columnas que contienen información que es útil revisar, como las identidades de las etiquetas PIT, y también las marcas de tiempo para el inicio y fin de cada evento de posar.
 ```{r}
@@ -169,15 +169,15 @@ scored_clusters %>%
 
 ```
 
-Como puedes ver, cuatro eventos de movimiento que no fueron eventos de posar se asignaron al primer individuo (con la etiqueta PIT "1357aabbcc") en cada día, que es exactamente lo que simulaste en el tercer y el cuarto tutorial. Mas movimientos que no fueron eventos de posar se detectaron a través de estos días también, pero como esos eventos no fueron capturados por la antena de RFID (o sea fueron fallas simuladas de la antena de RFID), estos movimientos fueron capturados por solo los sensores de infrarrojo que no pueden grabar información sobre la identidad de individuos.
+Como puedes ver, cuatro eventos de movimiento que no fueron eventos de posar se asignaron al primer individuo (con la etiqueta PIT "1357aabbcc") en cada día, que es exactamente lo que simulaste en el tercer y el cuarto tutorial. Más movimientos que no fueron eventos de posar se detectaron a través de estos días también, pero como esos eventos no fueron capturados por la antena de RFID (o sea fueron fallas simuladas de la antena de RFID), estos movimientos fueron capturados por solo los sensores de infrarrojo que no pueden grabar información sobre la identidad de individuos.
 
 <h2>Construye una gráfica compleja de código de barras</h2>
 
-Ahora puedes visualizar los resultados finales. En el código abajo vas a aprender cómo crear una gráfica de código de barras que es mas compleja de lo que viste en el tutorial anterior, pero que es mas fácil que interpretar que esa gráfica anterior. Para esta gráfica seria útil poder visualizar tres tipos de inferencias de comportamiento o tipos de información a través del tiempo: la dirección de movimiento (cuando esta disponible), la identidad del individuo (cuando esta disponible), y los eventos de posar.
+Ahora puedes visualizar los resultados finales. En el código abajo vas a aprender cómo crear una gráfica de código de barras que es más compleja de lo que viste en el tutorial anterior, pero que es más fácil que interpretar que esa gráfica anterior. Para esta gráfica seria útil poder visualizar tres tipos de inferencias de comportamiento o tipos de información a través del tiempo: la dirección de movimiento (cuando esta disponible), la identidad del individuo (cuando esta disponible), y los eventos de posar.
 
 Puedes empezar con construir la gráfica con añadir líneas verticales para los eventos que no fueron eventos de posar. El color de cada línea indicara la identidad del individuo, incluyendo cuando esta información no estaba disponible. El tipo de línea va a contener información sobre la dirección de movimiento, y también cuando esta información no se pudo anotar.
 
-Para poder asignar colores y tipos de líneas de la forma que quieres en la gráfica, vas a necesitar modificar el `dataframe` de los resultados finales para convertir los `NAs` en las dos columnas asociadas con estos detalles de estética para convertir los datos ausentes en información útil. Por ejemplo, cuando no hay información sobre la identidad del individuo, seria muy útil convertir los valores asociados de `NA` a un valor como "unassigned" ("no asignado"). En el código abajo vas a usar la función `is.na()` adentro de frases condicionales de `ifelse()` para convertir los valores de `NA` adentro de las columnas "individual_initiated" y "direction_scored" para poder tener información mas útil para la gráfica que vas a hacer mas adelante.
+Para poder asignar colores y tipos de líneas de la forma que quieres en la gráfica, vas a necesitar modificar el `dataframe` de los resultados finales para convertir los `NAs` en las dos columnas asociadas con estos detalles de estética para convertir los datos ausentes en información útil. Por ejemplo, cuando no hay información sobre la identidad del individuo, seria muy útil convertir los valores asociados de `NA` a un valor como "unassigned" ("no asignado"). En el código abajo vas a usar la función `is.na()` adentro de frases condicionales de `ifelse()` para convertir los valores de `NA` adentro de las columnas "individual_initiated" y "direction_scored" para poder tener información más útil para la gráfica que vas a hacer más adelante.
 
 Primero puedes practicar usar `is.na()` adentro de `ifelse()` para crear un vector nuevo. En el código abajo, vas a proveer la frase condicional que quieres probar (aquí vas a probar si la columna que contiene las etiquetas PIT del individuo que inicio el movimiento tiene valores de `NA`), el valor que quieres añadir al vector si la condición se cumple (el valor "unassigned" cuando no hay información sobre la etiqueta PIT), y luego el valor que quieres añadir si la condición no se cumple (en este caso es devolver la etiqueta PIT en la columna individual_initiated si el valor actual no es `NA`).
 ```{r}
@@ -215,7 +215,7 @@ scored_clusters_gg %>%
 
 ```
 
-Este resultado se ve bien. Deberías de ver valores de `NA` en el `dataframe` pero están en la columna "direction_scored" y asociados con los eventos de posar, que vas a añadir a la gráfica en otra capa diferente de código mas adelante.
+Este resultado se ve bien. Deberías de ver valores de `NA` en el `dataframe` pero están en la columna "direction_scored" y asociados con los eventos de posar, que vas a añadir a la gráfica en otra capa diferente de código más adelante.
 
 Puedes usar este `dataframe` modificado para crear la gráfica. En el código abajo, vas a añadir líneas con colores asignados por la identidad de individuos, y los tipos de línea van a representar la dirección de movimiento. Primero vas a especificar los detalles estéticos de la gráfica:
 ```{r}
@@ -272,9 +272,9 @@ ggplot() +
   
 ```
 
-Para hacer esta gráfica organizaste las líneas verticales para separar los movimientos asignados al primer individuo y los movimientos que no fueron asignados. Esta separación vertical entre estos dos conjuntos de datos facilita las comparaciones visuales de patrones de variación en los movimientos a través del tiempo. Creaste esta separación vertical con cambiar los valores que usaste para `y` y `yend` en la segunda capa de `geom_segment()` para que esas líneas empezarían mas arriba que las líneas de la primera capa de `geom_segment()`.
+Para hacer esta gráfica organizaste las líneas verticales para separar los movimientos asignados al primer individuo y los movimientos que no fueron asignados. Esta separación vertical entre estos dos conjuntos de datos facilita las comparaciones visuales de patrones de variación en los movimientos a través del tiempo. Creaste esta separación vertical con cambiar los valores que usaste para `y` y `yend` en la segunda capa de `geom_segment()` para que esas líneas empezarían más arriba que las líneas de la primera capa de `geom_segment()`.
 
-Puedes hacer mas modificaciones que ayudarían con interpretar esta gráfica. En primer lugar, las etiquetas de los paneles que están al lado izquierdo se pueden cambiar para demostrar el día general de colección de datos (como "Day 1" para el primer día) en vez de la fecha. El texto en en eje x también se puede cambiar para demostrar solo el tiempo (o sea eliminar la información sobre el mes y el día), y también puedes añadir mas etiquetas (por ejemplo, una etiqueta cada media hora).
+Puedes hacer más modificaciones que ayudarían con interpretar esta gráfica. En primer lugar, las etiquetas de los paneles que están al lado izquierdo se pueden cambiar para demostrar el día general de colección de datos (como "Day 1" para el primer día) en vez de la fecha. El texto en en eje x también se puede cambiar para demostrar solo el tiempo (o sea eliminar la información sobre el mes y el día), y también puedes añadir más etiquetas (por ejemplo, una etiqueta cada media hora).
 
 Puedes empezar con modificar el `dataframe` para añadir la información sobre el día de colección de datos. Vas a crear esta columna nueva con frases condicionales a través de la función `ifelse` porque solo hay tres días de colección de datos con etiquetas que tienes que cambiar.
 ```{r}
@@ -346,9 +346,9 @@ ggplot(data = scored_clusters_gg2) +
 
 ```
 
-Ahora que moviste la información sobre el día de colección de datos a las etiquetas de los paneles de la gráfica, necesitas componer el texto en el eje x. La gráfica sera mas fácil de interpretar si puedes alinear las marcas de tiempo por hora y minuto para una comparación directa a través de días diferentes.
+Ahora que moviste la información sobre el día de colección de datos a las etiquetas de los paneles de la gráfica, necesitas componer el texto en el eje x. La gráfica sera más fácil de interpretar si puedes alinear las marcas de tiempo por hora y minuto para una comparación directa a través de días diferentes.
 
-Para alinear las marcas de tiempo a través de días, necesitas actualizar el formato de las columnas que contienen las marcas de tiempo. El código para convertir las marcas de tiempo a un formato diferente es anidado y repetitivo pero la conversión se realizara correctamente. Cuando le comunicas a R que deberías de convertir las marcas de tiempo a un formato con horas, minutos, y segundos solamente, R va a añadir un año, un mes, y un día por defecto antes de la marca de tiempo (lo mas común es que usara la fecha actual). Este comportamiento es esperado y no es un error, mas bien facilita que las marcas de tiempo se alinean de la forma correcta a través de días (paneles) en la gráfica (porque R considera todas las marcas de tiempo como si ocurrieron en un solo día).
+Para alinear las marcas de tiempo a través de días, necesitas actualizar el formato de las columnas que contienen las marcas de tiempo. El código para convertir las marcas de tiempo a un formato diferente es anidado y repetitivo pero la conversión se realizara correctamente. Cuando le comunicas a R que deberías de convertir las marcas de tiempo a un formato con horas, minutos, y segundos solamente, R va a añadir un año, un mes, y un día por defecto antes de la marca de tiempo (lo más común es que usara la fecha actual). Este comportamiento es esperado y no es un error, más bien facilita que las marcas de tiempo se alinean de la forma correcta a través de días (paneles) en la gráfica (porque R considera todas las marcas de tiempo como si ocurrieron en un solo día).
 ```{r}
 
 scored_clusters_gg3 <- scored_clusters_gg2 %>% 
@@ -424,7 +424,7 @@ gg
   
 ```
 
-Todavía falta un tipo de información importante que necesitas añadir a esta gráfica: los eventos de posar. Vas a añadir esta información con otra capa de `geom_segment()` pero ahora vas a crear líneas cortas y anchas para que aparezcan mas como puntos en la gráfica:
+Todavía falta un tipo de información importante que necesitas añadir a esta gráfica: los eventos de posar. Vas a añadir esta información con otra capa de `geom_segment()` pero ahora vas a crear líneas cortas y anchas para que aparezcan más como puntos en la gráfica:
 ```{r}
 
 gg <- gg + 
@@ -447,7 +447,7 @@ gg
 Ahora deberías de ver que una leyenda de color aparece arriba de la gráfica con la adición de esta capa adicional de `geom_segment()`. Ambas de las leyendas se pueden mejorar. Puedes modificar la gráfica con actualizar el titulo de cada leyenda, aumentar el tamaño de texto de cada leyenda, y reducir el espacio blanco ente las leyendas y la gráfica. Para modificar los títulos de cada leyenda, vas a usar las funciones `guides()` y `guide_legend()`. Para aumentar el tamaño de texto en la leyenda, vas a usar el argumento `legend.text` adentro de la función `theme()`, y para reducir el espacio blanco entre la gráfica y las leyendas, vas a usar el argumento `legend.margin` adentro de la función `theme()`.
 ```{r}
 
-# Ve mas información sobre la función que controla los margenes (espacio blanco) alrededor de la leyenda
+# Ve más información sobre la función que controla los margenes (espacio blanco) alrededor de la leyenda
 ?margin
 
 gg <- gg +
@@ -480,7 +480,7 @@ ggsave(file.path(path, "behavioral_inferences.tiff"), width = 8, height = 6, uni
 
 Puedes continuar con modificar estéticas menores a este archivo para crear una figura de alta calidad para una publicación. Por ejemplo, puedes cambiar el tamaño final de la imagen (`width`, `height`), tanto como la resolución (`dpi`). Puedes también cambiar el tamaño de texto en cada eje y los títulos de cada eje, o la posición de la leyenda mientras determinas el tamaño final de la imagen en el archivo.
 
-Abajo esta todo el código que escribiste para la gráfica final, en una forma mas condensada y reorganizada:
+Abajo esta todo el código que escribiste para la gráfica final, en una forma más condensada y reorganizada:
 ```{r eval = FALSE}
 
 ggplot(data = scored_clusters_gg3) +
