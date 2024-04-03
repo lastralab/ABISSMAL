@@ -22,9 +22,9 @@ Este tutorial fue traducido al español por Grace Smith-Vidaurre, siguiendo las 
 
 <h2>Resumen del tutorial y objetivos de aprendizaje</h2>
 
-En este tercer tutorial, vamos a crear datos simulados de movimientos de animales que fueron detectados por diferentes sensores. El proceso de simular estos datos reemplaza el proceso de colección de datos que provee ABISSMAL para grabar datos de animales en vivo. Generar estos datos simulados te va a proveer más oportunidades para practicar habilidades básicas de escribir código y tener control sobre la creación de estos datos te ayudara entender los pasos diferentes de análisis de datos que siguen. Si quieres ver datos recolectados de pájaros con el software de ABISSMAL, y el código que fue usado para analizar esos datos, puedes revisar el preprint del [manuscrito de metodos](https://ecoevorxiv.org/repository/view/6268/) que tiene enlaces a los datos y el código que son públicamente accesibles.
+En este tercer tutorial, vamos a crear datos simulados de movimientos de animales que fueron detectados por diferentes sensores. El proceso de simular estos datos reemplaza el proceso de colección de datos que provee ABISSMAL para grabar datos de animales en vivo. Generar estos datos simulados te va a proveer más oportunidades para practicar habilidades básicas de escribir código y tener control sobre la creación de estos datos te ayudará entender los pasos diferentes de los análisis de datos que siguen. Si quieres ver datos recolectados de pájaros con el `software` de ABISSMAL, y el código que usamos para analizar esos datos, puedes revisar el preprint del [manuscrito de metodos](https://ecoevorxiv.org/repository/view/6268/) que tiene enlaces a los datos y el código que son públicamente accesibles.
 
-A través del proceso de simular datos en este tutorial, vas a continuar usando habilidades de programación que aprendiste en el segundo tutorial, y vas a aprender habilidades adicionales que incluyen:
+A través del proceso de simular datos en este tutorial, vas a continuar usando tus habilidades de programación que aprendiste en el segundo tutorial, y vas a aprender sobre:
 
 1. Crear objetos como vectores y `dataframes`
 2. Tipos de datos en R
@@ -36,7 +36,7 @@ A través del proceso de simular datos en este tutorial, vas a continuar usando 
 
 En el tutorial anterior instalaste el `tidyverse`, una colección de paquetes para la ciencia de datos. También aprendiste sobre directorios de trabajo y creaste un directorio nuevo en tu computadora para guardar archivos de datos o imágenes que vas a generar en los siguientes tutoriales.
 
-Cada vez que inicies un archivo nuevo de RMarkdown o R, es importante configurar tu espacio virtual antes de empezar a analizar datos. En el trozo abajo, vas a limpiar tu ambiente global y cargar el `tidyverse` usando código que viste en el segundo tutorial, pero ahora todo el código esta combinado en un solo trozo.
+Cada vez que inicies un archivo nuevo de RMarkdown o R, es importante configurar tu espacio virtual antes de empezar a analizar datos. En el trozo abajo, vas a limpiar tu ambiente global y cargar el `tidyverse` usando código que viste en el segundo tutorial, pero ahora todo el código está combinado en un solo trozo.
 ```{r message = FALSE, warning = FALSE}
 
 rm(list = ls()) # Limpia tu ambiente global
@@ -47,9 +47,9 @@ library(tidyverse) # Carga la colección de paquetes en el tidyverse
 
 <h2>Crear un objeto de `path`</h2>
 
-El siguiente paso sera especificar tu directorio de trabajo. En el segundo tutorial, usaste un `string`, o una secuencia de caracteres entrecomillas para indicar texto adentro de código de R, para especificar el `path` de tu directorio de trabajo mientras usabas funciones diferentes. En vez de copiar y pegar la misma secuencia de caracteres cada vez que quieres usar este `path`, es más eficiente guardar esta secuencia de caracteres (que especifica el `path` de tu directorio de trabajo) adentro de un objeto nuevo, y luego usar el nombre del objeto cuando necesitas especificar el `path`.
+El siguiente paso será especificar tu directorio de trabajo. En el segundo tutorial, usaste un `string`, o una secuencia de caracteres entrecomillas para indicar texto adentro de código de R, para especificar el `path` de tu directorio de trabajo mientras usabas funciones diferentes. En vez de copiar y pegar la misma secuencia de caracteres cada vez que quieres usar este `path`, es más eficiente guardar esta secuencia de caracteres (que especifica el `path` de tu directorio de trabajo) adentro de un objeto nuevo, y luego usar el nombre del objeto cuando necesitas especificar el `path`.
 
-Para crear un objeto de tu `path`, puedes escribir el nombre del objeto que quieres crear al lado izquierdo del trozo (sin comillas), luego los símbolos para crear un objeto en R (`<-`), y luego la información que quieres asignar a este objeto. En este case, la información que quieres guardar adentro de este objeto es tu directorio de trabajo en el formato de un `string`, y esta información necesita estar entrecomillas.
+Para crear un objeto de tu `path`, puedes escribir el nombre del objeto que quieres crear al lado izquierdo del trozo (sin comillas), luego los símbolos para crear un objeto en R (`<-`), y luego la información que quieres asignar a este objeto. En este caso, la información que quieres guardar adentro de este objeto es tu directorio de trabajo en el formato de un `string`, y esta información necesita estar entrecomillas.
 ```{r eval = TRUE}
 
 path <- "/home/gsvidaurre/Desktop/ABISSMAL_tutoriales"
@@ -63,22 +63,22 @@ path
 
 ```
 
-También puedes ver el contenido de `path` con hacer clic en la pestaña de "Environment" y revisar la columna al lado derecho del nombre del objeto. Ahora puedes confirmar que `path` es un objeto nuevo que contiene información sobre tu directorio de trabajo y esta disponible en tu ambiente global para más operaciones.
+También puedes ver el contenido de `path` con hacer clic en la pestaña de "Environment" y revisar la columna al lado derecho del nombre del objeto. Ahora puedes confirmar que `path` es un objeto nuevo que contiene información sobre tu directorio de trabajo y está disponible en tu ambiente global para más operaciones.
 
 Puedes practicar eliminar solamente el objeto `path` de tu ambiente global con escribir y ejecutar el código `rm(list = "path")`. Después de ejecutar este código, deberías de inicializar `path` otra vez usando el código arriba.
 
 <h2>Crear marcas de tiempo para detecciones simuladas de movimientos</h2>
 
-Los datos primarios que colecta ABISSMAL son marcas de tiempo que indican el momento en el tiempo cuando un sensor se activo y grabo movimiento. Muchas (pero no todas) de estas detecciones se pueden asignar a uno o más animales que se movieron cerca de un sensor, por ejemplo, cuando un pájaro entra a un contenedor de nido a través de una antena circular de RFID ("radio frequency identification") montado en la entrada del contenedor. En los siguientes trozos de código, vamos a generar datos simulados que representan datos de detecciones grabados por el sensor de RFID y también sensores de infrarrojo.
+Los datos primarios que colecta ABISSMAL son marcas de tiempo que indican el momento en el tiempo cuando un sensor se activó y grabó movimiento. Muchas (pero no todas) de estas detecciones se pueden asignar a uno o más animales que se movieron cerca de un sensor, por ejemplo, cuando un pájaro entra a un contenedor de nido a través de una antena circular de RFID ("radio frequency identification") montado en la entrada del contenedor. En los siguientes trozos de código, vamos a generar datos simulados que representan datos de detecciones grabados por el sensor de RFID y también sensores de infrarrojo.
 
-Digamos que estamos recolectando datos para 2 pájaros adultos a través de sensores de ABISSMAL montados en un contenedor de nido. La antena de RFID esta montada en la entrada del contenedor, y un par de sensores de infrarrojo, el par "externo", esta montado en frente de la antena de RFID para capturar movimientos afuera de la entrada del contenedor. Un segundo par de sensores de infrarrojo, el par "interno", esta montado detrás de la antena de RFID para capturar movimientos adentro de la entrada del contenedor. En este ejemplo simulado, el par externo de sensores infrarrojo va a activar cuando un pájaro entra al contenedor de nido, luego la antena de RFID, y luego el par interno de sensores infrarrojos. Cuando un pájaro sale del contenedor, el par interno de sensores infrarrojos debería de activar primero, luego la antena de RFID, y luego el par externo de sensores infrarrojos.
+Digamos que estamos recolectando datos para dos pájaros adultos a través de sensores de ABISSMAL montados en un contenedor de nido. La antena de RFID está montada en la entrada del contenedor, y un par de sensores de infrarrojo, el par "externo", está montado en frente de la antena de RFID para capturar movimientos afuera de la entrada del contenedor. Un segundo par de sensores de infrarrojo, el par "interno", está montado detrás de la antena de RFID para capturar movimientos adentro de la entrada del contenedor. En este ejemplo simulado, el par externo de sensores infrarrojo va a activar cuando un pájaro entra al contenedor de nido, luego la antena de RFID, y luego el par interno de sensores infrarrojos. Cuando un pájaro sale del contenedor, el par interno de sensores infrarrojos debería de activar primero, luego la antena de RFID, y luego el par externo de sensores infrarrojos.
 
 Empezaremos con crear un objeto que contiene las marcas de tiempo simuladas para la antena de RFID. Este objecto se llamara `rfid_ts` y va a contener cuatro marcas de tiempo en formato de horas:minutos:segundos. Cada marca de tiempo estará entrecomillas para indicar que estamos usando información de texto o secuencia de caracteres en el formato `string` de R.
 
-Vas a combinar estas marcas de tiempo adentro de un solo objeto usando la función `c()`. Esta función concatena valores separados por comas en un objecto de tipo vector o lista. Arriba creaste un objeto que se llama `path` sin usar `c()`, pero este objeto tenia un solo valor o elemento. Usar `c()` facilita combinar múltiple valores en un objeto como un vector que puede tener múltiple elementos.
+Vas a combinar estas marcas de tiempo adentro de un solo objeto usando la función `c()`. Esta función concatena valores separados por comas en un objecto de tipo vector o lista. Arriba creaste un objeto que se llama `path` sin usar `c()`, pero este objeto tenía un solo valor o elemento. Usar `c()` facilita combinar múltiples valores en un objeto como un vector que puede tener múltiples elementos.
 ```{r}
 
-# Crea un vector de cuatro marcas de tiempo de RFID o cuatro elementos in formato HH:MM:SS
+# Crea un vector de cuatro marcas de tiempo de RFID o cuatro elementos en formato HH:MM:SS
 rfid_ts <- c("10:00:00", "10:05:00", "11:00:00", "11:05:00")
   
 ```
@@ -115,7 +115,7 @@ rfid_ts <- c(rfid_ts, "08:00:00", "08:00:01", "08:00:02", "08:00:03", "11:30:00"
 En el código arriba, modificaste el objeto `rfid_ts` con la función `c()` para añadir diez más marcas de tiempo a este vector para tener un total de 14 elementos. Revisa la estructura del objeto modificado de `rfid_ts` usando la función `glimpse()`:
 ```{r}
 
-# Aquí puedes ver la estructura del objeto en un formato que incluye el tipo de dato en R ("chr", que es tipo `character` o `string`), el numero de elementos ([1:14]), y los valores de los primeros elementos del vector
+# Aquí puedes ver la estructura del objeto en un formato que incluye el tipo de dato en R ("chr", que es tipo `character` o `string`), el número de elementos ([1:14]), y los valores de los primeros elementos del vector
 glimpse(rfid_ts)
 
 ```
@@ -124,7 +124,7 @@ Otro tipo de información importante es simular ruido en las detecciones de los 
 ```{r}
 
 # Simula unas fallas de detección de la antena de RFID a través de ambos pares de sensores infrarrojos
-# Estas fallas en detección del sensor de RFID surgió en cuatro eventos simulados adicionales (dos entradas y dos salidas)
+# Estas fallas de detección del sensor de RFID surgieron en cuatro eventos simulados adicionales (dos entradas y dos salidas)
 o_irbb_ts <- c(o_irbb_ts, "06:05:05", "06:35:08", "07:15:40", "11:10:25")
 i_irbb_ts <- c(i_irbb_ts, "06:05:04", "06:35:09", "07:15:41", "11:10:24")
 
@@ -138,18 +138,18 @@ glimpse(o_irbb_ts)
 
 ```
 
-Acabas de crear datos simulados de movimientos de animales con unas detecciones que representan errores de detección, pero por el momento estos datos se encuentran en diferentes vectores separados y les faltan metadatos muy importantes. Por ejemplo, metadatos útiles que nos faltan incluyen información sobre la replica experimental, la fecha, y para los datos de RFID, el código alfanumérico único de cada etiqueta PIT que fue detectada por la antena de RFID. Algunos de estos metadatos son críticos para los análisis más adelante, como la fecha y los códigos de las etiquetas PIT.
+Acabas de crear datos simulados de movimientos de animales con unas detecciones que representan errores de detección, pero por el momento estos datos se encuentran en diferentes vectores separados y les faltan metadatos muy importantes. Por ejemplo, metadatos útiles que nos faltan incluyen información sobre la réplica experimental, la fecha, y para los datos de RFID, el código alfanumérico único de cada etiqueta PIT que fue detectada por la antena de RFID. Algunos de estos metadatos son críticos para los análisis más adelante, como la fecha y los códigos de las etiquetas PIT.
 
 Los vectores son estructuras útiles en R, pero una limitación de los vectores es que no puedes combinar diferentes tipos de datos en un solo objeto. Puedes intentar combinar diferentes tipos de datos en un vector:
 ```{r}
 
 # Crea un vector con los tipos `character`, `numeric`, y `binary` (o sea, datos de texto, valores numéricos, y valores binarios)
 # El resultado se debería de imprimir directamente a la consola porque no estas guardando el resultado en un objeto
-# Deberías de ver que todos los elementos se forzará al tipo `character` o `string` entrecomillas
+# Deberías de ver que todos los elementos se forzarán al tipo `character` o `string` entrecomillas
 c("1", 1, TRUE, FALSE)
 
 # Ahora crea un vector con datos `numeric` y `binary`
-# Deberías de poder ver que todos los elementos se forzará al tipo `numeric`. Los valores de TRUE y FALSE se convirtieron a los valores numéricos que R usa por defecto para guardar información binaria (TRUE se convierte a 1, y FALSE se convierte a 0)
+# Deberías de poder ver que todos los elementos se forzarán al tipo `numeric`. Los valores de TRUE y FALSE se convirtieron a los valores numéricos que R usa por defecto para guardar información binaria (TRUE se convierte a 1, y FALSE se convierte a 0)
 c(1, 1, TRUE, FALSE)
 
 ```
@@ -158,15 +158,15 @@ Cuando intentas combinar los tipos de dato `character`, `numeric`, y `binary` en
 
 <h2>Crear vectores de metadatos</h2>
 
-Para los análisis que siguen, necesitas poder crear metadatos con diferentes tipos de datos, y luego combinar los datos primarios para cada sensor (las marcas de tiempo por sensor) con los metadatos importantes. Puedes empezar con crear vectores de metadatos para las marcas de tiempo de RFID, incluyendo información sobre la replica experimental, la fecha, y la identidad de la etiqueta PIT para cada detección.
+Para los análisis que siguen, necesitas poder crear metadatos con diferentes tipos de datos, y luego combinar los datos primarios para cada sensor (las marcas de tiempo por sensor) con los metadatos importantes. Puedes empezar con crear vectores de metadatos para las marcas de tiempo de RFID, incluyendo información sobre la réplica experimental, la fecha, y la identidad de la etiqueta PIT para cada detección.
 
-Para crear un vector de metadatos sobre la replica experimental, vas a usar la función `rep()` para repetir la información sobre la replica experimental automáticamente, en vez de copiar y pegar las misma información varias veces. Para configurar el numero de veces que la información sobre la replica experimental se vaya a repetir, también vas a usar la función `length()` para calcular lo largo del vector `rfid_ts` automáticamente, y comunicarle este resultado a `rep()`. Crear un vector de metadatos que tiene el mismo largo que el vector de `rfid_ts` sera útil para combinar estos vectores en un solo objeto más adelante.
+Para crear un vector de metadatos sobre la réplica experimental, vas a usar la función `rep()` para repetir la información sobre la réplica experimental automáticamente, en vez de copiar y pegar las misma información varias veces. Para configurar el número de veces que la información sobre la réplica experimental se vaya a repetir, también vas a usar la función `length()` para calcular lo largo del vector `rfid_ts` automáticamente, y comunicarle este resultado a `rep()`. Crear un vector de metadatos que tiene el mismo largo que el vector de `rfid_ts` será útil para combinar estos vectores en un solo objeto más adelante.
 ```{r}
 
 # La documentación nos dice que rep() espera dos argumentos, `x` y `time`
 ?rep
 
-# Crea un vector con información sobre la replica experimental
+# Crea un vector con información sobre la réplica experimental
 # El argumento `x` contiene la información de metadatos que se va a repetir
 # El argumento `times` especifica la cantidad de veces que esta información se va a repetir
 exp_rep <- rep(x = "Pair_01", times = length(rfid_ts))
@@ -180,7 +180,7 @@ glimpse(exp_rep)
 
 ```
 
-Usar `times = length(rfid_ts)` es mejor costumbre que configurar lo largo de `rfid_ts` manualmente (por ejemplo, `times = 14`). Configurar el valor de `times` manualmente es suponer que el objeto `rfid_ts` no ha cambiado dentro de una sesión de escribir código, o entre sesiones diferentes, y esto puede ser una suposición peligrosa. Cuando usas `times = length(rfid_ts)` te aseguras que el código arriba va a crear un vector de metadatos del mismo largo que `rfid_ts` sin importar que tantas modificaciones le hayas hecho a `rfid_ts` en el código arriba.
+Usar `times = length(rfid_ts)` es mejor costumbre que configurar lo largo de `rfid_ts` manualmente (por ejemplo, `times = 14`). Configurar el valor de `times` manualmente es suponer que el objeto `rfid_ts` no ha cambiado adentro de una sesión de escribir código, o entre sesiones diferentes, y esto puede ser una suposición peligrosa. Cuando usas `times = length(rfid_ts)` te aseguras que el código arriba va a crear un vector de metadatos del mismo largo que `rfid_ts` sin importar qué tantas modificaciones le hayas hecho a `rfid_ts` en el código arriba.
 
 Puedes también usar una frase condicional para confirmar que el vector de metadatos es del mismo largo que el vector de marcas de tiempo de RFID. Las frases condicionales puede ser útiles para revisar suposiciones en tu código, o para construir nuevos datos y funciones.
 ```{r}
@@ -192,7 +192,7 @@ length(rfid_ts) == length(exp_rep)
 
 En la frase condicional arriba, estas usando los símbolos `==` para preguntar si los dos vectores `rfid_ts` y `exp_rep` tienen la misma cantidad de elementos (si tienen el mismo largo).
 
-También puedes usar los símbolos `!=` para preguntar si los dos vectores `rfid_ts` y `exp_rep` *no* tienen la misma cantidad de elementos (si *no* tienen el mismo largo):
+También puedes usar los símbolos `!=` para preguntar si los dos vectores `rfid_ts` y `exp_rep` *no* tienen la misma cantidad de elementos (o sea, si *no* tienen el mismo largo):
 ```{r}
 
 # El resultado de esta frase debería de ser FALSE, porque estos vectores tienen el mismo largo
@@ -200,31 +200,31 @@ length(rfid_ts) != length(exp_rep)
 
 ```
 
-Como un ejemplo, puedes modificar `rfid_ts` para que tenga un numero de elementos diferente a `exp_rep`. Abajo puedes ver algunas formas diferentes de filtrar o eliminar cuatro elementos del vector `rfid_ts` para que tenga diez elementos total.
+Como un ejemplo, puedes modificar `rfid_ts` para que tenga un número de elementos diferente a `exp_rep`. Abajo puedes ver algunas formas diferentes de filtrar o eliminar cuatro elementos del vector `rfid_ts` para que tenga diez elementos en total.
 ```{r}
 
-## Crear indices numéricos para filtrar un objeto
+## Crea índices numéricos para filtrar un objeto
 
-# Puedes usar el símbolo `:` para crear una secuencia de números de los indices 5 a lo largo de rfid_ts 
+# Puedes usar el símbolo `:` para crear una secuencia de números de los índices 5 a lo largo de rfid_ts 
 5:length(rfid_ts)
 
-# También puedes usar la función `seq()` para crear la misma secuencia de indices numéricos que ves arriba
+# También puedes usar la función `seq()` para crear la misma secuencia de índices numéricos que ves arriba
 seq(from = 5, to = length(rfid_ts), by = 1)
 
-# Si quieres filtrar elementos no consecutivos, puedes crear un vector de indices con la función `c()`
+# Si quieres filtrar elementos no consecutivos, puedes crear un vector de índices con la función `c()`
 c(1, 3, 5, 6, 8, 10, 11, 12, 13, 14)
 
-## Filtrar un vector por indices numéricos
+## Filtra un vector por índices numéricos
 
-# Cuando insertas cualquiera de las expresiones arriba adentro de los corchetes que vienen después del nombre del vector, puedes seleccionar los elementos de indice cinco a lo largo de rfid_ts, y eliminar los primeros cuatro elementos 
+# Cuando insertas cualquiera de las expresiones arriba adentro de los corchetes que vienen después del nombre del vector, puedes seleccionar los elementos del índice cinco a lo largo de rfid_ts, y así eliminar los primeros cuatro elementos 
 rfid_ts[5:length(rfid_ts)]
 
 rfid_ts[seq(from = 5, to = length(rfid_ts), by = 1)]
 
 rfid_ts[c(1, 3, 5, 6, 8, 10, 11, 12, 13, 14)]
 
-# Puedes usar cualquier de los métodos arriba para crear una secuencia de indices que quieres eliminar, y luego usar el símbolo `-` adentro de los corchetes para eliminar los elementos en esos indices particulares. Por ejemplo:
-rfid_ts[-c(1:4)] # los números deberían de estar adentro de la función `c()` para que este tipo de filtrar de forma invertida funcione
+# Puedes usar cualquier de los métodos arriba para crear una secuencia de índices que quieres eliminar, y luego usar el símbolo `-` adentro de los corchetes para eliminar los elementos en esos índices particulares. Por ejemplo:
+rfid_ts[-c(1:4)] # los números deberían de estar adentro de la función `c()` para que funcione este tipo de filtrar de forma invertida
 
 ```
 
@@ -238,9 +238,9 @@ length(rfid_ts[-c(1:4)]) != length(exp_rep)
 
 <h2>Crear `dataframes` con datos primarios y metadatos</h2>
 
-Es importante combinar los metadatos con los datos primarios para análisis futuros, y puedes combinarlos usando un tipo de objeto que se llama un `dataframe`. Los `dataframes` son parecidos a las hojas de calculo porque tienen dos dimensiones (filas y columnas), y puedes guardar múltiples tipos de datos diferentes en el mismo `dataframe`. También puedes guardar `dataframes` en hojas de calculo o archivos físicos en tu computadora.
+Es importante combinar los metadatos con los datos primarios para análisis futuros, y puedes combinarlos usando un tipo de objeto que se llama un `dataframe`. Los `dataframes` son parecidos a las hojas de cálculo porque tienen dos dimensiones (filas y columnas), y puedes guardar múltiples tipos de datos diferentes en el mismo `dataframe`. También puedes guardar `dataframes` en hojas de cálculo o archivos físicos en tu computadora.
 
-Para combinar dos vectores en un solo `dataframe`, los vectores tienen que tener el mismo largo. Cuando intentas combinar dos vectores de largo diferentes, deberías de recibir un mensaje de error en la consola especificando que los dos argumentos no tienen el mismo numero de filas:
+Para combinar dos vectores en un solo `dataframe`, los vectores tienen que tener el mismo largo. Cuando intentas combinar dos vectores de largo diferentes, deberías de recibir un mensaje de error en la consola especificando que los dos argumentos no tienen el mismo número de filas:
 ```{r eval = FALSE}
 
 sim_dats <- data.frame(exp_rep, rfid_ts[-c(1:4)])
@@ -259,9 +259,9 @@ glimpse(sim_dats)
 
 ```
 
-Cuando revisas la estructura del objeto `sim_dats`, el `dataframe` nuevo, puedes ver que tiene 14 filas y 2 columnas. Para cada columna (después del símbolo de "$"), puedes ver que el nombre de la columna (aquí `exp_rep` y `rfid_ts`), el tipo de dato en cada columna (en este momento cada columna es del tipo `character`), y luego los valores de cada columna en las primeras filas del `dataframe`.
+Cuando revisas la estructura del objeto `sim_dats`, el `dataframe` nuevo, puedes ver que tiene 14 filas y dos columnas. Para cada columna (después del símbolo de "$"), puedes ver que el nombre de la columna (aquí `exp_rep` y `rfid_ts`), el tipo de dato en cada columna (en este momento cada columna es del tipo `character`), y luego los valores de cada columna en las primeras filas del `dataframe`.
 
-Puedes cambiar los nombres de cada columna con añadir un nombre nuevo y el símbolo `=` antes de cada vector. Abajo el vector `exp_rep` se convierte en la columna `replicate` con la replica experimental y el vector `rfid_ts` se convierte en la columna `timestamps` con las marcas de tiempo.
+Puedes cambiar los nombres de cada columna con añadir un nombre nuevo y el símbolo `=` antes de cada vector. Abajo el vector `exp_rep` se convierte en la columna `replicate` con la réplica experimental y el vector `rfid_ts` se convierte en la columna `timestamps` con las marcas de tiempo.
 ```{r}
 
 sim_dats <- data.frame(replicate = exp_rep, timestamps = rfid_ts)
@@ -282,19 +282,19 @@ glimpse(sim_dats)
 La columna del año tiene un nombre extraño cuando añadimos una nueva columna usando `cbind()`, y si revisas el código de arriba, puedes ver que el nombre de esta columna se parece mucho al código que escribiste adentro de `cbind()`. Puedes usar la función `names()` e indexar con corchetes para cambiar el nombre extraño a un nombre mejor, como "year":
 ```{r}
 
-# Esta función devuelve un vector de los nombres de las columnas del `dataframe`
+# Esta función devuelve un vector de los nombres de las columnas del dataframe
 names(sim_dats)
 
-# Usa indexar con corchetes y la función `ncol()` para encontrar el ultimo nombre entre los nombres de todas las columnas, porque esta ultima columna contiene la información sobre el año
-ncol(sim_dats) # Hay 3 columnas en este `dataframe`
+# Usa indexar con corchetes y la función ncol() para encontrar el último nombre entre los nombres de todas las columnas, porque esta última columna contiene la información sobre el año
+ncol(sim_dats) # Hay 3 columnas en este dataframe
 
-# Esta expresión devuelve el nombre de la ultima columna
+# Esta expresión devuelve el nombre de la última columna
 names(sim_dats)[ncol(sim_dats)]
 
-# Puedes sobrescribir el nombre de la ultima columna con un nombre nuevo
+# Puedes sobrescribir el nombre de la última columna con un nombre nuevo
 names(sim_dats)[ncol(sim_dats)] <- "year"
 
-# Confirma que el nombre de la columna de año se actualizo de la forma que esperas
+# Confirma que el nombre de la columna de año se actualizó de la forma que esperas
 names(sim_dats)
 glimpse(sim_dats)
 
@@ -302,10 +302,10 @@ glimpse(sim_dats)
 
 <h2>Crear `dataframes` usando el `tidyverse`</h2>
 
-En el código arriba, usaste código de R base para añadir una columna nueva y actualizar el nombre de esa columna. Te tomo varias líneas de código para completar estas operaciones. Puedes reducir la cantidad de código que necesitas para estos pasos si eliminas las líneas de código que usaste para revisar las operaciones. Pero otra forma para reducir la cantidad de código que escribes para esta serie de operaciones es usar la notación y colección de funciones del `tidyverse`:
+En el código arriba, usaste código de R base para añadir una columna nueva y actualizar el nombre de esa columna. Te tomó varias líneas de código para completar estas operaciones. Puedes reducir la cantidad de código que necesitas para estos pasos si eliminas las líneas de código que usaste para revisar las operaciones. Pero otra forma para reducir la cantidad de código que escribes para esta serie de operaciones es usar la notación y colección de funciones del `tidyverse`:
 ```{r}
 
-# Crear el `dataframe` de nuevo con dos columnas
+# Crear el dataframe de nuevo con dos columnas
 sim_dats <- data.frame(replicate = exp_rep, timestamps = rfid_ts)
 
 # Usa el tidyverse para añadir el año como la tercera columna
@@ -320,7 +320,7 @@ glimpse(sim_dats)
 
 Acabas de añadir una columna para el año con el nombre correcto en menos líneas de código. En la notación del `tidyverse`, el símbolo de `%>%` significa una operación de `pipe`, en que usas el objeto antes del símbolo de `%>%` como entrada para la operación o función que sigue el símbolo de `%>%`. Arriba usaste el objeto de `sim_dats` como entrada para la función `mutate()`, que usaste para crear la columna `year`.
 
-La notación `dplyr::` antes de `mutate()` indica que la función `mutate()` se debería de acceder desde el paquete que se llama `dplyr`. Incluir el nombre del paquete con dos puntos repetidos dos veces es una notación importante para usar cuando hay múltiples funciones accesibles en tu ambiente global con el mismo nombre. Por ejemplo, si usas otros paquetes aparte de `dplyr` que también tienen funciones que se llaman `mutate()`, y no especificas cual paquete quieres usar, puedes terminar con errores inmediatos (como cuando el código no se puede ejecutar). Incluso si el código ejecuta, usar la operación equivocada de otra función de `mutate()` puede introducir errores a tus análisis más adelante que son difíciles de identificar.
+La notación `dplyr::` antes de `mutate()` indica que la función `mutate()` se debería de acceder desde el paquete que se llama `dplyr`. Incluir el nombre del paquete con dos puntos repetidos dos veces es una notación importante usar cuando hay múltiples funciones accesibles en tu ambiente global con el mismo nombre. Por ejemplo, si usas otros paquetes aparte de `dplyr` que también tienen funciones que se llaman `mutate()`, y no especificas cual paquete quieres usar, puedes terminar con errores inmediatos (como cuando el código no se puede ejecutar). Incluso si el código ejecuta, usar la operación equivocada de otra función de `mutate()` puede introducir errores a tus análisis más adelante que son difíciles de identificar.
 
 Las operaciones de `piping` con el símbolo `%>%` (o un `pipe`) pueden simplificar el código que escribes porque no creas tantos objetos intermedios como cuando usas R base. Por otro lado, por esta misma razón puede tomar práctica solucionar errores con operaciones de `piping` cuando estas operaciones son largas y anidadas. Una forma útil para revisar resultados intermedios adentro de operaciones largas de `piping` es incluir la función `glimpse()` entre diferentes pasos de la operación:
 ```{r}
@@ -332,14 +332,14 @@ sim_dats <- data.frame(replicate = exp_rep, timestamps = rfid_ts)
 sim_dats %>%
   glimpse() %>% # Ver la estructura de la primera versión de sim_dats
   dplyr::mutate(
-    # La expresión nrow(.) significa "obtener el numero de filas para el objeto actual". El objeto en este caso es sim_dats
+    # La expresión nrow(.) significa "obtener el número de filas para el objeto actual". El objeto en este caso es sim_dats
     year = rep(2023, nrow(.))
   ) %>%
   glimpse() # Ver la estructura de la versión más reciente de sim_dats con la columna nueva de "year"
 
 ```
 
-En el código arriba, también aprendiste una forma nueva para repetir un valor adentro de una operación de `piping` con la notación `.` adentro de una función, que significa que la operación ejecutara con el objeto actual. En el ejemplo arriba, `.` se refiere al objeto `sim_dats` que se usó como entrada para la operación entera de `piping`. Como el símbolo `.` esta adentro de la función `nrow()`, la función debería de devolver el numero de filas de `sim_dat`.
+En el código arriba, también aprendiste una forma nueva para repetir un valor adentro de una operación de `piping` con la notación `.` adentro de una función, que significa que la operación ejecutará con el objeto actual. En el ejemplo arriba, `.` se refiere al objeto `sim_dats` que se usó como entrada para la operación entera de `piping`. Como el símbolo `.` está adentro de la función `nrow()`, la función debería de devolver el número de filas de `sim_dat`.
 
 Puedes usar una operación parecida para añadir dos columnas al `dataframe` que contienen información del mes y día:
 ```{r}
@@ -360,6 +360,6 @@ sim_dats %>%
 
 ```
 
-En el código arriba, añadiste dos columnas numéricas más al `dataframe` y lo hiciste sin necesitar usar la función `rep()` para repetir valores. Esto fue posible porque usaste un `dataframe` que ya existía como la entrada a las operaciones de `dplyr::mutate()`, y el único valor que especificaste para cada columna nueva del año, mes, y día se repitió automáticamente para llenar todas las filas en el data frame para cada columna. Especificar un solo valor para una nueva columna puede ayudar reducir la cantidad de código que escribes, pero solo cuando de verdad quieres que el mismo valor se repite por todas las filas del `dataframe`.
+En el código arriba, añadiste dos columnas numéricas más al `dataframe` y lo hiciste sin necesitar usar la función `rep()` para repetir valores. Esto fue posible porque usaste un `dataframe` que ya existía como la entrada a las operaciones de `dplyr::mutate()`, y el único valor que especificaste para cada columna nueva del año, mes, y día se repitió automáticamente para llenar todas las filas en el `dataframe` para cada columna. Especificar un solo valor para una nueva columna puede ayudar reducir la cantidad de código que escribes, pero sólo cuando de verdad quieres que el mismo valor se repite por todas las filas del `dataframe`.
 
-Como no guardaste estas modificaciones a `sim_dats` en un objeto el resultado del código arriba se va a imprimir a la consola. En el siguiente tutorial, vas a guardar este `dataframe` de datos simulados de RFID y sensores infrarrojo a hojas de calculo como archivos físicos en tu computadora.
+Como no guardaste estas modificaciones a `sim_dats` en un objeto, el resultado del código arriba se va a imprimir a la consola. En el siguiente tutorial, vas a guardar este `dataframe` de datos simulados de RFID y sensores infrarrojo a hojas de cálculo como archivos físicos en tu computadora.

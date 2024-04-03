@@ -68,7 +68,7 @@ Para obtener más información sobre cada una de las tres funciones primarias, p
 
 <h2>Combinar los datos originales</h2>
 
-Cuando hayas cargado las funciones de ABISSMAL, podrás usar la primera función, `combine_raw_data()`, para combinar los datos colectados a través de días y tipos de sensores en una sola hoja de calculo por sensor. Vas a empezar con combinar los datos originales para el sensor de RFID que fueron colectados a través de días diferentes en una hoja de calculo para este sensor.
+Cuando hayas cargado las funciones de ABISSMAL, podrás usar la primera función, `combine_raw_data()`, para combinar los datos colectados a través de días y tipos de sensores en una sola hoja de cálculo por sensor. Vas a empezar con combinar los datos originales para el sensor de RFID que fueron colectados a través de días diferentes en una hoja de cálculo para este sensor.
 
 Vas a proveerle información a la función `combine_raw_data()` a través de los siguientes argumentos:
 
@@ -78,11 +78,11 @@ Vas a proveerle información a la función `combine_raw_data()` a través de los
 
 * `data_dir` es la carpeta que contiene datos adentro de tu directorio de trabajo
 
-* `out_dir` es la carpeta dónde quieres guardar la hoja de calculo de los datos originales combinados. La función creara esta carpeta si no existe en tu computadora
+* `out_dir` es la carpeta dónde quieres guardar la hoja de cálculo de los datos originales combinados. La función creara esta carpeta si no existe en tu computadora
 
 * `tz` es la zona de tiempo para convertir marcas de tiempo al formato `POSIXct` en R. La zona de tiempo por defecto es "America/New York", y puedes ver la sección de "Time zones" en la documentación para `DateTimeClasses` en R para más información (`?DateTimeClasses`)
 
-* `POSIXct_format` es una secuencia de caracteres que contiene la información del formato `POSIXct` para combinar fechas y marcas de tiempo en una sola columna. Por defecto la función devolverá el año como un numero con cuatro dígitos y el mes y el día como números con dos dígitos, separados por guiones. La fecha y el tiempo estarán separados por un espacio, y la hora, el minuto, y el segundo (en decimales), todos con dos dígitos, estarán separados por dos puntos
+* `POSIXct_format` es una secuencia de caracteres que contiene la información del formato `POSIXct` para combinar fechas y marcas de tiempo en una sola columna. Por defecto la función devolverá el año como un número con cuatro dígitos y el mes y el día como números con dos dígitos, separados por guiones. La fecha y el tiempo estarán separados por un espacio, y la hora, el minuto, y el segundo (en decimales), todos con dos dígitos, estarán separados por dos puntos
 ```{r}
 
 # Combina los datos originales para los sensores de RFID e infrarrojo en procesos separados
@@ -90,14 +90,14 @@ combine_raw_data(sensors = "RFID", path = path, data_dir = "Data", out_dir = "Da
 
 ```
 
-Puedes revisar que `combine_raw_data()` guardo una hoja de calculo con los datos originales combinados de RFID al directorio nuevo `raw_combined`:
+Puedes revisar que `combine_raw_data()` guardo una hoja de cálculo con los datos originales combinados de RFID al directorio nuevo `raw_combined`:
 ```{r}
 
 list.files(file.path(path, "Data/raw_combined"), pattern = ".csv$")
 
 ```
 
-Puedes leer el archivo de datos combinados de RFID ("combined_raw_data_RFID.csv") a R para revisar la estructura de esta hoja de calculo:
+Puedes leer el archivo de datos combinados de RFID ("combined_raw_data_RFID.csv") a R para revisar la estructura de esta hoja de cálculo:
 ```{r}
 
 rfid_data <- read.csv(file.path(path, "Data/raw_combined", "combined_raw_data_RFID.csv"))
@@ -106,18 +106,18 @@ glimpse(rfid_data)
 
 ```
 
-Leer estos datos a R creo un objeto `dataframe`. Deberías de poder ver que hay unas columnas nuevas creadas por la función, como la columna `data_type`. Para esta hoja de calculo, las columnas `sensor_id` y `data_type` contienen la misma información, pero es útil tener columnas separadas para poder estar al tanto de la identidad única del sensor y el tipo de sensor cuando usas múltiples sensores del mismo tipo (por ejemplo, dos pares de sensores infrarrojos tendrán números de identidad únicos en la columna de `senso_id`).
+Leer estos datos a R creo un objeto `dataframe`. Deberías de poder ver que hay unas columnas nuevas creadas por la función, como la columna `data_type`. Para esta hoja de cálculo, las columnas `sensor_id` y `data_type` contienen la misma información, pero es útil tener columnas separadas para poder estar al tanto de la identidad única del sensor y el tipo de sensor cuando usas múltiples sensores del mismo tipo (por ejemplo, dos pares de sensores infrarrojos tendrán números de identidad únicos en la columna de `senso_id`).
 
-La función `combine_raw_data()` también creo una columna nueva de marcas de tiempo en formato POSIXct para los pasos que siguen de procesar y analizar datos, pero mantuvo la columna original de marcas de tiempo. La función añadió columnas para indicar la etapa de procesar datos y la fecha en que combinaste los datos originales. Finalmente, si revisas las carpetas con los datos originales de RFID, veras que las hojas de calculo originales por día se preservaron y no fueron ni eliminados ni sobrescritos.
+La función `combine_raw_data()` también creo una columna nueva de marcas de tiempo en formato POSIXct para los pasos que siguen de procesar y analizar datos, pero mantuvo la columna original de marcas de tiempo. La función añadió columnas para indicar la etapa de procesar datos y la fecha en que combinaste los datos originales. Finalmente, si revisas las carpetas con los datos originales de RFID, veras que las hojas de cálculo originales por día se preservaron y no fueron ni eliminados ni sobrescritos.
 
-También puedes ejecutar `combine_raw_data()` con los datos originales de múltiples sensores a la vez con proveer un vector con las etiquetas de estos sensores al argumento `sensores`. Los datos para cada tipo de sensor todavía se guardaran en hojas de calculo separados, y evitas tener que escribir el mismo código varias veces para ejecutar `combine_raw_data()` para múltiples sensores:
+También puedes ejecutar `combine_raw_data()` con los datos originales de múltiples sensores a la vez con proveer un vector con las etiquetas de estos sensores al argumento `sensores`. Los datos para cada tipo de sensor todavía se guardaran en hojas de cálculo separados, y evitas tener que escribir el mismo código varias veces para ejecutar `combine_raw_data()` para múltiples sensores:
 ```{r}
 
 combine_raw_data(sensors = c("RFID", "IRBB"), path = path, data_dir = "Data", out_dir = "Data/raw_combined", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS")
 
 ```
 
-Los datos de RFID se sobrescribirán, y deberías de ver una hoja de calculo adicional con los datos originales de los sensores infrarrojos:
+Los datos de RFID se sobrescribirán, y deberías de ver una hoja de cálculo adicional con los datos originales de los sensores infrarrojos:
 ```{r}
 
 list.files(file.path(path, "Data/raw_combined"), pattern = ".csv$")
@@ -133,7 +133,7 @@ detect_perching_events(file_nm = "combined_raw_data_RFID.csv", threshold = 2, ru
 
 ```
 
-`detect_perching_events()` puede operar en solo un archivo y tipo de sensor a la vez. La función automáticamente crea una carpeta que se llama "processed" (para datos procesados) y guardara un archivo de .csv adentro de esa carpeta si pudo detectar eventos de posar usando el umbral temporal actual (`threshold`, en segundos), y la duración de secuencias de detección actual (`run_length`, en numero de detecciones).
+`detect_perching_events()` puede operar en solo un archivo y tipo de sensor a la vez. La función automáticamente crea una carpeta que se llama "processed" (para datos procesados) y guardara un archivo de .csv adentro de esa carpeta si pudo detectar eventos de posar usando el umbral temporal actual (`threshold`, en segundos), y la duración de secuencias de detección actual (`run_length`, en número de detecciones).
 
 Cuando creamos datos simulados en los últimos tutoriales, simulaste eventos de posar en los datos de RFID. Pudiste recuperar estos eventos de posar usando `detect_perching_events()`?
 ```{r}
@@ -144,7 +144,7 @@ glimpse(perching)
 
 ```
 
-`detect_perching_events()` identifico un total de seis eventos de posar, que es el mismo numero que simulaste en el tutorial anterior (dos eventos de posar por día a través de tres días). Puedes revisar los valores adentro del `dataframe` para ver más información sobre estos eventos de posar:
+`detect_perching_events()` identifico un total de seis eventos de posar, que es el mismo número que simulaste en el tutorial anterior (dos eventos de posar por día a través de tres días). Puedes revisar los valores adentro del `dataframe` para ver más información sobre estos eventos de posar:
 ```{r}
 
 # Las marcas de tiempo cuando cada evento de posar empezó
@@ -187,7 +187,7 @@ list.files(file.path(path, "Data/processed"))
 
 ```
 
-Puedes leer este archivo a R para ver su estructura. Deberías de ver menos filas en este `dataframe` comparado con la hoja de calculo de los datos originales:
+Puedes leer este archivo a R para ver su estructura. Deberías de ver menos filas en este `dataframe` comparado con la hoja de cálculo de los datos originales:
 ```{r}
 
 rfid_pp <- read.csv(file.path(path, "Data/processed/pre_processed_data_RFID.csv"))
@@ -290,7 +290,7 @@ ggplot(data = rfid_combined)
 
 ```
 
-Necesitaras añadir otras funciones estéticas a esta capa fundamental de la gráfica para poder ver tus datos. Las funciones que usaras para añadir detalles estéticos a la gráfica vacía dependerán del tipo de gráfica que quieres crear. En este ejemplo, vas a generar una gráfica de código de barras, en que cada marca de tiempo esta representado por una línea vertical delgada. Las gráfica de código de barra pueden ser gráficas útiles cuando trabajas con marcas de tiempo, porque la información más importante se contiene en una dimensión (el tiempo en el eje x). Si fueras a resumir el numero de marcas de tiempo grabado cada día, seria mejor hacer una gráfica de líneas. 
+Necesitaras añadir otras funciones estéticas a esta capa fundamental de la gráfica para poder ver tus datos. Las funciones que usaras para añadir detalles estéticos a la gráfica vacía dependerán del tipo de gráfica que quieres crear. En este ejemplo, vas a generar una gráfica de código de barras, en que cada marca de tiempo esta representado por una línea vertical delgada. Las gráfica de código de barra pueden ser gráficas útiles cuando trabajas con marcas de tiempo, porque la información más importante se contiene en una dimensión (el tiempo en el eje x). Si fueras a resumir el número de marcas de tiempo grabado cada día, seria mejor hacer una gráfica de líneas. 
 
 Puedes añadir la función `geom_segment()` como la siguiente capa encima de la capa fundamental de la gráfica. `geom_segment()` facilita añadir línea a una gráfica, y las líneas pueden comunicar información en una o dos dimensiones (por su ancho en el eje x y su altura en el eje y).
 ```{r}

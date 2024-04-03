@@ -22,7 +22,7 @@ Este tutorial fue traducido al español por Grace Smith-Vidaurre, siguiendo las 
 
 <h2>Resumen del tutorial y objetivos de aprendizaje</h2>
 
-En este sexto y ultimo tutorial, vas a terminar de usar las detecciones simuladas de movimientos de animales el `pipeline` de procesar y analizar datos de ABISSMAL. Vas a detectar `clusters` ("cúmulos") de detecciones que representan eventos de movimientos distintos y luego vas a anotar inferencias de comportamiento de estos eventos de movimiento. También vas a crear gráficas para visualizar las inferencias de comportamiento. Vas a continuar a usar habilidades que aprendiste en los tutoriales anteriores, y también vas a aprender cómo crear visualizaciones más complejas con `ggplot()`.
+En este sexto y último tutorial, vas a terminar de usar las detecciones simuladas de movimientos de animales el `pipeline` de procesar y analizar datos de ABISSMAL. Vas a detectar `clusters` ("cúmulos") de detecciones que representan eventos de movimientos distintos y luego vas a anotar inferencias de comportamiento de estos eventos de movimiento. También vas a crear gráficas para visualizar las inferencias de comportamiento. Vas a continuar a usar habilidades que aprendiste en los tutoriales anteriores, y también vas a aprender cómo crear visualizaciones más complejas con `ggplot()`.
 
 <h2>Cargar paquetes e inicializar el `path` de tu directorio de trabajo</h2>
 
@@ -117,7 +117,7 @@ Por ejemplo, la función `dplyr::filter()` eliminara una fila cada vez que encue
 
 <h2>Cuenta eventos por día</h2>
 
-Ahora puedes escribir código para contar el numero de eventos de entrada y salida que ABISSMAL anoto por día. Vas a necesitar 1) crear una columna nueva con la información sobre el día para cada marca de tiempo, 2) eliminar filas con datos ausentes para la información anotada de la dirección del movimiento (la columna `direction_scored`, porque esta información no se puede anotar para algunos movimientos), 3) agrupar el `dataframe` por día y por la dirección anotada, y luego 4) contar el numero de filas por grupo.
+Ahora puedes escribir código para contar el número de eventos de entrada y salida que ABISSMAL anoto por día. Vas a necesitar 1) crear una columna nueva con la información sobre el día para cada marca de tiempo, 2) eliminar filas con datos ausentes para la información anotada de la dirección del movimiento (la columna `direction_scored`, porque esta información no se puede anotar para algunos movimientos), 3) agrupar el `dataframe` por día y por la dirección anotada, y luego 4) contar el número de filas por grupo.
 ```{r}
 
 scored_clusters %>%
@@ -127,16 +127,16 @@ scored_clusters %>%
   ) %>%
   # Aquí estas usando la función is.na() que devolverá TRUE cuando encuentra un valor ausente (NA) en la columna actual. Con colocar el símbolo de ! antes de is.na(), estas invirtiendo la frase condicional y también el resultado, así que todos los valores TRUE se convertirán a FALSE. Por ende, dplyr::filter eliminara todas las filas que devuelven el valor de FALSE en esta expresión (o sea, todas las filas con valores ausentes en la columna direction_scored con información sobre la dirección anotada de movimiento)
   dplyr::filter(!is.na(direction_scored)) %>%
-  # Agrupa el dataframe por ambas columnas para las cuales quieres contar filas (eventos). Aquí quieres saber el numero de entradas y salidas (categorías en la columna direction_scored) por día (categorías en la columna day)
+  # Agrupa el dataframe por ambas columnas para las cuales quieres contar filas (eventos). Aquí quieres saber el número de entradas y salidas (categorías en la columna direction_scored) por día (categorías en la columna day)
   group_by(day, direction_scored) %>%
-  # Luego puedes resumir los datos: el numero de filas aquí es el numero de entradas o salidas anotadas por día
+  # Luego puedes resumir los datos: el número de filas aquí es el número de entradas o salidas anotadas por día
   dplyr::summarise(
     n = n()
   )
 
 ```
 
-Cuatro entradas y salidas se anotaron por día. Cómo se compara este resultado con el numero de entradas y salidas que esperabas por día? Si regresas al código en los tutoriales anteriores (el tercer y el cuarto tutorial) dónde creaste los datos originales simulados, deberías de poder ver que empezaste por simular dos entradas y dos salidas por día en los datos para el sistema de RFID y los sensores de infrarrojo. Luego añadiste dos entradas y dos salidas más por día cuando simulaste fallas de detección del sistema de RFID (o sea, estos fueron movimientos capturados solamente por los sensores de infrarrojo). `score_clusters` detecto el numero correcto de entradas y salidas por día.
+Cuatro entradas y salidas se anotaron por día. Cómo se compara este resultado con el número de entradas y salidas que esperabas por día? Si regresas al código en los tutoriales anteriores (el tercer y el cuarto tutorial) dónde creaste los datos originales simulados, deberías de poder ver que empezaste por simular dos entradas y dos salidas por día en los datos para el sistema de RFID y los sensores de infrarrojo. Luego añadiste dos entradas y dos salidas más por día cuando simulaste fallas de detección del sistema de RFID (o sea, estos fueron movimientos capturados solamente por los sensores de infrarrojo). `score_clusters` detecto el número correcto de entradas y salidas por día.
 
 Ahora puedes revisar los eventos de posar, empezando con filtrar todas las filas que no se anotaron como eventos de posar (o sea, filas con valores de `NA` en la columna "perching_PIT_tag" que contiene información sobre las etiquetas de PIT). Luego puedes seleccionar solo las columnas que contienen información que es útil revisar, como las identidades de las etiquetas PIT, y también las marcas de tiempo para el inicio y fin de cada evento de posar.
 ```{r}
@@ -287,7 +287,7 @@ scored_clusters_gg2 <- scored_clusters_gg %>%
   ) %>% 
   dplyr::mutate(
     # Luego deberías de reemplazar la etiqueta para cada día y guardar estos resultados en una columna nueva
-    day_label = ifelse(day == 1, "Day 1", day), # Aquí el ultimo argumento es la columna day porque la columna day_label no se ha creado todavía
+    day_label = ifelse(day == 1, "Day 1", day), # Aquí el último argumento es la columna day porque la columna day_label no se ha creado todavía
     day_label = ifelse(day == 2, "Day 2", day_label),
     day_label = ifelse(day == 3, "Day 3", day_label)
   )

@@ -16,7 +16,7 @@ Este tutorial fue traducido al español por Grace Smith-Vidaurre, siguiendo las 
 
 <h2>Resumen del tutorial y objetivos de aprendizaje</h2>
 
-Sería una gran ayuda si antes de empezar este tutorial puedes completar una encuesta a través de Google Forms. La información que compartes nos ayudará saber más de tu experiencia en R y analizando datos biológicos antes de empezar los tutoriales mismos, tanto como las habilidades que buscas mejorar a través de completar esta colección de tutoriales. También nos ayudara mejorar los tutoriales en el futuro. Puedes encontrar el enlace para la encuesta en el archivo README de los tutoriales.
+Sería una gran ayuda si antes de empezar este tutorial puedes completar una encuesta a través de Google Forms. La información que compartes nos ayudará saber más de tu experiencia en R y analizando datos biológicos antes de empezar los tutoriales mismos, tanto como las habilidades que buscas mejorar a través de completar esta colección de tutoriales. También nos ayudará mejorar los tutoriales en el futuro. Puedes encontrar el enlace para la encuesta en el archivo README de los tutoriales.
 
 En este primer tutorial, vas a leer sobre el programa RStudio, aprender cómo crear una versión local de el repositorio de ABISSMAL en GitHub, y aprender más sobre el `pipeline` de análisis de datos en ABISSMAL. En este tutorial vas a aprender cómo:
 
