@@ -22,7 +22,7 @@ Este tutorial fue traducido al español por Grace Smith-Vidaurre y editado por T
 
 <h2>Resumen del tutorial y objetivos de aprendizaje</h2>
 
-En este quinto tutorial, vas a empezar a usar las detecciones simuladas de movimientos de animales en el `pipeline` de análisis de datos de ABISSMAL, incluyendo combinar los datos originales a través de días y procesar o limpiar los datos originales. También vas a crear gráficas de los datos procesados. Vas a continuar a usar habilidades que aprendiste en los tutoriales anteriores, y vas a aprender nuevas habilidades cómo:
+En este quinto tutorial, vas a empezar a usar las detecciones simuladas de movimientos de animales en el `pipeline` de análisis de datos de ABISSMAL, incluyendo combinar los datos originales a través de días y procesar o limpiar los datos originales. También vas a crear gráficas de los datos procesados. Vas a continuar usando habilidades que aprendiste en los tutoriales anteriores, y vas a aprender nuevas habilidades cómo:
 
 1. Acceder funciones customizadas
 2. Usar funciones customizadas
@@ -43,28 +43,28 @@ path <- "/home/gsvidaurre/Desktop/ABISSMAL_vignettes" # Inicializa un objeto con
 
 <h2>Cargar las funciones de ABISSMAL</h2>
 
-Las funciones customizadas de R en ABISSMAL están guardadas en archivos físicos (extensión .R) adentro de la versión local del repositorio en tu computadora (que descargaste en el primer tutorial). Para poder usar las funciones de ABISSMAL, vas a necesitar cargar los archivos físicos de R para que las funciones estén disponibles en tu ambiente global. En el código abajo, vas a usar la función `source()` para cargar tres de las cinco funciones primarias de ABISSMAL, y también un archivo que contiene funciones de apoyo:
+Las funciones customizadas de R en ABISSMAL están guardadas en archivos físicos (extensión .R) adentro de la versión local del repositorio en tu computadora (que descargaste en el primer tutorial). Para poder usar las funciones de ABISSMAL, vas a necesitar cargar los archivos físicos de R para que las funciones estén disponibles en tu ambiente global. En el código de abajo, vas a usar la función `source()` para cargar tres de las cinco funciones primarias de ABISSMAL, y también un archivo que contiene funciones de apoyo:
 ```{r}
 
 # Carga la función que combina los datos originales
 source("/home/gsvidaurre/Desktop/GitHub_repos/ABISSMAL/R/combine_raw_data.R")
 
-# Carga la función que detecta eventos de posa en los datos originales
+# Carga la función que detecta eventos de pose en los datos originales
 source("/home/gsvidaurre/Desktop/GitHub_repos/ABISSMAL/R/detect_perching_events.R")
 
 # Carga la función que procesa los datos originales
 source("/home/gsvidaurre/Desktop/GitHub_repos/ABISSMAL/R/preprocess_detections.R")
 
-# Carga un archivo con funciones de apoyo que cada función arriba requiere
+# Carga un archivo con funciones de apoyo que cada función anterior que requiera
 source("/home/gsvidaurre/Desktop/GitHub_repos/ABISSMAL/R/utilities.R")
 
 ```
 
 <h2>Accede información sobre las funciones de ABISSMAL</h2>
 
-Después de ejecutar las líneas de código arriba, deberías de ver que una colección entera de funciones ahora está disponible en tu ambiente global (revisa la pestaña de `Environment`). Las funciones que empiezan con `check_` son funciones de apoyo. Si haces scroll hacia abajo, puedes ver que tres de las funciones primarias de ABISSMAL (`combine_raw_data`, `detect_perching_events`, `preprocess_detections`) también están disponibles en tu ambiente global. En la columna al lado derecho de los nombres de las funciones también podrás ver algo de información sobre los argumentos de cada función.
+Después de ejecutar las líneas de código anteriores, deberías de ver que una colección entera de funciones ahora está disponible en tu ambiente global (revisa la pestaña de `Environment`). Las funciones que empiezan con `check_` son funciones de apoyo. Si haces scroll hacia abajo, puedes ver que tres de las funciones primarias de ABISSMAL (`combine_raw_data`, `detect_perching_events`, `preprocess_detections`) también están disponibles en tu ambiente global. En la columna al lado derecho de los nombres de las funciones también podrás ver algo de información sobre los argumentos de cada función.
 
-Para obtener más información sobre cada una de las tres funciones primarias, puedes hacer clic en el ícono blanco cuadrado a la mera derecha de cada función en la pestaña de `Environment`, o ejecutar el código `View(nombre_de_la_funcion)`. Este comando debería de abrir el archivo de la función actual en una pestaña nueva adentro de tu panel de fuente. En el archivo de cada función, vas ver líneas de documentación que empiezan con los símbolos "`#@", luego el nombre de la función y una descripción, y luego una descripción de cada argumento (parámetro) para la función. Si haces scroll hacia abajo, podrás ver una sección con detalles sobre la función misma, incluyendo la información que devuelve. Esta documentación está escrita en inglés por el momento. Después de las líneas de documentación verás el código de la función misma. 
+Para obtener más información sobre cada una de las tres funciones primarias, puedes hacer clic en el ícono blanco cuadrado a la mera derecha de cada función en la pestaña de `Environment`, o ejecutar el código `View(nombre_de_la_funcion)`. Este comando debería de abrir el archivo de la función actual en una pestaña nueva adentro de tu panel de fuente. En el archivo de cada función, vas ver líneas de documentación que empiezan con los símbolos "`#@", luego el nombre de la función y una descripción, y luego una descripción de cada argumento (parámetro) para la función. Si haces scroll hacia abajo, podrás ver una sección con detalles sobre la función misma, incluyendo la información que devuelve. Esta documentación está escrita solo en inglés por el momento. Después de las líneas de documentación verás el código de la función misma.
 
 <h2>Combinar los datos originales</h2>
 
@@ -76,7 +76,7 @@ Vas a proveerle información a la función `combine_raw_data()` a través de los
 
 * `path` es tu directorio general de trabajo
 
-* `data_dir` es la carpeta que contiene datos adentro de tu directorio de trabajo
+* `data_dir` es la carpeta que contiene archivos dentro de tu directorio de trabajo
 
 * `out_dir` es la carpeta donde quieres guardar la hoja de cálculo de los datos originales combinados. La función creará esta carpeta si no existe en tu computadora
 
@@ -97,7 +97,7 @@ list.files(file.path(path, "Data/raw_combined"), pattern = ".csv$")
 
 ```
 
-Puedes leer el archivo de datos combinados de RFID ("combined_raw_data_RFID.csv") a R para revisar la estructura de esta hoja de cálculo:
+Puedes proveer el archivo de datos combinados de RFID ("combined_raw_data_RFID.csv") a R para revisar la estructura de esta hoja de cálculo:
 ```{r}
 
 rfid_data <- read.csv(file.path(path, "Data/raw_combined", "combined_raw_data_RFID.csv"))
@@ -106,11 +106,11 @@ glimpse(rfid_data)
 
 ```
 
-Leer estos datos a R creó un objeto `dataframe`. Deberías de poder ver que hay unas columnas nuevas creadas por la función, como la columna `data_type`. Para esta hoja de cálculo, las columnas `sensor_id` y `data_type` contienen la misma información, pero es útil tener columnas separadas para poder estar al tanto de la identidad única del sensor y el tipo de sensor cuando usas múltiples sensores del mismo tipo (por ejemplo, dos pares de sensores infrarrojo tendrán números de identidad únicos en la columna de `sensor_id`).
+R lee esos datos y crea un objeto `dataframe`. Deberías de poder ver que hay columnas nuevas creadas por la función, como la columna `data_type`. Para esta hoja de cálculo, las columnas `sensor_id` y `data_type` contienen la misma información, pero es útil tener columnas separadas para poder estar al tanto de la identidad única del sensor y el tipo de sensor cuando usas múltiples sensores del mismo tipo (por ejemplo, dos pares de sensores infrarrojo tendrán números de identidad únicos en la columna de `sensor_id`).
 
-La función `combine_raw_data()` también creó una columna nueva de marcas de tiempo en formato `POSIXct` para los pasos que siguen de procesar y analizar datos, pero mantuvo la columna original de marcas de tiempo. La función añadió columnas para indicar la etapa de procesar datos y la fecha en que combinaste los datos originales. Finalmente, si revisas las carpetas con los datos originales de RFID, verás que las hojas de cálculo originales por día se preservaron y no fueron ni eliminados ni sobrescritos.
+La función `combine_raw_data()` también crea una columna nueva de marcas de tiempo en formato `POSIXct` para los siguientes pasos de procesar y analizar datos, pero a la vez mantiene la columna original de marcas de tiempo. Por consiguiente, la función añadió columnas para indicar la etapa de procesar datos y la fecha en que combinaste los datos originales. Finalmente, si revisas las carpetas con los datos originales de RFID, verás que las hojas de cálculo originales por día se preservaron y no fueron ni eliminados ni sobrescritos.
 
-También puedes ejecutar `combine_raw_data()` con los datos originales de múltiples sensores a la vez con proveer un vector con las etiquetas de estos sensores al argumento `sensores`. Los datos para cada tipo de sensor todavía se guardarán en hojas de cálculo separadas, y así evitas tener que escribir el mismo código varias veces para ejecutar `combine_raw_data()` para múltiples sensores:
+También puedes ejecutar `combine_raw_data()` con los datos originales de múltiples sensores a la vez proveyendo un vector con las etiquetas de estos sensores al argumento `sensores`. Los datos para cada tipo de sensor se guardarán en hojas de cálculo separadas, y así evitas tener que escribir el mismo código varias veces para ejecutar `combine_raw_data()` para múltiples sensores:
 ```{r}
 
 combine_raw_data(sensors = c("RFID", "IRBB"), path = path, data_dir = "Data", out_dir = "Data/raw_combined", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS")
@@ -124,18 +124,18 @@ list.files(file.path(path, "Data/raw_combined"), pattern = ".csv$")
 
 ```
 
-<h2>Detectar eventos de posar</h2>
+<h2>Detectar eventos de pose</h2>
 
-Puedes usar los datos originales combinados de sensores diferentes en las siguientes funciones de ABISSMAL para empezar a hacer inferencias de comportamiento de los datos de detección de movimiento. Por ejemplo, puedes detectar eventos de posar en los datos originales de RFID con la función `detect_perching_events()`. Puedes leer más sobre cada argumento en el archivo de R que contiene esta función.
+Puedes usar los datos originales combinados de sensores diferentes en las siguientes funciones de ABISSMAL para empezar a hacer inferencias de comportamiento de los datos de detección de movimiento. Por ejemplo, puedes detectar eventos de pose en los datos originales de RFID con la función `detect_perching_events()`. Puedes leer más sobre cada argumento en el archivo de R que contiene esta función.
 ```{r}
 
 detect_perching_events(file_nm = "combined_raw_data_RFID.csv", threshold = 2, run_length = 2, sensor_id_col_nm = "sensor_id", timestamps_col_nm = "timestamp_ms", PIT_tag_col_nm = "PIT_tag", rfid_label = "RFID", general_metadata_cols = c("chamber_id", "sensor_id"), path = file.path(path, "Data"), data_dir = "raw_combined", out_dir = "processed", out_file_prefix = "perching_events", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS")
 
 ```
 
-`detect_perching_events()` puede operar en sólo un archivo y tipo de sensor a la vez. La función automáticamente crea una carpeta que se llama "processed" (para datos procesados) y guardará un archivo de `.csv` adentro de esa carpeta si pudo detectar eventos de posar usando el umbral temporal actual (`threshold`, en segundos), y la duración de secuencias de detección actual (`run_length`, en número de detecciones).
+`detect_perching_events()` puede operar en sólo un archivo y tipo de sensor a la vez. La función automáticamente crea una carpeta que se llama "processed" (para datos procesados) y guardará un archivo de `.csv` dentro de esa carpeta si efectivamente pudo detectar eventos de pose usando el umbral temporal actual (`threshold`, en segundos), y la duración de secuencias de detección actual (`run_length`, en número de detecciones).
 
-Cuando creamos datos simulados en los últimos tutoriales, simulaste eventos de posar en los datos de RFID. Pudiste recuperar estos eventos de posar usando `detect_perching_events()`?
+Cuando creamos datos simulados en los últimos tutoriales, simulaste eventos de pose en los datos de RFID. Pudiste recuperar estos eventos de pose usando `detect_perching_events()`?
 ```{r}
 
 perching <- read.csv(file.path(path, "Data", "processed", "perching_events_RFID.csv"))
@@ -144,13 +144,13 @@ glimpse(perching)
 
 ```
 
-`detect_perching_events()` identificó un total de seis eventos de posar, que es el mismo número que simulaste en el tutorial anterior (dos eventos de posar por día a través de tres días). Puedes revisar los valores adentro del `dataframe` para ver más información sobre estos eventos de posar:
+`detect_perching_events()` identificó un total de seis eventos de pose, que es el mismo número que simulaste en el tutorial anterior (dos eventos de pose por día a través de tres días). Puedes revisar los valores dentro del `dataframe` para ver más información sobre estos eventos de pose:
 ```{r}
 
-# Las marcas de tiempo cuando cada evento de posar empezó
+# Las marcas de tiempo cuando cada pose empezó
 perching$perching_start
 
-# Las marcas de tiempo cuando cada evento de posar terminó
+# Las marcas de tiempo cuando cada pose terminó
 perching$perching_end
 
 # La etiqueta única de PIT que contiene información sobre la identidad del individuo que estuvo posando en la antena de RFID
@@ -165,13 +165,13 @@ View(perching)
 
 ```
 
-La información arriba te dice que hubo dos eventos de posar a las 8:00 cada día, y dos eventos de posar a las 11:30 cada día (como esperamos). La etiqueta de PIT para cada individuo se detectó una vez por día, por ende, cada individuo realizó un evento de posar cada día.
+La información de arriba te dice que hubo dos eventos de pose a las 8:00 cada día, y dos eventos de pose a las 11:30 cada día (como esperábamos). La etiqueta de PIT para cada individuo se detectó una vez por día, por ende, cada individuo realizó un evento de pose cada día.
 
-Detectar eventos de posar no es un requisito en el `pipeline` de análisis de ABISSMAl, pero puede ser un paso útil para obtener la mayor cantidad de información que puedes de los datos originales antes de filtrar las detecciones en el siguiente paso de procesar o limpiar los datos originales.
+Detectar eventos de pose no es un requisito en el `pipeline` de análisis de ABISSMAl, pero puede ser un paso útil para obtener la mayor cantidad de información que puedes de los datos originales antes de filtrar las detecciones en el siguiente paso de procesar o limpiar los datos originales.
 
 <h2>Procesar los datos originales</h2>
 
-Cuando hayas detectado los eventos de posar en los datos originales, puedes seguir con procesar o limpiar los datos originales con la función `preprocess_detections()`. Los datos originales a veces contienen múltiples detecciones separadas por poco tiempo (como las detecciones de RFID cuando un individuo está posando en la antena), y estas múltiples detecciones pueden causar ruido cuando tratas de hacer inferencias de comportamiento con datos colectados por múltiples sensores. Cuando le provees "thin" al argumento `mode`, `preprocess_detections()` elimina detecciones separadas por un periodo corto de tiempo (usando el valor del umbral temporal en segundos para el argumento `thin_threshold`), y devuelve datos filtrados de detecciones que todavía representan eventos discretos de movimiento.
+Cuando hayas detectado los eventos de pose en los datos originales, puedes seguir con procesar o limpiar los datos originales con la función `preprocess_detections()`. Los datos originales a veces contienen múltiples detecciones separadas por poco tiempo (como las detecciones de RFID cuando un individuo está posando en la antena), y estas múltiples detecciones pueden causar ruido cuando tratas de hacer inferencias de comportamiento con datos colectados por múltiples sensores. Cuando le provees "thin" al argumento `mode`, `preprocess_detections()` elimina detecciones separadas por un periodo corto de tiempo (usando el valor del umbral temporal en segundos para el argumento `thin_threshold`), y devuelve datos filtrados de detecciones que todavía representan eventos discretos de movimiento.
 
 `preprocess_detections()` opera en un solo tipo de sensor a la vez:
 ```{r}
@@ -187,7 +187,7 @@ list.files(file.path(path, "Data/processed"))
 
 ```
 
-Puedes leer este archivo a R para ver su estructura. Deberías de ver menos filas en este `dataframe` comparado con la hoja de cálculo de los datos originales:
+Puedes darle este archivo a R para que lo lea y vea su estructura. Deberías de poder ver menos filas en este `dataframe` comparado con la hoja de cálculo de los datos originales:
 ```{r}
 
 rfid_pp <- read.csv(file.path(path, "Data/processed/pre_processed_data_RFID.csv"))
@@ -209,13 +209,13 @@ glimpse(irbb_pp)
 
 ```
 
-<h2>Visualizar datos de RFID en una gráfica de código de barras</h2>
+<h2>Visualizar datos de RFID en una gráfica de barras</h2>
 
 Ahora que combinaste y procesaste los datos originales por sensor, es hora de visualizar estos conjuntos de datos diferentes. Hacer gráficas mientras escribes código es importante para generar figures de alta calidad para publicaciones y presentaciones y también para revisar tu proceso de analizar datos.
 
-En el código abajo, vas a aprender cómo usar funciones del paquete `ggplot2` para hacer una gráfica del estilo de código de barras con los datos originales y procesados de RFID.
+En el código de abajo, vas a aprender cómo usar funciones del paquete `ggplot2` para hacer una gráfica de barras con los datos originales y procesados de RFID.
 
-Puedes empezar con leer los datos originales y procesados de RFID, también los eventos de posar de RFID, y convertir las marcas de tiempo al formato `POSIX`.
+Puedes empezar dándole a R los datos originales y procesados de RFID, los eventos de posar de RFID, y convertir las marcas de tiempo al formato `POSIX`.
 ```{r}
 
 rfid_raw <- read.csv(file.path(path, "Data/raw_combined", "combined_raw_data_RFID.csv")) %>%
@@ -224,14 +224,14 @@ rfid_raw <- read.csv(file.path(path, "Data/raw_combined", "combined_raw_data_RFI
     timestamp_ms = as.POSIXct(format(as.POSIXct(timestamp_ms, tz = "America/New York"), "%Y-%m-%d %H:%M:%OS6"))
   ) %>%
   # Ordena las marcas de tiempo
-  # La expresión "-desc()" adentro de la función arrange() indica que las marcas de tiempo se ordenarán de menos a más recientes
+  # La expresión "-desc()" dentro de la función arrange() indica que las marcas de tiempo se ordenarán de menos a más recientes
   dplyr::arrange(-desc(timestamp_ms))
 
-# Deberías de ver que la columna timestamp_ms con las marcas de tiempo está en el formato "dttm", significando que la conversión a formato POSIX se realizó bien
+# Deberías de ver que la columna timestamp_ms con las marcas de tiempo está en el formato "dttm", significando que la conversión a formato POSIX se realizó correctamente
 glimpse(rfid_raw)
 
 rfid_pp <- read.csv(file.path(path, "Data/processed/pre_processed_data_RFID.csv")) %>%
-  # Tienes que convertir las marcas de tiempo al formato POSIX cada vez que los datos se leen a R para hacer gráficas
+  # Tienes que convertir las marcas de tiempo al formato POSIX cada vez que los datos se le dan a leer a R para hacer gráficas
   dplyr::mutate(
     timestamp_ms = as.POSIXct(format(as.POSIXct(timestamp_ms, tz = "America/New York"), "%Y-%m-%d %H:%M:%OS6"))
   ) %>% 
@@ -240,7 +240,7 @@ rfid_pp <- read.csv(file.path(path, "Data/processed/pre_processed_data_RFID.csv"
 glimpse(rfid_pp)
 
 rfid_perch <- read.csv(file.path(path, "Data/processed/perching_events_RFID.csv")) %>%
-  # Tienes que convertir las marcas de tiempo de inicio y final de cada evento de posar al formato POSIX cada vez que los datos se leen a R para hacer gráficas
+  # Tienes que convertir las marcas de tiempo de inicio y final de cada evento de pose al formato POSIX cada vez que los datos se dan a R para hacer gráficas
   dplyr::mutate(
     perching_start = as.POSIXct(format(as.POSIXct(perching_start, tz = "America/New York"), "%Y-%m-%d %H:%M:%OS6")),
     perching_end = as.POSIXct(format(as.POSIXct(perching_end, tz = "America/New York"), "%Y-%m-%d %H:%M:%OS6"))
@@ -272,9 +272,9 @@ glimpse(rfid_combined)
 
 ```
 
-Vas a construir la gráfica con estos datos usando funciones de `ggplot2`, un paquete que es parte del `tidyverse` pero que también se puede instalar y usar afuera del `tidyverse`. Puedes revisar este [enlace](https://ggplot2.tidyverse.org/) que tiene más recursos (en inglés) para aprender cómo usar la notación de `ggplot` para hacer diferentes tipos de gráficas. Estos recursos incluyen secciones de tres libros diferentes con ejercicios para practicar hacer gráficas sencillas o complejas, y también un curso en línea y un seminario en línea. Puedes encontrar otros recursos en español en línea, como esta [guia para `ggplot2`](https://raw.githubusercontent.com/rstudio/cheatsheets/main/translations/spanish/data-visualization_es.pdf).
+Vas a construir la gráfica con estos datos usando funciones de `ggplot2`, un paquete que es parte del `tidyverse` pero que también se puede instalar y usar fuera del `tidyverse`. Puedes revisar este [enlace](https://ggplot2.tidyverse.org/) que tiene más recursos (en inglés) para aprender cómo usar la notación de `ggplot` para hacer diferentes tipos de gráficas. Estos recursos incluyen secciones de tres libros diferentes con ejercicios para practicar hacer gráficas sencillas o complejas, y también un curso en línea y un seminario en línea. Puedes encontrar otros recursos en español también, como esta [guia para `ggplot2`](https://raw.githubusercontent.com/rstudio/cheatsheets/main/translations/spanish/data-visualization_es.pdf).
 
-El paquete de `ggplot2` tiene una notación única para construir gráficas, en que empiezas haciendo la gráfica con llamar la función `ggplot()` y luego añades características con añadir capas de otras funciones de `ggplot2` con el símbolo de `+`.
+El paquete de `ggplot2` tiene una notación única para construir gráficas, en la cual empiezas haciendo la gráfica llamando la función `ggplot()` y luego añades características añadiendo capas de otras funciones de `ggplot2` con el símbolo de `+`.
 
 Si llamas `ggplot()`, verás que la función inmediatamente dibuja una gráfica vacía en tu panel de `Plots` (gráficas) en RStudio.
 ```{r}
@@ -290,9 +290,9 @@ ggplot(data = rfid_combined)
 
 ```
 
-Necesitarás añadir otras funciones estéticas a esta capa fundamental de la gráfica para poder ver tus datos. Las funciones que usarás para añadir detalles estéticos a la gráfica vacía dependerán del tipo de gráfica que quieres crear. En este ejemplo, vas a generar una gráfica de código de barras, en que cada marca de tiempo está representada por una línea vertical delgada. Las gráfica de código de barra pueden ser gráficas útiles cuando trabajas con marcas de tiempo, porque la información más importante se contiene en una dimensión (el tiempo en el eje x). Si fueras a resumir el número de marcas de tiempo grabado cada día, sería mejor hacer una gráfica de líneas. 
+Necesitarás añadir otras funciones estéticas a esta capa fundamental de la gráfica para poder ver tus datos. Las funciones que usarás para añadir detalles estéticos a la gráfica vacía dependerán del tipo de gráfica que quieres crear. En este ejemplo, vas a generar una gráfica barras, en la cual cada marca de tiempo está representada por una línea vertical delgada. Las gráfica barras pueden ser gráficas útiles cuando trabajas con marcas de tiempo, porque la información más importante se contiene en una dimensión (el tiempo en el eje "x"). Si fueras a resumir el número de marcas de tiempo grabado cada día, sería mejor hacer una gráfica de líneas.
 
-Puedes añadir la función `geom_segment()` como la siguiente capa encima de la capa fundamental de la gráfica. `geom_segment()` facilita añadir línea a una gráfica, y las líneas pueden comunicar información en una o dos dimensiones (por su ancho en el eje x y su altura en el eje y).
+Puedes añadir la función `geom_segment()` como la siguiente capa encima de la capa fundamental de la gráfica. `geom_segment()` facilita añadir línea a una gráfica, y las líneas pueden comunicar información en una o dos dimensiones (por su ancho en el eje "x" y su altura en el eje "y").
 ```{r}
 
 ggplot(data = rfid_combined) +
@@ -305,7 +305,7 @@ ggplot(data = rfid_combined) +
   
 ```
 
-En el código arriba, `geom_segment()` añade una línea vertical a la gráfica para cada detección en el `dataframe` completo. Con usar el argumento `color` adentro de `geom_segment()`, y proveer el nombre de la columna que contiene las etiquetas de los conjuntos de datos, le comunicaste a la función que las líneas deberían de tener colores que corresponden al conjunto particular de datos. El argumento `color` tiene que estar adentro de la función `aes()` (que controla la estética de esta capa de información) para que esta asignación de colores se realice por el conjunto de datos.
+En el código anterior, `geom_segment()` añade una línea vertical a la gráfica para cada detección en el `dataframe` completo. Usando el argumento `color` adentro de `geom_segment()`, y proveyendo el nombre de la columna que contiene las etiquetas de los conjuntos de datos, le comunicaste a la función que las líneas deberían de tener colores que corresponden al conjunto particular de datos. El argumento `color` tiene que estar adentro de la función `aes()` (que controla la estética de esta capa de información) para que esta asignación de colores se realice por el conjunto de datos.
 
 Los colores de las líneas se asignarán automáticamente por `ggplot` usando los colores por defecto del paquete, pero puedes cambiar estos colores usando la función `scale_color_manual()`:
 ```{r}
@@ -324,11 +324,11 @@ ggplot(data = rfid_combined) +
 
 Las líneas ahora tienen los colores nuevos que especificaste pero en la leyenda los datos procesados salen primero. Si quieres cambiar el orden de las etiquetas del conjunto de datos en la leyenda, y los colores asignados a los conjuntos de datos, puedes modificar la columna `dataset` en el `dataframe` que usaste para crear la gráfica.
 
-Las funciones de `ggplot` usan un tipo de datos que se llaman `factors` para automáticamente determinar la estética de la gráfica, como el método de asignar colores que usaste arriba con `geom_segment()`. Las columnas (o vectores) en formato `factor` se ven como columnas de tipo `character` (en que cada fila contiene una secuencia de caracteres), pero R guarda los valores únicos de cada columna como números enteros y luego guarda los valores únicos de las secuencias de caracteres en una propiedad que se llama `levels` ("niveles" o "categorías"). Puedes cambiar el orden en que los valores únicos de una columna en formato `factor` se añaden a la gráfica cuando cambias el orden de los `levels` de la columna:
+Las funciones de `ggplot` usan un tipo de datos que se llaman `factors` para determinar automáticamente la estética de la gráfica, como el método de asignar colores que usaste arriba con `geom_segment()`. Las columnas (o vectores) en formato `factor` se ven como columnas de tipo `character` (en que cada fila contiene una secuencia de caracteres), pero R guarda los valores únicos de cada columna como números enteros y luego guarda los valores únicos de las secuencias de caracteres en una propiedad que se llama `levels` ("niveles" o "categorías"). Puedes cambiar el orden en que los valores únicos de una columna en formato `factor` se añaden a la gráfica cuando cambias el orden de los `levels` de la columna:
 ```{r}
 
 # Cambia la columna dataset al tipo de datos "factor"
-# Cuando especificas que el valor de "raw" ("original") venga primero en el argumento de levels, estás reorganizando los levels (niveles) de la columna para que este valor salga primero en la leyenda
+# Cuando especificas que el valor de "raw" ("original") vaya primero en el argumento de levels, estás reorganizando los niveles de la columna para que este valor salga primero en la leyenda
 rfid_combined <- rfid_combined %>% 
   dplyr::mutate(
     dataset = factor(dataset, levels = c("raw", "pre-processed"))
@@ -337,7 +337,7 @@ rfid_combined <- rfid_combined %>%
 # La columna de dataset ahora es tipo "fct" o "factor"
 glimpse(rfid_combined)
 
-# Los niveles de la columna ahora están ordenados para que el valor "raw" venga primero, en vez de estar en orden alfabético
+# Los niveles de la columna ahora están ordenados para que el valor "raw" vaya primero, en vez de estar en orden alfabético
 levels(rfid_combined$dataset)
 
 ```
@@ -357,7 +357,7 @@ ggplot(data = rfid_combined) +
 
 ```
 
-En la gráfica que acabas de hacer, es muy difícil de discriminar entre las líneas para cada conjunto de datos. Puedes usar la función `facet_wrap()` para dividir los conjuntos de datos en paneles diferentes:
+En la gráfica que acabas de hacer, puede resultar difícil distingüir entre las líneas para cada conjunto de datos. Puedes usar la función `facet_wrap()` para dividir los conjuntos de datos en paneles diferentes:
 ```{r}
 
 ggplot(data = rfid_combined) +
@@ -375,13 +375,13 @@ ggplot(data = rfid_combined) +
 
 ```
 
-Acabas de crear paneles diferentes adentro de esta gráfica y cada panel contiene datos un solo conjunto de datos. Con este cambio estructural también alineaste los paneles en el mismo eje x para que sea más fácil de comparar patrones temporales.
+Acabas de crear paneles diferentes dentro de esta gráfica y cada panel contiene información de un solo conjunto de datos. Con este cambio estructural también alineaste los paneles en el mismo eje "x" para que sea más fácil de comparar patrones temporales.
 
-Desde este punto de vista es difícil ver cómo los dos conjuntos de datos (originales y procesados) son diferentes. Puedes filtrar el `dataframe` con funciones del `tidyverse` para visualizar solo las primeras dos detecciones para cada conjunto de datos:
+Hasta este punto es difícil ver cómo los dos conjuntos de datos (originales y procesados) son diferentes. Puedes filtrar el `dataframe` con funciones del `tidyverse` para visualizar solo las primeras dos detecciones para cada conjunto de datos:
 ```{r}
 
 ggplot(data = rfid_combined %>%
-         # Crea grupos por las categorías o levels en la columna dataset
+         # Crea grupos para las categorías o levels en la columna dataset
          group_by(dataset) %>% 
          # Selecciona las primeras dos filas para cada grupo 
          slice(1:2) %>% 
@@ -396,19 +396,19 @@ ggplot(data = rfid_combined %>%
   
   scale_color_manual(values = c("orange", "darkgreen")) +
   
-  # El símbolo de ~ significa "por", así que estás creando un panel por cada valor único (o categoría) en la columna dataset
+  # El símbolo de ~ significa "por", así que ahora estás creando un panel por cada valor único (o categoría) en la columna dataset
   facet_wrap(~ dataset, nrow = 2, strip.position = "left")
 
 ```
 
 Ahora deberías de ver que la segunda marca de tiempo en los datos originales se eliminó del conjunto de datos procesados (fue filtrado usando el umbral temporal en `preprocess_detections`).
 
-Luego puedes añadir los datos de eventos de posar en el `dataframe` `rfid_perch`, que no combinaste con los otros conjuntos de datos. En cambio a `rfid_raw` y `rfid_pp`, este conjunto de datos tiene dos columnas de marcas de tiempo que contienen información sobre el inicio y el fin de cada evento de posar. Puedes añadir este conjunto de datos a la gráfica con otra llamada de la función `geom_segment()`. Usarás esta capa de `geom_segment()` para añadir líneas que contienen información temporal sobre cuándo los eventos de posar empezaron y terminaron.
+Luego puedes añadir los datos de eventos de pose en el `dataframe` `rfid_perch`, que no combinaste con los otros conjuntos de datos. A diferencia de `rfid_raw` y `rfid_pp`, este conjunto de datos tiene dos columnas de marcas de tiempo que contienen información sobre el inicio y el fin de cada evento de pose. Puedes añadir este conjunto de datos a la gráfica volviendo a llamar la función `geom_segment()`. Usarás esta capa de `geom_segment()` para añadir líneas que contienen información temporal sobre cuándo empezaron los eventos de pose y cuándo terminaron.
 ```{r}
 
 ggplot(data = rfid_combined) +
   
-  # Añade una línea vertical para cada marca de tiempo
+  # Añade una línea vertical por cada marca de tiempo
   geom_segment(
     aes(x = timestamp_ms, y = 0, xend = timestamp_ms, yend = 1, color = dataset),
     linewidth = 0.3
@@ -419,7 +419,7 @@ ggplot(data = rfid_combined) +
   # El símbolo de ~ significa "por", así que estás creando un panel por cada valor único (o categoría) en la columna dataset
   facet_wrap(~ dataset, nrow = 2, strip.position = "left") +
   
-  # Añade los eventos de posar
+  # Añade los eventos de pose
   geom_segment(
     data = rfid_perch,
     aes(x = perching_start, xend = perching_end, y = 1.2, yend = 1.5),
@@ -429,9 +429,9 @@ ggplot(data = rfid_combined) +
 
 ```
 
-En el código arriba para `geom_segment()`, especificaste que querías añadir otro conjunto de datos a la gráfica cuando usaste el argumento `data`. Los argumentos `x` y `y` determinan donde va a empezar cada línea en ambos ejes de la gráfica, respectivamente. También vas a tener que especificar donde quieres que cada línea termina en cada eje. En el eje x, indicaste que quieres que la línea empiece y termine cuando los eventos de posar empezaron y terminaron con proveer la columna `perching_start` al argumento `x` y `perching_end` al argumento `xend`. En el eje y, los números que usaste para los argumentos `y` y `yend` determinan donde las líneas para los eventos de posar se dibujarán, que en este caso es justamente arriba de las líneas para los otros conjuntos de datos. Las líneas para los eventos de posar se dibujaron como otra capa de información encima de cada panel de la gráfica por defecto.
+En el código anterior con respecto a `geom_segment()`, especificaste que querías añadir otro conjunto de datos a la gráfica cuando usaste el argumento `data`. Los argumentos `x` y `y` determinan donde va a empezar cada línea en ambos ejes de la gráfica, respectivamente. También vas a tener que especificar donde quieres que cada línea termina en cada eje. En el eje x, indicaste que quieres que la línea empiece y termine cuando los eventos de pose empezaron y terminaron, proveyendo a la columna `perching_start` al argumento `x` y `perching_end` al argumento `xend`. En el eje "y", los números que usaste para los argumentos `y` y `yend` determinan donde las líneas para los eventos de pose se van a dibujar, que en este caso es justamente arriba de las líneas para los otros conjuntos de datos. Las líneas para los eventos de pose se dibujaron como otra capa de información encima de cada panel de la gráfica por defecto.
 
-Puedes hacer unos cambios a la gráfica para que sea más fácil de interpretar. Puedes cambiar la posición de la leyenda usando el argumento `legend.position` adentro de la función general de `theme()`. Abajo puedes guardar la gráfica adentro de un objeto, para que no tengas que escribir todo el código de la gráfica de nuevo cuando quieres añadirle más información.
+Puedes hacer unos cambios a la gráfica para que sea más fácil de interpretar. Puedes cambiar la posición de la leyenda usando el argumento `legend.position` adentro de la función general de `theme()`. Abajo puedes guardar la gráfica adentro de un objeto, para que no tengas que escribir otra vez  el código de la gráfica cada vez que quieres añadirle más información.
 ```{r}
 
 gg <- ggplot(data = rfid_combined) +
@@ -444,10 +444,10 @@ gg <- ggplot(data = rfid_combined) +
   
   scale_color_manual(values = c("orange", "darkgreen")) +
   
-  # El símbolo de ~ significa "por", así que estás creando un panel por cada valor único (o categoría) en la columna dataset
+  # El símbolo de ~ significa "por", así que estás ahora creando un panel por cada valor único (o categoría) en la columna dataset
   facet_wrap(~ dataset, nrow = 2, strip.position = "left") +
   
-  # Añade los eventos de posar
+  # Añade los eventos de pose
   geom_segment(
     data = rfid_perch,
     aes(x = perching_start, xend = perching_end, y = 1.2, yend = 1.5),
@@ -463,7 +463,7 @@ gg
 
 ```
 
-Ahora puedes hacer unos ajustes menores para seguir mejorando la gráfica, incluyendo cambiar los títulos de los ejes para que sean más informativos, cambiar el color de fondo a blanco, y eliminar el texto en el eje y tanto como las rayas en el eje y, porque este eje no contiene información para interpretación de los datos (o sea, la altura de cada línea no contiene información para interpretación).
+Ahora puedes hacer ajustes menores para seguir mejorando la gráfica, incluyendo cambiar los títulos de los ejes para que sean más informativos, cambiar el color de fondo a blanco, y eliminar el texto en el eje "y" así como las líneas en el eje "y", porque este eje no contiene información para interpretación de los datos (o sea, la altura de cada línea no contiene información para interpretación).
 ```{r}
 
 gg <- gg +
@@ -471,13 +471,13 @@ gg <- gg +
   # Cambia los títulos de ambos ejes
   xlab("Date and time") +
   
-  # El eje y no contiene información y por ende puedes eliminar este título
+  # El eje "y" no contiene información y por ende puedes eliminar este título
   ylab("") +
   
   # Usa esta función para cambiar el color de fondo a blanco y negro
   theme_bw() +
   
-  # Usa funciones de estética para eliminar el texto en el eje y y también los rayos en este eje
+  # Usa funciones de estética para eliminar el texto en el eje "y" y también las líneas en este eje
   theme(
     axis.text.y = element_blank(),
     axis.ticks.y = element_blank(),
@@ -488,7 +488,7 @@ gg
 
 ```
 
-Puedes guardar las gráficas que creas en R como archivos físicos. Abajo usarás la función `ggsave()` para escribir la gráfica que hiciste arriba como un archivo en tu computadora.
+Puedes guardar las gráficas que creas en R como archivos físicos. Abajo usarás la función `ggsave()` para escribir la gráfica que hiciste arriba y guardarlo en tu computadora.
 ```{r}
 
 gg
@@ -498,6 +498,6 @@ ggsave(file.path(path, "raw_processed_perching.tiff"), width = 8, height = 6, un
 
 ```
 
-Puedes continuar con modificaciones a este archivo para crear una figura de alta calidad para una publicación. Por ejemplo, puedes cambiar el tamaño final del archivo (`width` o "el ancho", `height` o "la altura"), tanto como la resolución en píxeles (`dpi`). También puedes cambiar el tamaño de texto en cada eje o del título de cada eje, o la posición de la leyenda mientras determinas el tamaño final de la imagen.
+Puedes continuar con modificaciones a este archivo para crear una figura de alta calidad para una publicación. Por ejemplo, puedes cambiar el tamaño final del archivo (`width` o "el ancho", `height` o "la altura"), así como también la resolución en píxeles (`dpi`). Incluso puedes cambiar el tamaño de texto en cada eje o del título de cada eje, o la posición de la leyenda mientras determinas el tamaño final de la imagen.
 
-En el siguiente tutorial vas a continuar analizando datos con ABISSMAL y vas a crear una gráfica de código de barras más compleja y refinada.
+En el siguiente tutorial vas a continuar analizando datos con ABISSMAL y vas a crear una gráfica de barras más compleja y refinada.

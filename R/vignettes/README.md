@@ -36,7 +36,7 @@ Nuestro objetivo es diseminar habilidades de programación en R en un contexto b
 
 4. Guardar los datos simulados y aprender cómo escribir datos a archivos físicos en tu computadora, manipular `dataframes` con R base y el `tidyverse`, y escribir bucles (`loops`) sencillos y complejos
 
-5. Trabajar en el `pipeline` de procesar datos con ABISSMAL mientras aprendes cómo acceder y usar funciones customizadas, y también cómo visualizar marcas de tiempo en una figura de código de barras
+5. Trabajar en el `pipeline` de procesar datos con ABISSMAL mientras aprendes cómo acceder y usar funciones customizadas, y también cómo visualizar marcas de tiempo en una gráfica de barras
 
 6. Terminar el `pipeline` de análisis de datos de ABISSMAL mientras se emplean las habilidades de programación que practicaste en los tutoriales anteriores, y al final vas a crear una figura de código de barras más compleja y refinada
 
