@@ -1,0 +1,116 @@
+---
+title: "Vignette 01: Introduction"
+author: "Grace Smith-Vidaurre"
+date: "2023-12-27"
+output: 
+  html_document:
+    css: "styles.css"
+    toc: true
+    toc_float: true
+    toc_depth: 4
+---
+
+<h2>Vignette overview and learning objectives</h2>
+
+This first vignette will take you through a brief introduction to RStudio, downloading a local version of the ABISSMAL GitHub repository, and an introduction to the data analysis workflow provided by ABISSMAL. Through this tutorial, you will learn:
+
+1. How to configure your RStudio session
+2. How to create a local version of a GitHub repository
+3. The data processing and analysis steps provided by the ABISSMAL R functions
+4. How to troubleshoot errors online
+5. How to report bugs as GitHub issues
+
+There are many different ways to carry out a single task or to solve a single problem in R. Keep this in mind throughout all of these tutorials. In each tutorial, you will learn examples of how to carry out specific tasks or solve specific problems with code, but these examples are not an exhaustive overview of how to address any one task or solve any one problem. Instead, use these tutorials as an opportunity to practice using your coding skills in a biological context.  
+
+<h2>Configure your RStudio session</h2>
+
+If you are new to using R (a programming language for statistical analysis) and RStudio (a graphical user interface for R), then I recommend checking out the introductory lesson [R for Reproducible Scientific Analysis](https://swcarpentry.github.io/r-novice-gapminder/) provided by the [Software Carpentry](https://software-carpentry.org/).
+
+Once you have R and RStudio installed on your computer, you can open RStudio by clicking on the software icon. The default pane configuration for RStudio should look like this (the background color will probably be different):
+
+<br>
+![A screenshot of the default RStudio pane configuration, with the console pane below the source pane](/home/gsvidaurre/Desktop/GitHub_repos/ABISSMAL/R/vignettes/images/RStudio_01.png)
+
+This pane layout makes it difficult to see the code that you're writing and saving in a physical file in the source pane, and the output of that code in the console pane. You can reconfigure the panes so that the source and console panes are horizontally adjacent to one another, which makes it easier to immediately check the output of any code that you run. To reconfigure the pane layout:
+
+* Go to the menu along the top bar of the RStudio window and select the option "Tools"
+
+* Select "Global Options" in the pop-up menu
+
+* In the next pop-up menu, select the option "Pane Layout" along the lefthand side
+
+* Use the dropdown menus to select "Source" as the top right pane and "Console" as the top left pane
+
+* You can select "Apply" to apply those changes, then "Ok" to exit this window 
+
+The RStudio pane layout should now look like this:
+
+<br>
+![A screenshot of the updated RStudio pane configuration, with the console pane to the right of the source pane](/home/gsvidaurre/Desktop/GitHub_repos/ABISSMAL/R/vignettes/images/RStudio_02.png)
+
+Another useful change to the RStudio configuration is soft-wrapping lines of text and code so that you don't have to scroll horizontally to see long lines of text in your Source pane. To do this, go to "Tools", then "Global Options", then "Code", and check the box next to the option "Soft-wrap R source files", then select "Apply" and "Ok".
+
+You can also change the font size, font color, and background color of your RStudio workspace. After selecting "Tools" and "Global Options", go to "Appearance" to see some different options.
+
+<h2>Create a local version of an existing GitHub repository</h2>
+
+If you are new to using GitHub, then I recommend downloading [GitHub Desktop](https://desktop.github.com/). This software is a graphical user interface for the GitHub version control platform. We will work through how to download the GitHub repository for ABISSMAL so that you can access the ABISSMAL R functions on your local computer. If you are already familiar with GitHub and using Git through the command line, then check out the installation instructions on the [ABISSMAL README](https://github.com/lastralab/ABISSMAL).
+
+Once you have installed GitHub Desktop:
+
+* Open GitHub Desktop by clicking on the icon
+
+* Open your default Internet browser and navigate to the ABISSMAL GitHub repository: https://github.com/lastralab/ABISSMAL
+
+* Click on the green "Code" button and copy the web URL under the HTTPS option in the dropdown menu
+
+* In the GitHub Desktop window, go to the top menu and select "File"
+
+* Select "Clone repository", 
+
+* Select the tab "URL"
+
+* Paste the web URL for ABISSMAL into the text box under "Repository URL or GitHub username and repository"
+
+* Check that the directory in the text box under "Local path" is the correct place to install the ABISSMAL GitHub repository on your computer. For instance, if "Local path" is "/home/User/Desktop/ABISSMAL", then the ABISSMAL repository will be installed directly to your Desktop
+
+* Select "Clone" once you're ready to create a local version of the remote ABISSMAL repository on your computer
+
+Once the repository has been installed on your computer, you should see the following directory and file structure inside the folder labeled "ABISSMAL" that looks similar to this:
+
+<br>
+![A screenshot of the directory that is the local ABISSMAL repository](/home/gsvidaurre/Desktop/GitHub_repos/ABISSMAL/R/vignettes/images/ABISSMAL_localrepo.png)
+
+The files that we'll be working with throughout the following vignettes are inside of the "R" folder. This folder contains 6 R files (extension ".R"), a README file that contains more information about each R file, and folders with the vignettes in RMarkdown format (extension ".Rmd") as well as automated unit testing scripts.
+
+<h2>ABISSMAL data processing and analysis</h2>
+
+ABISSMAL provides 5 different R functions for data processing and analysis. These functions are briefly described below in the order in which they should generally be used. The functions are also described in more detail in the R folder README as well as the accompanying methods manuscript:
+
+1. `combine_raw_data` will automatically concatenate spreadsheets of raw data collected each day into a single spreadsheet across days. This data concatenation is performed for a given sensor type (e.g. infrared beam breakers or an infrared video camera) and does not change or overwrite the original raw data. This function can use data from any sensor type (RFID, infrared beam breakers, video camera, or temperature probe) as input, but the following functions do not accept data from the temperature probe
+
+2. `detect_perching_events` uses the output of `combine_raw_data` as input, and will detect stretches of detections that occurred close together in time as perching events. These events represent periods of time when an individual was perched in the RFID antenna in the nest container entrance. This function returns a spreadsheet of the timing of inferred perching events detected using data from sensors placed around the nest container entrance (RFID or infrared beam breakers)
+
+3. `preprocess_detections` uses the output of `combine_raw_data` as input, and removes detections that occurred very close together in time. This function returns a spreadsheet of pre-processed data per sensor type, in which consecutive detections are all separated by no less than a given temporal threshold (e.g. when using a threshold of 1 second, only a single detection can occur per second)
+
+4. `detect_clusters` uses the output of `preprocess_detections` from any 2 or more movement sensor types as input. This function identifies detections across 2+ sensor types that occurred close together in time, and returns temporal information and metadata about each detection cluster. Detection clusters represent discrete movement events by one or more individuals
+
+5. `score_clusters` uses the output of `detect_clusters` as the main input. This function can also use the output of `detect_perching_events` to integrate perching events detected in the raw RFID or infrared beam breaker datasets. It can also use the output of `preprocess_detections` to integrate video recording events that were not detected by `detect_clusters`. This function serves to make behavioral inferences about each movement event, including the direction of movement, the magnitude of movement, individual identity when RFID data was present in a cluster, and where the beginning of the movement event likely occurred (at the container entrance or inside of the container). This function returns a spreadsheet of behavioral inferences and other metadata about each movement event that can be used for subsequent analyses and visualization
+
+<br>
+![Figure 4 from the ABISSMAL methods manuscript under review, that shows a general workflow across these 5 functions](/home/gsvidaurre/Desktop/GitHub_repos/ABISSMAL/R/vignettes/images/Figure4_ComputationalAnalyses.png)
+* Figure from Smith-Vidaurre, G., Molina, T., Jarvis, E.D., and E.A. Hobson. 2023. Automated tracking of avian parental care. [EcoEvoRxiv preprint]((https://ecoevorxiv.org/repository/view/6268/)).
+
+<h2>Troubleshoot errors online</h2>
+
+You will run into errors while writing and running code, and while this can be frustrating, errors are an important part of the overall learning experience. Errors can arise for many different reasons, including typos that you introduced while writing code, issues with package versions that you installed, or perhaps missing packages. Sometimes, errors may be due to issues with the custom ABISSMAL functions that you will use in the subsequent vignettes, or issues with the code in the vignettes themselves. 
+
+Whenever you run into an error with your code, it's important to troubleshoot the error and figure out out how to solve it before assuming that the error is due to the custom ABISSMAL functions or issues with the ABISSMAL vignettes. There are many different resources online that you can use to troubleshoot common errors in R. One way to start troubleshooting errors online is to copy and paste the error message printed to your console into a search engine, which should point you to public forums online in which people have asked about and solved similar errors. You may also be able to use generative AI tools like ChatGPT to search for potential typos or issues with your code. You can also read R documentation to figure out if the error is associated with a specific package or function upon which ABISSMAL depends.
+
+Once you have thoroughly researched a given error, and you're sure that the error you're getting isn't due to a typo or issues with data structure on your end, then it's time to consider whether the error is due to a bug in a custom ABISSMAL function or the code provided in a vignette. These are bugs that you can report to the ABISSMAL developers on GitHub (see below).
+
+<h2>Report bugs on GitHub</h2>
+
+As you work through each vignette, you may encounter "bugs" or errors with the code, including code that does not work or that yields incorrect outcomes. These bugs can occur with the ABISSMAL functions themselves, or with the code in a given vignette. When you encounter a bug with an ABISSMAL function, you can create an Issue through the GitHub repository. To create a new Issue, you can select "New Issue" on the [Issues page](https://github.com/lastralab/ABISSMAL/issues) of the main ABISSMAL repository, then follow the instructions in the Issue template to add the information needed for the code developers to address the bug effectively. You can also add the tag "bug" to your issue. If you encounter an issue with the ABISSMAL vignettes, then you can submit an issue through the main ABISSMAL GitHub repository as well, as long as you clarify that the bug is related to code in a given vignette.
+
+In the next vignette, we will create simulated datasets of raw movement data to learn how to use the different ABISSMAL functions described above.

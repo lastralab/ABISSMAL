@@ -1,0 +1,704 @@
+---
+title: "Tutorial 04: Guardar Datos"
+author: "Grace Smith-Vidaurre"
+date: "2023-12-27"
+output: 
+  html_document:
+    css: "styles.css"
+    toc: true
+    toc_float: true
+    toc_depth: 4
+---
+
+```{r setup, include = FALSE}
+
+knitr::opts_chunk$set(echo = TRUE, eval = TRUE)
+
+```
+
+<h2>Información sobre esta traducción</h2>
+
+Este tutorial fue traducido al español por Grace Smith-Vidaurre y editado por Tania Molina, siguiendo las [convenciones de traducción de los Carpentries](https://github.com/Carpentries-ES/board/blob/master/Convenciones_Traduccion.md), incluyendo usar el género femenino por defecto. Si encuentras errores de ortografía que impiden tu habilidad de completar los tutoriales, por favor reporta los errores de ortografía a GitHub usando los pasos en el primer tutorial para reportar un "Issue".
+
+<h2>Resumen del tutorial y objetivos de aprendizaje</h2>
+
+En este cuarto tutorial, vas a guardar hojas de cálculo de las detecciones simuladas de movimientos de animales en tu computadora. Vas a continuar usando habilidades que aprendiste en los tutoriales anteriores, y vas a aprender nuevas habilidades que incluyen:
+
+1. Indexar y filtrar `dataframes`
+2. Revisar la estructura de `dataframes` con R base y el `tidyverse`
+3. Guardar objetos de R como archivos físicos en tu computadora
+4. Leer archivos de tu computadora a R
+5. Escribir y probar bucles
+
+<h2>Cargar paquetes e inicializar el `path` de tu directorio de trabajo</h2>
+
+```{r message = FALSE, warning = FALSE}
+
+rm(list = ls()) # Limpia tu ambiente global
+
+library(tidyverse) # Carga la colección de paquetes del tidyverse
+
+path <- "/home/gsvidaurre/Desktop/ABISSMAL_vignettes" # Inicializa un objeto con el path de tu directorio de trabajo
+
+```
+
+<h3>Crear los datos simulados</h3>
+
+En el código abajo, vas a recrear los datos simulados de RFID y sensores infrarrojo del tutorial anterior. Aquí estamos combinando el código en menos trozos comparado con el tercer tutorial:
+```{r}
+
+# Crea un vector de cuatro marcas de tiempo de RFID en formato HH:MM:SS
+rfid_ts <- c("10:00:00", "10:05:00", "11:00:00", "11:05:00")
+
+# Añade eventos de posar a los datos de RFID
+rfid_ts <- c(rfid_ts, "08:00:00", "08:00:01", "08:00:02", "08:00:03", "11:30:00", "11:30:01", "11:30:02", "11:30:03", "11:30:04", "11:30:05")
+
+glimpse(rfid_ts)
+
+```
+
+Aquí "IRBB" significa "infrared beam breakers" o sensores de infrarrojo.
+```{r}
+
+# Simula marcas de tiempo para los pares externos ("o_") e internos ("i_") de sensores infrarrojo para una entrada y una salida, y luego otra entrada y salida
+o_irbb_ts <- c("09:59:59", "10:05:01", "10:59:59", "11:05:01")
+i_irbb_ts <- c("10:00:01", "10:04:59", "11:00:01", "11:04:59")
+
+# Simula unos errores de detección por la antena de RFID en las marcas de tiempo de cada par de sensores infrarrojo
+# Estos errores de detección surgieron en cuatro movimientos adicionales: dos entradas y dos salidas
+o_irbb_ts <- c(o_irbb_ts, "06:05:05", "06:35:08", "07:15:40", "11:10:25")
+i_irbb_ts <- c(i_irbb_ts, "06:05:04", "06:35:09", "07:15:41", "11:10:24")
+
+# Simula unas detecciones de ruido en las marcas de tiempo del par externo de sensores infrarrojo
+o_irbb_ts <- c(o_irbb_ts, "09:45:01", "09:45:02", "09:45:03", "09:45:04", "09:45:05", "09:45:06", "09:45:07", "09:45:08", "09:45:09", "09:45:10", "09:45:11")
+
+glimpse(o_irbb_ts)
+glimpse(i_irbb_ts)
+
+```
+
+<h3>Simula tres días de colección de datos de RFID</h3>
+
+En el código siguiente, vas a combinar el vector de marcas de tiempo de RFID que inicializaste arriba con metadatos en un `dataframe`. Estos metadatos van a incluir el año, el mes, y el día, y también una columna con los valores de dos etiquetas PIT (una etiqueta por individuo simulado), y una columna con información sobre el tipo de sensor. Deberías de reconocer partes de este código del tutorial anterior:
+```{r}
+
+# Crea un vector para la réplica experimental
+exp_rep <- rep(x = "Nest_01", times = length(rfid_ts))
+
+# Crea un vector de las identidades de las etiquetas PIT
+# Asigna las primeras cuatro detecciones de RFID al primer individuo, el primer evento de posar (cuatro detecciones) al primer individuo, y el segundo evento de posar (seis detecciones) al segundo individuo
+# Estas tres expresiones de rep() están combinadas en un solo vector usando la función c()
+PIT_tag <- c(rep("1357aabbcc", 4), rep("1357aabbcc", 4), rep("2468zzyyxx", 6))
+
+# Crea el dataframe con los metadatos de réplica experimental y las marcas de tiempo
+sim_dats_rfid <- data.frame(chamber_id = exp_rep, timestamps = rfid_ts)
+
+# Sobrescribe el dataframe con la versión modificada que tiene columnas para el año, el mes, y el día
+sim_dats_rfid <- sim_dats_rfid %>%
+  dplyr::mutate(
+    year = 2023
+  ) %>%
+  dplyr::mutate(
+    month = 08,
+    day = 01
+  ) %>%
+  # Añade los metadatos de las etiquetas PIT en una columna nueva
+  dplyr::mutate(
+    PIT_tag = PIT_tag
+  ) %>% 
+  dplyr::mutate(
+    sensor_id = "RFID"
+  )
+
+glimpse(sim_dats_rfid)
+
+```
+
+Ahora puedes usar este `dataframe` para simular el proceso de colección de datos a través de dos días más. Para crear observaciones (filas) de dos días adicionales, puedes adjuntar las filas de una copia modificada de `sim_dats_rfid` al objeto original de `sim_dats_rfid`.
+
+En el código siguiente, estás usando una operación `pipe` para usar `sim_dats_rfid` como entrada en `bind_rows()`, y con esta notación estás especificando que `sim_dats_rfid` es el objeto original al cual quieres adjuntar más filas. Luego el código dentro de `bind_rows()` especifica el `dataframe`, o las filas nuevas que quieres adjuntar a `sim_dats_rfid`. En este caso, el código adentro de `bind_rows()` asigna `sim_dats_rfid` a `dplyr::mutate()` para modificar la columna de `day` y representar un día adicional de colección de datos. Luego repites este proceso para añadir un tercer día de recolectar datos simulados:
+```{r}
+
+sim_dats_rfid <- sim_dats_rfid %>% 
+  bind_rows(
+    sim_dats_rfid %>% 
+      dplyr::mutate(
+        day = 02
+      )
+  ) %>% 
+  bind_rows(
+    sim_dats_rfid %>% 
+      dplyr::mutate(
+        day = 03
+      )
+  )
+
+glimpse(sim_dats_rfid) # Tres veces el número original de filas
+
+```
+
+<h3>Revisar columnas de `dataframe` con R base</h3>
+
+Acabas de revisar la estructura del `dataframe` para confirmar que los datos simulados tienen datos recolectados a través de tres días. También puedes revisar los valores únicos que están presentes en la columna de `day`. Abajo puedes ver una forma de revisar los valores únicos adentro de una columna de un `dataframe`, usando dos ejemplos diferentes de notación de R base para acceder columnas adentro de un `dataframe`:
+```{r}
+
+# Escribir una expresión con el nombre de un objeto dataframe, un símbolo $, y el nombre de una columna te ayuda a acceder una columna a la vez en un dataframe. Una columna en un dataframe es un vector, por ende cuando ejecutas este código deberías de ver un vector de valores impreso en la consola
+sim_dats_rfid$day
+
+# Puedes también acceder una columna en un dataframe indexando, si escribes dos pares de corchetes (ambos pares de abrir y cerrar) después del nombre del dataframe, y colocas el nombre de la columna entrecomillas adentro del par interno de corchetes
+sim_dats_rfid[["day"]]
+
+# Puedes usar la función unique() para ver los valores únicos dentro de un vector, incluyendo una columna en un dataframe
+unique(sim_dats_rfid$day) # Tres días, se ve bien
+
+unique(sim_dats_rfid[["day"]]) # Tres días, se ve bien
+
+```
+
+<h3>Revisar columnas en un `dataframe` con el `tidyverse`</h3>
+
+También puedes revisar valores únicos en una columna usando funciones del `tidyverse`. En la expresión de abajo, vas a usar una expresión de `pipe` para facilitar el `dataframe` `sim_dats_rfid` a la función `pull()`, que va a acceder la columna `day` del `dataframe` como un vector. Luego este vector de la columna `day` se va a usar como entrada a la función `unique()` para revisar los valores únicos del vector mismo. La función `unique()` no requiere un argumento adentro de los paréntesis porque ya recibió el valor de entrada que necesita a través de la operación de `piping`.
+```{r}
+
+# Tres días, se ve bien
+sim_dats_rfid %>% 
+  pull(day) %>% 
+  unique()
+
+```
+
+<h3>Simula tres días de recolectar datos de los sensores infrarrojo</h3>
+
+Ahora puedes repetir este proceso de crear un `dataframe` con metadatos para los datos de los sensores de infrarrojo. Dado que los sensores de infrarrojo no colectan información sobre la identidad única de individuos, vas a añadir columnas para el año, el mes, el día, y el tipo de sensor. También vas a simular la colección de datos para estos sensores a través de los mismos tres días que los datos simulados de RFID.
+```{r}
+
+# Sobrescribe el vector exp_rep con un vector nuevo que tenga el mismo largo que los vectores o_irbb_ts y i_irbb_ts juntos
+exp_rep <- rep(x = "Nest_01", times = length(o_irbb_ts) + length(i_irbb_ts))
+
+# Añade las marcas de tiempo de ambos pares de sensores infrarrojo a la misma columna usando c()
+sim_dats_irbb <- data.frame(chamber_id = exp_rep, timestamps = c(o_irbb_ts, i_irbb_ts))
+
+sim_dats_irbb <- sim_dats_irbb %>%
+  dplyr::mutate(
+    year = 2023,
+    month = 08,
+    day = 01,
+    # Añade un identificador único para cada par de sensores
+    # Cada etiqueta única se repetirá por el tamaño del vector de marcas de tiempo de cada par de sensores infrarrojo
+    sensor_id = c(rep("Outer Beam Breakers", length(o_irbb_ts)), rep("Inner Beam Breakers", length(i_irbb_ts)))
+  )
+
+glimpse(sim_dats_irbb)
+
+sim_dats_irbb <- sim_dats_irbb %>% 
+  bind_rows(
+    sim_dats_irbb %>% 
+      dplyr::mutate(
+        day = 02
+      )
+  ) %>% 
+  bind_rows(
+    sim_dats_irbb %>% 
+      dplyr::mutate(
+        day = 03
+      )
+  )
+
+glimpse(sim_dats_irbb) # Tres veces el número de filas
+
+# Tres días, se ve bien
+sim_dats_irbb %>% 
+  pull(day) %>% 
+  unique()
+
+```
+
+<h2>Guarda un `dataframe` como un archivo físico</h2>
+
+Los `dataframes` que creas y manipulas en R se pueden guardar como archivos físicos en tu directorio de trabajo. Tienes muchas opciones diferentes para guardar `dataframes`, pero recomiendo que uses formato `.csv` porque este formato es compatible con R, Microsoft Word, y otros programas. Puedes usar la función `write.csv()` para guardar `dataframes` a hojas de cálculo `.csv` en tu computadora:
+```{r eval = FALSE}
+
+?write.csv
+
+```
+
+Para escribir un archivo físico en tu directorio de trabajo, necesitas comunicarle a R 1) donde guardar el archivo y 2) el nombre del archivo que quieres crear. Puedes pasarle ambas piezas de información a `write.csv()` con combinar tu directorio de trabajo y el nombre del archivo usando la función `file.path()`. Para este ejemplo, vas a crear un archivo de prueba mientras practicas cómo usar `write.csv()`:
+```{r}
+
+# Combina el path (camino o ubicación) a tu directorio de trabajo con el nombre del archivo que quieres escribir
+# La función file.path() combinará ambas piezas de información en un solo path para este archivo
+rfid_file <- file.path(path, "test_file.csv")
+
+# Este objeto contiene la ubicación dónde vas a guardar el archivo, y luego el nombre del archivo
+rfid_file
+
+```
+
+Luego puedes proveer el `dataframe` a `write.csv()` usando un `pipe` y puedes especificar información adicional para crear el archivo `.csv`, como si quisieras añadir una columna adicional de identidades numéricas de las filas:
+```{r eval = FALSE}
+
+sim_dats_rfid %>%
+  # Escribe el dataframe como una hoja de cálculo en formato .csv. No incluyes los nombres de las filas (row.names = FALSE)
+  # El símbolo "." abajo significa que la función write.csv() va a operar sobre el objeto que proporcionó el pipe, que en este caso es el objeto sim_dats_rfid
+  write.csv(x = ., file = rfid_file, row.names = FALSE)
+
+```
+
+Como se especifica en la documentación para la función `write.csv()`, esta función va a incluir las nombres de las columnas en la hoja de cálculo por defecto. La función no va a adjuntar esta información del `dataframe` en el archivo de `.csv` si esta hoja de cálculo ya existe, o sea, si ya creaste el archivo de `.csv` y vuelves a correr el código arriba, el archivo se va a sobrescribir por defecto.
+
+Puedes revisar que `write.csv()` funcionó como esperabas con usar `list.files()` para ver los archivos en tu directorio de trabajo.
+```{r eval = FALSE}
+
+# Ve una lista de todos los archivos en este path
+list.files(path)
+
+```
+
+También puedes usar `list.files()` para customizar una búsqueda con el argumento `pattern` (patrón). Usar el argumento `pattern` es parecido a buscar una palabra específica adentro de un documento de texto. El símbolo de "$" después de ".csv" significa que la función debería de buscar todos los archivos que *terminan* en el patrón ".csv".
+```{r eval = FALSE}
+
+# Devuelve sólo archivos que terminan en el patrón ".csv" en este path particular
+list.files(path, pattern = ".csv$")
+
+```
+
+<h3>Leer una hoja de cálculo</h3>
+
+Ahora puedes leer uno de estos archivos con R usando la función `read.csv()`. En el código abajo, vas a proveer el resultado de `read.csv()` a la función `glimpse()` para revisar la estructura del `dataframe` cuando leíste el archivo. El resultado de este código se imprime a la consola porque no está guardado adentro de un objeto.
+```{r eval = FALSE}
+
+read.csv(file.path(path, "test_file.csv")) %>% 
+  glimpse()
+
+```
+
+Ahora que practicaste usar `write.csv()` y `read.csv()`, puedes eliminar el archivo temporal que creaste proveyendo el objeto `rfid_file` a la función `file.remove()`.
+```{r eval = FALSE}
+
+rfid_file <- file.path(path, "test_file.csv")
+rfid_file
+
+file.remove(rfid_file)
+
+```
+
+<h2>Guardar datos simulados para análisis con ABISSMAL</h2>
+
+En el código de abajo, vas a trabajar con una serie de pasos para guardar los datos simulados en el formato y en las ubicaciones esperadas por las funciones de ABISSMAL. Para poder usar estas funciones de ABISSMAL, los datos simulados originales se tienen que guardar en una hoja de cálculo diferente por el tipo de sensor y el día de colección de datos. Estas hojas de cálculo se tienen que guardar adentro de una carpeta por tipo de sensor. ABISSMAL guarda los datos originales de esta misma forma cuando el sistema se usa para colectar datos empíricos de animales.
+
+<h3>Filtrar un `dataframe`</h3>
+
+Vas a practicar cómo usar la función `dplyr::filter()` para filtrar filas de un `dataframe` por día y luego guardar un `dataframe` filtrado con `write.csv()`. Para filtrar un `dataframe`, puedes usar una frase condicional adentro de la función `dplyr::filter()`:
+```{r}
+
+# Provee el dataframe a la función filter() con un "pipe"
+sim_dats_rfid %>% 
+  # Filtra el dataframe con seleccionar todas las filas en que la columna de día era igual a uno (el primer día de colección de datos)
+  dplyr::filter(day == 1) %>%
+  glimpse()
+
+# Revisa que este paso de filtrar se hizo correctamente. El único valor dentro de la columna del día debería de ser 1
+sim_dats_rfid %>% 
+  dplyr::filter(day == 1) %>%
+  pull(day) %>% 
+  unique()
+
+```
+
+Puedes obtener resultados similares cuando inviertes la frase condicional dentro de `dplyr::filter()` para eliminar los días que **no** fueron ni el segundo día ni el tercer día de colección de datos. Abajo combinaste dos frases condicionales usando el símbolo de "&".
+```{r}
+
+sim_dats_rfid %>%
+  # Filtra el dataframe seleccionando todas las filas en que los valores en la columna de día no son iguales a 2 o 3
+  dplyr::filter(day != 2 & day != 3) %>%
+  glimpse()
+
+# Usa la función par ver los valores únicos en una columna para verificar que el proceso de filtrar se completo bien
+sim_dats_rfid %>% 
+  dplyr::filter(day != 2 & day != 3) %>%
+  pull(day) %>% 
+  unique()
+
+```
+
+Ahora que practicaste filtrar un `dataframe`, puedes combinar este paso de filtrar con escribir un archivo `.csv` que contiene el `dataframe` filtrado por los datos colectados en un solo día:
+```{r eval = FALSE}
+
+# Crea un directorio nuevo adentro de tu directorio de trabajo para guardar datos
+file.path(path, "Data") # Revisa el path nuevo
+dir.create(file.path(path, "Data")) # Crea el path nuevo
+
+# Crea un directorio nuevo adentro del directorio de Data para los datos originales de RFID
+file.path(path, "RFID") # Revisa el path nuevo
+dir.create(file.path(path, "Data", "RFID")) # Crea el path nuevo
+
+# Inicializa el nombre del archivo nuevo con el path de tu directorio de trabajo 
+# Asegúrate de especificar que el archivo se va a guardar adentro de la carpeta nueva "RFID"
+rfid_file <- file.path(path, "Data/RFID", "test.csv")
+rfid_file
+
+# Filtra los datos simulados de RFID para sacar el primer día de colección de datos
+sim_dats_rfid %>% 
+  dplyr::filter(day == 1) %>% 
+  # Escribe el dataframe filtrado como una hoja de cálculo en formato .csv. No incluyas los nombres para las filas
+  # Recuerda que el símbolo "." significa que la función va a usar el objeto que proveyó la operación de "pipe", que aquí es el dataframe filtrado para seleccionar solo el primer día de colección de datos
+  write.csv(x = ., file = rfid_file, row.names = FALSE)
+
+```
+
+Revisa que el archivo de prueba se creó correctamente dentro de la carpeta nueva de RFID, y luego puedes eliminar este archivo.
+```{r eval = FALSE}
+
+list.files(file.path(path, "Data/RFID"), pattern = ".csv$")
+
+rfid_file <- file.path(path, "Data/RFID", "test.csv")
+rfid_file
+
+file.remove(rfid_file)
+
+```
+
+<h3>Practicar escribir un bucle (loop)</h3>
+
+Puedes repetir el código de arriba seis veces (tres veces por sensor) para escribir un `dataframe` por cada día de colección de datos por sensor. Pero es mejor evitar repetir el mismo código varias veces, porque cuando escribes código de esta forma es más difícil mantener archivos organizados de código y también es más fácil introducir errores mientras procesas y analizas datos. Cuando necesitas ejecutar el mismo código varias veces, es mejor escribir un bucle o `loop`. Escribir bucles es una habilidad muy importante y vamos a construir un bucle paso por paso.
+
+Vas a practicar cómo escribir un bucle con la función `lapply()`.
+```{r}
+
+?lapply
+
+# Crea un vector de los archivos que quieres guardar
+files <- c(file.path(path, "Data/RFID", "test1.csv"), file.path(path, "Data/RFID", "test2.csv"))
+
+files
+length(files)
+
+```
+
+Ahora puedes empezar a escribir la estructura de un bucle. En el código siguiente, el argumento `X` es el número de veces que se va a ejecutar el bucle. En este caso, `X` es un vector numérico de 1 por el largo del vector `files` y contiene los números uno y dos. Por ende, el bucle va a ejecutar dos veces, y cada valor consecutivo en `X` se va a usar en cada iteración correspondiente del bucle para escribir un archivo a la vez.
+
+El argumento `FUN` es una función customizada que fue escrita usando la notación `function(x){}`. Todo el código adentro de las llaves curvas (abre y cierre) se ejecutará en cada iteración del bucle. El argumento `x` adentro de `funcion()` es la variable de iteración, o la variable que va a tomar un valor diferente del vector `X` en cada iteración.
+```{r}
+
+# En este bucle la variable de iteración x va a tomar cada valor del vector en el argumento X. Por ejemplo, en la primera iteración del bucle, x va a tomar el valor numérico de 1. En la segunda iteración del bucle, x va a tomar el valor numérico de 2. Para probar esta lógica puedes ejecutar el bucle siguiente, y ver el valor de x que se va a imprimir en cada iteración en la consola
+lapply(X = 1:length(files), FUN = function(x){
+  
+  x
+  
+})
+
+```
+
+Como puedes ver, el resultado de este bucle es un `list` con dos elementos. Cada elemento del `list` está rodeado de dos pares de corchetes ([[1]] y [[2]]) y contiene un vector con un tamaño de 1 que contiene el valor de la variable de iteración (1 y 2, respectivamente).
+
+La variable de iteración, o `x`, no existe como un objeto afuera de la función del bucle. Si imprimes `x` afuera del bucle, no se va a encontrar ese objeto. Si creaste un objeto `x` afuera del bucle, verás los contenidos de este objeto cuando imprimes `x`. O sea, escribir un bucle que usa `x` como la variable de iteración no afectará otras líneas de código que usan un objeto que se llama `x` afuera de la función, y viceversa.
+
+La variable de iteración de una función puede ser otras letras del alfabeto como `i`, `j`, `y`, `z`, o una combinación de múltiples letras, números, guiones bajos, o puntos, siempre y cuando el nombre de la variable empiece con una letra.
+
+Una propiedad útil de la variable de iteración es que puedes usarlo para indexar vectores, `dataframes`, u otros objetos que creaste afuera del bucle. Por ejemplo, puedes usar `x` e indexar con corchetes para imprimir el nombre de cada archivo que quieras crear:
+```{r}
+
+lapply(X = 1:length(files), FUN = function(x){
+  
+  files[x]
+  
+})
+
+```
+
+También puedes modificar el código adentro de la función customizada para guardar cada archivo si metes la expresión `files[x]` dentro de la función `write.csv()` y usas una operación de `piping` para usar un `dataframe` como entrada para `write.csv()`.
+```{r eval = FALSE}
+
+lapply(X = 1:length(files), FUN = function(x){
+  
+  # En cada iteración del bucle, vas a guardar el dataframe `files[x]` en una hoja de cálculo con el nombre de archivo de la iteración actual
+  sim_dats_rfid %>%
+    write.csv(file = files[x], row.names = FALSE)
+  
+})
+
+```
+
+Deberías de ver dos resultados `NULL` en la consola si el bucle se ejecuta correctamente. Cuando revises los contenidos de la carpeta anidada de RFID, vas a poder ver que ambos archivos de `.csv` de prueba se escribieron en esta ubicación:
+```{r}
+
+list.files(file.path(path, "Data/RFID"))
+
+```
+
+Acabas de escribir dos hojas de cálculo usando un bucle, pero escribiste el mismo `dataframe` a cada hoja de cálculo. Para poder escribir un `dataframe` diferente a cada hoja de cálculo, puedes añadir el paso de filtrar el `dataframe` que aprendiste arriba. En el código siguiente, también vas a crear otro objecto de vector que se llama `days` (días) y luego usarás la variable de iteración para filtrar `sim_dats_rfid` y escribir una hoja de cálculo por cada día en `days`.
+```{r eval = FALSE}
+
+days <- c(1, 2, 3)
+
+lapply(X = 1:length(files), FUN = function(x){
+  
+  sim_dats_rfid %>%
+    # Filtra el dataframe una día a la vez
+    dplyr::filter(day == days[x]) %>%
+    # Escribe el dataframe filtrado por el día actual a una hoja de cálculo para ese día 
+    write.csv(file = files[x], row.names = FALSE)
+  
+})
+
+```
+
+Puedes borrar estos archivos que creaste de prueba. En el código siguiente, vas a ver otro ejemplo de cómo buscar un patrón de texto mientras buscas evidencia de que los archivos de prueba se crearon (antes de borrarlos). La secuencia de caracteres que usas para el argumento `pattern` empieza con el símbolo de `^`, el cual significa que quieres buscar todos los archivos que *empiezan* con el patrón "test". También estás especificando que quieres devolver la ubicación (`path`) completa de cada archivo usando el argumento `full.names = TRUE`, para que la función `file.remove()` tenga toda la información que necesita para borrar estos archivos de prueba.
+```{r eval = FALSE}
+
+rem_files <- list.files(file.path(path, "Data/RFID"), pattern = "^test", full.names = TRUE)
+rem_files
+
+file.remove(rem_files)
+
+```
+
+<h3>Usa un bucle para guardar la hoja de cálculo de RFID</h3>
+
+Ahora puedes juntar todo lo que aprendiste arriba y usar el bucle para escribir una hoja de cálculo por día para el sensor de RFID.
+```{r eval = FALSE}
+
+# Crea un vector de los nombres de los archivos que quieres guardar
+files <- c(
+  "RFID_simulated_Pair-01_2023_08_01.csv", 
+  "RFID_simulated_Pair-01_2023_08_02.csv", 
+  "RFID_simulated_Pair-01_2023_08_03.csv"
+)
+
+# Añade el path para la ubicación o carpeta al nombre de cada archivo
+files <- file.path(path, "Data/RFID", files) 
+files
+
+# Inicializa un vector de los días para poder escribir una hoja de cálculo por día en cada iteración del bucle
+days <- c(1, 2, 3)
+days
+
+# Puedes eliminar los nombres de los argumentos de lapply() porque estás especificando los valores de los argumentos en el orden que la función espera por defecto
+invisible(lapply(1:length(files), function(x){
+  
+  sim_dats_rfid %>%
+    # Filtra el dataframe por el día actual en esta iteración
+    dplyr::filter(day == days[x]) %>%
+    # Escribe el dataframe filtrado en la hoja de cálculo correcta para el día actual
+    write.csv(file = files[x], row.names = FALSE)
+  
+}))
+
+```
+
+En el código de arriba, deberías de poder ver un cambio adicional que hicimos al bucle al rodearlo con la función `invisible()`. Esta función silencia el resultado que se imprime en la consola (que viste cuando ejecutaste trozos de código anteriores), donde el resultado de cada iteración de `lapply()` está rodeado de dos pares de corchetes, y luego un solo par de corchetes. `lapply()` es una función que devuelve un `list`, y cuando la función se ejecuta correctamente pero no hay resultados para imprimir (como cuando creas un archivo físico), la función debería de devolver valores de `NULL` que significan resultados vacíos. Este comportamiento se espera con nuestro uso de `lapply()` porque usamos la función para escribir archivos físicos y no para devolver resultados a la consola. Ya que puedes usar `list.files()` para revisar que `lapply()` se ejecutó bien, usar `invisible()` te ayudará a minimizar la cantidad de texto que tienes que revisar en tu consola.
+```{r eval = FALSE}
+
+# Los archivos nuevos de .csv para cada día de datos de RFID están presentes en el directorio esperado, muy bien
+list.files(file.path(path, "Data/RFID"))
+
+```
+
+Ahora puedes eliminar los archivos que acabas de crear, porque vas a trabajar en escribir un bucle anidado que va a escribir automáticamente los datos de cada día para cada tipo de sensor.
+```{r eval = FALSE}
+
+files <- c("RFID_simulated_Pair-01_2023_08_01.csv", "RFID_simulated_Pair-01_2023_08_02.csv", "RFID_simulated_Pair-01_2023_08_03.csv")
+
+# Añade el path para el directorio correcto a los nombres de los archivos que quieres borrar
+files <- file.path(path, "Data/RFID", files) 
+files
+
+file.remove(files)
+
+```
+
+Si quieres más práctica escribiendo bucles, puedes escribir un bucle para guardar una hoja de cálculo para cada día de colección de datos de los sensores infrarrojo.
+
+<h3>Escribe un bucle anidado para crear hojas de cálculo</h3>
+
+Si quieres minimizar la cantidad de código que escribes para guardar los datos por tipo de sensor y por día, puedes guardar archivos de ambos tipos de sensores (RFID y sensores infrarrojo) en el mismo bucle. Para continuar, deberías de crear otro directorio para los datos de los sensores infrarrojo:
+```{r eval = FALSE}
+
+dir.create(file.path(path, "Data", "IRBB"))
+
+```
+
+Para lograr filtrar y escribir datos para ambos tipos de sensores a través de los días de colección de datos, vas a usar un tipo de objeto en R que se llama un `list`. Vas a usar estos `lists` adentro del bucle anidado:
+```{r}
+
+# Crea un list de los nombres de archivos customizados para guardar datos para cada tipo de sensor por día
+files <- list(
+  c("RFID_simulated_Pair-01_2023_08_01.csv", "RFID_simulated_Pair-01_2023_08_02.csv", "RFID_simulated_Pair-01_2023_08_03.csv"),
+  c("IRBB_simulated_Pair-01_2023_08_01.csv", "IRBB_simulated_Pair-01_2023_08_02.csv", "IRBB_simulated_Pair-01_2023_08_03.csv")
+)
+
+glimpse(files)
+
+```
+
+Los `lists` son objetos útiles porque son muy flexibles. A diferencia de los vectores, una sola lista puede contener varios diferentes tipos de datos. A diferencia de un `dataframe`, los elementos de una lista no necesitan tener las mismas dimensiones. Los elementos de una lista también pueden ser diferentes tipos de objetos con estructuras diferentes. Por ejemplo, un solo `list` puede contener vectores, `dataframes`, y otros `lists`. El `list` que creaste arriba tiene dos elementos, y cada elemento es un vector de tres secuencias de caracteres que contienen los nombres de archivos que especificaste usando la función `c()`.
+
+Puedes indexar un `list` de una forma parecida a indexar vectores y `dataframes`, pero usar un par o dos pares de corchetes devuelve resultados diferentes:
+```{r}
+
+# Usar un par de corchetes para filtrar un list devuelve el elemento actual en formato de list
+files[1]
+glimpse(files[1])
+
+# Usar dos pares de corchetes devuelve solo el elemento actual, o sea, elimina la estructura de list para demostrar la estructura original de ese elemento (aquí este elemento es un vector)
+files[[1]]
+glimpse(files[[1]])
+
+```
+
+Un `list` también puede tener nombres para sus elementos, y los elementos se pueden acceder por nombre:
+```{r}
+
+# Crea un list de los nombres de los archivos que quieres guardar
+files <- list(
+  `RFID` = c("RFID_simulated_Pair-01_2023_08_01.csv", "RFID_simulated_Pair-01_2023_08_02.csv", "RFID_simulated_Pair-01_2023_08_03.csv"),
+  `IRBB` = c("IRBB_simulated_Pair-01_2023_08_01.csv", "IRBB_simulated_Pair-01_2023_08_02.csv", "IRBB_simulated_Pair-01_2023_08_03.csv")
+)
+
+glimpse(files)
+
+```
+
+Accede los elementos de este `list` por nombre:
+```{r}
+
+# Usar un par de corchetes devuelve el elemento "RFID" como una lista
+files["RFID"]
+
+# Usar el símbolo de dolar "$" o dos pares de corchetes devuelve el elemento "RFID" en su formato original
+files$RFID
+
+files[["RFID"]]
+
+```
+
+Los `lists` son tipos de objetos muy útiles para operaciones con bucles anidados. Por ejemplo, si quieres escribir una hoja de cálculo por tipo de sensor y por día, vas a necesitar 1) un bucle para iterar a través de los tipos de sensores y 2) un bucle para iterar a través de días de colección de datos para cada sensor. Puedes usar listas para crear estructuras anidadas de datos que puedes proveer a un bucle anidado, para asegurar que cada capa del bucle se ejecuta de la forma que esperas. Por ejemplo, el `list` que se llama `files` refleja el bucle anidado que necesitas, porque los archivos están ordenados primero por el tipo de sensor (cada elemento del `list`) y luego por día de colección de datos (cada elemento del vector adentro de cada elemento del `list`):
+```{r}
+
+# Crea un vector de los nombres de los sensores
+sensors <- c("RFID", "IRBB")
+
+sensors
+
+# Inicializa un list nombrado con los nombres de los archivos que quieres escribir
+files <- list(
+  `RFID` = c("RFID_simulated_Pair-01_2023_08_01.csv", "RFID_simulated_Pair-01_2023_08_02.csv", "RFID_simulated_Pair-01_2023_08_03.csv"),
+  `IRBB` = c("IRBB_simulated_Pair-01_2023_08_01.csv", "IRBB_simulated_Pair-01_2023_08_02.csv", "IRBB_simulated_Pair-01_2023_08_03.csv")
+)
+
+files
+
+# Crea un list de los paths para los archivos de cada sensor. Usarás estos paths dentro de los bucles
+file_dirs <- list(
+  `RFID` = file.path(path, "Data/RFID"),
+  `IRBB` = file.path(path, "Data/IRBB") 
+)
+
+file_dirs
+
+# Crea un list de los días de colección de datos para cada tipo de sensor
+# Esto puede ser un solo vector en vez de una lista porque quieres guardar el mismo número de días por sensor, pero un list es útil por si quieres cambiar los días mismos o el número de días que quieres guardar por sensor
+days <- list(
+  `RFID` = c(1, 2, 3),
+  `IRBB` = c(1, 2, 3)
+)
+
+days
+
+# Ahora necesitas crear un list de los dataframes que quieres usar para crear los archivos. Como ya sabes cómo filtrar dataframes por día, ese código puede ir adentro de los bucles para minimizar la cantidad de código que escribes. Aquí vas a especificar el dataframe que usarás en las operaciones de filtro para cada tipo de sensor
+dats <- list(
+  `RFID` = sim_dats_rfid,
+  `IRBB` = sim_dats_irbb
+)
+
+glimpse(dats)
+
+```
+
+Cuando hayas establecido las estructuras de los datos para informar la operación del bucle, puedes escribir el bucle anidado mismo. Este bucle anidado es una estructura compleja, y por ende es útil probar el bucle con valores determinados de cada variable de iteración (`x` y `y` abajo).
+
+Después de escribir este bucle pero antes de ejecutar la estructura completa del bucle, deberías de probar el código adentro de cada capa del bucle. Para lograr esto, puedes inicializar los valores de las variables de iteración y luego correr el código adentro de cada bucle (pero sin ejecutar el bucle entero). Esta forma de revisar el bucle es equivalente a congelar el bucle en el tiempo, para que puedas ver el resultado del código para una sola iteración (abajo vas a ver la primera iteración para cada capa del bucle cuando ambos `x` y `y` tiene el valor numérico de uno).
+
+Para lograr este tipo de chequeo, deberías de ejecutar el código para "congelar" las variables de iteración en la primera iteración de cada bucle ( o sea, inicializar `x` y `y` con el valor de uno). Luego deberías de ejecutar el código dentro de cada bucle, empezando con la creación de `days_tmp`, luego las operaciones de indexar y filtrar el `dataframe`, y luego filtrar los nombres de los archivos. No deberías de ejecutar las líneas con `lapply()` porque quieres evitar ejecutar los bucles completos hasta que estés segura que el código adentro de cada bucle funciona de la forma que esperas.
+
+*Nota importante*: Arriba aprendiste que las variables de iteración no existen afuera de un bucle. Esta forma de probar el código adentro del bucle, en que no estás ejecutando los bucles mismos, es equivalente a probar el código afuera del bucle y por ende, los valores de las variables de iteración que inicialices afuera del bucle se van a respetar.
+
+Si observas el código dentro de cada bucle, deberías de ver que entre el bucle exterior y el bucle interior, vas a usar el nombre del sensor para la primera iteración del bucle exterior ("RFID") para determinar los días para las iteraciones del bucle interior (en `days_tmp`). Adentro del bucle interior, vas a filtrar el `list` de `dataframes` por sensor, y luego por los días que quieres por sensor. Luego vas a indexar el nombre del archivo para el tipo de sensor actual y el día actual con una combinación de indexar la lista de nombres de los archivos con uno o dos pares de corchetes. Abajo, las líneas que abren y cierran los bucles mismos están comentados para guiar tu chequeo (o sea para guiar cuales líneas de código deberías de ejecutar):
+```{r eval = FALSE}
+
+# Congela las variables de iteración para el chequeo
+x <- 1
+y <- 1
+
+# El bucle exterior: empieza con iterar a través de los sensores
+# invisible(lapply(1:length(sensores), function(x){
+  
+  # Para obtener los días correctos para el tipo de sensor actual, deberías de indexar el list nombrado de días
+  # Este paso de indexar es importante para que el bucle interior ejecute correctamente
+  sensors[x] # Una secuencia de caracteres con el nombre del sensor
+  
+  # Coloca la secuencia de caracteres con el nombre del sensor adentro de dos pares de corchetes para extraer el vector de días para el tipo de sensor actual
+  days_tmp <- days[[sensors[x]]]
+  
+  days_tmp
+  
+  # El bucle interior: itera a través de días para cada tipo de sensor
+  # lapply(1:length(days_tmp), function(y){
+    
+    # Para obtener el dataframe del tipo de sensor actual, puedes usar "x" adentro de dos pares de corchetes para extraer el dataframe del list
+    dats[[x]] %>%
+      # Para filtrar el dataframe por el día actual puedes usar "y" para indexar el vector temporal de días (para extraer un solo elemento de este vector)
+      dplyr::filter(day == days_tmp[y]) %>% 
+      glimpse()
+    
+    # Usa dos pares de corchetes para acceder el vector de los nombres de los archivos para el tipo de sensor actual que está adentro de la lista. Luego usa la variable "y" para indexar este vector con un par de corchetes para acceder el nombre de archivo correcto para esta iteración
+    files[[x]]
+    
+    files[[x]][y]
+    
+    # También vas a combinar el nombre del archivo con el path correcto:
+    file.path(file_dirs[[x]], files[[x]][y])
+    
+  # })
+  
+# }))
+
+```
+
+Ahora deberías de tener una mejor idea sobre cómo cada bucle opera a través de diferentes estructuras de datos para realizar la tarea que quieres (en este caso, escribir una hoja de cálculo por tipo de sensor y por día). Más adelante puedes modificar la estructura entera de los bucles para reemplazar las líneas que escribiste y realizar el chequeo con las operaciones finales que quieres realizar:
+```{r eval = FALSE}
+
+# El bucle exterior: empieza con iterar a través de los sensores
+invisible(lapply(1:length(sensors), function(x){
+  
+  # Para obtener los días correctos para el tipo de sensor actual, deberías de indexar el list nombrado de días
+  # Este paso de indexar es importante para que el bucle interior se ejecute correctamente
+  days_tmp <- days[[sensors[x]]]
+  
+  # El bucle interior: itera a través de días para cada tipo de sensor para escribir una hoja de cálculo por tipo de sensor y día
+  lapply(1:length(days_tmp), function(y){
+    
+    # Usa la variable "x" para acceder el dataframe para el tipo de sensor actual y luego usa la variable "y" para filtrar este dataframe por el día actual
+    dats[[x]] %>%
+      # Filtra el dataframe por el día actual
+      dplyr::filter(day == days_tmp[y]) %>%
+      # Usa una operación de indexar con doble corchetes para especificar el path correcto por tipo de sensor
+      # Luego usa operaciones de filtrar con doble corchetes y un par de corchetes para acceder el nombre correcto del archivo para el tipo de sensor y el día actual
+      write.csv(file = file.path(file_dirs[[x]], files[[x]][y]), row.names = FALSE)
+    
+  })
+  
+}))
+
+```
+
+Esta estructura de bucle debería de haber creado un archivo por tipo de sensor y día en el directorio correcto por tipo de sensor. Puedes revisar que estos seis archivos existen adentro del directorio para cada tipo de sensor en tu directorio de trabajo:
+```{r eval = FALSE}
+
+list.files(file.path(path, "Data/RFID"))
+
+list.files(file.path(path, "Data/IRBB"))
+
+```
+
+En este tutorial aprendiste más sobre cómo filtrar `dataframes` y guardar estos objetos como hojas de cálculo, y cómo usar bucles (loops) de una capa y estructuras de bucles anidados. En el siguiente tutorial vas a usar las hojas de cálculo de los datos simulados de RFID y sensores infrarrojo que creaste para empezar a procesar y analizar datos con las funciones de ABISSMAL.

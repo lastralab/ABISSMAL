@@ -1,0 +1,361 @@
+---
+title: "Vignette 03: Simulate Data"
+author: "Grace Smith-Vidaurre"
+date: "2023-12-27"
+output: 
+  html_document:
+    css: "styles.css"
+    toc: true
+    toc_float: true
+    toc_depth: 4
+---
+
+```{r setup, include = FALSE}
+
+knitr::opts_chunk$set(echo = TRUE, eval = TRUE)
+
+```
+
+<h2>Vignette overview and learning objectives</h2>
+
+In this third vignette, we will create simulated datasets of animal movements detected by different sensors. Simulating these datasets replaces the data collection process pipeline used by ABISSMAL to collect data from live animals. Generating simulated datasets will provide you more opportunities to practice basic coding skills, and will also allow you to have more control over the process of data collection in order to understand the subsequent data analysis steps. If you want to see movement detection datasets collected from live birds with ABISSMAL, and the code used to analyze those datasets, then check out the [methods manuscript preprint](https://ecoevorxiv.org/repository/view/6268/) that has links to publicly available data and code.
+
+Throughout the process of creating simulated datasets in this vignette, you will continue to use coding skills that you learned in vignette 02, and you will learn additional skills that include:
+
+1. Creating objects like vectors and data frames
+2. Data types in R
+3. Indexing and manipulating objects
+4. Using conditional statements
+5. Piping expressions through the tidyverse
+
+<h2>Load packages</h2>
+
+In the previous vignette, you installed a set of data science packages called the `tidyverse`. You also learned about working directories and created a directory on your computer to save the data or image files that you generate across vignettes.
+
+Whenever you start a new RMarkdown file or R script, it's important to set up your virtual workspace before starting data analysis. In the chunk below, you will clean your global environment and load the tidyverse. This is code that you already saw in vignette 02, but now these lines of code are together in one chunk.
+```{r message = FALSE, warning = FALSE}
+
+rm(list = ls()) # Clean global environment
+
+library(tidyverse) # Load the set of tidyverse packages
+
+```
+
+<h2>Create a path object</h2>
+
+The next step is to specify your working directory. In vignette 02, you used a string (text contained in double quotes to indicate a character string used inside of R code) to specify your working directory while using different functions. Using the same long character string over and over is a lot of copy-pasting. Instead, you can save the character string for your working directory as a new object in R.
+
+You can create a `path` object by writing out the name of the object on the left (without quotes), then the object creation symbols `<-`, and then the information that you want to store in this object (your working directory as a character string in quotes).
+```{r eval = TRUE}
+
+path <- "/home/gsvidaurre/Desktop/ABISSMAL_vignettes"
+
+```
+
+In the code above, you created an object called `path`. You can see contents of the object `path` by writing out the object name and running that code in the console:
+```{r eval = TRUE}
+
+path
+
+```
+
+You can also see the contents of `path` by clicking on the "Environment" tab and checking out the column to the right of the object name. `path` is a new object that holds information about your working directory, and it's available in your global environment for future operations.
+
+You can practice removing the `path` object from your global environment by writing and running the code `rm(list = "path")`. After doing this, make sure to recreate `path` using the code above.
+
+<h2>Create timestamps of simulated detections of animal movements</h2>
+
+The primary data collected by the ABISSMAL tracking system are timestamps indicating the moment of time when a sensor activated and recorded movement. Many (but not all) of these detections can be attributed to one or more animals moving near a sensor, such as a bird moving through a radio frequency identification (RFID) antenna mounted in the entrance of a nest container. In the subsequent code chunks, we will generate simulated data that represent RFID and infrared beam breaker detection datasets. 
+
+In this simulated example, let's assume that we're collecting data for 2 adult birds at a nest container. The RFID antenna is mounted in the entrance of nest container. One pair of infrared beam breakers, the "outer" pair, is mounted in front of the RFID antenna to catch movements just outside of the container entrance. A second pair of infrared beam breakers, the "inner" pair, is mounted behind the RFID antenna to catch movements just inside of the container entrance. In this simulated setup, the outer beam breakers will activate when a bird enters the nest container, followed by the RFID antenna and the inner beam breakers. When a bird leaves the nest container, the inner beam breakers should activate first, followed by the RFID antenna and then the outer beam breakers.
+
+We will start by creating an object that holds simulated timestamps for the RFID antenna. This object will be called `rfid_ts`, and it will hold 4 timestamps in hours:minutes:seconds format. Each timestamp will be surrounded by double quotes to denote that we are using text or character string information here. 
+
+These timestamps are combined inside of the same object by using the function `c()`. This function `c()` concatenates values separated by commas into a vector or list object. Above you created an object called `path` without using `c()`, but that object had a single value. Using `c()` allows you to combine multiple values into a vector that will have more than 1 element.
+```{r}
+
+# Create a vector of 4 RFID timestamps or 4 elements in HH:MM:SS format
+rfid_ts <- c("10:00:00", "10:05:00", "11:00:00", "11:05:00")
+  
+```
+
+You can check out the different properties of the `rfid_ts` object after it's made:
+```{r}
+
+rfid_ts # Run the object name to see its contents
+
+is.vector(rfid_ts) # A binary value indicating that rfid_ts is a vector
+
+class(rfid_ts) # A vector with data of type "character"
+
+length(rfid_ts) # This vector has 4 elements
+
+```
+
+Let's continue by simulating 2 entrance and 2 exit movement events. We can choose timestamps for the outer pair of infrared beam breakers that precede the RFID timestamps and timestamps for the inner beam breaker pai that follow the RFID antenna to simulate an entrance event. We can simulate detections by these sensors in the opposite order (inner beam breakers, then RFID, followed by the outer beam breakers) to simulate an exit event. We will offset detections from each sensor within the entrance and exit movement events by 1 second.
+```{r}
+
+# Simulate outer and inner beam breaker timestamps for an entrance, an exit, and then another entrance and exit
+o_irbb_ts <- c("09:59:59", "10:05:01", "10:59:59", "11:05:01")
+i_irbb_ts <- c("10:00:01", "10:04:59", "11:00:01", "11:04:59")
+
+```
+
+Birds will sometimes perch in the nest container entrance, and the sensors should pick up this behavior. You can add some perching events to the simulated dataset. Here we will simulate perching events for the RFID data only.
+```{r}
+
+rfid_ts <- c(rfid_ts, "08:00:00", "08:00:01", "08:00:02", "08:00:03", "11:30:00", "11:30:01", "11:30:02", "11:30:03", "11:30:04", "11:30:05")
+
+```
+
+In the code above, we modified the object `rfid_ts` by using the function `c()` to add 10 more timestamps to this vector, for a total of 14 elements. Check out the structure of the modified `rfid_ts` object using the function `glimpse()`:
+```{r}
+
+# See the object structure in a format that includes the data type ("chr"), the number of elements ([1:14]), and a preview of the first few elements
+glimpse(rfid_ts)
+
+```
+
+Another important type of information to simulate is noise in the sensor detections. For instance, the RFID antenna can fail to detect an individual's passive integrated transponder (PIT) tag, and the infrared beam breakers can activate when birds leave nesting material hanging in the entrance of the container. In both of these cases, the infrared beam breakers should activate when the RFID antenna does not.
+```{r}
+
+# Simulate some RFID detection failures across both beam breaker pairs
+# These RFID detection failures occurred over 2 additional simulated entrances and 2 additional simulated exits
+o_irbb_ts <- c(o_irbb_ts, "06:05:05", "06:35:08", "07:15:40", "11:10:25")
+i_irbb_ts <- c(i_irbb_ts, "06:05:04", "06:35:09", "07:15:41", "11:10:24")
+
+glimpse(o_irbb_ts)
+glimpse(i_irbb_ts)
+
+# Simulate some stray detections for the outer beam breaker
+o_irbb_ts <- c(o_irbb_ts, "09:45:01", "09:45:02", "09:45:03", "09:45:04", "09:45:05", "09:45:06", "09:45:07", "09:45:08", "09:45:09", "09:45:10", "09:45:11")
+
+glimpse(o_irbb_ts)
+
+```
+
+You've created simulated, noisy datasets of detections of animal movements, but currently, these datasets are encoded across separate vector objects and do not have important metadata. For instance, some useful metadata includes information about the experimental replicate, the date, and for the RFID data, the unique alphanumeric code of each PIT tag detected by the RFID antenna. Some of this metadata is critically important for downstream analyses (e.g. the date and PIT tag codes).
+
+Vectors are useful data structures in R, but one limitation of vectors is that you cannot combine different data types into the same object. You can try this out with the code below:
+```{r}
+
+# Create a vector with character, numeric, and binary data types
+# Since you're not saving the output into an object, the result will print directly to the console
+# You should see that all elements are forced to be character strings in double quotes
+c("1", 1, TRUE, FALSE)
+
+# Create a vector with numeric and binary data types
+# You should see that all elements have been forced to numeric. The TRUE and FALSE binary values are converted to the underlying numeric values used to store binary information (TRUE is stored as 1, and FALSE is stored as 0)
+c(1, 1, TRUE, FALSE)
+
+```
+
+When you try to combine character, numeric, and binary data types in the same vector, all vector elements will be forced to the character data type. A similar thing happens when you try to combine numeric and binary data types, but the vector is forced to numeric. Note that the binary values TRUE and FALSE are equivalent to the numeric values 1 and 0, respectively.
+
+<h2>Create metadata vectors</h2>
+
+For downstream analyses, you need to be able to create metadata of different data types, and then combine the primary data for each sensor (timestamps) with this metadata. Start by creating vectors of metadata for the RFID timestamps, including information about the experimental replicate, the date, and the PIT tag identity for each detection.
+
+Make a vector of metadata about the experimental replicate. Here, instead of writing out the same information many times, you'll use the function `rep()` to repeat the information about the experimental replicate several times. In order to set the number of times that the experimental replicate information is repeated, you'll also use the function `length()` to get the length of the `rfid_ts` vector, and then feed that result to `rep()`. Creating a metadata vector that is the same length as the `rfid_ts` vector will be useful for combining these vectors into a single object later. 
+```{r}
+
+# The documentation tells us that rep() expects two arguments, `x` and `times`
+?rep
+
+# Create a vector with information about the experimental replicate
+# The argument `x` contains the metadata information that will be repeated
+# The argument `times` specifies the number of times that the information will be repeated
+exp_rep <- rep(x = "Pair_01", times = length(rfid_ts))
+
+glimpse(exp_rep)
+
+# You can also run code without writing out the argument names, as long as the arguments are written in the same order that the function expects:
+exp_rep <- rep("Pair_01", length(rfid_ts))
+
+glimpse(exp_rep)
+
+```
+
+Using `times = length(rfid_ts)` is better practice than manually entering the length of `rfid_ts` (e.g. `times = 14`). When you manually enter a value for `times`, you're assuming that the `rfid_ts` has not changed within and between coding sessions, which can be a dangerous assumption. By using `times = length(rfid_ts)`, you are ensuring that the code above will create a vector of metadata the same length as `rfid_ts` regardless of whether you made additional modifications to `rfid_ts` above.
+
+You can use a conditional statement to confirm that the vector of metadata is the same length as the vector of RFID timestamps. Conditional statements can be useful ways to check assumptions in your code, or to efficiently build new datasets and functions.
+```{r}
+
+# If this condition is met, then the result in the console should be "[1] TRUE"
+length(rfid_ts) == length(exp_rep)
+
+```
+
+In the conditional statement above, you're using the symbols `==` to ask if the two vectors `rfid_ts` and `exp_rep` are the same length.
+
+You can also use the symbols `!=` to ask if the two vectors are *not* the same length:
+```{r}
+
+# This statement should yield FALSE, because these vectors are the same length
+length(rfid_ts) != length(exp_rep)
+
+```
+
+As an example, you can modify `rfid_ts` so that it is a different length than `exp_rep`. Below you'll see some different ways that you can filter out 4 elements of the vector `rfid_ts` so that this vector is 10 elements long.
+```{r}
+
+## Create numeric indices for filtering an object
+
+# You can use : to create a sequence of numbers from indices 5 to the length of rfid_ts
+5:length(rfid_ts)
+
+# You can also use the function `seq()` to create the same sequence of numeric indices
+seq(from = 5, to = length(rfid_ts), by = 1)
+
+# If you want to filter out non-consecutive elements, you can create a vector of indices with the function `c()`
+c(1, 3, 5, 6, 8, 10, 11, 12, 13, 14)
+
+## Filter an object using numeric indices
+
+# When you put any of the expressions above inside of square brackets after the object name you will pull out elements 5 to the length of rfid_ts and drop the first 4 elements
+rfid_ts[5:length(rfid_ts)]
+
+rfid_ts[seq(from = 5, to = length(rfid_ts), by = 1)]
+
+rfid_ts[c(1, 3, 5, 6, 8, 10, 11, 12, 13, 14)]
+
+# Finally, you can use any of the methods above to create a sequence of indices that you want to drop, and then use the `-` symbol inside of the square brackets to remove those indices. For instance:
+rfid_ts[-c(1:4)] # the numbers must be wrapped in `c()` in order for this inverted filtering to work 
+
+```
+
+Next, you can check whether the modified version of `rfid_ts` is the same length as `exp_rep`:
+```{r}
+
+# This statement should yield TRUE, because these vectors are not the same length
+length(rfid_ts[-c(1:4)]) != length(exp_rep)
+
+```
+
+<h2>Create data frames with primary data and metadata</h2>
+
+For later analyses, it is really important to have the metadata accompany your primary data in the very same object. To combine the primary data and metadata for these simulated datasets, you can rely on an object called a "data frame". Data frames are similar to spreadsheets. They have 2 dimensions (rows and columns), and you can store multiple different types of data in the same data frame. You can also write out data frames to spreadsheets that exist as physical files on your computer.
+
+When you try making a data frame with vectors of different length, you should get an error message stating that the two arguments provided have different numbers of rows:
+```{r eval = FALSE}
+
+sim_dats <- data.frame(exp_rep, rfid_ts[-c(1:4)])
+
+# "Error in data.frame(exp_rep, rfid_ts[-c(1:4)]) : 
+  # arguments imply differing number of rows: 14, 10"
+
+```
+
+Now use the full `exp_rep` and `rfid_ts` vectors to create the data frame, in which these vectors become columns of the data frame:
+```{r}
+
+sim_dats <- data.frame(exp_rep, rfid_ts)
+
+glimpse(sim_dats)
+
+```
+
+When you check out the structure of the new data frame `sim_dats`, you can see that it has 14 rows and 2 columns. For each column (after the "$" symbol), you can see the column name (here `exp_rep` and `rfid_ts`), the type of data in each column (both columns are type "character"), and then a preview of the first values in each column.
+
+You can change the column names by adding a new name and `=` before each vector. Here the vector `exp_rep` becomes the column `replicate` and the vector `rfid_ts` becomes the column `timestamps``
+```{r}
+
+sim_dats <- data.frame(replicate = exp_rep, timestamps = rfid_ts)
+
+glimpse(sim_dats)
+
+```
+
+We can add additional metadata to this data frame now that it's been created. For instance, it would be useful to have information about the date when these timestamps were collected. You can start by adding a column for the year, which will be data type "dbl" (which stands for "double" or "numeric"):
+```{r}
+
+sim_dats <- cbind(sim_dats, rep(2023, length(rfid_ts)))
+
+glimpse(sim_dats)  
+
+```
+
+The year column has a strange name when we add the new column using `cbind()`. The column name is the expression that you wrote inside of `cbind()`. You can use the function `names()` and square bracket indexing to change the strange column name to "year":
+```{r}
+
+# This function returns a vector of the column names of the data frame 
+names(sim_dats)
+
+# Use square bracket indexing and the function `ncol()` to find the last column name
+ncol(sim_dats) # There are 3 columns in this data frame
+
+# This expression gets you the name of the last column
+names(sim_dats)[ncol(sim_dats)]
+
+# Then you can overwrite the last column name with a new name
+names(sim_dats)[ncol(sim_dats)] <- "year"
+
+# Confirm that the name was changed correctly
+names(sim_dats)
+glimpse(sim_dats)
+
+```
+
+<h2>Create data frames using the tidyverse</h2>
+
+In the chunk above, you used base R code to add a new column and to update the column name. It took more than a few lines of code to carry out these operations. You could reduce the amount of code needed for these steps by removing the lines included to check your work. But another way that you can reduce the amount of code you're writing for these operations is to use tidyverse notation and functions:
+```{r}
+
+# Make the data frame again with only 2 columns
+sim_dats <- data.frame(replicate = exp_rep, timestamps = rfid_ts)
+
+# Use the tidyverse to add the year as the 3rd column
+sim_dats <- sim_dats %>% 
+  dplyr::mutate(
+    year = rep(2023, length(rfid_ts))
+  )
+
+glimpse(sim_dats)
+
+```
+
+You added a column for the year with the correct column name in fewer lines of code. In this tidyverse syntax, the symbol `%>%` represents a piping operation, in which you're using one object as the input for a subsequent operation. Here, you're using the object `sim_dats` at the input for the function `mutate()`, which you used to create the column `year`. 
+
+The notation `dplyr::` before `mutate()` indicates that the function `mutate()` should be sourced from the package called `dplyr`. Including the package name with 2 colons before a function name is important when there are multiple functions loaded in your global environment that have the same name. For instance, if you use other packages that also have functions called `mutate()`, and you don't specify which package you want to use, then you could end up with immediate errors (the code fails to run) or worse, you could run the wrong `mutate()` operation for a given analysis (which can lead to errors down the line that are harder to trace).
+
+Piping operations can simplify the code that you write, so that you don't have to create as many intermediate objects. On the other hand, for the same reason it can take practice to troubleshoot piping operations, especially when they become very long. A useful way to check intermediate results within long piping operations is to include the function `glimpse()` between different piping steps:
+```{r}
+
+# Make the data frame again with only 2 columns
+sim_dats <- data.frame(replicate = exp_rep, timestamps = rfid_ts)
+
+# Use the tidyverse to add the year as the 3rd column
+sim_dats %>%
+  glimpse() %>% # See the structure of the first version sim_dats
+  dplyr::mutate(
+    # The nrow(.) expression means "get the number of rows for the current object", which in this case is sim_dats
+    year = rep(2023, nrow(.))
+  ) %>%
+  glimpse() # See the structure of the latest sim_dats with the new column "year"
+
+```
+
+In the code above, you also learned a new way to repeat a value within a piping operation by using the notation '.' inside of a function, which means that you will perform the given operation (getting the number of rows) on the current object (`sim_dats`) piped into the expression (the `nrow()` function). 
+
+You can use a similar rule of thumb to add two more columns for the month and day to the data frame:
+```{r}
+ 
+# Use the tidyverse to add the year as the 3rd column
+sim_dats %>%
+  glimpse() %>% # See the structure of the original sim_dats
+  dplyr::mutate(
+    year = 2023
+  ) %>%
+  glimpse() %>% # See the structure of the intermediate sim_dats with the new column year
+  # Also add columns for the month and day
+  dplyr::mutate(
+    month = 08,
+    day = 01
+  ) %>% 
+  glimpse() # See the structure of the final sim_dats with the additional new columns month and day
+
+```
+
+In the code above, you added 2 more numeric columns to the data frame and you did this without needing to use the `rep()` function. Since you piped an existing data frame into each `dplyr::mutate()` expression, the single value that you specified for each of the year, month, and day columns was automatically repeated to fill the total rows in the data frame. Specifying a single value for a new column can help reduce the amount of code that you write, but only when you truly want the same value repeated across all rows of a data frame.
+
+You did not save these modifications that you made to `sim_dats` in an object, so the output was printed to the console only. In the next vignette, you will write out this data frame of simulated RFID and IRBB data to spreadsheets as physical files on your computer.
