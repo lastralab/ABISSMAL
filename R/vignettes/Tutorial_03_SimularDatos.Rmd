@@ -180,7 +180,7 @@ glimpse(exp_rep)
 
 ```
 
-Usar `times = length(rfid_ts)` es mejor costumbre que configurar lo largo de `rfid_ts` manualmente (por ejemplo, `times = 14`). Configurar el valor de `times` manualmente es suponer que el objeto `rfid_ts` no ha cambiado adentro de una sesión de escribir código, o entre sesiones diferentes, y esto puede ser una suposición peligrosa. Cuando usas `times = length(rfid_ts)` te aseguras que el código arriba va a crear un vector de metadatos del mismo largo que `rfid_ts` sin importar qué tantas modificaciones le hayas hecho a `rfid_ts` en el código arriba.
+Usar `times = length(rfid_ts)` es mejor práctica que configurar lo largo de `rfid_ts` manualmente (por ejemplo, `times = 14`). Configurar el valor de `times` manualmente es suponer que el objeto `rfid_ts` no ha cambiado adentro de una sesión de escribir código, o entre sesiones diferentes, y esto puede ser una suposición peligrosa. Cuando usas `times = length(rfid_ts)` te aseguras que el código arriba va a crear un vector de metadatos del mismo largo que `rfid_ts` sin importar qué tantas modificaciones le hayas hecho a `rfid_ts` en el código arriba.
 
 Puedes también usar una frase condicional para confirmar que el vector de metadatos es del mismo largo que el vector de marcas de tiempo de RFID. Las frases condicionales puede ser útiles para revisar suposiciones en tu código, o para construir nuevos datos y funciones.
 ```{r}
