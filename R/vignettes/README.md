@@ -9,7 +9,7 @@ The goal of these vignettes is to disseminate R coding skills in a biological co
 
 1. An introduction to RStudio that includes downloading the ABISSMAL GitHub repository, an introduction to the ABISSMAL data processing and analysis pipeline, and information about troubleshooting errors and reporting bugs
 
-2. Learn how to set up a virtual workspace, including cleaning your global environment, running code inside of RMarkdown files, package installation, keyboard shortcuts, creating and specifying a working directory
+2. Learn how to set up a virtual workspace, including cleaning your global environment, running code inside RMarkdown files, package installation, keyboard shortcuts, creating and specifying a working directory
 
 3. Create simulated datasets of animal movements while learning how to create objects in R, different data types in R, and how to manipulate objects with conditional statements and piping expressions
 
@@ -26,20 +26,20 @@ After completing the vignettes, it would be very helpful if you could complete t
 
 <h2>Resumen</h2>
 
-Nuestro objetivo es diseminar habilidades de programación en R en un contexto biológico a través del sistema de ABISSMAL. Tenemos seis tutoriales que cubren los siguientes temas:
+Nuestro objetivo es diseminar habilidades de programación en R en un contexto biológico a través del sistema de ABISSMAL. Tenemos seis tutoriales que cubren los siguientes puntos:
 
-1. Una introducción a RStudio que incluye descargar el repositorio de GitHub de ABISSMAL, una introducción al `pipeline` de procesar y analizar datos de ABISSMAL, e información sobre cómo manejar y reportar errores 
+1. Una introducción a RStudio que incluye cómo descargar el repositorio de GitHub de ABISSMAL, una introducción al `pipeline` para procesar y analizar datos de ABISSMAL, e información sobre cómo manejar y reportar errores 
 
-2. Aprende cómo configurar un espacio virtual, incluyendo limpiar tu ambiente global, ejecutar código adentro de trozos de código de archivos de RMarkdown, instalar paquetes, atajos para escribir código, y crear y especificar un directorio de trabajo
+2. Aprender cómo configurar un espacio virtual, incluyendo limpiar tu ambiente global, ejecutar código dentro de piezas de código de archivos de RMarkdown, instalar paquetes, atajos para escribir código, y crear y especificar un directorio de trabajo
 
-3. Crea datos simulados de movimientos de animales mientras aprendes cómo crear objetos en R, qué son los diferentes tipos de datos en R, y cómo manipular objetos con frases condicionales y expresiones de `piping`
+3. Crear datos simulados de movimientos de animales mientras se aprende cómo crear objetos en R, qué son los diferentes tipos de datos en R, y cómo manipular objetos con frases condicionales y expresiones de `piping`
 
-4. Guarda los datos simulados y aprende cómo escribir datos a archivos físicos en tu computadora, manipular `dataframes` con R base y el `tidyverse`, y escribir bucles sencillos y complejos
+4. Guardar los datos simulados y aprender cómo escribir datos a archivos físicos en tu computadora, manipular `dataframes` con R base y el `tidyverse`, y escribir bucles (`loops`) sencillos y complejos
 
-5. Trabaja en el `pipeline` de procesar datos con ABISSMAL mientras aprendes cómo acceder y usas funciones customizadas, y también cómo visualizar marcas de tiempo en una figura de código de barras
+5. Trabajar en el `pipeline` de procesar datos con ABISSMAL mientras aprendes cómo acceder y usar funciones customizadas, y también cómo visualizar marcas de tiempo en una figura de código de barras
 
-6. Termina el `pipeline` de análisis de datos de ABISSMAL mientras usas las habilidades de programación que practicaste en los tutoriales anteriores, y terminarás con crear una figura de código de barras más compleja y refinada
+6. Terminar el `pipeline` de análisis de datos de ABISSMAL mientras se emplean las habilidades de programación que practicaste en los tutoriales anteriores, y al final vas a crear una figura de código de barras más compleja y refinada
 
-Cada tutorial está disponible como un archivo de RMarkdown (extension `.Rmd`) que puedes abrir en RStudio. El reporte "tejido" de cada tutorial está disponible como un archivo en formato HTML, y puedes abrir esos archivos en tu navegador por defecto. Los archivos de HTML contienen texto, código, y los resultados de los trozos de código.
+Cada tutorial está disponible como un archivo de RMarkdown (extension `.Rmd`) que puedes abrir en RStudio. El reporte de cada tutorial está disponible como un archivo en formato HTML, estos archivos se pueden abrir en cualquier navegador de internet (Google Chrome, Firefox, Safari, etc). Los archivos de HTML contienen texto, código, y los resultados de las piezas de código.
 
-Sería una gran ayuda si después de completar los tutoriales también completarías una encuesta a través de [Google Forms](https://forms.gle/CaQXVWDrY5oHg8mCA). La información que compartes nos ayudará mejorar los tutoriales en el futuro.
+Sería una gran ayuda si después de completar los tutoriales pudieras completar una encuesta a través de [Google Forms](https://forms.gle/CaQXVWDrY5oHg8mCA). La información que compartas nos ayudará mejorar los tutoriales en el futuro.

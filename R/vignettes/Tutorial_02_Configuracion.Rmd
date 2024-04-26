@@ -127,7 +127,7 @@ libr
 
 <h2>Resolver frases incompletas en la consola</h2>
 
-Es importante vigilar el panel de la consola mientras escribes y ejecutas código en RStudio. El símbolo de `>` (o "mayor que") en la consola significa que la consola terminó de ejecutar código y está lista para otra operación. Cuando ves el símbolo de `+` (o "más") en la consola, este símbolo indica que la frase de código que acabas de ejecutar no está completa. Las frases incompletas de código surgen de errores de tipeo, como cuando te faltó abrir o cerrar los paréntesis en una función. Abajo hay un ejemplo de una frase incompleta de código:
+Es importante vigilar el panel de la consola mientras escribes y ejecutas código en RStudio. El símbolo de `>` (o "mayor que") en la consola significa que la consola terminó de ejecutar código y está lista para otra operación. Cuando ves el símbolo de `+` (o "más") en la consola, este símbolo indica que la frase de código que acabas de ejecutar no está completa. Las frases incompletas de código surgen de errores de mecanografía, como cuando te faltó abrir o cerrar los paréntesis en una función. Abajo hay un ejemplo de una frase incompleta de código:
 ```{r eval = FALSE}
 
 library(tidyverse
