@@ -2003,10 +2003,10 @@ correspondiente del bucle para escribir un archivo a la vez.</p>
 escrita usando la notación <code>function(x){}</code>. Todo el código
 adentro de las llaves curvas (abre y cierre) se ejecutará en cada
 iteración del bucle. El argumento <code>x</code> adentro de
-<code>funcion()</code> es el variable de iteración, o el variable que va
+<code>funcion()</code> es la variable de iteración, o la variable que va
 a tomar un valor diferente del vector <code>X</code> en cada
 iteración.</p>
-<pre class="r"><code># En este bucle el variable de iteración x va a tomar cada valor del vector en el argumento X. Por ejemplo, en la primera iteración del bucle, x va a tomar el valor numérico de 1. En la segunda iteración del bucle, x va a tomar el valor numérico de 2. Para probar esta lógica puedes ejecutar el bucle abajo, y ver el valor de x que se va a imprimir en cada iteración en la consola
+<pre class="r"><code># En este bucle la variable de iteración x va a tomar cada valor del vector en el argumento X. Por ejemplo, en la primera iteración del bucle, x va a tomar el valor numérico de 1. En la segunda iteración del bucle, x va a tomar el valor numérico de 2. Para probar esta lógica puedes ejecutar el bucle abajo, y ver el valor de x que se va a imprimir en cada iteración en la consola
 lapply(X = 1:length(files), FUN = function(x){
   
   x
@@ -2020,22 +2020,22 @@ lapply(X = 1:length(files), FUN = function(x){
 <p>Como puedes ver, el resultado de este bucle es un <code>list</code>
 con dos elementos. Cada elemento del <code>list</code> está rodeado de
 dos pares de corchetes ([[1]] y [[2]]) y contiene un vector con un largo
-de uno que contiene el valor del variable de iteración (uno y dos,
+de uno que contiene el valor dla variable de iteración (uno y dos,
 respectivamente).</p>
-<p>El variable de iteración, o <code>x</code>, no existe como un objeto
+<p>La variable de iteración, o <code>x</code>, no existe como un objeto
 afuera de la función del bucle. Si imprimes <code>x</code> afuera del
 bucle, no se va a encontrar ese objeto. Si creaste un objeto
 <code>x</code> afuera del bucle arria, verás los contenidos de este
 objeto cuando imprimes <code>x</code>. O sea, escribir un bucle que usa
-<code>x</code> como el variable de iteración no afectará otras líneas de
+<code>x</code> como la variable de iteración no afectará otras líneas de
 código que usan un objeto que se llama <code>x</code> afuera de la
 función, y viceversa.</p>
-<p>El variable de iteración de una función puede ser otras letras del
+<p>La variable de iteración de una función puede ser otras letras del
 alfabeto como <code>i</code>, <code>j</code>, <code>y</code>,
 <code>z</code>, o una combinación de múltiples letras, números, guiones
 bajo, o periodos, siempre y cuando el nombre de la variable empieza con
 una letra.</p>
-<p>Una propiedad útil del variable de iteración es que puedes usarlo
+<p>Una propiedad útil dla variable de iteración es que puedes usarlo
 para indexar vectores, <code>dataframes</code>, u otros objetos que
 creaste afuera del bucle. Por ejemplo, puedes usar <code>x</code> e
 indexar con corchetes para imprimir el nombre de cada archivo que
@@ -2342,7 +2342,7 @@ resultado del código para una sola iteración (abajo vas a ver la primera
 iteración para cada capa del bucle cuando ambos <code>x</code> y
 <code>y</code> tiene el valor numérico de uno).</p>
 <p>Para lograr este tipo de chequeo, deberías de ejecutar el código para
-“congelar” los variables de iteración en la primera iteración de cada
+“congelar” las variables de iteración en la primera iteración de cada
 bucle ( o sea, inicializar <code>x</code> y <code>y</code> con el valor
 de uno). Luego deberías de ejecutar el código adentro de cada bucle,
 empezando con la creación de <code>days_tmp</code>, luego las
@@ -2351,11 +2351,11 @@ filtrar los nombres de los archivos. No deberías de ejecutar las líneas
 con <code>lapply()</code> porque quieres evitar ejecutar los bucles
 completos hasta que estés segura que el código adentro de cada bucle
 funciona de la forma que esperas.</p>
-<p><em>Nota importante</em>: Arriba aprendiste que los variables de
+<p><em>Nota importante</em>: Arriba aprendiste que las variables de
 iteración no existen afuera de un bucle. Esta forma de probar el código
 adentro del bucle, en que no estás ejecutando los bucles mismos, es
 equivalente a probar el código afuera del bucle y por ende, los valores
-de los variables de iteración que inicialices afuera del bucle se van a
+de las variables de iteración que inicialices afuera del bucle se van a
 respetar.</p>
 <p>Mientras revisas el código adentro de cada bucle, deberías de ver que
 entre el bucle exterior y el bucle interior, vas a usar el nombre del
@@ -2394,7 +2394,7 @@ y &lt;- 1
       dplyr::filter(day == days_tmp[y]) %&gt;% 
       glimpse()
     
-    # Usa dos pares de corchetes para acceder el vector de los nombres de los archivos para el tipo de sensor actual que está adentro de la lista. Luego usa el variable y para indexar este vector con un par de corchetes para acceder el nombre de archivo correcto para esta iteración
+    # Usa dos pares de corchetes para acceder el vector de los nombres de los archivos para el tipo de sensor actual que está adentro de la lista. Luego usa la variable y para indexar este vector con un par de corchetes para acceder el nombre de archivo correcto para esta iteración
     files[[x]]
     
     files[[x]][y]
@@ -2421,7 +2421,7 @@ invisible(lapply(1:length(sensors), function(x){
   # El bucle interior: itera a través de días para cada tipo de sensor para escribir una hoja de cálculo por tipo de sensor y día
   lapply(1:length(days_tmp), function(y){
     
-    # Usa el variable x para acceder el dataframe para el tipo de sensor actual y luego usar el variable y para filtrar este dataframe por el día actual
+    # Usa la variable x para acceder el dataframe para el tipo de sensor actual y luego usar la variable y para filtrar este dataframe por el día actual
     dats[[x]] %&gt;%
       # Filtra el dataframe por el día actual
       dplyr::filter(day == days_tmp[y]) %&gt;%
