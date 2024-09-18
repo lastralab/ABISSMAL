@@ -1,0 +1,28 @@
+/* Custom code snippet styles for ABISSMAL */
+pre.dark {
+    background-color: #333 !important;
+    color: white !important;
+    padding: 10px;
+    border-radius: 4px;
+}
+
+/* Ensure images scale with their containers */
+img {
+    max-width: 100%;
+    height: auto;
+}
+
+/* Adjust the sidebar for smaller screens */
+@media (max-width: 768px) {
+    .wy-side-nav {
+        width: 100%;
+        position: relative;
+    }
+
+    .wy-nav-content {
+        padding-left: 0;
+        position: relative;
+        max-width: 100% !important;
+    }
+}
+
