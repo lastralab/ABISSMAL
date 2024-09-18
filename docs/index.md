@@ -1,15 +1,17 @@
 # Welcome to ABISSMAL
 
-For full documentation visit [mkdocs.org](https://www.mkdocs.org). TODO
+Automated Behavioral tracking by Integrating Sensors that Survey Movements Around a target Location
 
-## Commands
+For full documentation visit our [wiki](https://github.com/lastralab/ABISSMAL/wiki)
+
+## Pre-requisites
 
 * `mkdocs new [dir-name]` - Create a new project.
 * `mkdocs serve` - Start the live-reloading docs server.
 * `mkdocs build` - Build the documentation site.
 * `mkdocs -h` - Print help message and exit.
 
-## Project layout
+## Installing ABISSMAL
 
     mkdocs.yml    # The configuration file.
     docs/
