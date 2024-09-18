@@ -18,6 +18,18 @@ body {
     box-sizing: border-box;
 }
 
+a.icon:visited, article h3 a:visited {
+    color: #2e6da4;
+}
+
+.wy-nav-top {
+    background: black;
+}
+
+.wy-side-nav-search a:visited{
+    color: white;
+}
+
 /* Adjust the sidebar for smaller screens */
 @media (max-width: 768px) {
     .wy-side-nav {
