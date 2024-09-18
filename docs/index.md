@@ -25,7 +25,7 @@ For full documentation visit our [wiki](https://github.com/lastralab/ABISSMAL/wi
 ## Installing ABISSMAL
 
 1. `cd ~/Desktop` - Navigate to the Raspberry Pi's Desktop directory
-2. `git clone https://github.com/lastralab/ABISSMAL.git` - Clone the repository
+2. `git clone https://github.com/lastralab/ABISSMAL.git` - Clone the [repository](https://github.com/lastralab/ABISSMAL.git)
 3. `cd ABISSMAL` - Access the project root directory
 4. `sudo chmod +x *.sh` - Make files executable
 5. `sudo ./run_install.sh` - Initiate the installation script, enter the following information: 
