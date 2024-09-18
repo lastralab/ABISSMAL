@@ -5,7 +5,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       <link rel="shortcut icon" href="../img/favicon.ico" />
-    <title>About - ABISSMAL Docs</title>
+    <title>Open Source - ABISSMAL Docs</title>
     <link rel="stylesheet" href="../css/theme.css" />
     <link rel="stylesheet" href="../css/theme_extra.css" />
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
@@ -13,8 +13,8 @@
     
       <script>
         // Current page data
-        var mkdocs_page_name = "About";
-        var mkdocs_page_input_path = "about.md";
+        var mkdocs_page_name = "Open Source";
+        var mkdocs_page_input_path = "opensource.md";
         var mkdocs_page_url = null;
       </script>
     
@@ -48,20 +48,18 @@
                 <li class="toctree-l1"><a class="reference internal" href="../abissmal/">Usage</a>
                 </li>
               </ul>
-              <ul class="current">
-                <li class="toctree-l1 current"><a class="reference internal current" href="#">About</a>
-    <ul class="current">
-    <li class="toctree-l2"><a class="reference internal" href="#about">About</a>
-    </li>
-    <li class="toctree-l2"><a class="reference internal" href="#github-collaborators">Github Collaborators</a>
-    </li>
-    <li class="toctree-l2"><a class="reference internal" href="#manuscript-in-preparation">Manuscript in preparation</a>
-    </li>
-    </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../about/">About</a>
                 </li>
               </ul>
-              <ul>
-                <li class="toctree-l1"><a class="reference internal" href="../opensource/">Open Source</a>
+              <ul class="current">
+                <li class="toctree-l1 current"><a class="reference internal current" href="#">Open Source</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#gitflow">Gitflow</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#collaborators">Collaborators</a>
+    </li>
+    </ul>
                 </li>
               </ul>
       </div>
@@ -78,7 +76,7 @@
         <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
   <ul class="wy-breadcrumbs">
     <li><a href=".." class="icon icon-home" aria-label="Docs"></a></li>
-      <li class="breadcrumb-item active">About</li>
+      <li class="breadcrumb-item active">Open Source</li>
     <li class="wy-breadcrumbs-aside">
     </li>
   </ul>
@@ -87,25 +85,54 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
             <div class="section" itemprop="articleBody">
               
-                <h1 id="abissmal">ABISSMAL</h1>
-<p>Automated Behavioral tracking by Integrating Sensors that Survey Movements Around a target Location</p>
+                <h1 id="github-collaboration">Github Collaboration</h1>
 <p>For full documentation visit our <a href="https://github.com/lastralab/ABISSMAL/wiki">wiki</a></p>
-<h2 id="about">About</h2>
-<p>ABISSMAL is a hardware and software platform for automated behavioral tracking with built-in system monitoring and error logging. ABISSMAL also provides the capacity to make behavioral inferences by integrating data across multiple types of movement sensors. We tested the tracking system by tracking parental care behaviors with captive zebra finches that raised young birds over 50 days. See the accompanying methods manuscript for more detailed information about ABISSMAL. Our Wiki page has detailed information about how to set up and build hardware, as well as software installation and troubleshooting.</p>
-<h2 id="github-collaborators">Github Collaborators</h2>
+<h2 id="gitflow">Gitflow</h2>
+<p><img alt="abissmal gitflow" src="https://user-images.githubusercontent.com/22894897/150058257-d3c12516-95c2-45c8-b1d3-2591c44f5616.png" /></p>
+<h2 id="collaborators">Collaborators</h2>
 <ul>
-<li>Tania Molina (Lead Developer/Project Manager): tanismo[at]lastralab.com</li>
-<li>Grace Smith-Vidaurre, PhD (Developer): gsvidaurre[at]gmail.com</li>
+<li>Set up a local replicate of the tracking system that is separate from the code owner</li>
+<li>Make sure that issues that require modifying the same file are merged to avoid conflicts downstream (copy and paste into a single issue, close the other). Alternatively, work on these issues one at a time (after one issue was merged to main)</li>
+<li>For every issue that requires developing or modifying code, create a local branch with the issue number (e.g. PCT-10 for issue #10) from the main branch (e.g. see Git workflow above)<ul>
+<li><code>git checkout main</code></li>
+<li><code>git branch</code> to confirm that you're on the main branch</li>
+<li><code>git fetch</code></li>
+<li><code>git pull</code></li>
+<li><code>git checkout -b PCT-[insert issue number]</code></li>
+<li><code>git branch</code> to confirm that you're on the new local branch</li>
 </ul>
-<h2 id="manuscript-in-preparation">Manuscript in preparation</h2>
-<p>Smith-Vidaurre, G., Molina, T., Jarvis, E.D., and Hobson, E.A. (2023). Automated tracking of
-avian parental care behavior. In prep. EcoEvoRxiv preprint: <a href="https://doi.org/10.32942/X2Z60C">https://doi.org/10.32942/X2Z60C</a></p>
+</li>
+<li>Make changes on this local branch</li>
+<li>Test changes on the local branch by running the tracking system and checking for anticipated outcomes or errors</li>
+<li>Commit local changes and push them to the same branch in the remote master (may need to publish the local branch remotely)<ul>
+<li><code>git fetch</code></li>
+<li><code>git pull</code></li>
+<li><code>git add ./[name of files(s)]</code></li>
+<li><code>git commit -m '[PCT-000] Then add your message'</code></li>
+<li><code>git push</code></li>
+</ul>
+</li>
+<li>Make a pull request to merge the remote version of the local branch with the staging branch</li>
+<li>The code owner tests the updates on their local tracking system (see above) before confirming the pull request and merging the changes to the main branch</li>
+</ul>
+<h2>Setup Git credentials before cloning</h2>
+
+<p>These steps will save time instead of entering your Git credentials over and over.</p>
+<ol>
+<li>Create a new <a href="https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token" target="_blank">github token</a> and store it safely. <br /></li>
+<li>Store settings locally: <br />
+   <code>git config --global credential.helper store</code>
+   <br /></li>
+<li>Clone repository:<br />
+   <code>git clone https://github.com/lastralab/Abissmal.git</code> <br /></li>
+<li>Insert credentials using your new token as password <br />
+   <br /></li>
+</ol>
               
             </div>
           </div><footer>
     <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
-        <a href="../abissmal/" class="btn btn-neutral float-left" title="Usage"><span class="icon icon-circle-arrow-left"></span> Previous</a>
-        <a href="../opensource/" class="btn btn-neutral float-right" title="Open Source">Next <span class="icon icon-circle-arrow-right"></span></a>
+        <a href="../about/" class="btn btn-neutral float-left" title="About"><span class="icon icon-circle-arrow-left"></span> Previous</a>
     </div>
 
   <hr/>
@@ -128,10 +155,8 @@ avian parental care behavior. In prep. EcoEvoRxiv preprint: <a href="https://doi
   <span class="rst-current-version" data-toggle="rst-current-version">
     
     
-      <span><a href="../abissmal/" style="color: #fcfcfc">&laquo; Previous</a></span>
+      <span><a href="../about/" style="color: #fcfcfc">&laquo; Previous</a></span>
     
-    
-      <span><a href="../opensource/" style="color: #fcfcfc">Next &raquo;</a></span>
     
   </span>
 </div>

@@ -51,11 +51,37 @@
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#logs">Logs</a>
     </li>
+    <li class="toctree-l2"><a class="reference internal" href="#software-troubleshooting">Software Troubleshooting</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#run_install-executed-more-than-once-on-the-same-pi">run_install executed more than once on the same Pi</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#no-sockets-found-after-executing-mainsh">No sockets found after executing Main.sh</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#ssh-connection-external-drive-not-found">SSH Connection - External Drive not found</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#led-still-on-after-detaching-all-screens">LED still ON after detaching all screens</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#hardware-troubleshooting">Hardware Troubleshooting</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#mmal-memory-or-video-timed-out-while-waiting-for-capture-to-end">mmal memory or Video timed out while waiting for capture to end</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#rfid-reader-not-working">RFID reader not working</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#blank-display-with-tracking-system-running">Blank display with tracking system running</a>
+    </li>
+        </ul>
+    </li>
     </ul>
                 </li>
               </ul>
               <ul>
                 <li class="toctree-l1"><a class="reference internal" href="../about/">About</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../opensource/">Open Source</a>
                 </li>
               </ul>
       </div>
@@ -102,6 +128,83 @@
 </ul>
 </li>
 <li><code>grep -nir "INFO" /home/pi/log/</code> - See useful information</li>
+</ul>
+<h2 id="software-troubleshooting">Software Troubleshooting</h2>
+<h3 id="run_install-executed-more-than-once-on-the-same-pi">run_install executed more than once on the same Pi</h3>
+<p>If you run <code>run_install.sh</code> more than once, make sure there's only one line in <code>/etc/crontab</code> that specifies the Abissmal cron job, otherwise remove the duplicated lines with vim/nano editor as sudo. To see cron logging during or after the tracking system is running, open a terminal window and run <br /><code>tail -f /home/pi/log/abissmal_cron.log</code></p>
+<h3 id="no-sockets-found-after-executing-mainsh">No sockets found after executing Main.sh</h3>
+<p>This error usually indicates that one of the devices to the Pi wasn't set up correctly, which caused one or more screens to fail. Check that you set up all devices correctly. For instance, for the temperature sensor to work, it needs to be connected to 3V power and GPIO pin #4 for 1-wire data transfer. The Pi also needs to be set up to communicate with this device before running <code>Main.sh</code>.</p>
+<h3 id="ssh-connection-external-drive-not-found">SSH Connection - External Drive not found</h3>
+<p>When using ssh connection to the raspberry pi, the external drive might not be found in <code>/media/pi/</code>. A few extra steps are required in order for it to be used by the <code>Backups.py</code> script.</p>
+<p>Mount the external drive using <code>sudo sudo mount /dev/sda1 /media/pi/YourEDName</code><br />
+Give it permissions so that username 'pi' can write in it:<br />
+<code>sudo -s</code><br />
+<code>chmod -R 777 /media/pi/YourExternalDriveName/Data</code> <br />
+<code>exit</code><br /></p>
+<p>Note: Exit root mode so you won't run anything else under the root user</p>
+<h3 id="led-still-on-after-detaching-all-screens">LED still ON after detaching all screens</h3>
+<p>Open terminal in root folder, run:<br />
+<code>screen -r irbb</code><br />
+Hit <code>Ctrl + C</code></p>
+<h2 id="hardware-troubleshooting">Hardware Troubleshooting</h2>
+<p>Make sure to test the different hardware components used for this tracking system before discarding a sensor. For instance, if a screen is continuously failing for a given sensor, start by checking whether the sensor is still connected to the PCB or the Pi. If the connection looks ok, then check and swap out the jumper cable harnesses or ribbon cable, custom-soldered PCB, and the sensor itself to test whether any of these individual components are causing problems.</p>
+<h3 id="mmal-memory-or-video-timed-out-while-waiting-for-capture-to-end"><em>mmal memory</em> or <em>Video timed out while waiting for capture to end</em></h3>
+<p>This error arises when the camera ribbon cable isn't connected well to either the Pi or the camera, but can also arise if a ribbon cable has been damaged. If you see this error, it's worth starting with testing the connection itself (e.g. disconnect and reconnect the ribbon cable), then swapping out ribbon cables to see if that fixes the issue. If not, then the camera module itself may be bad.</p>
+<h3 id="rfid-reader-not-working">RFID reader not working</h3>
+<p>In our experience, issues with the CognIoT RFID reader are usually caused by issues with setting up the Pi for compatibility with this device. Make sure to run all setup steps in the Set up Raspberry Pi and tracking system software protocol.</p>
+<p>The RFID reader has an onboard LED that is helpful for troubleshooting. This light should be red when the reader is connected to a Pi that is powered on. If the red LED is blinking, then the antenna connection is missing or bad. The LED should turn green when it detects a PIT tag. If this LED doesn't change to green when you move a PIT tag near the antenna, then you may need to configure the RFID reader. To do this, use the following steps:</p>
+<ul>
+<li>
+<p>Connect the Raspberry Pi to the display, mouse, keyboard, and power cord</p>
+</li>
+<li>
+<p>Connect the GPIO ribbon cable to the Raspberry Pi and the customized PCB</p>
+</li>
+<li>
+<p>Connect the custom loop antenna to the RFID reader, then connect the RFID reader to the custom PCB with the jumper cable harnesses. Make sure these are connected in the right orientation</p>
+</li>
+<li>
+<p>Test the connections on the jumper cables for continuity while the Pi remains powered off. Set the multimeter to the sound check for continuity and touch the positive end of the multimeter to one pin header on the PCB and the corresponding jumper cable header connected to the Pi. GPIO connections that are the same (e.g. #4 on the Pi and PCB) should have continuity, but GPIO that are different should njot have continuity (e.g. 5v0 and GND)</p>
+</li>
+<li>
+<p>Turn the Pi on, and check that the red LED on RFID reader is on. If this is not on, or it's blinking, then there is an issue with the connection to the antenna</p>
+</li>
+<li>
+<p>Open a new terminal window, and navigate to the Modules folder inside the Abissmal folder. Change the working directory below if you installed the software elsewhere:</p>
+<ul>
+<li><code>cd /home/pi/Desktop/Abissmal/Modules</code></li>
+</ul>
+</li>
+<li>
+<p>Run the file called <code>RFID_CognIot_Original.py</code> in order to configure the RFID reader</p>
+<ul>
+<li><code>python RFID_CognIot_Original.py</code></li>
+<li>Follow the prompts on the terminal in order to configure the RFID reader to detect PIT tags that will be used in experiments:</li>
+</ul>
+</li>
+<li>
+<p>Select option "v" and then "c" or "C" to change the reader operating mode to be compatible with the EM1042 PIT tags</p>
+</li>
+<li>
+<p>When taken back to the main option menu, select option "S", pass the PIT tag over the antenna (the LED on the RFID reader should turn green when the tag is detected), and watch the output on the terminal to check that the reader is recognizing the PIT tag</p>
+</li>
+<li>
+<p>Shut down the Pi, then disconnect the RFID reader</p>
+</li>
+</ul>
+<h3 id="blank-display-with-tracking-system-running">Blank display with tracking system running</h3>
+<p>If you want to leave a Pi connected to a display in order to easily check data throughout the course of an experiment, you may run into issues with the display screen automatically blanking. Screen blanking can make it seem like a Pi is not working. Screen blanking is likely the problem when a monitor is blank and will not turn on even when you engage the Pi through a keyboard, but you can see that the RFID reader LED is red and not blinking. In order to fix this issue, you should turn off the display screen blanking, and also turn off the power save option for displays. Some of these commands may need to be run if the Pi is rebooted before running the tracking system:</p>
+<ul>
+<li>Run <code>sudo raspi-config</code> in a terminal window</li>
+<li>Select "2 Display Options Configure Display Settings"</li>
+<li>Select "4 Screen blanking enable / disable screen blanking" </li>
+<li>Select "No" when asked whether you want to enable screen blanking. You can also select this preference through the "Preferences" tab in the GUI</li>
+<li>Run the following commands in a terminal window (check the status of power-saving, then turn power-saving off, then check the status to confirm):<ul>
+<li><code>iw wlan0 get power_save</code></li>
+<li><code>sudo iw dev wlan0 set power_save off</code></li>
+<li><code>iw wlan0 get power_save</code></li>
+</ul>
+</li>
 </ul>
               
             </div>
