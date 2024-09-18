@@ -1,4 +1,4 @@
-# Welcome to ABISSMAL
+# Usage
 
 Automated Behavioral tracking by Integrating Sensors that Survey Movements Around a target Location
 

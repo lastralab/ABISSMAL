@@ -2,7 +2,7 @@ site_name: ABISSMAL Docs
 nav:
   - Home: index.md
   - Usage: abissmal.md
-  - About ABISSMAL: about.md
+  - About: about.md
 theme: readthedocs
 extra_css:
   - css/extra.css
