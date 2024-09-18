@@ -17,8 +17,7 @@ For full documentation visit our [wiki](https://github.com/lastralab/ABISSMAL/wi
 ## Pre-requisites
 
 * Setup Raspberry Pi by following [these steps](https://github.com/lastralab/Abissmal/wiki/2.-Set-up-Raspberry-Pi-and-tracking-system-software)
-* Raspberry Pi OS version required: (todo)
-* Python version supported: (todo)
+* Python version supported: 3
 * Setup [sensors and other hardware](https://github.com/lastralab/ABISSMAL/wiki/4.-Set-up-sensors-and-other-hardware)
 
 ## Installing ABISSMAL
