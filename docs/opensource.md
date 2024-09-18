@@ -35,9 +35,7 @@ These steps will save time instead of entering your Git credentials over and ove
 1. Create a new <a href="https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token" target="_blank">github token</a> and store it safely. <br />
 2. Store settings locally: <br />
    `git config --global credential.helper store`
-   <br />
 3. Clone repository:<br />
    `git clone https://github.com/lastralab/Abissmal.git` <br />
 4. Insert credentials using your new token as password <br />
-   <br />
 
