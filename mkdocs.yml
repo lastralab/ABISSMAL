@@ -3,6 +3,7 @@ nav:
   - Home: index.md
   - Usage: abissmal.md
   - About: about.md
+  - Open Source: opensource.md
 theme: readthedocs
 extra_css:
   - css/extra.css
