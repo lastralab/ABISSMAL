@@ -11,3 +11,7 @@ ABISSMAL is a hardware and software platform for automated behavioral tracking w
 ## Collaborators
 - Tania Molina (Lead Developer/Project Manager): tanismo[at]lastralab.com
 - Grace Smith-Vidaurre, PhD (Developer): gsvidaurre[at]gmail.com
+
+## Manuscript in preparation
+Smith-Vidaurre, G., Molina, T., Jarvis, E.D., and Hobson, E.A. (2023). Automated tracking of
+avian parental care behavior. In prep. EcoEvoRxiv preprint: [https://doi.org/10.32942/X2Z60C](https://doi.org/10.32942/X2Z60C)
