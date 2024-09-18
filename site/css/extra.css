@@ -1,0 +1,7 @@
+/* Custom code snippet styles for ABISSMAL */
+pre.dark {
+    background-color: #333 !important; /* Dark gray background */
+    color: white !important;           /* White text */
+    padding: 10px;                     /* Optional padding */
+    border-radius: 4px;                /* Optional rounded corners */
+}

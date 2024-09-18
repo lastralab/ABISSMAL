@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="css/theme.css" />
     <link rel="stylesheet" href="css/theme_extra.css" />
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+        <link href="css/extra.css" rel="stylesheet" />
     
       <script>
         // Current page data
@@ -46,15 +47,17 @@
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#installing-abissmal">Installing ABISSMAL</a>
     </li>
+    <li class="toctree-l2"><a class="reference internal" href="#directory-structure">Directory Structure</a>
+    </li>
     </ul>
                 </li>
               </ul>
               <ul>
-                <li class="toctree-l1"><a class="reference internal" href="about/">About</a>
+                <li class="toctree-l1"><a class="reference internal" href="abissmal/">Usage</a>
                 </li>
               </ul>
               <ul>
-                <li class="toctree-l1"><a class="reference internal" href="troubleshooting/">Troubleshooting</a>
+                <li class="toctree-l1"><a class="reference internal" href="about/">About</a>
                 </li>
               </ul>
       </div>
@@ -83,24 +86,61 @@
                 <h1 id="welcome-to-abissmal">Welcome to ABISSMAL</h1>
 <p>Automated Behavioral tracking by Integrating Sensors that Survey Movements Around a target Location</p>
 <p>For full documentation visit our <a href="https://github.com/lastralab/ABISSMAL/wiki">wiki</a></p>
+<pre class="dark">
+           ____ _____  _____ _____ __  __          _      
+     /\   |  _ \_   _|/ ____/ ____|  \/  |   /\   | |     
+    /  \  | |_) || | | (___| (___ | \  / |  /  \  | |     
+   / /\ \ |  _ < | |  \___ \\___ \| |\/| | / /\ \ | |     
+  / ____ \| |_) || |_ ____) |___) | |  | |/ ____ \| |____ 
+ /_/    \_\____/_____|_____/_____/|_|  |_/_/    \_\______|
+
+</pre>
+
 <h2 id="pre-requisites">Pre-requisites</h2>
 <ul>
-<li><code>mkdocs new [dir-name]</code> - Create a new project.</li>
-<li><code>mkdocs serve</code> - Start the live-reloading docs server.</li>
-<li><code>mkdocs build</code> - Build the documentation site.</li>
-<li><code>mkdocs -h</code> - Print help message and exit.</li>
+<li>Setup Raspberry Pi by following <a href="https://github.com/lastralab/Abissmal/wiki/2.-Set-up-Raspberry-Pi-and-tracking-system-software">these steps</a></li>
+<li>Raspberry Pi OS version required: (todo)</li>
+<li>Python version supported: (todo)</li>
+<li>Setup <a href="https://github.com/lastralab/ABISSMAL/wiki/4.-Set-up-sensors-and-other-hardware">sensors and other hardware</a></li>
 </ul>
 <h2 id="installing-abissmal">Installing ABISSMAL</h2>
-<pre><code>mkdocs.yml    # The configuration file.
-docs/
-    index.md  # The documentation homepage.
-    ...       # Other markdown pages, images and other files.
+<ol>
+<li><code>cd ~/Desktop</code> - Navigate to the Raspberry Pi's Desktop directory</li>
+<li><code>git clone https://github.com/lastralab/ABISSMAL.git</code> - Clone the repository</li>
+<li><code>cd ABISSMAL</code> - Access the project root directory</li>
+<li><code>sudo chmod +x *.sh</code> - Make files executable</li>
+<li><code>sudo ./run_install.sh</code> - Initiate the installation script, enter the following information: <ul>
+<li>Insert <code>y/Y</code> to install required packages if it's the first time using ABISSMAL, this can be skipped later on. </li>
+<li>Enter your Twilio Account SID to enable SMS alerts or press "Enter" key to skip</li>
+<li>Wait for it to restart</li>
+<li>NOTE: If you are using SSH connection you will have to <a href="https://github.com/lastralab/ABISSMAL/wiki/5.-Troubleshooting">mount the external hard drive manually</a></li>
+</ul>
+</li>
+</ol>
+<h2 id="directory-structure">Directory Structure</h2>
+<pre><code>run_install.sh      # The installer script. This needs to run everytime you pull a new version of the repository
+Main.sh             # The script that initiates the ABISSMAL tracking system
+cron.sh             # This script is automatically used by ABISSMAL for data collection, system monitoring and error logging
+Modules/
+    Backups.py      # Responsible for transfering data from the Pi to an external hard drive using cron
+    monitor.py      # System monitoring
+    IRBB.py         # Collects data from two pairs of infrared beam breakers
+    RFID.py         # Collects data from the 125kHz CognIot radio frequency identification (RFID) reader
+    Temp.py         # Collects data from the waterproof 1-wire DS18B20 temperature sensor
+    Video.py        # Records videos by motion detection using a Raspberry Pi (H) infrared fisheye lens camera with infrared LEDs
+    alt_video.py    # Responsible to record alternative videos for validation (can only run on a raspberry pi without the other modules enabled)
+R/
+    ...             # General documentation for data processing and integration functions
+3D/
+    ...             # Holds 3D-printing designs for customized hardware in .stl format
+VideoConcatenation/
+    ...             # Optional scripts for video concatenation with ffmpeg
 </code></pre>
               
             </div>
           </div><footer>
     <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
-        <a href="about/" class="btn btn-neutral float-right" title="About">Next <span class="icon icon-circle-arrow-right"></span></a>
+        <a href="abissmal/" class="btn btn-neutral float-right" title="Usage">Next <span class="icon icon-circle-arrow-right"></span></a>
     </div>
 
   <hr/>
@@ -124,7 +164,7 @@ docs/
     
     
     
-      <span><a href="about/" style="color: #fcfcfc">Next &raquo;</a></span>
+      <span><a href="abissmal/" style="color: #fcfcfc">Next &raquo;</a></span>
     
   </span>
 </div>
@@ -144,5 +184,5 @@ docs/
 
 <!--
 MkDocs version : 1.6.1
-Build Date UTC : 2024-09-18 17:15:59.057943+00:00
+Build Date UTC : 2024-09-18 18:54:49.416813+00:00
 -->

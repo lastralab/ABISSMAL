@@ -5,7 +5,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       <link rel="shortcut icon" href="../img/favicon.ico" />
-    <title>About - ABISSMAL Docs</title>
+    <title>Usage - ABISSMAL Docs</title>
     <link rel="stylesheet" href="../css/theme.css" />
     <link rel="stylesheet" href="../css/theme_extra.css" />
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
@@ -13,8 +13,8 @@
     
       <script>
         // Current page data
-        var mkdocs_page_name = "About";
-        var mkdocs_page_input_path = "about.md";
+        var mkdocs_page_name = "Usage";
+        var mkdocs_page_input_path = "abissmal.md";
         var mkdocs_page_url = null;
       </script>
     
@@ -44,18 +44,18 @@
                 <li class="toctree-l1"><a class="reference internal" href="..">Home</a>
                 </li>
               </ul>
-              <ul>
-                <li class="toctree-l1"><a class="reference internal" href="../abissmal/">Usage</a>
-                </li>
-              </ul>
               <ul class="current">
-                <li class="toctree-l1 current"><a class="reference internal current" href="#">About</a>
+                <li class="toctree-l1 current"><a class="reference internal current" href="#">Usage</a>
     <ul class="current">
-    <li class="toctree-l2"><a class="reference internal" href="#about">About</a>
+    <li class="toctree-l2"><a class="reference internal" href="#running-abissmal">Running ABISSMAL</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#collaborators">Collaborators</a>
+    <li class="toctree-l2"><a class="reference internal" href="#logs">Logs</a>
     </li>
     </ul>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../about/">About</a>
                 </li>
               </ul>
       </div>
@@ -72,7 +72,7 @@
         <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
   <ul class="wy-breadcrumbs">
     <li><a href=".." class="icon icon-home" aria-label="Docs"></a></li>
-      <li class="breadcrumb-item active">About</li>
+      <li class="breadcrumb-item active">Usage</li>
     <li class="wy-breadcrumbs-aside">
     </li>
   </ul>
@@ -81,21 +81,35 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
             <div class="section" itemprop="articleBody">
               
-                <h1 id="abissmal">ABISSMAL</h1>
+                <h1 id="usage">Usage</h1>
 <p>Automated Behavioral tracking by Integrating Sensors that Survey Movements Around a target Location</p>
 <p>For full documentation visit our <a href="https://github.com/lastralab/ABISSMAL/wiki">wiki</a></p>
-<h2 id="about">About</h2>
-<p>ABISSMAL is a hardware and software platform for automated behavioral tracking with built-in system monitoring and error logging. ABISSMAL also provides the capacity to make behavioral inferences by integrating data across multiple types of movement sensors. We tested the tracking system by tracking parental care behaviors with captive zebra finches that raised young birds over 50 days. See the accompanying methods manuscript for more detailed information about ABISSMAL. Our Wiki page has detailed information about how to set up and build hardware, as well as software installation and troubleshooting.</p>
-<h2 id="collaborators">Collaborators</h2>
+<h2 id="running-abissmal">Running ABISSMAL</h2>
+<ol>
+<li><code>./Main.sh</code> - Initiate ABISSMAL to start collecting data</li>
+<li>Check the <a href="logs.md">logs</a> to monitor the system</li>
+</ol>
+<h2 id="logs">Logs</h2>
+<p>Search log files to help with troubleshooting</p>
 <ul>
-<li>Tania Molina (Lead Developer/Project Manager): tanismo[at]lastralab.com</li>
-<li>Grace Smith-Vidaurre, PhD (Developer): gsvidaurre[at]gmail.com</li>
+<li><code>grep -nir "ERROR" /home/pi/log/</code> - Find errors</li>
+<li><code>tail -f /home/pi/log/abissmal_Box_01.log</code> - See logs in real time using tail</li>
+<li><code>tail -f /home/pi/log/abissmal_Box_01.log | grep "Videos recorded"</code> - Use specific strings to tail</li>
+<li><code>du -s -h /media/pi/&lt;YourDriveName&gt;/&lt;DataPath&gt;/*</code> - Monitor external drive space:<ul>
+<li><code>df -h /media/pi/Box_01/</code> - Example output:</li>
+<li><pre class="dark">
+  Filesystem      Size  Used Avail Use% Mounted on
+  /dev/sda1       932G   35G  897G   4% /media/pi/Box_01</pre></li>
+</ul>
+</li>
+<li><code>grep -nir "INFO" /home/pi/log/</code> - See useful information</li>
 </ul>
               
             </div>
           </div><footer>
     <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
-        <a href="../abissmal/" class="btn btn-neutral float-left" title="Usage"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href=".." class="btn btn-neutral float-left" title="Home"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../about/" class="btn btn-neutral float-right" title="About">Next <span class="icon icon-circle-arrow-right"></span></a>
     </div>
 
   <hr/>
@@ -118,8 +132,10 @@
   <span class="rst-current-version" data-toggle="rst-current-version">
     
     
-      <span><a href="../abissmal/" style="color: #fcfcfc">&laquo; Previous</a></span>
+      <span><a href=".." style="color: #fcfcfc">&laquo; Previous</a></span>
     
+    
+      <span><a href="../about/" style="color: #fcfcfc">Next &raquo;</a></span>
     
   </span>
 </div>

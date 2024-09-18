@@ -7,7 +7,6 @@ For full documentation visit our [wiki](https://github.com/lastralab/ABISSMAL/wi
 ## Running ABISSMAL
 
 1. `./Main.sh` - Initiate ABISSMAL to start collecting data
-2. Check the [logs](logs.md) to monitor the system
 
 ## Logs
 
