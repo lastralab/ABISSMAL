@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="description" content="None" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="description" content="Automated Behavioral tracking by Integrating Sensors that Survey Movements Around a target Location" />
       <link rel="shortcut icon" href="img/favicon.ico" />
     <title>ABISSMAL Docs</title>
     <link rel="stylesheet" href="css/theme.css" />
@@ -107,6 +107,7 @@
 <li>Raspberry Pi SD card (32Gb or 64 Gb with Rasbian Buster pre-installed)</li>
 <li>Python version: 3.7</li>
 <li>Setup <a href="https://github.com/lastralab/ABISSMAL/wiki/4.-Set-up-sensors-and-other-hardware">sensors and other hardware</a></li>
+<li>Before starting, get to know the basics of: <a href="https://linuxize.com/post/how-to-use-linux-screen/">Linux Screen</a> and <a href="https://cronitor.io/guides/cron-jobs">Cron jobs</a></li>
 </ul>
 <h2 id="installing-abissmal">Installing ABISSMAL</h2>
 <ol>
@@ -118,7 +119,7 @@
 <li>Insert <code>y/Y</code> to install required packages if it's the first time using ABISSMAL, this can be skipped later on. </li>
 <li>Enter your Twilio Account SID to enable SMS alerts or press "Enter" key to skip</li>
 <li>Wait for it to restart</li>
-<li>NOTE: If you are using SSH connection you will have to <a href="https://github.com/lastralab/ABISSMAL/wiki/5.-Troubleshooting">mount the external hard drive manually</a></li>
+<li>NOTE: If you are using SSH connection you will have to <a href="abissmal/#ssh-connection-external-drive-not-found">mount the external hard drive manually</a></li>
 </ul>
 </li>
 </ol>
@@ -133,6 +134,8 @@ Modules/
     RFID.py         # Collects data from the 125kHz CognIot radio frequency identification (RFID) reader
     Temp.py         # Collects data from the waterproof 1-wire DS18B20 temperature sensor
     Video.py        # Records videos by motion detection using a Raspberry Pi (H) infrared fisheye lens camera with infrared LEDs
+    helper.py       # Contains helper functions such as the CSV writter, directory setup and sms alerts
+    log.py          # Resposible for the global Logger setup
     alt_video.py    # Responsible to record alternative videos for validation (can only run on a raspberry pi without the other modules enabled)
 R/
     ...             # General documentation for data processing and integration functions
@@ -189,5 +192,5 @@ VideoConcatenation/
 
 <!--
 MkDocs version : 1.6.1
-Build Date UTC : 2024-09-18 22:20:49.667450+00:00
+Build Date UTC : 2024-09-19 18:31:08.604982+00:00
 -->
