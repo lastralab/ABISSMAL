@@ -1,4 +1,5 @@
 site_name: ABISSMAL Docs
+site_description: Automated Behavioral tracking by Integrating Sensors that Survey Movements Around a target Location
 nav:
   - Home: index.md
   - Usage: abissmal.md
@@ -7,3 +8,8 @@ nav:
 theme: readthedocs
 extra_css:
   - css/extra.css
+extra:
+  seo:
+    description: ABISSMAL is a hardware and software platform for automated behavioral tracking with built-in system monitoring and error logging
+    keywords: abissmal, tanismo, python, raspberrypi, gsvidaurre, lastralab, github, tracking, science, research, data, sensors, video, rfid, irbb, temperature
+
