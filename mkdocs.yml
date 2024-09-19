@@ -12,4 +12,5 @@ extra:
   seo:
     description: ABISSMAL is a hardware and software platform for automated behavioral tracking with built-in system monitoring and error logging
     keywords: abissmal, tanismo, python, raspberrypi, gsvidaurre, lastralab, github, tracking, science, research, data, sensors, video, rfid, irbb, temperature
+    robots: index, follow
 
