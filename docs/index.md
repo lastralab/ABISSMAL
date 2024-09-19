@@ -21,7 +21,7 @@ For full documentation visit our [wiki](https://github.com/lastralab/ABISSMAL/wi
 * Raspberry Pi SD card (32Gb or 64 Gb with Rasbian Buster pre-installed)
 * Python version: 3.7
 * Setup [sensors and other hardware](https://github.com/lastralab/ABISSMAL/wiki/4.-Set-up-sensors-and-other-hardware)
-- Before starting, get to know the basics of: [Linux Screen](https://linuxize.com/post/how-to-use-linux-screen/) and [Cron jobs](https://cronitor.io/guides/cron-jobs)
+* Before starting, get to know the basics of: [Linux Screen](https://linuxize.com/post/how-to-use-linux-screen/) and [Cron jobs](https://cronitor.io/guides/cron-jobs)
 
 ## Installing ABISSMAL
 
