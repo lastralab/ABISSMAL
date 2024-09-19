@@ -2,9 +2,6 @@
 
 Automated Behavioral tracking by Integrating Sensors that Survey Movements Around a target Location
 
-## Ethics Statement
-We developed and tested this tracking system with an institutional animal care and use (IACUC) protocol that was approved for captive zebra finches by Rockefeller University. If you plan to use this tracking system for research with live animals (captive or wild), then you must have your own approved institutional protocols and permits for ethical and responsible use of animals in research.
-
 For full documentation visit our [wiki](https://github.com/lastralab/ABISSMAL/wiki)
 
 ## Running ABISSMAL
@@ -97,3 +94,6 @@ If you want to leave a Pi connected to a display in order to easily check data t
     - `iw wlan0 get power_save`
     - `sudo iw dev wlan0 set power_save off`
     - `iw wlan0 get power_save`
+
+## Ethics Statement
+We developed and tested this tracking system with an institutional animal care and use (IACUC) protocol that was approved for captive zebra finches by Rockefeller University. If you plan to use this tracking system for research with live animals (captive or wild), then you must have your own approved institutional protocols and permits for ethical and responsible use of animals in research.
