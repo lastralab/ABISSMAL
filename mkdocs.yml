@@ -7,10 +7,12 @@ site_author: tanismo
 copyright: '© tanismo'
 edit_uri: blob/docs/docs
 nav:
-  - Getting Started: index.md
-  - Usage: abissmal.md
-  - About: about.md
-  - Github Collaboration: opensource.md
+  - Getting Started:
+    - Initial Setup: index.md
+    - Usage: abissmal.md
+  - About ABISSMAL:
+    - Project Overview: about.md
+    - Github Collaboration: opensource.md
 theme: readthedocs
 extra_css:
   - css/extra.css
