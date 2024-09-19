@@ -6,7 +6,11 @@ For full documentation visit our [wiki](https://github.com/lastralab/ABISSMAL/wi
 ## Gitflow
 ![abissmal gitflow](https://user-images.githubusercontent.com/22894897/150058257-d3c12516-95c2-45c8-b1d3-2591c44f5616.png)
 
-## Collaborators
+## Current Roles
+- Tania Molina (Lead Developer/Project Manager): [@lastralab](https://github.com/lastralab)
+- Grace Smith-Vidaurre, PhD (PI, Developer, R Lead): [@gsvidaurre](https://github.com/gsvidaurre)
+
+## New collaborators
 
 * Set up a local replicate of the tracking system that is separate from the code owner
 * Make sure that issues that require modifying the same file are merged to avoid conflicts downstream (copy and paste into a single issue, close the other). Alternatively, work on these issues one at a time (after one issue was merged to main)

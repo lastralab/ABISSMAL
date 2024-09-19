@@ -4,13 +4,13 @@ site_url: https://lastralab.github.io/ABISSMAL/site/
 repo_url: https://github.com/lastralab/ABISSMAL
 repo_name: ABISSMAL
 site_author: tanismo
-copyright: 'tanismo, the smith-vidaurre lab'
+copyright: '© tanismo'
 edit_uri: blob/docs/docs
 nav:
-  - Home: index.md
+  - Getting Started: index.md
   - Usage: abissmal.md
   - About: about.md
-  - Open Source: opensource.md
+  - Github Collaboration: opensource.md
 theme: readthedocs
 extra_css:
   - css/extra.css
