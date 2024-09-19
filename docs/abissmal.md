@@ -6,7 +6,8 @@ For full documentation visit our [wiki](https://github.com/lastralab/ABISSMAL/wi
 
 ## Running ABISSMAL
 
-1. `./Main.sh` - Initiate ABISSMAL to start collecting data
+1. `sudo ./run_install.sh` - Run installation only if a new version of the repository has been pulled or you haven't ran it yet
+2. `./Main.sh` - Initiate ABISSMAL to start collecting data
 
 ## Logs
 
