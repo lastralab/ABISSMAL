@@ -21,6 +21,7 @@ For full documentation visit our [wiki](https://github.com/lastralab/ABISSMAL/wi
 * Raspberry Pi SD card (32Gb or 64 Gb with Rasbian Buster pre-installed)
 * Python version: 3.7
 * Setup [sensors and other hardware](https://github.com/lastralab/ABISSMAL/wiki/4.-Set-up-sensors-and-other-hardware)
+- Before starting, get to know the basics of: [Linux Screen](https://linuxize.com/post/how-to-use-linux-screen/) and [Cron jobs](https://cronitor.io/guides/cron-jobs)
 
 ## Installing ABISSMAL
 
@@ -32,7 +33,7 @@ For full documentation visit our [wiki](https://github.com/lastralab/ABISSMAL/wi
      * Insert `y/Y` to install required packages if it's the first time using ABISSMAL, this can be skipped later on. 
      * Enter your Twilio Account SID to enable SMS alerts or press "Enter" key to skip
      * Wait for it to restart
-     * NOTE: If you are using SSH connection you will have to [mount the external hard drive manually](https://github.com/lastralab/ABISSMAL/wiki/5.-Troubleshooting)
+     * NOTE: If you are using SSH connection you will have to [mount the external hard drive manually](abissmal/#ssh-connection-external-drive-not-found)
 
 ## Directory Structure
 
@@ -46,6 +47,8 @@ For full documentation visit our [wiki](https://github.com/lastralab/ABISSMAL/wi
         RFID.py         # Collects data from the 125kHz CognIot radio frequency identification (RFID) reader
         Temp.py         # Collects data from the waterproof 1-wire DS18B20 temperature sensor
         Video.py        # Records videos by motion detection using a Raspberry Pi (H) infrared fisheye lens camera with infrared LEDs
+        helper.py       # Contains helper functions such as the CSV writter, directory setup and sms alerts
+        log.py          # Resposible for the global Logger setup
         alt_video.py    # Responsible to record alternative videos for validation (can only run on a raspberry pi without the other modules enabled)
     R/
         ...             # General documentation for data processing and integration functions
