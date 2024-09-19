@@ -1,5 +1,11 @@
 site_name: ABISSMAL Docs
 site_description: Automated Behavioral tracking by Integrating Sensors that Survey Movements Around a target Location
+site_url: https://lastralab.github.io/ABISSMAL/site/
+repo_url: https://github.com/lastralab/ABISSMAL
+repo_name: ABISSMAL
+site_author: tanismo
+copyright: tanismo, gsvidaurre
+remote_branch: docs
 nav:
   - Home: index.md
   - Usage: abissmal.md
@@ -8,3 +14,6 @@ nav:
 theme: readthedocs
 extra_css:
   - css/extra.css
+plugins:
+  - search:
+      indexing: 'full'
