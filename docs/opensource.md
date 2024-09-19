@@ -36,6 +36,5 @@ These steps will save time instead of entering your Git credentials over and ove
 2. Store settings locally: <br />
    `git config --global credential.helper store`
 3. Clone repository:<br />
-   `git clone https://github.com/lastralab/Abissmal.git` <br />
+   `git clone https://github.com/lastralab/ABISSMAL.git` <br />
 4. Insert credentials using your new token as password <br />
-

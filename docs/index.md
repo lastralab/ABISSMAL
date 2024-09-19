@@ -56,4 +56,3 @@ For full documentation visit our [wiki](https://github.com/lastralab/ABISSMAL/wi
         ...             # Holds 3D-printing designs for customized hardware in .stl format
     VideoConcatenation/
         ...             # Optional scripts for video concatenation with ffmpeg
-

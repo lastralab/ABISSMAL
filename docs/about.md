@@ -15,3 +15,6 @@ ABISSMAL is a hardware and software platform for automated behavioral tracking w
 ## Manuscript in preparation
 Smith-Vidaurre, G., Molina, T., Jarvis, E.D., and Hobson, E.A. (2023). Automated tracking of
 avian parental care behavior. In prep. EcoEvoRxiv preprint: [https://doi.org/10.32942/X2Z60C](https://doi.org/10.32942/X2Z60C)
+
+### Ethics Statement
+We developed and tested this tracking system with an institutional animal care and use (IACUC) protocol that was approved for captive zebra finches by Rockefeller University. If you plan to use this tracking system for research with live animals (captive or wild), then you must have your own approved institutional protocols and permits for ethical and responsible use of animals in research.
