@@ -33,7 +33,7 @@ For full documentation visit our [wiki](https://github.com/lastralab/ABISSMAL/wi
      * Insert `y/Y` to install required packages if it's the first time using ABISSMAL, this can be skipped later on. 
      * Enter your Twilio Account SID to enable SMS alerts or press "Enter" key to skip
      * Wait for it to restart
-     * NOTE: If you are using SSH connection you will have to [mount the external hard drive manually](abissmal/#ssh-connection-external-drive-not-found)
+     * NOTE: If you are using SSH connection you will have to [mount the external hard drive manually](abissmal.md/#ssh-connection-external-drive-not-found)
 
 ## Directory Structure
 
