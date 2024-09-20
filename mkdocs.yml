@@ -13,7 +13,9 @@ nav:
   - About ABISSMAL:
     - Project Overview: about.md
     - Github Collaboration: opensource.md
-theme: readthedocs
+theme:
+  name: readthedocs
+  logo: img/abissmal.png
 extra_css:
   - css/extra.css
 plugins:
