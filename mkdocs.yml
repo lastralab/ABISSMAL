@@ -16,6 +16,8 @@ nav:
 theme:
   name: readthedocs
   logo: img/abissmal.png
+  icon:
+    logo: img/abissmal.png
 extra_css:
   - css/extra.css
 plugins:
