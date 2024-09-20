@@ -23,3 +23,6 @@ extra_css:
 plugins:
   - search:
       indexing: 'full'
+extra:
+  scripts:
+    - head.html
