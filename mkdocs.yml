@@ -8,7 +8,7 @@ copyright: '© tanismo'
 edit_uri: blob/docs/docs
 nav:
   - Getting Started:
-    - Install ABISSMAL: index.md
+    - Installation: index.md
     - Usage: abissmal.md
   - About ABISSMAL:
     - Project Overview: about.md
