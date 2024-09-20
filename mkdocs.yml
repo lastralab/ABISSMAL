@@ -16,10 +16,9 @@ nav:
 theme:
   name: readthedocs
   logo: img/abissmal.png
+  custom_dir: overrides
 extra_css:
   - css/extra.css
 plugins:
   - search:
       indexing: 'full'
-extra:
-  og_image: img/abissmal.png
