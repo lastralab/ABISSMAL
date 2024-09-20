@@ -5,12 +5,26 @@ Automated Behavioral tracking by Integrating Sensors that Survey Movements Aroun
 For full documentation visit our [wiki](https://github.com/lastralab/ABISSMAL/wiki)
 
 <pre class="dark">
-           ____ _____  _____ _____ __  __          _      
-     /\   |  _ \_   _|/ ____/ ____|  \/  |   /\   | |     
-    /  \  | |_) || | | (___| (___ | \  / |  /  \  | |     
-   / /\ \ |  _ < | |  \___ \\___ \| |\/| | / /\ \ | |     
-  / ____ \| |_) || |_ ____) |___) | |  | |/ ____ \| |____ 
+           ____ _____  _____ _____ __  __          _
+     /\   |  _ \_   _|/ ____/ ____|  \/  |   /\   | |
+    /  \  | |_) || | | (___| (___ | \  / |  /  \  | |
+   / /\ \ |  _ < | |  \___  \___ \| |\/| | / /\ \ | |
+  / ____ \| |_) || |_ ____) |___) | |  | |/ ____ \| |____
  /_/    \_\____/_____|_____/_____/|_|  |_/_/    \_\______|
+
+
+Automated behavioral tracking by integrating sensors that survey 
+movements around a target location
+
+Date:        November 2023
+Authors:     Molina, T. & Smith-Vidaurre, G.
+
+Setting permissions for user: demo
+
+Enter first letter of the modules to track:
+Example: virt (V/v)ideo/(R/r)fid/(I/i)rbb/(T/t)emp
+To run Validation Video only, enter (A/a)
+
 
 </pre>
 
