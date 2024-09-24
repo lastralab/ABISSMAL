@@ -32,19 +32,34 @@ a.icon:visited, article h3 a:visited {
 
 /* Adjust the sidebar for smaller screens */
 @media (max-width: 768px) {
+
+    body {
+        padding-top: 56px !important;
+    }
+
+    .wy-nav-top {
+        position: fixed;
+        top: 0;
+        width: 100%;
+        z-index: 1000;
+    }
+
     .wy-side-nav {
         width: 100%;
         position: relative;
     }
 
     .wy-nav-content {
-        padding-left: 0;
         position: relative;
         max-width: 100% !important;
     }
 
     .wy-grid-for-nav {
         position: relative;
+    }
+
+    h1, h2, h3, h4, h5, h6 {
+        scroll-margin-top: 86px; /* Match this with the body padding */
     }
 }
 
