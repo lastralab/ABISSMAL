@@ -15,7 +15,7 @@
 #' @param data_dir A character string. This argument should be the name of directory where the combined raw data per sensor type is saved inside the path above. For instance, "raw_combined".
 #' @param out_dir A character string. This argument should be the name of a directory inside the path above specifying where the resulting .csv file of perching events should be saved (e.g. "processed"). This folder will be created as a new directory if it doesn't already exist.
 #' @param out_file_prefix A character string. The name (plus extension) of the resulting file that will be written to out_dir. The default prefix is "perching_events". The function will automatically add the sensor type of the data used as input to this default file name as a suffix before the .csv extension.
-#' @param tz A character string. This argument should contain the timezone used for converting timestamps to POSIXct format. For instance, "America/New York". See the base function `as.POSIXct` for more information.
+#' @param tz A character string. This argument should contain the timezone used for converting timestamps to POSIXct format. Currently timezones specified such as "America/New York" do not work, and it is recommended to set tz to "". See the base function `as.POSIXct` for more information.
 #' @param POSIXct_format A character string. This argument should contain the format used to converting timestamps to POSIXct format. The default is "%Y-%m-%d %H:%M:%OS6" to return timestamps with milliseconds in decimal format. See the base function `as.POSIXct` for more information.
 #'
 #' @details This function parses raw radio frequency identification (RFID) or infrared beam breaker data to identify perching events (e.g. periods of time when an individual was perched in the entrance of the nest container around which the movement sensors are mounted). When RFID data is used as input, this function identifies perching events for each unique passive integrated transponder (PIT) tag and date in the dataset. When beam breaker data is used as input, the function identifies perching events for each pair of beam breakers and date in the dataset. `detect_perching_events` identifies runs of sensor detections separated by the given temporal threshold or less. The function then takes the first and last detection of each run and returns these timestamps as the start and end of each perching event.
@@ -199,6 +199,24 @@ detect_perching_events <- function(file_nm, threshold, run_length = 2, sensor_id
       )
     ) %>% 
     
+    # # TKTK troubleshooting, I see the two RFID timestamps that I want to catch as a perching event
+    # perching_df %>% 
+    #   ungroup() %>% 
+    #   dplyr::filter(dates == "2023-8-9", PIT_tag_ID == "01-10-3F-8F-F0") %>% 
+    #   pull(data) %>% 
+    #   as.data.frame() %>% 
+    #   View()
+    # 
+    # # ALL of the lags are FALSE, which is actually right for a threshold of 1 second
+    # # When threshold = 2 seconds, the lag between the two timestamps at 8:47 is correctly identified as less than this threshold, although the run length is 1
+    # perching_df %>% 
+    #   ungroup() %>% 
+    #   dplyr::filter(dates == "2023-8-9", PIT_tag_ID == "01-10-3F-8F-F0") %>% 
+    #   pull(lags) %>% 
+    #   as.data.frame() %>% 
+    #   View()
+    #   
+    
     # Make a data frame of the first and last indices of each run longer than the given run_length that contain temporal difference values below or equal to the given threshold
     dplyr::mutate(
       # Map over the nested data frames in lags
@@ -211,7 +229,9 @@ detect_perching_events <- function(file_nm, threshold, run_length = 2, sensor_id
                               run_lengths = rle(binary_diff)[["lengths"]],
                               .groups = "keep"
         ) %>% 
-          dplyr::filter(run_values & run_lengths >= run_length) %>% 
+          dplyr::filter(run_values & run_lengths >= run_length) %>%
+          # TKTK troubleshooting removal of the run length
+          # dplyr::filter(run_values) %>%
           ungroup()
       )
     ) %>% 
@@ -244,6 +264,56 @@ detect_perching_events <- function(file_nm, threshold, run_length = 2, sensor_id
     unnest(`cols` = c(perching)) %>%
     ungroup() %>% 
     dplyr::select(-c(dates))
+  
+  # # TKTK troubleshooting
+  # # The perching event is NOT detected here when run_length = 1 and threshold = 2
+  # # it's also not identified when I reduce run_length to 0...
+  # # the RFID detections are finally retained when I remove run_length, but the issue is now that there are many many perching events detected...I need a way to retain detections that are NOT caught in the run_length operation, and also a way to run the run_length operation to detect longer perchin events
+  # # There must be a way to fix what's happening with run_length = 0. Otherwise I'll just have to detect short and long perching events separately and that will be very inefficient
+  # View(perching_df)
+  # nrow(perching_df) # There are 9311 entries when I run the code above with run_length = 0 and with the run_length filter removed....this is very strange. See below, looks like the overall results are the same but I'm seeing different timestamps because there's an issue with how the indices are being set for filtering timestamps of runs. Plus I just noticed that I was missing seeing the 08-09 timestamps because the timestamps are arranged in numeric order rather than consecutive order here
+  # 
+  # # perching_df$lags
+  
+  
+  # lags_runs <- perching_df %>% 
+  #   dplyr::mutate(
+  #     map(
+  #       .x = lags,
+  #       .f = ~ dplyr::reframe(.x,
+  #                             first_indices = (cumsum(rle(binary_diff)[["lengths"]]) - (rle(binary_diff)[["lengths"]])) + 1,
+  #                             last_indices = cumsum(rle(binary_diff)[["lengths"]]),
+  #                             run_values = rle(binary_diff)[["values"]],
+  #                             run_lengths = rle(binary_diff)[["lengths"]],
+  #                             .groups = "keep"
+  #       ) %>% 
+  #         dplyr::filter(run_values & run_lengths >= run_length) %>%
+  #         # TKTK troubleshooting removal of the run length
+  #         # dplyr::filter(run_values) %>%
+  #         ungroup()
+  #     )
+  #   )
+  # 
+  # glimpse(lags_runs)
+  # 
+  # # Index 672 are the timestamps at 8:47 that are less than 2 seconds apart
+  # lags_runs %>%
+  #   ungroup() %>%
+  #   dplyr::filter(dates == "2023-8-9", PIT_tag_ID == "01-10-3F-8F-F0") %>%
+  #   pull(lags) %>%
+  #   as.data.frame() %>%
+  #   View()
+  # 
+  # # I think I need to add a 1 to the start timestamp index
+  # # For index 672, the start and end timestamps are now correctly identified as 672 (run_length of 1), and this update holds when adding back the run_length filter with run_length equal to 1
+  # lags_runs %>%
+  #   ungroup() %>%
+  #   dplyr::filter(dates == "2023-8-9", PIT_tag_ID == "01-10-3F-8F-F0") %>%
+  #   pull(`map(...)`) %>%
+  #   as.data.frame() %>%
+  #   View()
+  
+  
   
   if(nrow(perching_df) > 0){
     

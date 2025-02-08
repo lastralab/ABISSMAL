@@ -6,9 +6,9 @@ rm(list = ls())
 if (!require(testthat)) install.packages('testthat')
 library(testthat)
 
-source("/home/gsvidaurre/Desktop/GitHub_repos/ABISSMAL/R/score_clusters.R")
+source(file.path(code_path, "score_clusters.R"))
 
-source("/home/gsvidaurre/Desktop/GitHub_repos/ABISSMAL/R/utilities.R")
+source(file.path(code_path, "utilities.R"))
 
 # This testing file can be run by calling test_file("./path/to/this/file)
 
@@ -29,7 +29,7 @@ test_that("The function labels entrances and exits as expected using data from 2
   # library(testthat)
   
   # Create a temporary directory for testing. Files will be written and read here
-  path <- "/home/gsvidaurre/Desktop"
+  path <- testthat_tmp_path
   data_dir <- "tmp_tests"
   tmp_path <- file.path(path, data_dir)
   
@@ -82,7 +82,7 @@ test_that("The function labels entrances and exits as expected using data from 2
   
   write.csv(sim_dats, file.path(tmp_path, "processed",  "detection_clusters.csv"), row.names = FALSE)
   
-  score_clusters(file_nm = "detection_clusters.csv", sensor_id_col_nm = NULL, PIT_tag_col_nm = NULL, rfid_label = NULL, camera_label = NULL, outer_irbb_label = "Outer Beam Breaker", inner_irbb_label = "Inner Beam Breaker", video_metadata_col_nms = NULL, integrate_perching = FALSE, perching_dataset = NULL, perching_prefix = NULL, pixel_col_nm = NULL, video_width = NULL, video_height = NULL, integrate_preproc_video = FALSE, path = path, data_dir = file.path(data_dir, "processed"), out_dir = file.path(data_dir, "processed"), out_file_nm = "scored_detectionClusters.csv", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS")
+  score_clusters(file_nm = "detection_clusters.csv", sensor_id_col_nm = NULL, PIT_tag_col_nm = NULL, rfid_label = NULL, camera_label = NULL, outer_irbb_label = "Outer Beam Breaker", inner_irbb_label = "Inner Beam Breaker", video_metadata_col_nms = NULL, integrate_perching = FALSE, perching_dataset = NULL, perching_prefix = NULL, pixel_col_nm = NULL, video_width = NULL, video_height = NULL, integrate_preproc_video = FALSE, path = path, data_dir = file.path(data_dir, "processed"), out_dir = file.path(data_dir, "processed"), out_file_nm = "scored_detectionClusters.csv", tz = "", POSIXct_format = "%Y-%m-%d %H:%M:%OS")
   
   # Read in the output, check the output, then delete all files
   test_res <- read.csv(file.path(tmp_path, "processed", "scored_detectionClusters.csv"))
@@ -126,7 +126,7 @@ test_that("The function labels entrances and exits as expected using data from R
   # library(testthat)
   
   # Create a temporary directory for testing. Files will be written and read here
-  path <- "/home/gsvidaurre/Desktop"
+  path <- testthat_tmp_path
   data_dir <- "tmp_tests"
   tmp_path <- file.path(path, data_dir)
   
@@ -179,7 +179,7 @@ test_that("The function labels entrances and exits as expected using data from R
   
   write.csv(sim_dats, file.path(tmp_path, "processed", "detection_clusters.csv"), row.names = FALSE)
   
-  score_clusters(file_nm = "detection_clusters.csv", sensor_id_col_nm = NULL, PIT_tag_col_nm = NULL, rfid_label = "RFID", camera_label = NULL, outer_irbb_label = "Outer Beam Breaker", inner_irbb_label = "Inner Beam Breaker", video_metadata_col_nms = NULL, integrate_perching = FALSE, perching_dataset = NULL, perching_prefix = NULL, pixel_col_nm = NULL, video_width = NULL, video_height = NULL, integrate_preproc_video = FALSE, path = path, data_dir = file.path(data_dir, "processed"), out_dir = file.path(data_dir, "processed"), out_file_nm = "scored_detectionClusters.csv", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS")
+  score_clusters(file_nm = "detection_clusters.csv", sensor_id_col_nm = NULL, PIT_tag_col_nm = NULL, rfid_label = "RFID", camera_label = NULL, outer_irbb_label = "Outer Beam Breaker", inner_irbb_label = "Inner Beam Breaker", video_metadata_col_nms = NULL, integrate_perching = FALSE, perching_dataset = NULL, perching_prefix = NULL, pixel_col_nm = NULL, video_width = NULL, video_height = NULL, integrate_preproc_video = FALSE, path = path, data_dir = file.path(data_dir, "processed"), out_dir = file.path(data_dir, "processed"), out_file_nm = "scored_detectionClusters.csv", tz = "", POSIXct_format = "%Y-%m-%d %H:%M:%OS")
   
   # Read in the output, check the output, then delete all files
   test_res <- read.csv(file.path(tmp_path, "processed", "scored_detectionClusters.csv"))
@@ -229,7 +229,7 @@ test_that("The function labels entrances and exits as expected using data from R
   # library(dplyr)
 
   # Create a temporary directory for testing. Files will be written and read here
-  path <- "/home/gsvidaurre/Desktop"
+  path <- testthat_tmp_path
   data_dir <- "tmp_tests"
   tmp_path <- file.path(path, data_dir)
   
@@ -286,7 +286,7 @@ test_that("The function labels entrances and exits as expected using data from R
 
   write.csv(sim_dats, file.path(tmp_path, "processed", "detection_clusters.csv"), row.names = FALSE)
   
-  score_clusters(file_nm = "detection_clusters.csv", sensor_id_col_nm = NULL, PIT_tag_col_nm = NULL, rfid_label = "RFID", camera_label = "Camera", outer_irbb_label = "Outer Beam Breaker", inner_irbb_label = "Inner Beam Breaker", video_metadata_col_nms = c("total_pixels_motionTrigger", "pixel_threshold", "video_file_name"), integrate_perching = FALSE, perching_dataset = NULL, perching_prefix = NULL, pixel_col_nm = "total_pixels_motionTrigger", video_width = 1280, video_height = 720, integrate_preproc_video = FALSE, path = path, data_dir = file.path(data_dir, "processed"), out_dir = file.path(data_dir, "processed"), out_file_nm = "scored_detectionClusters.csv", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS")
+  score_clusters(file_nm = "detection_clusters.csv", sensor_id_col_nm = NULL, PIT_tag_col_nm = NULL, rfid_label = "RFID", camera_label = "Camera", outer_irbb_label = "Outer Beam Breaker", inner_irbb_label = "Inner Beam Breaker", video_metadata_col_nms = c("total_pixels_motionTrigger", "pixel_threshold", "video_file_name"), integrate_perching = FALSE, perching_dataset = NULL, perching_prefix = NULL, pixel_col_nm = "total_pixels_motionTrigger", video_width = 1280, video_height = 720, integrate_preproc_video = FALSE, path = path, data_dir = file.path(data_dir, "processed"), out_dir = file.path(data_dir, "processed"), out_file_nm = "scored_detectionClusters.csv", tz = "", POSIXct_format = "%Y-%m-%d %H:%M:%OS")
   
   # Read in the output, check the output, then delete all files
   test_res <- read.csv(file.path(tmp_path, "processed", "scored_detectionClusters.csv"))
@@ -336,7 +336,7 @@ test_that("The function labels entrances and exits as expected using data from R
   # library(dplyr)
   
   # Create a temporary directory for testing. Files will be written and read here
-  path <- "/home/gsvidaurre/Desktop"
+  path <- testthat_tmp_path
   data_dir <- "tmp_tests"
   tmp_path <- file.path(path, data_dir)
   
@@ -358,43 +358,10 @@ test_that("The function labels entrances and exits as expected using data from R
   
   ends <- starts + rep(c(5, 10, 15), 2)
   
-  # Create a spreadsheet of the simulated directional movement events
-  sim_dats <- data.frame(start = starts) %>% 
-    dplyr::mutate(
-      chamber_id = "Box_01",
-      year = year(start),
-      month = month(start),
-      day = day(start),
-      end = ends,
-      event_seq = c(
-        paste(c(rep("Outer Beam Breaker", 2), rep("Inner Beam Breaker", 2), "Camera"), collapse = "; "), # entrance
-        paste(c(rep("RFID", 2), "Inner Beam Breaker", "Camera"), collapse = "; "), # entrance
-        paste(c(rep("Outer Beam Breaker", 3), rep("RFID", 2), "Camera"), collapse = "; "), # entrance
-        paste(c("Camera", rep("Inner Beam Breaker", 2), rep("Outer Beam Breaker", 2)), collapse = "; "), # exit
-        paste(c(rep("Camera", "Inner Beam Breaker", 5), rep("RFID", 2)), collapse = "; "), # exit
-        paste(c("Camera", rep("RFID", 2), rep("Outer Beam Breaker", 4)), collapse = "; ") # exit
-      ),
-      indiv1_id = "test",
-      indiv2_id = NA,
-      # Matches the number of RFID detections if present above
-      total_indiv1_detections = c(NA, 2, 3, NA, 2, 4), 
-      total_indiv2_detections = 0,
-      individual_initiated = "test",
-      individual_ended = "test",
-      total_pixels_motionTrigger = 60000, 
-      pixel_threshold = 100, 
-      video_file_name = paste(paste(paste("Box_01_2023_8_1", paste(hour(start), minute(start), second(start), sep = "_"), sep = "_"), "pre_trigger", sep = "_"), ".mp4", sep = ""),
-      
-      threshold_seconds = 1,
-      run_length = 1,
-      data_stage = "pre-processing",
-      date_pre_processed = Sys.Date()
-    )
-  
-  write.csv(sim_dats, file.path(tmp_path, "processed", "detection_clusters.csv"), row.names = FALSE)
+  # TKTK CONTINUE I think what needs to happen is that the video file names need to match for 2 videos only between detect_clusters and the pre-processed video data
   
   # Generate a file with pre-processed video timestamps 
-
+  
   # Create 6 video recording detections, two of which will map onto detection clusters, and 4 of which will not (singlet video recording events)
   starts_camera <- c(
     starts[c(1:2)] + 2, 
@@ -402,6 +369,11 @@ test_that("The function labels entrances and exits as expected using data from R
       "2023-01-01 05:00:00 EST"
     )) + seq(1, 200, 50)
   )
+  
+  # The first two videos are the two that should match between spreadsheets to indicate a container entrance event
+  vid_nms_ce <- paste(paste(paste("Box_01_2023_1_1", paste(hour(starts_camera), minute(starts_camera), second(starts_camera), sep = "_"), sep = "_"), "pre_trigger", sep = "_"), ".mp4", sep = "")[1:2]
+  vid_nms_ce <- c(vid_nms_ce, rep(NA, length(starts_camera) - length(vid_nms_ce)))
+  # vid_nms_ce
   
   # Each video recording timestamp is repeated twice to simulate our current setup of a pre-motion trigger and post-motion trigger video per timestamp representing the movement detection event
   camera_ts <- data.frame(timestamp_ms = rep(starts_camera, each = 2)) %>%
@@ -413,7 +385,7 @@ test_that("The function labels entrances and exits as expected using data from R
       sensor_id = "Camera",
       total_pixels_motionTrigger = 60000, 
       pixel_threshold = 100, 
-      video_file_name = paste(paste(rep(paste("Box_01_2023_8_1", paste(hour(starts_camera), minute(starts_camera), second(starts_camera), sep = "_"), sep = "_"), 2), c("pre_trigger", "post_trigger"), sep = "_"), ".mp4", sep = ""),
+      video_file_name = paste(paste(rep(paste("Box_01_2023_1_1", paste(hour(starts_camera), minute(starts_camera), second(starts_camera), sep = "_"), sep = "_"), each = 2), c("pre_trigger", "post_trigger"), sep = "_"), ".mp4", sep = ""),
       thin_threshold_s = 1,
       data_stage = "pre-processing",
       date_pre_processed = Sys.Date()
@@ -421,16 +393,50 @@ test_that("The function labels entrances and exits as expected using data from R
   
   write.csv(camera_ts, file.path(tmp_path, "processed", "pre_processed_data_Video.csv"), row.names = FALSE)
   
-  score_clusters(file_nm = "detection_clusters.csv", sensor_id_col_nm = NULL, PIT_tag_col_nm = NULL, rfid_label = "RFID", camera_label = "Camera", outer_irbb_label = "Outer Beam Breaker", inner_irbb_label = "Inner Beam Breaker", video_metadata_col_nms = c("total_pixels_motionTrigger", "pixel_threshold", "video_file_name"), integrate_perching = FALSE, perching_dataset = NULL, perching_prefix = NULL, pixel_col_nm = "total_pixels_motionTrigger", video_width = 1280, video_height = 720, integrate_preproc_video = TRUE, video_file_nm = "pre_processed_data_Video.csv", timestamps_col_nm = "timestamp_ms", path = path, data_dir = file.path(data_dir, "processed"), out_dir = file.path(data_dir, "processed"), out_file_nm = "scored_detectionClusters.csv", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS")
+  # Create a spreadsheet of the simulated directional movement events
+  sim_dats <- data.frame(start = starts) %>% 
+    dplyr::mutate(
+      chamber_id = "Box_01",
+      year = year(start),
+      month = month(start),
+      day = day(start),
+      end = ends,
+      event_seq = c(
+        paste(c(rep("Outer Beam Breaker", 2), rep("Inner Beam Breaker", 2), "Camera"), collapse = "; "), # entrance
+        paste(c(rep("RFID", 2), "Inner Beam Breaker", "Camera"), collapse = "; "), # entrance
+        paste(c(rep("Outer Beam Breaker", 3), rep("RFID", 2)), collapse = "; "), # entrance
+        paste(c(rep("Inner Beam Breaker", 2), rep("Outer Beam Breaker", 2)), collapse = "; "), # exit
+        paste(c(rep("Inner Beam Breaker", 5), rep("RFID", 2)), collapse = "; "), # exit
+        paste(c(rep("RFID", 2), rep("Outer Beam Breaker", 4)), collapse = "; ") # exit
+      ),
+      indiv1_id = "test",
+      indiv2_id = NA,
+      # Matches the number of RFID detections if present above
+      total_indiv1_detections = c(NA, 2, 3, NA, 2, 4), 
+      total_indiv2_detections = 0,
+      individual_initiated = "test",
+      individual_ended = "test",
+      total_pixels_motionTrigger = 60000, 
+      pixel_threshold = 100, 
+      video_file_name = vid_nms_ce,
+      threshold_seconds = 1,
+      run_length = 1,
+      data_stage = "pre-processing",
+      date_pre_processed = Sys.Date()
+    )
+  
+  write.csv(sim_dats, file.path(tmp_path, "processed", "detection_clusters.csv"), row.names = FALSE)
+  
+  score_clusters(file_nm = "detection_clusters.csv", sensor_id_col_nm = NULL, PIT_tag_col_nm = NULL, rfid_label = "RFID", camera_label = "Camera", outer_irbb_label = "Outer Beam Breaker", inner_irbb_label = "Inner Beam Breaker", video_metadata_col_nms = c("total_pixels_motionTrigger", "pixel_threshold", "video_file_name"), integrate_perching = FALSE, perching_dataset = NULL, perching_prefix = NULL, pixel_col_nm = "total_pixels_motionTrigger", video_width = 1280, video_height = 720, integrate_preproc_video = TRUE, video_file_nm = "pre_processed_data_Video.csv", timestamps_col_nm = "timestamp_ms", path = path, data_dir = file.path(data_dir, "processed"), out_dir = file.path(data_dir, "processed"), out_file_nm = "scored_detectionClusters.csv", tz = "", POSIXct_format = "%Y-%m-%d %H:%M:%OS")
   
   # Read in the output, check the output, then delete all files
   test_res <- read.csv(file.path(tmp_path, "processed", "scored_detectionClusters.csv"))
   
-  # Test that the results are 6 inferred container entrance movements and 4 inferred inside container movements, in that order
-  expect_equal(test_res$inferredMovement_Location, c(rep("container_entrance", 6), rep("inside_container", 4)))
+  # glimpse(test_res)
+  # View(test_res)
   
-  # Test that the number of detection clusters in the input and output data are the same as expected
-  expect_equal(nrow(sim_dats) + (nrow(camera_ts)/2 - 2), nrow(test_res))
+  # Test that the results are 1 inferred container entrance movement and 1 inferred inside container movement for the first two videos, then 4 container entrance events for detections without videos, then 4 inside container events for detections that were video alone. However, the order should be 
+  expect_equal(test_res$inferredMovement_Location, c(rep(c("container_entrance", "inside_container"), 2), rep("container_entrance", 4), rep("inside_container", 4)))
   
   # Remove the temporary directory and all files within it
   if(tmp_path == file.path(path, data_dir)){
@@ -439,6 +445,8 @@ test_that("The function labels entrances and exits as expected using data from R
   
 })
 
+
+# TKTK CONTINUE
 test_that("The function labels entrances and exits as expected using data from 2 beam breaker pairs and integrating RFID perching data", {
   
   # Avoid library calls and other changes to the virtual environment
@@ -454,7 +462,7 @@ test_that("The function labels entrances and exits as expected using data from 2
   # library(testthat)
   
   # Create a temporary directory for testing. Files will be written and read here
-  path <- "/home/gsvidaurre/Desktop"
+  path <- testthat_tmp_path
   data_dir <- "tmp_tests"
   tmp_path <- file.path(path, data_dir)
   
@@ -527,7 +535,7 @@ test_that("The function labels entrances and exits as expected using data from 2
 
   write.csv(sim_perch, file.path(tmp_path, "processed", "perching_events_RFID.csv"), row.names = FALSE)
   
-  score_clusters(file_nm = "detection_clusters.csv", sensor_id_col_nm = "sensor_id", PIT_tag_col_nm = "PIT_tag_ID", rfid_label = NULL, camera_label = NULL, outer_irbb_label = "Outer Beam Breaker", inner_irbb_label = "Inner Beam Breaker", video_metadata_col_nms = NULL, integrate_perching = TRUE, perching_dataset = "RFID", perching_prefix = "perching_events_", pixel_col_nm = NULL, video_width = NULL, video_height = NULL, integrate_preproc_video = FALSE, path = path, data_dir = file.path(data_dir, "processed"), out_dir = file.path(data_dir, "processed"), out_file_nm = "scored_detectionClusters.csv", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS")
+  score_clusters(file_nm = "detection_clusters.csv", sensor_id_col_nm = "sensor_id", PIT_tag_col_nm = "PIT_tag_ID", rfid_label = NULL, camera_label = NULL, outer_irbb_label = "Outer Beam Breaker", inner_irbb_label = "Inner Beam Breaker", video_metadata_col_nms = NULL, integrate_perching = TRUE, perching_dataset = "RFID", perching_prefix = "perching_events_", pixel_col_nm = NULL, video_width = NULL, video_height = NULL, integrate_preproc_video = FALSE, path = path, data_dir = file.path(data_dir, "processed"), out_dir = file.path(data_dir, "processed"), out_file_nm = "scored_detectionClusters.csv", tz = "", POSIXct_format = "%Y-%m-%d %H:%M:%OS")
   
   # Read in the output, check the output, then delete all files
   test_res <- read.csv(file.path(tmp_path, "processed", "scored_detectionClusters.csv"))
@@ -582,7 +590,7 @@ test_that("The function labels entrances and exits as expected using data from R
   # library(testthat)
   
   # Create a temporary directory for testing. Files will be written and read here
-  path <- "/home/gsvidaurre/Desktop"
+  path <- testthat_tmp_path
   data_dir <- "tmp_tests"
   tmp_path <- file.path(path, data_dir)
   
@@ -655,7 +663,7 @@ test_that("The function labels entrances and exits as expected using data from R
   
   write.csv(sim_perch, file.path(tmp_path, "processed", "perching_events_RFID.csv"), row.names = FALSE)
   
-  score_clusters(file_nm = "detection_clusters.csv", sensor_id_col_nm = "sensor_id", PIT_tag_col_nm = "PIT_tag_ID", rfid_label = "RFID", camera_label = NULL, outer_irbb_label = "Outer Beam Breaker", inner_irbb_label = "Inner Beam Breaker", video_metadata_col_nms = NULL, integrate_perching = TRUE, perching_dataset = "RFID", perching_prefix = "perching_events_", pixel_col_nm = NULL, video_width = NULL, video_height = NULL, integrate_preproc_video = FALSE, path = path, data_dir = file.path(data_dir, "processed"), out_dir = file.path(data_dir, "processed"), out_file_nm = "scored_detectionClusters.csv", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS")
+  score_clusters(file_nm = "detection_clusters.csv", sensor_id_col_nm = "sensor_id", PIT_tag_col_nm = "PIT_tag_ID", rfid_label = "RFID", camera_label = NULL, outer_irbb_label = "Outer Beam Breaker", inner_irbb_label = "Inner Beam Breaker", video_metadata_col_nms = NULL, integrate_perching = TRUE, perching_dataset = "RFID", perching_prefix = "perching_events_", pixel_col_nm = NULL, video_width = NULL, video_height = NULL, integrate_preproc_video = FALSE, path = path, data_dir = file.path(data_dir, "processed"), out_dir = file.path(data_dir, "processed"), out_file_nm = "scored_detectionClusters.csv", tz = "", POSIXct_format = "%Y-%m-%d %H:%M:%OS")
   
   # Read in the output, check the output, then delete all files
   test_res <- read.csv(file.path(tmp_path, "processed", "scored_detectionClusters.csv"))
@@ -715,7 +723,7 @@ test_that("The function labels entrances and exits as expected using data from R
   # library(testthat)
   
   # Create a temporary directory for testing. Files will be written and read here
-  path <- "/home/gsvidaurre/Desktop"
+  path <- testthat_tmp_path
   data_dir <- "tmp_tests"
   tmp_path <- file.path(path, data_dir)
   
@@ -792,7 +800,7 @@ test_that("The function labels entrances and exits as expected using data from R
   
   write.csv(sim_perch, file.path(tmp_path, "processed", "perching_events_RFID.csv"), row.names = FALSE)
   
-  score_clusters(file_nm = "detection_clusters.csv", sensor_id_col_nm = "sensor_id", PIT_tag_col_nm = "PIT_tag_ID", rfid_label = "RFID", camera_label = "Camera", outer_irbb_label = "Outer Beam Breaker", inner_irbb_label = "Inner Beam Breaker", video_metadata_col_nms = c("total_pixels_motionTrigger", "pixel_threshold", "video_file_name"), integrate_perching = TRUE, perching_dataset = "RFID", perching_prefix = "perching_events_", pixel_col_nm = "total_pixels_motionTrigger", video_width = 1280, video_height = 720, integrate_preproc_video = FALSE, path = path, data_dir = file.path(data_dir, "processed"), out_dir = file.path(data_dir, "processed"), out_file_nm = "scored_detectionClusters.csv", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS")
+  score_clusters(file_nm = "detection_clusters.csv", sensor_id_col_nm = "sensor_id", PIT_tag_col_nm = "PIT_tag_ID", rfid_label = "RFID", camera_label = "Camera", outer_irbb_label = "Outer Beam Breaker", inner_irbb_label = "Inner Beam Breaker", video_metadata_col_nms = c("total_pixels_motionTrigger", "pixel_threshold", "video_file_name"), integrate_perching = TRUE, perching_dataset = "RFID", perching_prefix = "perching_events_", pixel_col_nm = "total_pixels_motionTrigger", video_width = 1280, video_height = 720, integrate_preproc_video = FALSE, path = path, data_dir = file.path(data_dir, "processed"), out_dir = file.path(data_dir, "processed"), out_file_nm = "scored_detectionClusters.csv", tz = "", POSIXct_format = "%Y-%m-%d %H:%M:%OS")
   
   # Read in the output, check the output, then delete all files
   test_res <- read.csv(file.path(tmp_path, "processed", "scored_detectionClusters.csv"))
@@ -853,7 +861,7 @@ test_that("The function labels entrances and exits as expected using data from R
   # library(dplyr)
   
   # Create a temporary directory for testing. Files will be written and read here
-  path <- "/home/gsvidaurre/Desktop"
+  path <- testthat_tmp_path
   data_dir <- "tmp_tests"
   tmp_path <- file.path(path, data_dir)
   
@@ -958,7 +966,7 @@ test_that("The function labels entrances and exits as expected using data from R
   
   write.csv(camera_ts, file.path(tmp_path, "processed", "pre_processed_data_Video.csv"), row.names = FALSE)
   
-  score_clusters(file_nm = "detection_clusters.csv", sensor_id_col_nm = "sensor_id", PIT_tag_col_nm = "PIT_tag_ID", rfid_label = "RFID", camera_label = "Camera", outer_irbb_label = "Outer Beam Breaker", inner_irbb_label = "Inner Beam Breaker", video_metadata_col_nms = c("total_pixels_motionTrigger", "pixel_threshold", "video_file_name"), integrate_perching = TRUE, perching_dataset = "RFID", perching_prefix = "perching_events_", pixel_col_nm = "total_pixels_motionTrigger", video_width = 1280, video_height = 720, integrate_preproc_video = TRUE, video_file_nm = "pre_processed_data_Video.csv", timestamps_col_nm = "timestamp_ms", path = path, data_dir = file.path(data_dir, "processed"), out_dir = file.path(data_dir, "processed"), out_file_nm = "scored_detectionClusters.csv", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS")
+  score_clusters(file_nm = "detection_clusters.csv", sensor_id_col_nm = "sensor_id", PIT_tag_col_nm = "PIT_tag_ID", rfid_label = "RFID", camera_label = "Camera", outer_irbb_label = "Outer Beam Breaker", inner_irbb_label = "Inner Beam Breaker", video_metadata_col_nms = c("total_pixels_motionTrigger", "pixel_threshold", "video_file_name"), integrate_perching = TRUE, perching_dataset = "RFID", perching_prefix = "perching_events_", pixel_col_nm = "total_pixels_motionTrigger", video_width = 1280, video_height = 720, integrate_preproc_video = TRUE, video_file_nm = "pre_processed_data_Video.csv", timestamps_col_nm = "timestamp_ms", path = path, data_dir = file.path(data_dir, "processed"), out_dir = file.path(data_dir, "processed"), out_file_nm = "scored_detectionClusters.csv", tz = "", POSIXct_format = "%Y-%m-%d %H:%M:%OS")
   
   # Read in the output, check the output, then delete all files
   test_res <- read.csv(file.path(tmp_path, "processed", "scored_detectionClusters.csv"))
@@ -1002,7 +1010,7 @@ test_that("The function labels entrances and exits as expected using data from 2
   # library(testthat)
   
   # Create a temporary directory for testing. Files will be written and read here
-  path <- "/home/gsvidaurre/Desktop"
+  path <- testthat_tmp_path
   data_dir <- "tmp_tests"
   tmp_path <- file.path(path, data_dir)
   
@@ -1074,7 +1082,7 @@ test_that("The function labels entrances and exits as expected using data from 2
   
   write.csv(sim_perch, file.path(tmp_path, "processed", "perching_events_IRBB.csv"), row.names = FALSE)
   
-  score_clusters(file_nm = "detection_clusters.csv", sensor_id_col_nm = "sensor_id", PIT_tag_col_nm = NULL, rfid_label = NULL, camera_label = NULL, outer_irbb_label = "Outer Beam Breaker", inner_irbb_label = "Inner Beam Breaker", video_metadata_col_nms = NULL, integrate_perching = TRUE, perching_dataset = "IRBB", perching_prefix = "perching_events_", pixel_col_nm = NULL, video_width = NULL, video_height = NULL, integrate_preproc_video = FALSE, path = path, data_dir = file.path(data_dir, "processed"), out_dir = file.path(data_dir, "processed"), out_file_nm = "scored_detectionClusters.csv", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS")
+  score_clusters(file_nm = "detection_clusters.csv", sensor_id_col_nm = "sensor_id", PIT_tag_col_nm = NULL, rfid_label = NULL, camera_label = NULL, outer_irbb_label = "Outer Beam Breaker", inner_irbb_label = "Inner Beam Breaker", video_metadata_col_nms = NULL, integrate_perching = TRUE, perching_dataset = "IRBB", perching_prefix = "perching_events_", pixel_col_nm = NULL, video_width = NULL, video_height = NULL, integrate_preproc_video = FALSE, path = path, data_dir = file.path(data_dir, "processed"), out_dir = file.path(data_dir, "processed"), out_file_nm = "scored_detectionClusters.csv", tz = "", POSIXct_format = "%Y-%m-%d %H:%M:%OS")
   
   # Read in the output, check the output, then delete all files
   test_res <- read.csv(file.path(tmp_path, "processed", "scored_detectionClusters.csv"))
@@ -1129,7 +1137,7 @@ test_that("The function labels entrances and exits as expected using data from R
   # library(testthat)
   
   # Create a temporary directory for testing. Files will be written and read here
-  path <- "/home/gsvidaurre/Desktop"
+  path <- testthat_tmp_path
   data_dir <- "tmp_tests"
   tmp_path <- file.path(path, data_dir)
   
@@ -1201,7 +1209,7 @@ test_that("The function labels entrances and exits as expected using data from R
   
   write.csv(sim_perch, file.path(tmp_path, "processed", "perching_events_IRBB.csv"), row.names = FALSE)
   
-  score_clusters(file_nm = "detection_clusters.csv", sensor_id_col_nm = "sensor_id", PIT_tag_col_nm = NULL, rfid_label = "RFID", camera_label = NULL, outer_irbb_label = "Outer Beam Breaker", inner_irbb_label = "Inner Beam Breaker", video_metadata_col_nms = NULL, integrate_perching = TRUE, perching_dataset = "IRBB", perching_prefix = "perching_events_", pixel_col_nm = NULL, video_width = NULL, video_height = NULL, integrate_preproc_video = FALSE, path = path, data_dir = file.path(data_dir, "processed"), out_dir = file.path(data_dir, "processed"), out_file_nm = "scored_detectionClusters.csv", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS")
+  score_clusters(file_nm = "detection_clusters.csv", sensor_id_col_nm = "sensor_id", PIT_tag_col_nm = NULL, rfid_label = "RFID", camera_label = NULL, outer_irbb_label = "Outer Beam Breaker", inner_irbb_label = "Inner Beam Breaker", video_metadata_col_nms = NULL, integrate_perching = TRUE, perching_dataset = "IRBB", perching_prefix = "perching_events_", pixel_col_nm = NULL, video_width = NULL, video_height = NULL, integrate_preproc_video = FALSE, path = path, data_dir = file.path(data_dir, "processed"), out_dir = file.path(data_dir, "processed"), out_file_nm = "scored_detectionClusters.csv", tz = "", POSIXct_format = "%Y-%m-%d %H:%M:%OS")
   
   # Read in the output, check the output, then delete all files
   test_res <- read.csv(file.path(tmp_path, "processed", "scored_detectionClusters.csv"))
@@ -1261,7 +1269,7 @@ test_that("The function labels entrances and exits as expected using data from R
   # library(testthat)
   
   # Create a temporary directory for testing. Files will be written and read here
-  path <- "/home/gsvidaurre/Desktop"
+  path <- testthat_tmp_path
   data_dir <- "tmp_tests"
   tmp_path <- file.path(path, data_dir)
   
@@ -1337,7 +1345,7 @@ test_that("The function labels entrances and exits as expected using data from R
   
   write.csv(sim_perch, file.path(tmp_path, "processed", "perching_events_IRBB.csv"), row.names = FALSE)
   
-  score_clusters(file_nm = "detection_clusters.csv", sensor_id_col_nm = "sensor_id", PIT_tag_col_nm = NULL, rfid_label = "RFID", camera_label = "Camera", outer_irbb_label = "Outer Beam Breaker", inner_irbb_label = "Inner Beam Breaker", video_metadata_col_nms = c("total_pixels_motionTrigger", "pixel_threshold", "video_file_name"), integrate_perching = TRUE, perching_dataset = "IRBB", perching_prefix = "perching_events_", pixel_col_nm = "total_pixels_motionTrigger", video_width = 1280, video_height = 720, integrate_preproc_video = FALSE, path = path, data_dir = file.path(data_dir, "processed"), out_dir = file.path(data_dir, "processed"), out_file_nm = "scored_detectionClusters.csv", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS")
+  score_clusters(file_nm = "detection_clusters.csv", sensor_id_col_nm = "sensor_id", PIT_tag_col_nm = NULL, rfid_label = "RFID", camera_label = "Camera", outer_irbb_label = "Outer Beam Breaker", inner_irbb_label = "Inner Beam Breaker", video_metadata_col_nms = c("total_pixels_motionTrigger", "pixel_threshold", "video_file_name"), integrate_perching = TRUE, perching_dataset = "IRBB", perching_prefix = "perching_events_", pixel_col_nm = "total_pixels_motionTrigger", video_width = 1280, video_height = 720, integrate_preproc_video = FALSE, path = path, data_dir = file.path(data_dir, "processed"), out_dir = file.path(data_dir, "processed"), out_file_nm = "scored_detectionClusters.csv", tz = "", POSIXct_format = "%Y-%m-%d %H:%M:%OS")
   
   # Read in the output, check the output, then delete all files
   test_res <- read.csv(file.path(tmp_path, "processed", "scored_detectionClusters.csv"))
@@ -1397,7 +1405,7 @@ test_that("The function labels entrances and exits as expected using data from 2
   # library(testthat)
   
   # Create a temporary directory for testing. Files will be written and read here
-  path <- "/home/gsvidaurre/Desktop"
+  path <- testthat_tmp_path
   data_dir <- "tmp_tests"
   tmp_path <- file.path(path, data_dir)
   
@@ -1485,7 +1493,7 @@ test_that("The function labels entrances and exits as expected using data from 2
   
   write.csv(sim_perch_irbb, file.path(tmp_path, "processed", "perching_events_IRBB.csv"), row.names = FALSE)
   
-  score_clusters(file_nm = "detection_clusters.csv", sensor_id_col_nm = "sensor_id", PIT_tag_col_nm = "PIT_tag_ID", rfid_label = NULL, camera_label = NULL, outer_irbb_label = "Outer Beam Breaker", inner_irbb_label = "Inner Beam Breaker", video_metadata_col_nms = NULL, integrate_perching = TRUE, perching_dataset = "RFID-IRBB", perching_prefix = "perching_events_", pixel_col_nm = NULL, video_width = NULL, video_height = NULL, integrate_preproc_video = FALSE, path = path, data_dir = file.path(data_dir, "processed"), out_dir = file.path(data_dir, "processed"), out_file_nm = "scored_detectionClusters.csv", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS")
+  score_clusters(file_nm = "detection_clusters.csv", sensor_id_col_nm = "sensor_id", PIT_tag_col_nm = "PIT_tag_ID", rfid_label = NULL, camera_label = NULL, outer_irbb_label = "Outer Beam Breaker", inner_irbb_label = "Inner Beam Breaker", video_metadata_col_nms = NULL, integrate_perching = TRUE, perching_dataset = "RFID-IRBB", perching_prefix = "perching_events_", pixel_col_nm = NULL, video_width = NULL, video_height = NULL, integrate_preproc_video = FALSE, path = path, data_dir = file.path(data_dir, "processed"), out_dir = file.path(data_dir, "processed"), out_file_nm = "scored_detectionClusters.csv", tz = "", POSIXct_format = "%Y-%m-%d %H:%M:%OS")
   
   # Read in the output, check the output, then delete all files
   test_res <- read.csv(file.path(tmp_path, "processed", "scored_detectionClusters.csv"))
@@ -1544,7 +1552,7 @@ test_that("The function labels entrances and exits as expected using data from R
   # library(testthat)
   
   # Create a temporary directory for testing. Files will be written and read here
-  path <- "/home/gsvidaurre/Desktop"
+  path <- testthat_tmp_path
   data_dir <- "tmp_tests"
   tmp_path <- file.path(path, data_dir)
   
@@ -1632,7 +1640,7 @@ test_that("The function labels entrances and exits as expected using data from R
   
   write.csv(sim_perch_irbb, file.path(tmp_path, "processed", "perching_events_IRBB.csv"), row.names = FALSE)
   
-  score_clusters(file_nm = "detection_clusters.csv", sensor_id_col_nm = "sensor_id", PIT_tag_col_nm = "PIT_tag_ID", rfid_label = "RFID", camera_label = NULL, outer_irbb_label = "Outer Beam Breaker", inner_irbb_label = "Inner Beam Breaker", video_metadata_col_nms = NULL, integrate_perching = TRUE, perching_dataset = "RFID-IRBB", perching_prefix = "perching_events_", pixel_col_nm = NULL, video_width = NULL, video_height = NULL, integrate_preproc_video = FALSE, path = path, data_dir = file.path(data_dir, "processed"), out_dir = file.path(data_dir, "processed"), out_file_nm = "scored_detectionClusters.csv", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS")
+  score_clusters(file_nm = "detection_clusters.csv", sensor_id_col_nm = "sensor_id", PIT_tag_col_nm = "PIT_tag_ID", rfid_label = "RFID", camera_label = NULL, outer_irbb_label = "Outer Beam Breaker", inner_irbb_label = "Inner Beam Breaker", video_metadata_col_nms = NULL, integrate_perching = TRUE, perching_dataset = "RFID-IRBB", perching_prefix = "perching_events_", pixel_col_nm = NULL, video_width = NULL, video_height = NULL, integrate_preproc_video = FALSE, path = path, data_dir = file.path(data_dir, "processed"), out_dir = file.path(data_dir, "processed"), out_file_nm = "scored_detectionClusters.csv", tz = "", POSIXct_format = "%Y-%m-%d %H:%M:%OS")
   
   # Read in the output, check the output, then delete all files
   test_res <- read.csv(file.path(tmp_path, "processed", "scored_detectionClusters.csv"))
@@ -1696,7 +1704,7 @@ test_that("The function labels entrances and exits as expected using data from R
   # library(testthat)
   
   # Create a temporary directory for testing. Files will be written and read here
-  path <- "/home/gsvidaurre/Desktop"
+  path <- testthat_tmp_path
   data_dir <- "tmp_tests"
   tmp_path <- file.path(path, data_dir)
   
@@ -1788,7 +1796,7 @@ test_that("The function labels entrances and exits as expected using data from R
   
   write.csv(sim_perch_irbb, file.path(tmp_path, "processed", "perching_events_IRBB.csv"), row.names = FALSE)
   
-  score_clusters(file_nm = "detection_clusters.csv", sensor_id_col_nm = "sensor_id", PIT_tag_col_nm = "PIT_tag_ID", rfid_label = "RFID", camera_label = "Camera", outer_irbb_label = "Outer Beam Breaker", inner_irbb_label = "Inner Beam Breaker", video_metadata_col_nms = c("total_pixels_motionTrigger", "pixel_threshold", "video_file_name"), integrate_perching = TRUE, perching_dataset = "RFID-IRBB", perching_prefix = "perching_events_", pixel_col_nm = "total_pixels_motionTrigger", video_width = 1280, video_height = 720, integrate_preproc_video = FALSE, path = path, data_dir = file.path(data_dir, "processed"), out_dir = file.path(data_dir, "processed"), out_file_nm = "scored_detectionClusters.csv", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS")
+  score_clusters(file_nm = "detection_clusters.csv", sensor_id_col_nm = "sensor_id", PIT_tag_col_nm = "PIT_tag_ID", rfid_label = "RFID", camera_label = "Camera", outer_irbb_label = "Outer Beam Breaker", inner_irbb_label = "Inner Beam Breaker", video_metadata_col_nms = c("total_pixels_motionTrigger", "pixel_threshold", "video_file_name"), integrate_perching = TRUE, perching_dataset = "RFID-IRBB", perching_prefix = "perching_events_", pixel_col_nm = "total_pixels_motionTrigger", video_width = 1280, video_height = 720, integrate_preproc_video = FALSE, path = path, data_dir = file.path(data_dir, "processed"), out_dir = file.path(data_dir, "processed"), out_file_nm = "scored_detectionClusters.csv", tz = "", POSIXct_format = "%Y-%m-%d %H:%M:%OS")
   
   # Read in the output, check the output, then delete all files
   test_res <- read.csv(file.path(tmp_path, "processed", "scored_detectionClusters.csv"))
@@ -1853,7 +1861,7 @@ test_that("The function labels entrances and exits as expected using data from R
   # library(dplyr)
   
   # Create a temporary directory for testing. Files will be written and read here
-  path <- "/home/gsvidaurre/Desktop"
+  path <- testthat_tmp_path
   data_dir <- "tmp_tests"
   tmp_path <- file.path(path, data_dir)
   
@@ -1973,7 +1981,7 @@ test_that("The function labels entrances and exits as expected using data from R
   
   write.csv(camera_ts, file.path(tmp_path, "processed", "pre_processed_data_Video.csv"), row.names = FALSE)
   
-  score_clusters(file_nm = "detection_clusters.csv", sensor_id_col_nm = "sensor_id", PIT_tag_col_nm = "PIT_tag_ID", rfid_label = "RFID", camera_label = "Camera", outer_irbb_label = "Outer Beam Breaker", inner_irbb_label = "Inner Beam Breaker", video_metadata_col_nms = c("total_pixels_motionTrigger", "pixel_threshold", "video_file_name"), integrate_perching = TRUE, perching_dataset = "RFID-IRBB", perching_prefix = "perching_events_", pixel_col_nm = "total_pixels_motionTrigger", video_width = 1280, video_height = 720, integrate_preproc_video = TRUE, video_file_nm = "pre_processed_data_Video.csv", timestamps_col_nm = "timestamp_ms", path = path, data_dir = file.path(data_dir, "processed"), out_dir = file.path(data_dir, "processed"), out_file_nm = "scored_detectionClusters.csv", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS")
+  score_clusters(file_nm = "detection_clusters.csv", sensor_id_col_nm = "sensor_id", PIT_tag_col_nm = "PIT_tag_ID", rfid_label = "RFID", camera_label = "Camera", outer_irbb_label = "Outer Beam Breaker", inner_irbb_label = "Inner Beam Breaker", video_metadata_col_nms = c("total_pixels_motionTrigger", "pixel_threshold", "video_file_name"), integrate_perching = TRUE, perching_dataset = "RFID-IRBB", perching_prefix = "perching_events_", pixel_col_nm = "total_pixels_motionTrigger", video_width = 1280, video_height = 720, integrate_preproc_video = TRUE, video_file_nm = "pre_processed_data_Video.csv", timestamps_col_nm = "timestamp_ms", path = path, data_dir = file.path(data_dir, "processed"), out_dir = file.path(data_dir, "processed"), out_file_nm = "scored_detectionClusters.csv", tz = "", POSIXct_format = "%Y-%m-%d %H:%M:%OS")
   
   # Read in the output, check the output, then delete all files
   test_res <- read.csv(file.path(tmp_path, "processed", "scored_detectionClusters.csv"))
@@ -2024,7 +2032,7 @@ test_that("the function catches when the perching_dataset argument does not cont
   # library(testthat)
 
   # Create a temporary directory for testing. Files will be written and read here
-  path <- "/home/gsvidaurre/Desktop"
+  path <- testthat_tmp_path
   data_dir <- "tmp_tests"
   tmp_path <- file.path(path, data_dir)
   
@@ -2078,12 +2086,12 @@ test_that("the function catches when the perching_dataset argument does not cont
   write.csv(sim_dats, file.path(tmp_path, "processed",  "detection_clusters.csv"), row.names = FALSE)
   
   expect_error(
-    score_clusters(file_nm = "detection_clusters.csv", sensor_id_col_nm = NULL, PIT_tag_col_nm = NULL, rfid_label = NULL, camera_label = NULL, outer_irbb_label = "Outer Beam Breaker", inner_irbb_label = "Inner Beam Breaker", video_metadata_col_nms = NULL, integrate_perching = TRUE, perching_dataset = "RFD", perching_prefix = "perching_events", pixel_col_nm = NULL, video_width = NULL, video_height = NULL, integrate_preproc_video = FALSE, path = path, data_dir = file.path(data_dir, "processed"), out_dir = file.path(data_dir, "processed"), out_file_nm = "scored_detectionClusters.csv", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
+    score_clusters(file_nm = "detection_clusters.csv", sensor_id_col_nm = NULL, PIT_tag_col_nm = NULL, rfid_label = NULL, camera_label = NULL, outer_irbb_label = "Outer Beam Breaker", inner_irbb_label = "Inner Beam Breaker", video_metadata_col_nms = NULL, integrate_perching = TRUE, perching_dataset = "RFD", perching_prefix = "perching_events", pixel_col_nm = NULL, video_width = NULL, video_height = NULL, integrate_preproc_video = FALSE, path = path, data_dir = file.path(data_dir, "processed"), out_dir = file.path(data_dir, "processed"), out_file_nm = "scored_detectionClusters.csv", tz = "", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
     regexp = "The perching dataset is not specified correctly"
   )
   
   expect_error(
-    score_clusters(file_nm = "detection_clusters.csv", sensor_id_col_nm = NULL, PIT_tag_col_nm = NULL, rfid_label = NULL, camera_label = NULL, outer_irbb_label = "Outer Beam Breaker", inner_irbb_label = "Inner Beam Breaker", video_metadata_col_nms = NULL, integrate_perching = TRUE, perching_dataset = "RFID-irbb", perching_prefix = "perching_events", pixel_col_nm = NULL, video_width = NULL, video_height = NULL, integrate_preproc_video = FALSE, path = path, data_dir = file.path(data_dir, "processed"), out_dir = file.path(data_dir, "processed"), out_file_nm = "scored_detectionClusters.csv", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
+    score_clusters(file_nm = "detection_clusters.csv", sensor_id_col_nm = NULL, PIT_tag_col_nm = NULL, rfid_label = NULL, camera_label = NULL, outer_irbb_label = "Outer Beam Breaker", inner_irbb_label = "Inner Beam Breaker", video_metadata_col_nms = NULL, integrate_perching = TRUE, perching_dataset = "RFID-irbb", perching_prefix = "perching_events", pixel_col_nm = NULL, video_width = NULL, video_height = NULL, integrate_preproc_video = FALSE, path = path, data_dir = file.path(data_dir, "processed"), out_dir = file.path(data_dir, "processed"), out_file_nm = "scored_detectionClusters.csv", tz = "", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
     regexp = "The perching dataset is not specified correctly"
   )
   
@@ -2109,7 +2117,7 @@ test_that("the function catches when non-NULL arguments are NULL", {
   # library(testthat)
   
   # Create a temporary directory for testing. Files will be written and read here
-  path <- "/home/gsvidaurre/Desktop"
+  path <- testthat_tmp_path
   data_dir <- "tmp_tests"
   tmp_path <- file.path(path, data_dir)
   
@@ -2172,7 +2180,7 @@ test_that("the function catches when non-NULL arguments are NULL", {
     `data_dir` = file.path(data_dir, "processed"),
     `out_dir` = file.path(data_dir, "processed"),
     `out_file_nm` = "scored_detection_clusters.csv", 
-    `tz` = "America/New York",
+    `tz` = "",
     `POSIXct_format` = "%Y-%m-%d %H:%M:%OS"
   )
 
@@ -2202,7 +2210,7 @@ test_that("the function catches when non-NULL arguments are NULL", {
     args[arg_nms[i]] <- list(NULL)
     
     expect_error(
-      score_clusters(file_nm = "detection_clusters.csv", sensor_id_col_nm = args[["sensor_id_col_nm"]], PIT_tag_col_nm = args[["PIT_tag_col_nm"]], rfid_label = NULL, camera_label = NULL, outer_irbb_label = "Outer Beam Breaker", inner_irbb_label = "Inner Beam Breaker", video_metadata_col_nms = NULL, integrate_perching = TRUE, perching_dataset = args[["perching_dataset"]], perching_prefix = args[["perching_prefix"]], integrate_preproc_video = FALSE, path = path, data_dir = file.path(data_dir, "processed"), out_dir = file.path(data_dir, "processed"), out_file_nm = "scored_detectionClusters.csv", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
+      score_clusters(file_nm = "detection_clusters.csv", sensor_id_col_nm = args[["sensor_id_col_nm"]], PIT_tag_col_nm = args[["PIT_tag_col_nm"]], rfid_label = NULL, camera_label = NULL, outer_irbb_label = "Outer Beam Breaker", inner_irbb_label = "Inner Beam Breaker", video_metadata_col_nms = NULL, integrate_perching = TRUE, perching_dataset = args[["perching_dataset"]], perching_prefix = args[["perching_prefix"]], integrate_preproc_video = FALSE, path = path, data_dir = file.path(data_dir, "processed"), out_dir = file.path(data_dir, "processed"), out_file_nm = "scored_detectionClusters.csv", tz = "", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
       regexp = paste("Expected a non-NULL value but the argument", arg_nms[i], "is NULL", sep = " ")
     )
     
@@ -2221,7 +2229,7 @@ test_that("the function catches when non-NULL arguments are NULL", {
     args[arg_nms[i]] <- list(NULL)
     
     expect_error(
-      score_clusters(file_nm = "detection_clusters.csv", sensor_id_col_nm = NULL, PIT_tag_col_nm = NULL, rfid_label = NULL, camera_label = "Camera", outer_irbb_label = "Outer Beam Breaker", inner_irbb_label = "Inner Beam Breaker", video_metadata_col_nms = c("total_pixels_motionTrigger"), integrate_perching = FALSE, perching_dataset = NULL, perching_prefix = NULL, pixel_col_nm = "total_pixels_motionTrigger", video_width = 1280, video_height = 720, integrate_preproc_video = TRUE, video_file_nm = args[["video_file_nm"]], timestamps_col_nm = args[["timestamps_col_nm"]], path = path, data_dir = file.path(data_dir, "processed"), out_dir = file.path(data_dir, "processed"), out_file_nm = "scored_detectionClusters.csv", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
+      score_clusters(file_nm = "detection_clusters.csv", sensor_id_col_nm = NULL, PIT_tag_col_nm = NULL, rfid_label = NULL, camera_label = "Camera", outer_irbb_label = "Outer Beam Breaker", inner_irbb_label = "Inner Beam Breaker", video_metadata_col_nms = c("total_pixels_motionTrigger"), integrate_perching = FALSE, perching_dataset = NULL, perching_prefix = NULL, pixel_col_nm = "total_pixels_motionTrigger", video_width = 1280, video_height = 720, integrate_preproc_video = TRUE, video_file_nm = args[["video_file_nm"]], timestamps_col_nm = args[["timestamps_col_nm"]], path = path, data_dir = file.path(data_dir, "processed"), out_dir = file.path(data_dir, "processed"), out_file_nm = "scored_detectionClusters.csv", tz = "", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
       regexp = paste("Expected a non-NULL value but the argument", arg_nms[i], "is NULL", sep = " ")
     )
     
@@ -2242,7 +2250,7 @@ test_that("the function catches when non-NULL arguments are NULL", {
     args[arg_nms[i]] <- list(NULL)
     
     expect_error(
-      score_clusters(file_nm = "detection_clusters.csv", sensor_id_col_nm = NULL, PIT_tag_col_nm = NULL, rfid_label = "RFID", camera_label = "Video", outer_irbb_label = NULL, inner_irbb_label = NULL, video_metadata_col_nms = args[["video_metadata_col_nms"]], integrate_perching = FALSE, perching_dataset = NULL, perching_prefix = NULL, pixel_col_nm = args[["pixel_col_nm"]], video_width = args[["video_width"]], video_height = args[["video_height"]], integrate_preproc_video = FALSE, path = path, data_dir = file.path(data_dir, "processed"), out_dir = file.path(data_dir, "processed"), out_file_nm = "scored_detectionClusters.csv", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
+      score_clusters(file_nm = "detection_clusters.csv", sensor_id_col_nm = NULL, PIT_tag_col_nm = NULL, rfid_label = "RFID", camera_label = "Video", outer_irbb_label = NULL, inner_irbb_label = NULL, video_metadata_col_nms = args[["video_metadata_col_nms"]], integrate_perching = FALSE, perching_dataset = NULL, perching_prefix = NULL, pixel_col_nm = args[["pixel_col_nm"]], video_width = args[["video_width"]], video_height = args[["video_height"]], integrate_preproc_video = FALSE, path = path, data_dir = file.path(data_dir, "processed"), out_dir = file.path(data_dir, "processed"), out_file_nm = "scored_detectionClusters.csv", tz = "", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
       regexp = paste("Expected a non-NULL value but the argument", arg_nms[i], "is NULL", sep = " ")
     )
     
@@ -2250,27 +2258,27 @@ test_that("the function catches when non-NULL arguments are NULL", {
   
   # Finally, check that the sensor label arguments are specified correctly given the combinations expected by the function
   expect_error(
-    score_clusters(file_nm = "detection_clusters.csv", sensor_id_col_nm = NULL, PIT_tag_col_nm = NULL, rfid_label = NULL, camera_label = NULL, outer_irbb_label = NULL, inner_irbb_label = NULL, video_metadata_col_nms = NULL, integrate_perching = FALSE, perching_dataset = NULL, perching_prefix = NULL, integrate_preproc_video = FALSE, path = path, data_dir = file.path(data_dir, "processed"), out_dir = file.path(data_dir, "processed"), out_file_nm = "scored_detectionClusters.csv", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
+    score_clusters(file_nm = "detection_clusters.csv", sensor_id_col_nm = NULL, PIT_tag_col_nm = NULL, rfid_label = NULL, camera_label = NULL, outer_irbb_label = NULL, inner_irbb_label = NULL, video_metadata_col_nms = NULL, integrate_perching = FALSE, perching_dataset = NULL, perching_prefix = NULL, integrate_preproc_video = FALSE, path = path, data_dir = file.path(data_dir, "processed"), out_dir = file.path(data_dir, "processed"), out_file_nm = "scored_detectionClusters.csv", tz = "", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
     regexp = "Data from at least two sensor types, or two beam breaker pairs, must be specified"
   )
   
   expect_error(
-    score_clusters(file_nm = "detection_clusters.csv", sensor_id_col_nm = NULL, PIT_tag_col_nm = NULL, rfid_label = "RFID", camera_label = NULL, outer_irbb_label = NULL, inner_irbb_label = NULL, video_metadata_col_nms = NULL, integrate_perching = FALSE, perching_dataset = NULL, perching_prefix = NULL, integrate_preproc_video = FALSE, path = path, data_dir = file.path(data_dir, "processed"), out_dir = file.path(data_dir, "processed"), out_file_nm = "scored_detectionClusters.csv", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
+    score_clusters(file_nm = "detection_clusters.csv", sensor_id_col_nm = NULL, PIT_tag_col_nm = NULL, rfid_label = "RFID", camera_label = NULL, outer_irbb_label = NULL, inner_irbb_label = NULL, video_metadata_col_nms = NULL, integrate_perching = FALSE, perching_dataset = NULL, perching_prefix = NULL, integrate_preproc_video = FALSE, path = path, data_dir = file.path(data_dir, "processed"), out_dir = file.path(data_dir, "processed"), out_file_nm = "scored_detectionClusters.csv", tz = "", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
     regexp = "The RFID data must be accompanied by beam breaker and/or video data"
   )
   
   expect_error(
-    score_clusters(file_nm = "detection_clusters.csv", sensor_id_col_nm = NULL, PIT_tag_col_nm = NULL, rfid_label = NULL, camera_label = "Video", outer_irbb_label = NULL, inner_irbb_label = NULL, video_metadata_col_nms = NULL, integrate_perching = FALSE, perching_dataset = NULL, perching_prefix = NULL, integrate_preproc_video = FALSE, path = path, data_dir = file.path(data_dir, "processed"), out_dir = file.path(data_dir, "processed"), out_file_nm = "scored_detectionClusters.csv", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
+    score_clusters(file_nm = "detection_clusters.csv", sensor_id_col_nm = NULL, PIT_tag_col_nm = NULL, rfid_label = NULL, camera_label = "Video", outer_irbb_label = NULL, inner_irbb_label = NULL, video_metadata_col_nms = NULL, integrate_perching = FALSE, perching_dataset = NULL, perching_prefix = NULL, integrate_preproc_video = FALSE, path = path, data_dir = file.path(data_dir, "processed"), out_dir = file.path(data_dir, "processed"), out_file_nm = "scored_detectionClusters.csv", tz = "", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
     regexp = "The video data must be accompanied by beam breaker and/or RFID data"
   )
   
   expect_error(
-    score_clusters(file_nm = "detection_clusters.csv", sensor_id_col_nm = NULL, PIT_tag_col_nm = NULL, rfid_label = NULL, camera_label = NULL, outer_irbb_label = "Outer Beam Breaker", inner_irbb_label = NULL, video_metadata_col_nms = NULL, integrate_perching = FALSE, perching_dataset = NULL, perching_prefix = NULL, integrate_preproc_video = FALSE, path = path, data_dir = file.path(data_dir, "processed"), out_dir = file.path(data_dir, "processed"), out_file_nm = "scored_detectionClusters.csv", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
+    score_clusters(file_nm = "detection_clusters.csv", sensor_id_col_nm = NULL, PIT_tag_col_nm = NULL, rfid_label = NULL, camera_label = NULL, outer_irbb_label = "Outer Beam Breaker", inner_irbb_label = NULL, video_metadata_col_nms = NULL, integrate_perching = FALSE, perching_dataset = NULL, perching_prefix = NULL, integrate_preproc_video = FALSE, path = path, data_dir = file.path(data_dir, "processed"), out_dir = file.path(data_dir, "processed"), out_file_nm = "scored_detectionClusters.csv", tz = "", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
     regexp = "The outer beam breaker data must be accompanied by inner beam breaker data"
   )
   
   expect_error(
-    score_clusters(file_nm = "detection_clusters.csv", sensor_id_col_nm = NULL, PIT_tag_col_nm = NULL, rfid_label = NULL, camera_label = NULL, outer_irbb_label = NULL, inner_irbb_label = "Inner Beam Breaker", video_metadata_col_nms = NULL, integrate_perching = FALSE, perching_dataset = NULL, perching_prefix = NULL, integrate_preproc_video = FALSE, path = path, data_dir = file.path(data_dir, "processed"), out_dir = file.path(data_dir, "processed"), out_file_nm = "scored_detectionClusters.csv", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
+    score_clusters(file_nm = "detection_clusters.csv", sensor_id_col_nm = NULL, PIT_tag_col_nm = NULL, rfid_label = NULL, camera_label = NULL, outer_irbb_label = NULL, inner_irbb_label = "Inner Beam Breaker", video_metadata_col_nms = NULL, integrate_perching = FALSE, perching_dataset = NULL, perching_prefix = NULL, integrate_preproc_video = FALSE, path = path, data_dir = file.path(data_dir, "processed"), out_dir = file.path(data_dir, "processed"), out_file_nm = "scored_detectionClusters.csv", tz = "", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
     regexp = "The inner beam breaker data must be accompanied by outer beam breaker data"
   )
   
@@ -2296,7 +2304,7 @@ test_that("the function catches when NULL arguments are non-NULL", {
   # library(testthat)
   
   # Create a temporary directory for testing. Files will be written and read here
-  path <- "/home/gsvidaurre/Desktop"
+  path <- testthat_tmp_path
   data_dir <- "tmp_tests"
   tmp_path <- file.path(path, data_dir)
   
@@ -2364,7 +2372,7 @@ test_that("the function catches when NULL arguments are non-NULL", {
     args[arg_nms[i]] <- "test"
     
     expect_error(
-      score_clusters(file_nm = "detection_clusters.csv", sensor_id_col_nm = args[["sensor_id_col_nm"]], PIT_tag_col_nm = args[["PIT_tag_col_nm"]], rfid_label = NULL, camera_label = NULL, outer_irbb_label = "Outer Beam Breaker", inner_irbb_label = "Inner Beam Breaker", video_metadata_col_nms = NULL, integrate_perching = FALSE, perching_dataset = args[["perching_dataset"]], perching_prefix = args[["perching_prefix"]], pixel_col_nm = NULL, video_width = NULL, video_height = NULL, integrate_preproc_video = FALSE, path = path, data_dir = file.path(data_dir, "processed"), out_dir = file.path(data_dir, "processed"), out_file_nm = "scored_detectionClusters.csv", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
+      score_clusters(file_nm = "detection_clusters.csv", sensor_id_col_nm = args[["sensor_id_col_nm"]], PIT_tag_col_nm = args[["PIT_tag_col_nm"]], rfid_label = NULL, camera_label = NULL, outer_irbb_label = "Outer Beam Breaker", inner_irbb_label = "Inner Beam Breaker", video_metadata_col_nms = NULL, integrate_perching = FALSE, perching_dataset = args[["perching_dataset"]], perching_prefix = args[["perching_prefix"]], pixel_col_nm = NULL, video_width = NULL, video_height = NULL, integrate_preproc_video = FALSE, path = path, data_dir = file.path(data_dir, "processed"), out_dir = file.path(data_dir, "processed"), out_file_nm = "scored_detectionClusters.csv", tz = "", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
       regexp = paste("Expected a NULL value but the argument", arg_nms[i], "is not NULL", sep = " ")
     )
     
@@ -2392,7 +2400,7 @@ test_that("the function catches when character string arguments are not strings"
   # library(testthat)
   
   # Create a temporary directory for testing. Files will be written and read here
-  path <- "/home/gsvidaurre/Desktop"
+  path <- testthat_tmp_path
   data_dir <- "tmp_tests"
   tmp_path <- file.path(path, data_dir)
   
@@ -2454,7 +2462,7 @@ test_that("the function catches when character string arguments are not strings"
     `data_dir` = file.path(data_dir, "processed"),
     `out_dir` = file.path(data_dir, "processed"),
     `out_file_nm` = "scored_detection_clusters.csv", 
-    `tz` = "America/New York",
+    `tz` = "",
     `POSIXct_format` = "%Y-%m-%d %H:%M:%OS"
   )
   
@@ -2483,7 +2491,7 @@ test_that("the function catches when character string arguments are not strings"
     args[arg_nms[i]] <- 1
     
     expect_error(
-      score_clusters(file_nm = "detection_clusters.csv", sensor_id_col_nm = args[["sensor_id_col_nm"]], PIT_tag_col_nm = args[["PIT_tag_col_nm"]], rfid_label = NULL, camera_label = NULL, outer_irbb_label = "Outer Beam Breaker", inner_irbb_label = "Inner Beam Breaker", video_metadata_col_nms = NULL, integrate_perching = TRUE, perching_dataset = "RFID", perching_prefix = args[["perching_prefix"]], pixel_col_nm = NULL, video_width = NULL, video_height = NULL, integrate_preproc_video = FALSE, path = path, data_dir = file.path(data_dir, "processed"), out_dir = file.path(data_dir, "processed"), out_file_nm = "scored_detectionClusters.csv", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
+      score_clusters(file_nm = "detection_clusters.csv", sensor_id_col_nm = args[["sensor_id_col_nm"]], PIT_tag_col_nm = args[["PIT_tag_col_nm"]], rfid_label = NULL, camera_label = NULL, outer_irbb_label = "Outer Beam Breaker", inner_irbb_label = "Inner Beam Breaker", video_metadata_col_nms = NULL, integrate_perching = TRUE, perching_dataset = "RFID", perching_prefix = args[["perching_prefix"]], pixel_col_nm = NULL, video_width = NULL, video_height = NULL, integrate_preproc_video = FALSE, path = path, data_dir = file.path(data_dir, "processed"), out_dir = file.path(data_dir, "processed"), out_file_nm = "scored_detectionClusters.csv", tz = "", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
       regexp = paste("Expected a string but the argument", arg_nms[i], "is not a string", sep = " ")
     )
     
@@ -2502,7 +2510,7 @@ test_that("the function catches when character string arguments are not strings"
     args[arg_nms[i]] <- 1
     
     expect_error(
-      score_clusters(file_nm = "detection_clusters.csv", sensor_id_col_nm = NULL, PIT_tag_col_nm = NULL, rfid_label = NULL, camera_label = "Camera", outer_irbb_label = "Outer Beam Breaker", inner_irbb_label = "Inner Beam Breaker", video_metadata_col_nms = c("total_pixels_motionTrigger"), integrate_perching = FALSE, perching_dataset = NULL, perching_prefix = NULL, pixel_col_nm = "total_pixels_motionTrigger", video_width = 1280, video_height = 720, integrate_preproc_video = TRUE, video_file_nm = args[["video_file_nm"]], timestamps_col_nm = args[["timestamps_col_nm"]], path = path, data_dir = file.path(data_dir, "processed"), out_dir = file.path(data_dir, "processed"), out_file_nm = "scored_detectionClusters.csv", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
+      score_clusters(file_nm = "detection_clusters.csv", sensor_id_col_nm = NULL, PIT_tag_col_nm = NULL, rfid_label = NULL, camera_label = "Camera", outer_irbb_label = "Outer Beam Breaker", inner_irbb_label = "Inner Beam Breaker", video_metadata_col_nms = c("total_pixels_motionTrigger"), integrate_perching = FALSE, perching_dataset = NULL, perching_prefix = NULL, pixel_col_nm = "total_pixels_motionTrigger", video_width = 1280, video_height = 720, integrate_preproc_video = TRUE, video_file_nm = args[["video_file_nm"]], timestamps_col_nm = args[["timestamps_col_nm"]], path = path, data_dir = file.path(data_dir, "processed"), out_dir = file.path(data_dir, "processed"), out_file_nm = "scored_detectionClusters.csv", tz = "", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
       regexp = paste("Expected a string but the argument", arg_nms[i], "is not a string", sep = " ")
     )
     
@@ -2521,7 +2529,7 @@ test_that("the function catches when character string arguments are not strings"
     args[arg_nms[i]] <- 1
     
     expect_error(
-      score_clusters(file_nm = "detection_clusters.csv", sensor_id_col_nm = NULL, PIT_tag_col_nm = NULL, rfid_label = "RFID", camera_label = "Video", outer_irbb_label = NULL, inner_irbb_label = NULL, video_metadata_col_nms = args[["video_metadata_col_nms"]], pixel_col_nm = args[["pixel_col_nm"]], integrate_perching = FALSE, perching_dataset = NULL, perching_prefix = NULL, video_width = 1280, video_height = 720, integrate_preproc_video = FALSE, path = path, data_dir = file.path(data_dir, "processed"), out_dir = file.path(data_dir, "processed"), out_file_nm = "scored_detectionClusters.csv", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
+      score_clusters(file_nm = "detection_clusters.csv", sensor_id_col_nm = NULL, PIT_tag_col_nm = NULL, rfid_label = "RFID", camera_label = "Video", outer_irbb_label = NULL, inner_irbb_label = NULL, video_metadata_col_nms = args[["video_metadata_col_nms"]], pixel_col_nm = args[["pixel_col_nm"]], integrate_perching = FALSE, perching_dataset = NULL, perching_prefix = NULL, video_width = 1280, video_height = 720, integrate_preproc_video = FALSE, path = path, data_dir = file.path(data_dir, "processed"), out_dir = file.path(data_dir, "processed"), out_file_nm = "scored_detectionClusters.csv", tz = "", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
       regexp = paste("Expected a string but the argument", arg_nms[i], "is not a string", sep = " ")
     )
     
@@ -2551,7 +2559,7 @@ test_that("the function catches when Boolean arguments are not Boolean", {
   # library(testthat)
   
   # Create a temporary directory for testing. Files will be written and read here
-  path <- "/home/gsvidaurre/Desktop"
+  path <- testthat_tmp_path
   data_dir <- "tmp_tests"
   tmp_path <- file.path(path, data_dir)
   
@@ -2605,12 +2613,12 @@ test_that("the function catches when Boolean arguments are not Boolean", {
   write.csv(sim_dats, file.path(tmp_path, "processed",  "detection_clusters.csv"), row.names = FALSE)
   
   expect_error(
-    score_clusters(file_nm = "detection_clusters.csv", sensor_id_col_nm = NULL, PIT_tag_col_nm = NULL, rfid_label = "RFID", camera_label = "Video", outer_irbb_label = NULL, inner_irbb_label = NULL, video_metadata_col_nms = c("pixel_threshold"), integrate_perching = "test", perching_dataset = NULL, perching_prefix = NULL, integrate_preproc_video = FALSE, path = path, data_dir = file.path(data_dir, "processed"), out_dir = file.path(data_dir, "processed"), out_file_nm = "scored_detectionClusters.csv", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
+    score_clusters(file_nm = "detection_clusters.csv", sensor_id_col_nm = NULL, PIT_tag_col_nm = NULL, rfid_label = "RFID", camera_label = "Video", outer_irbb_label = NULL, inner_irbb_label = NULL, video_metadata_col_nms = c("pixel_threshold"), integrate_perching = "test", perching_dataset = NULL, perching_prefix = NULL, integrate_preproc_video = FALSE, path = path, data_dir = file.path(data_dir, "processed"), out_dir = file.path(data_dir, "processed"), out_file_nm = "scored_detectionClusters.csv", tz = "", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
     regexp = paste("Expected a Boolean value but the argument integrate_perching is not Boolean", sep = " ")
   )
   
   expect_error(
-    score_clusters(file_nm = "detection_clusters.csv", sensor_id_col_nm = NULL, PIT_tag_col_nm = NULL, rfid_label = "RFID", camera_label = "Video", outer_irbb_label = NULL, inner_irbb_label = NULL, video_metadata_col_nms = c("pixel_threshold"), integrate_perching = FALSE, perching_dataset = NULL, perching_prefix = NULL, integrate_preproc_video = "FALSE", path = path, data_dir = file.path(data_dir, "processed"), out_dir = file.path(data_dir, "processed"), out_file_nm = "scored_detectionClusters.csv", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
+    score_clusters(file_nm = "detection_clusters.csv", sensor_id_col_nm = NULL, PIT_tag_col_nm = NULL, rfid_label = "RFID", camera_label = "Video", outer_irbb_label = NULL, inner_irbb_label = NULL, video_metadata_col_nms = c("pixel_threshold"), integrate_perching = FALSE, perching_dataset = NULL, perching_prefix = NULL, integrate_preproc_video = "FALSE", path = path, data_dir = file.path(data_dir, "processed"), out_dir = file.path(data_dir, "processed"), out_file_nm = "scored_detectionClusters.csv", tz = "", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
     regexp = paste("Expected a Boolean value but the argument integrate_preproc_video is not Boolean", sep = " ")
   )
   
@@ -2636,7 +2644,7 @@ test_that("the function catches when numeric arguments are not numeric", {
   # library(testthat)
   
   # Create a temporary directory for testing. Files will be written and read here
-  path <- "/home/gsvidaurre/Desktop"
+  path <- testthat_tmp_path
   data_dir <- "tmp_tests"
   tmp_path <- file.path(path, data_dir)
   
@@ -2702,7 +2710,7 @@ test_that("the function catches when numeric arguments are not numeric", {
     args[arg_nms[i]] <- "test"
     
     expect_error(
-      score_clusters(file_nm = "detection_clusters.csv", sensor_id_col_nm = NULL, PIT_tag_col_nm = NULL, rfid_label = "RFID", camera_label = "Video", outer_irbb_label = NULL, inner_irbb_label = NULL, video_metadata_col_nms = c("total_pixels_motionTrigger"), pixel_col_nm = "total_pixels_motionTrigger", integrate_perching = FALSE, perching_dataset = NULL, perching_prefix = NULL, video_width = args[["video_width"]], video_height = args[["video_height"]], integrate_preproc_video = FALSE, path = path, data_dir = file.path(data_dir, "processed"), out_dir = file.path(data_dir, "processed"), out_file_nm = "scored_detectionClusters.csv", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
+      score_clusters(file_nm = "detection_clusters.csv", sensor_id_col_nm = NULL, PIT_tag_col_nm = NULL, rfid_label = "RFID", camera_label = "Video", outer_irbb_label = NULL, inner_irbb_label = NULL, video_metadata_col_nms = c("total_pixels_motionTrigger"), pixel_col_nm = "total_pixels_motionTrigger", integrate_perching = FALSE, perching_dataset = NULL, perching_prefix = NULL, video_width = args[["video_width"]], video_height = args[["video_height"]], integrate_preproc_video = FALSE, path = path, data_dir = file.path(data_dir, "processed"), out_dir = file.path(data_dir, "processed"), out_file_nm = "scored_detectionClusters.csv", tz = "", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
       regexp = paste("Expected a numeric value but the argument", arg_nms[i], "is not numeric", sep = " ")
     )
     
@@ -2732,7 +2740,7 @@ test_that("the function catches when paths don't exist", {
   # library(testthat)
   
   # Create a temporary directory for testing. Files will be written and read here
-  path <- "/home/gsvidaurre/Desktop"
+  path <- testthat_tmp_path
   data_dir <- "tmp_tests"
   tmp_path <- file.path(path, data_dir)
   
@@ -2789,7 +2797,7 @@ test_that("the function catches when paths don't exist", {
   file.remove(file.path(tmp_path, "processed", "detection_clusters.csv"))
   
   expect_error(
-    score_clusters(file_nm = "detection_clusters.csv", sensor_id_col_nm = NULL, PIT_tag_col_nm = NULL, rfid_label = "RFID", camera_label = "Video", outer_irbb_label = NULL, inner_irbb_label = NULL, video_metadata_col_nms = c("pixel_threshold"), integrate_perching = FALSE, perching_dataset = NULL, perching_prefix = NULL, pixel_col_nm = "total_pixels_motionTrigger", video_width = 1280, video_height = 720, integrate_preproc_video = FALSE, path = path, data_dir = file.path(data_dir, "processed"), out_dir = file.path(data_dir, "processed"), out_file_nm = "scored_detectionClusters.csv", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
+    score_clusters(file_nm = "detection_clusters.csv", sensor_id_col_nm = NULL, PIT_tag_col_nm = NULL, rfid_label = "RFID", camera_label = "Video", outer_irbb_label = NULL, inner_irbb_label = NULL, video_metadata_col_nms = c("pixel_threshold"), integrate_perching = FALSE, perching_dataset = NULL, perching_prefix = NULL, pixel_col_nm = "total_pixels_motionTrigger", video_width = 1280, video_height = 720, integrate_preproc_video = FALSE, path = path, data_dir = file.path(data_dir, "processed"), out_dir = file.path(data_dir, "processed"), out_file_nm = "scored_detectionClusters.csv", tz = "", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
     regexp = paste("The file detection_clusters.csv does not exist in the directory", file.path(path, data_dir, "processed"), sep = " ")
   )
   
@@ -2802,7 +2810,7 @@ test_that("the function catches when paths don't exist", {
   }
   
   expect_error(
-    score_clusters(file_nm = "detection_clusters.csv", sensor_id_col_nm = NULL, PIT_tag_col_nm = NULL, rfid_label = "RFID", camera_label = "Video", outer_irbb_label = NULL, inner_irbb_label = NULL,  video_metadata_col_nms = c("pixel_threshold"), integrate_perching = FALSE, perching_dataset = NULL, perching_prefix = NULL, pixel_col_nm = "total_pixels_motionTrigger", video_width = 1280, video_height = 720, integrate_preproc_video = FALSE, path = path, data_dir = file.path(data_dir, "processed"), out_dir = file.path(data_dir, "processed"), out_file_nm = "scored_detectionClusters.csv", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
+    score_clusters(file_nm = "detection_clusters.csv", sensor_id_col_nm = NULL, PIT_tag_col_nm = NULL, rfid_label = "RFID", camera_label = "Video", outer_irbb_label = NULL, inner_irbb_label = NULL,  video_metadata_col_nms = c("pixel_threshold"), integrate_perching = FALSE, perching_dataset = NULL, perching_prefix = NULL, pixel_col_nm = "total_pixels_motionTrigger", video_width = 1280, video_height = 720, integrate_preproc_video = FALSE, path = path, data_dir = file.path(data_dir, "processed"), out_dir = file.path(data_dir, "processed"), out_file_nm = "scored_detectionClusters.csv", tz = "", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
     regexp = paste("The directory", file.path(path, data_dir, "processed"), "does not exist", sep = " ")
   )
   
@@ -2823,7 +2831,7 @@ test_that("the input dataset has all of the expected columns", {
   # library(testthat)
   
   # Create a temporary directory for testing. Files will be written and read here
-  path <- "/home/gsvidaurre/Desktop"
+  path <- testthat_tmp_path
   data_dir <- "tmp_tests"
   tmp_path <- file.path(path, data_dir)
   
@@ -2884,7 +2892,7 @@ test_that("the input dataset has all of the expected columns", {
     write.csv(sim_dats, file.path(tmp_path, "processed",  "detection_clusters.csv"), row.names = FALSE)
     
     expect_error(
-      score_clusters(file_nm = "detection_clusters.csv", sensor_id_col_nm = NULL, PIT_tag_col_nm = NULL, rfid_label = "RFID", camera_label = "Video", outer_irbb_label = NULL, inner_irbb_label = NULL, video_metadata_col_nms = c("pixel_threshold"), integrate_perching = FALSE, perching_dataset = NULL, perching_prefix = NULL, pixel_col_nm = "total_pixels_motionTrigger", video_width = 1280, video_height = 720, integrate_preproc_video = FALSE, path = path, data_dir = file.path(data_dir, "processed"), out_dir = file.path(data_dir, "processed"), out_file_nm = "scored_detectionClusters.csv", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
+      score_clusters(file_nm = "detection_clusters.csv", sensor_id_col_nm = NULL, PIT_tag_col_nm = NULL, rfid_label = "RFID", camera_label = "Video", outer_irbb_label = NULL, inner_irbb_label = NULL, video_metadata_col_nms = c("pixel_threshold"), integrate_perching = FALSE, perching_dataset = NULL, perching_prefix = NULL, pixel_col_nm = "total_pixels_motionTrigger", video_width = 1280, video_height = 720, integrate_preproc_video = FALSE, path = path, data_dir = file.path(data_dir, "processed"), out_dir = file.path(data_dir, "processed"), out_file_nm = "scored_detectionClusters.csv", tz = "", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
       regexp = paste("The column", col_nms[i], "was not found in the data frame", sep = " ")
     )
     
@@ -2977,7 +2985,7 @@ test_that("the input dataset has all of the expected columns", {
     write.csv(sim_perch_irbb, file.path(tmp_path, "processed", "perching_events_IRBB.csv"), row.names = FALSE)
     
     expect_error(
-      score_clusters(file_nm = "detection_clusters.csv", sensor_id_col_nm = "sensor_id", PIT_tag_col_nm = "PIT_tag_ID", rfid_label = NULL, camera_label = NULL, outer_irbb_label = "Outer Beam Breaker", inner_irbb_label = "Inner Beam Breaker", video_metadata_col_nms = c("pixel_threshold"), integrate_perching = TRUE, perching_dataset = "RFID-IRBB", perching_prefix = "perching_events_", pixel_col_nm = NULL, video_width = NULL, video_height = NULL, integrate_preproc_video = FALSE, path = path, data_dir = file.path(data_dir, "processed"), out_dir = file.path(data_dir, "processed"), out_file_nm = "scored_detectionClusters.csv", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
+      score_clusters(file_nm = "detection_clusters.csv", sensor_id_col_nm = "sensor_id", PIT_tag_col_nm = "PIT_tag_ID", rfid_label = NULL, camera_label = NULL, outer_irbb_label = "Outer Beam Breaker", inner_irbb_label = "Inner Beam Breaker", video_metadata_col_nms = c("pixel_threshold"), integrate_perching = TRUE, perching_dataset = "RFID-IRBB", perching_prefix = "perching_events_", pixel_col_nm = NULL, video_width = NULL, video_height = NULL, integrate_preproc_video = FALSE, path = path, data_dir = file.path(data_dir, "processed"), out_dir = file.path(data_dir, "processed"), out_file_nm = "scored_detectionClusters.csv", tz = "", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
       regexp = paste("The column", col_nms[i], "was not found in the data frame", sep = " ")
     )
     
@@ -3018,7 +3026,7 @@ test_that("the input dataset has all of the expected columns", {
   write.csv(sim_dats, file.path(tmp_path, "processed",  "detection_clusters.csv"), row.names = FALSE)
   
   expect_error(
-    score_clusters(file_nm = "detection_clusters.csv", sensor_id_col_nm = NULL, PIT_tag_col_nm = NULL, rfid_label = NULL, camera_label = "Video", outer_irbb_label = "Outer Beam Breaker", inner_irbb_label = "Inner Beam Breaker", video_metadata_col_nms = c("pixel_threshold", "total_pixels_motionTrigger"), integrate_perching = FALSE, perching_dataset = NULL, perching_prefix = NULL, pixel_col_nm = "total_pixels_motionTrigger", video_width = 1280, video_height = 720, integrate_preproc_video = FALSE, path = path, data_dir = file.path(data_dir, "processed"), out_dir = file.path(data_dir, "processed"), out_file_nm = "scored_detectionClusters.csv", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
+    score_clusters(file_nm = "detection_clusters.csv", sensor_id_col_nm = NULL, PIT_tag_col_nm = NULL, rfid_label = NULL, camera_label = "Video", outer_irbb_label = "Outer Beam Breaker", inner_irbb_label = "Inner Beam Breaker", video_metadata_col_nms = c("pixel_threshold", "total_pixels_motionTrigger"), integrate_perching = FALSE, perching_dataset = NULL, perching_prefix = NULL, pixel_col_nm = "total_pixels_motionTrigger", video_width = 1280, video_height = 720, integrate_preproc_video = FALSE, path = path, data_dir = file.path(data_dir, "processed"), out_dir = file.path(data_dir, "processed"), out_file_nm = "scored_detectionClusters.csv", tz = "", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
     regexp = paste("The column", "pixel_threshold", "was not found in the data frame", sep = " ")
   )
   
@@ -3044,7 +3052,7 @@ test_that("the input dataset has no NAs in columns that cannot have NAs", {
   # library(testthat)
   
   # Create a temporary directory for testing. Files will be written and read here
-  path <- "/home/gsvidaurre/Desktop"
+  path <- testthat_tmp_path
   data_dir <- "tmp_tests"
   tmp_path <- file.path(path, data_dir)
   
@@ -3107,7 +3115,7 @@ test_that("the input dataset has no NAs in columns that cannot have NAs", {
     write.csv(sim_dats, file.path(tmp_path, "processed",  "detection_clusters.csv"), row.names = FALSE)
     
     expect_error(
-      score_clusters(file_nm = "detection_clusters.csv", sensor_id_col_nm = NULL, PIT_tag_col_nm = NULL, rfid_label = "RFID", camera_label = "Video", outer_irbb_label = NULL, inner_irbb_label = NULL, video_metadata_col_nms = c("pixel_threshold"), integrate_perching = FALSE, perching_dataset = NULL, perching_prefix = NULL, pixel_col_nm = "total_pixels_motionTrigger", video_width = 1280, video_height = 720, integrate_preproc_video = FALSE, path = path, data_dir = file.path(data_dir, "processed"), out_dir = file.path(data_dir, "processed"), out_file_nm = "scored_detectionClusters.csv", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
+      score_clusters(file_nm = "detection_clusters.csv", sensor_id_col_nm = NULL, PIT_tag_col_nm = NULL, rfid_label = "RFID", camera_label = "Video", outer_irbb_label = NULL, inner_irbb_label = NULL, video_metadata_col_nms = c("pixel_threshold"), integrate_perching = FALSE, perching_dataset = NULL, perching_prefix = NULL, pixel_col_nm = "total_pixels_motionTrigger", video_width = 1280, video_height = 720, integrate_preproc_video = FALSE, path = path, data_dir = file.path(data_dir, "processed"), out_dir = file.path(data_dir, "processed"), out_file_nm = "scored_detectionClusters.csv", tz = "", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
       regexp = paste("The column", col_nms[i], "needs to be in a format compatible with temporal calculations")
     )
     
@@ -3194,7 +3202,7 @@ test_that("the input dataset has no NAs in columns that cannot have NAs", {
     write.csv(sim_perch_irbb, file.path(tmp_path, "processed", "perching_events_IRBB.csv"), row.names = FALSE)
     
     expect_error(
-      score_clusters(file_nm = "detection_clusters.csv", sensor_id_col_nm = "sensor_id", PIT_tag_col_nm = "PIT_tag_ID", rfid_label = NULL, camera_label = NULL, outer_irbb_label = "Outer Beam Breaker", inner_irbb_label = "Inner Beam Breaker", video_metadata_col_nms = c("pixel_threshold"), integrate_perching = TRUE, perching_dataset = "RFID-IRBB", perching_prefix = "perching_events_", pixel_col_nm = NULL, video_width = NULL, video_height = NULL, integrate_preproc_video = FALSE, path = path, data_dir = file.path(data_dir, "processed"), out_dir = file.path(data_dir, "processed"), out_file_nm = "scored_detectionClusters.csv", tz = "America/New York", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
+      score_clusters(file_nm = "detection_clusters.csv", sensor_id_col_nm = "sensor_id", PIT_tag_col_nm = "PIT_tag_ID", rfid_label = NULL, camera_label = NULL, outer_irbb_label = "Outer Beam Breaker", inner_irbb_label = "Inner Beam Breaker", video_metadata_col_nms = c("pixel_threshold"), integrate_perching = TRUE, perching_dataset = "RFID-IRBB", perching_prefix = "perching_events_", pixel_col_nm = NULL, video_width = NULL, video_height = NULL, integrate_preproc_video = FALSE, path = path, data_dir = file.path(data_dir, "processed"), out_dir = file.path(data_dir, "processed"), out_file_nm = "scored_detectionClusters.csv", tz = "", POSIXct_format = "%Y-%m-%d %H:%M:%OS"),
       regexp = paste("The column", col_nms[i], "needs to be in a format compatible with temporal calculations")
     )
     

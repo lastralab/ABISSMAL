@@ -22,7 +22,7 @@
 #' @param data_dir A character string. This argument should be the name of the directory where the pre-processed data that is used as input is saved inside the path above. For instance, "processed".
 #' @param out_dir A character string. This argument should be the name of a directory specifying where the .csv file of integrated data should be saved. For instance, "processed". This folder will be appended to the path and created as a new directory if it doesn't already exist.
 #' @param out_file_nm A character string. The name (plus extension) of the resulting file that will be written to out_dir. The default is "scored_detectionClusters.csv"
-#' @param tz A character string. This argument should contain the timezone used for converting timestamps to POSIXct format. For instance, "America/New York". See the base function `as.POSIXct` for more information.
+#' @param tz A character string. This argument should contain the timezone used for converting timestamps to POSIXct format. Currently timezones specified such as "America/New York" do not work, and it is recommended to set tz to "". See the base function `as.POSIXct` for more information.
 #' @param POSIXct_format A character string. This argument should contain the format used to converting timestamps to POSIXct format. The default is "%Y-%m-%d %H:%M:%OS6" to return timestamps with milliseconds in decimal format. See the base function `as.POSIXct` for more information.
 #' 
 #' @details `score_clusters` uses the order in which sensors triggered within clusters of detections identified by `detect_clusters` to score the direction of movement events. The function finds edges or transitions between sensor labels in the sequence of detections for each cluster. Then the function uses the order of the sensor labels in the first edge to label the directionality of movement events. Note that the function requires data from at least two sensor types (or two beam breaker pairs). When using beam breaker data, the function expects data from two pairs of these sensors. This function can also integrate clusters of detections with perching events identified by the function `detect_perching_events` (e.g. when an individual was perched in the entrance of the nest container).
@@ -189,8 +189,9 @@ score_clusters <- function(file_nm, rfid_label = NULL, camera_label = NULL, oute
       if(perching_dataset %in% c("RFID", "IRBB")){
         
         check_file(file.path(path, data_dir), paste(perching_prefix, perching_dataset, ".csv", sep = ""))
-        
-      } else if(perching_dataset %in% c("RFID", "IRBB")){
+      
+        # TKTK just made this change, this could be why RFID and IRBB perching events are not being integrated
+      } else if(perching_dataset %in% c("RFID-IRBB")){
         
         ps <- strsplit(perching_dataset, split = "-")[[1]]
         
@@ -224,8 +225,8 @@ score_clusters <- function(file_nm, rfid_label = NULL, camera_label = NULL, oute
   detectns <- detectns %>% 
     # Make sure that the timestamps are in the right format
     dplyr::mutate(
-      start = as.POSIXct(format(as.POSIXct(start, tz = "America/New York"), "%Y-%m-%d %H:%M:%OS6")),
-      end = as.POSIXct(format(as.POSIXct(end, tz = "America/New York"), "%Y-%m-%d %H:%M:%OS6"))
+      start = as.POSIXct(format(as.POSIXct(start, tz = tz), "%Y-%m-%d %H:%M:%OS6")),
+      end = as.POSIXct(format(as.POSIXct(end, tz = tz), "%Y-%m-%d %H:%M:%OS6"))
     ) %>% 
     rowid_to_column()
   
@@ -439,7 +440,7 @@ score_clusters <- function(file_nm, rfid_label = NULL, camera_label = NULL, oute
     
   }
   
-  # Integrate the prep-processed video recording events if specified, and if the camera is not NULL
+  # Integrate the pre-processed video recording events if specified, and if the camera is not NULL
   if(integrate_preproc_video & !is.null(camera_label)){
     
     # Read in the pre-processed video data depending on which datasets were specified
@@ -453,7 +454,7 @@ score_clusters <- function(file_nm, rfid_label = NULL, camera_label = NULL, oute
     video_pp <- video_pp %>% 
       # Make sure that the timestamps are in the right format
       dplyr::mutate(
-        !!timestamps_col_nm := as.POSIXct(format(as.POSIXct(!!sym(timestamps_col_nm), tz = "America/New York"), "%Y-%m-%d %H:%M:%OS6"))
+        !!timestamps_col_nm := as.POSIXct(format(as.POSIXct(!!sym(timestamps_col_nm), tz = tz), "%Y-%m-%d %H:%M:%OS6"))
       )
     
     # Find all of the pre-processed video recording events that are not in the current dataset of detection clusters. Search for video recording events that do not fall within the start and end timestamps of the detection clusters
@@ -467,7 +468,9 @@ score_clusters <- function(file_nm, rfid_label = NULL, camera_label = NULL, oute
         
         tmp <- detectns_edges2 %>% 
           dplyr::filter(
-            timestamp >= start & timestamp <= end
+            # TKTK troubleshooting
+            # timestamp >= start & timestamp <= end
+            start >= timestamp & end <= timestamp
           )
         
         if(nrow(tmp) > 0){
@@ -593,8 +596,8 @@ score_clusters <- function(file_nm, rfid_label = NULL, camera_label = NULL, oute
         perch_df <- perch_df %>% 
           # Make sure that the timestamps are in the right format
           dplyr::mutate(
-            perching_start = as.POSIXct(format(as.POSIXct(perching_start, tz = "America/New York"), "%Y-%m-%d %H:%M:%OS6")),
-            perching_end = as.POSIXct(format(as.POSIXct(perching_end, tz = "America/New York"), "%Y-%m-%d %H:%M:%OS6"))
+            perching_start = as.POSIXct(format(as.POSIXct(perching_start, tz = tz), "%Y-%m-%d %H:%M:%OS6")),
+            perching_end = as.POSIXct(format(as.POSIXct(perching_end, tz = tz), "%Y-%m-%d %H:%M:%OS6"))
           )
         
         check_tstmps_cols("perching_start", perch_df, "%Y-%m-%d %H:%M:%OS6")
@@ -625,8 +628,8 @@ score_clusters <- function(file_nm, rfid_label = NULL, camera_label = NULL, oute
         perch_df <- perch_df %>% 
           # Make sure that the timestamps are in the right format
           dplyr::mutate(
-            perching_start = as.POSIXct(format(as.POSIXct(perching_start, tz = "America/New York"), "%Y-%m-%d %H:%M:%OS6")),
-            perching_end = as.POSIXct(format(as.POSIXct(perching_end, tz = "America/New York"), "%Y-%m-%d %H:%M:%OS6"))
+            perching_start = as.POSIXct(format(as.POSIXct(perching_start, tz = tz), "%Y-%m-%d %H:%M:%OS6")),
+            perching_end = as.POSIXct(format(as.POSIXct(perching_end, tz = tz), "%Y-%m-%d %H:%M:%OS6"))
           )
         
         # Check that columns with timestamps are in the right format
@@ -646,9 +649,11 @@ score_clusters <- function(file_nm, rfid_label = NULL, camera_label = NULL, oute
           dplyr::select(rowid, start, end) %>% 
           pmap_dfr(., function(rowid, start, end){
             
-            tmp_perching <- perch_df %>% 
+            tmp_perching <- perch_df %>%
+              # TKTK I think switching the order of the logic here should help find perching events
+              # Perching events should occur within the start and end of the given behavioral event in the data frame that is being scored
               dplyr::filter(
-                start >= perching_start & end <= perching_end 
+                perching_start >= start & perching_end <= end 
               ) %>% 
               dplyr::rename(
                 perching_PIT_tag = !!sym(PIT_tag_col_nm)
@@ -670,7 +675,8 @@ score_clusters <- function(file_nm, rfid_label = NULL, camera_label = NULL, oute
             
             tmp_perching <- perch_df %>% 
               dplyr::filter(
-                start >= perching_start & end <= perching_end 
+                # TKTK made the same changes here
+                perching_start >= start & perching_end <= end 
               ) %>% 
               dplyr::mutate(
                 de_rowid = rowid
