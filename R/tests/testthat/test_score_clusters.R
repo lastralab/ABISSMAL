@@ -358,7 +358,7 @@ test_that("The function labels entrances and exits as expected using data from R
   
   ends <- starts + rep(c(5, 10, 15), 2)
   
-  # TKTK CONTINUE I think what needs to happen is that the video file names need to match for 2 videos only between detect_clusters and the pre-processed video data
+  # The video file names need to match for 2 videos only between detect_clusters and the pre-processed video data. And score_clusters needs to be updated such that when videos match a detection, they are NOT added back as inside_container inferences
   
   # Generate a file with pre-processed video timestamps 
   
@@ -372,6 +372,7 @@ test_that("The function labels entrances and exits as expected using data from R
   
   # The first two videos are the two that should match between spreadsheets to indicate a container entrance event
   vid_nms_ce <- paste(paste(paste("Box_01_2023_1_1", paste(hour(starts_camera), minute(starts_camera), second(starts_camera), sep = "_"), sep = "_"), "pre_trigger", sep = "_"), ".mp4", sep = "")[1:2]
+  
   vid_nms_ce <- c(vid_nms_ce, rep(NA, length(starts_camera) - length(vid_nms_ce)))
   # vid_nms_ce
   
@@ -436,7 +437,7 @@ test_that("The function labels entrances and exits as expected using data from R
   # View(test_res)
   
   # Test that the results are 1 inferred container entrance movement and 1 inferred inside container movement for the first two videos, then 4 container entrance events for detections without videos, then 4 inside container events for detections that were video alone. However, the order should be 
-  expect_equal(test_res$inferredMovement_Location, c(rep(c("container_entrance", "inside_container"), 2), rep("container_entrance", 4), rep("inside_container", 4)))
+  expect_equal(test_res$inferredMovement_Location, c(rep("container_entrance", 2), rep("container_entrance", 4), rep("inside_container", 4)))
   
   # Remove the temporary directory and all files within it
   if(tmp_path == file.path(path, data_dir)){
@@ -445,8 +446,7 @@ test_that("The function labels entrances and exits as expected using data from R
   
 })
 
-
-# TKTK CONTINUE
+# TKTK CONTINU: see notes around line 681 in score_clusters() for how the function needs to be updated to better integrate perching events
 test_that("The function labels entrances and exits as expected using data from 2 beam breaker pairs and integrating RFID perching data", {
   
   # Avoid library calls and other changes to the virtual environment
@@ -519,11 +519,11 @@ test_that("The function labels entrances and exits as expected using data from 2
   starts_p <- starts[c(1:2, 5)]
   ends_p <- starts_p + c(25, 50, 10)
   
-  sim_perch <- data.frame(perching_start = starts_p) %>% 
+  sim_perch <- data.frame(chamber_id = "Box_01") %>% 
     dplyr::mutate(
-      chamber_id = "Box_01",
       sensor_id = "RFID",
       PIT_tag_ID = "test",
+      perching_start = starts_p,
       perching_end = ends_p,
       perching_duration_s = perching_end - perching_start,
       unique_perching_event = seq(1, nrow(.), 1),
@@ -539,6 +539,8 @@ test_that("The function labels entrances and exits as expected using data from 2
   
   # Read in the output, check the output, then delete all files
   test_res <- read.csv(file.path(tmp_path, "processed", "scored_detectionClusters.csv"))
+  # glimpse(test_res)
+  # View(test_res)
   
   # Test that the results are 3 entrance events and 3 exit events, in that order
   expect_equal(test_res$direction_scored, rep(c("entrance", "exit"), each = 3))
@@ -558,6 +560,9 @@ test_that("The function labels entrances and exits as expected using data from 2
   }))
   
   # Test that the correct entrance and/or exit movements were assigned to perching events
+  # TKTK keep troubleshooting, why are perching events not integrated correctly here?
+  # View(test_res)
+  # i <- 1
   invisible(lapply(1:nrow(test_res), function(i){
 
     if(test_res$start[i] %in% starts_p){

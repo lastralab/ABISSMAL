@@ -27,9 +27,32 @@
 #' 
 #' @details `score_clusters` uses the order in which sensors triggered within clusters of detections identified by `detect_clusters` to score the direction of movement events. The function finds edges or transitions between sensor labels in the sequence of detections for each cluster. Then the function uses the order of the sensor labels in the first edge to label the directionality of movement events. Note that the function requires data from at least two sensor types (or two beam breaker pairs). When using beam breaker data, the function expects data from two pairs of these sensors. This function can also integrate clusters of detections with perching events identified by the function `detect_perching_events` (e.g. when an individual was perched in the entrance of the nest container).
 #' 
-#' @return A spreadsheet in .csv format with the metadata columns from the original pre-processed data used as input (including individual identity information from RFID data), columns indicating the start and end time of each detection cluster, all the possible edges or transitions detected in the sequence of sensor events, the inferred directionality of sensor events, the rule used to score detection (using the first edge only), and the magnitude of movement. Then magnitude of movement is calculated as the percentage of the observed pixels that changed color during motion detection with respect to the total number of pixels in a given video frame: ( observed number of pixels that changed / (video_width x video_height) ) * 100. The function also integrates pre-processed video recording events that were dropped while searching for detection clusters. These video recording events can be added back to the detection cluster dataset using the arguments `integrate_preproc_video`, `video_file_nm`, and `timestamps_col_nm`. The function also adds a column of inferred location of movement, since these video recording events may represent movements inside of the container that were not picked up by other sensors. All detection clusters that were picked up by other sensors are scored as movements that likely occurred at the entance of the nest container.
+#' @return A spreadsheet in .csv format with the metadata columns from the original pre-processed data used as input (including individual identity information from RFID data), columns indicating the start and end time of each detection cluster, all the possible edges or transitions detected in the sequence of sensor events, the inferred directionality of sensor events, the rule used to score detection (using the first edge only), and the magnitude of movement. Then magnitude of movement is calculated as the percentage of the observed pixels that changed color during motion detection with respect to the total number of pixels in a given video frame: ( observed number of pixels that changed / (video_width x video_height) ) * 100. The function also integrates pre-processed video recording events that were dropped while searching for detection clusters. These video recording events can be added back to the detection cluster dataset using the arguments `integrate_preproc_video`, `video_file_nm`, and `timestamps_col_nm`. The function also adds a column of inferred location of movement, since these video recording events may represent movements inside of the container that were not picked up by other sensors. All detection clusters that were picked up by other sensors are scored as movements that likely occurred at the entrance of the nest container.
 #' 
 #' Each row in the resulting .csv file is a unique detection cluster. Information about the date of processing is also contained in the resulting spreadsheet.
+#' 
+
+file_nm = "detection_clusters.csv"
+sensor_id_col_nm = "sensor_id"
+PIT_tag_col_nm = "PIT_tag_ID"
+rfid_label = NULL
+camera_label = NULL
+outer_irbb_label = "Outer Beam Breaker"
+inner_irbb_label = "Inner Beam Breaker"
+video_metadata_col_nms = NULL
+integrate_perching = TRUE
+perching_dataset = "RFID"
+perching_prefix = "perching_events_"
+pixel_col_nm = NULL
+video_width = NULL
+video_height = NULL
+integrate_preproc_video = FALSE
+path = path
+data_dir = file.path(data_dir, "processed")
+out_dir = file.path(data_dir, "processed")
+out_file_nm = "scored_detectionClusters.csv"
+tz = ""
+POSIXct_format = "%Y-%m-%d %H:%M:%OS"
 
 score_clusters <- function(file_nm, rfid_label = NULL, camera_label = NULL, outer_irbb_label = NULL, inner_irbb_label = NULL, video_metadata_col_nms, integrate_perching, perching_dataset = NULL, perching_prefix = NULL, sensor_id_col_nm = NULL, PIT_tag_col_nm = NULL, pixel_col_nm = NULL, video_width = NULL, video_height = NULL, integrate_preproc_video, video_file_nm = NULL, timestamps_col_nm = NULL, path, data_dir, out_dir, out_file_nm = "scored_detectionClusters.csv", tz, POSIXct_format = "%Y-%m-%d %H:%M:%OS"){
   
@@ -190,7 +213,6 @@ score_clusters <- function(file_nm, rfid_label = NULL, camera_label = NULL, oute
         
         check_file(file.path(path, data_dir), paste(perching_prefix, perching_dataset, ".csv", sep = ""))
       
-        # TKTK just made this change, this could be why RFID and IRBB perching events are not being integrated
       } else if(perching_dataset %in% c("RFID-IRBB")){
         
         ps <- strsplit(perching_dataset, split = "-")[[1]]
@@ -468,9 +490,7 @@ score_clusters <- function(file_nm, rfid_label = NULL, camera_label = NULL, oute
         
         tmp <- detectns_edges2 %>% 
           dplyr::filter(
-            # TKTK troubleshooting
-            # timestamp >= start & timestamp <= end
-            start >= timestamp & end <= timestamp
+            timestamp >= start, timestamp <= end
           )
         
         if(nrow(tmp) > 0){
@@ -650,10 +670,15 @@ score_clusters <- function(file_nm, rfid_label = NULL, camera_label = NULL, oute
           pmap_dfr(., function(rowid, start, end){
             
             tmp_perching <- perch_df %>%
-              # TKTK I think switching the order of the logic here should help find perching events
               # Perching events should occur within the start and end of the given behavioral event in the data frame that is being scored
               dplyr::filter(
-                perching_start >= start & perching_end <= end 
+                # This logic searches for perching events that happened within the start and end timestamps of the given detection
+                (perching_start >= start & perching_end <= end) |
+                  # Also search for perching events that started before the start of a detection but ended before the end timestamp. TKTK
+                  (perching_start >= start & perching_end <= end) |
+                  # Also search for perching events that started after the start of a detection and also ended before the end timestamp
+                  (perching_start >= start & perching_end <= end)
+                # TKTK how to handle integration of perching events that might have started before a detection event, or ended after the timestamps of a detection event?. TKTK the easiest thing to do will be to implement a temporal threshold for searching for perching events before and after the start of a detection...and then will also need to implement logic to select the closest perching event when multiple are found
               ) %>% 
               dplyr::rename(
                 perching_PIT_tag = !!sym(PIT_tag_col_nm)
@@ -676,7 +701,7 @@ score_clusters <- function(file_nm, rfid_label = NULL, camera_label = NULL, oute
             tmp_perching <- perch_df %>% 
               dplyr::filter(
                 # TKTK made the same changes here
-                perching_start >= start & perching_end <= end 
+                perching_start >= start, perching_end <= end 
               ) %>% 
               dplyr::mutate(
                 de_rowid = rowid
