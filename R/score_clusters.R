@@ -10,6 +10,7 @@
 #' @param integrate_perching Boolean. If TRUE, then the perching events identified using `find_perching_events` with either RFID and/or beam breaker data will be integrated with this dataset. This integration is done by finding detection clusters that occurred within the duration of a perching event. If FALSE, then perching events will not be integrated.
 #' @param perching_dataset A character string. Use "RFID", "IRBB", or "RFID-IRBB" to specify which dataset of perching events to integrate. Specifying "RFID-IRBB" means that perching events detected using both sensor types will be integrated. The default is NULL.
 #' @param perching_prefix A character string. The prefix for the file name of the perching events spreadsheet(s). This character string needs to contain all of the symbols in the file name(s) up until the sensor label and extension (e.g. "perching_events_"). The default is NULL.
+#' @param perching_threshold. A numeric value. This argument specifies a temporal threshold in seconds that will be used to search for perching events that full or partially overlapped with the timestamps of detection (e.g. perching events that started before the start or ended after the end of a detection). The default is NULL.
 #' @param sensor_id_col_nm A character string. This argument is the name of the metadata column in the perching event data to be integrated that contains information about the data type (e.g. "sensor_id"). The default is NULL, since integrating perching data is not a requirement.
 #' @param PIT_tag_col_nm A character string. This argument is the name of the metadata column in the perching event data to be integrated that contains information about the PIT tags detected by the RFID antenna (e.g. "PIT_tag_ID"). The default is NULL, since integrating perching data is not a requirement.
 #' @param pixel_col_nm A character string. This argument is the column name for the column that contains the number of pixels that triggered each unique video recording event and which will be used to calculate a magnitude of movement score. The default is `NULL`, since this argument is not needed for detection clusters without video recording events.
@@ -32,29 +33,30 @@
 #' Each row in the resulting .csv file is a unique detection cluster. Information about the date of processing is also contained in the resulting spreadsheet.
 #' 
 
-file_nm = "detection_clusters.csv"
-sensor_id_col_nm = "sensor_id"
-PIT_tag_col_nm = "PIT_tag_ID"
-rfid_label = NULL
-camera_label = NULL
-outer_irbb_label = "Outer Beam Breaker"
-inner_irbb_label = "Inner Beam Breaker"
-video_metadata_col_nms = NULL
-integrate_perching = TRUE
-perching_dataset = "RFID"
-perching_prefix = "perching_events_"
-pixel_col_nm = NULL
-video_width = NULL
-video_height = NULL
-integrate_preproc_video = FALSE
-path = path
-data_dir = file.path(data_dir, "processed")
-out_dir = file.path(data_dir, "processed")
-out_file_nm = "scored_detectionClusters.csv"
-tz = ""
-POSIXct_format = "%Y-%m-%d %H:%M:%OS"
+# file_nm = "detection_clusters.csv"
+# sensor_id_col_nm = "sensor_id"
+# PIT_tag_col_nm = "PIT_tag_ID"
+# rfid_label = NULL
+# camera_label = NULL
+# outer_irbb_label = "Outer Beam Breaker"
+# inner_irbb_label = "Inner Beam Breaker"
+# video_metadata_col_nms = NULL
+# integrate_perching = TRUE
+# perching_dataset = "RFID"
+# perching_prefix = "perching_events_"
+# perching_threshold = 30
+# pixel_col_nm = NULL
+# video_width = NULL
+# video_height = NULL
+# integrate_preproc_video = FALSE
+# path = path
+# data_dir = file.path(data_dir, "processed")
+# out_dir = file.path(data_dir, "processed")
+# out_file_nm = "scored_detectionClusters.csv"
+# tz = ""
+# POSIXct_format = "%Y-%m-%d %H:%M:%OS"
 
-score_clusters <- function(file_nm, rfid_label = NULL, camera_label = NULL, outer_irbb_label = NULL, inner_irbb_label = NULL, video_metadata_col_nms, integrate_perching, perching_dataset = NULL, perching_prefix = NULL, sensor_id_col_nm = NULL, PIT_tag_col_nm = NULL, pixel_col_nm = NULL, video_width = NULL, video_height = NULL, integrate_preproc_video, video_file_nm = NULL, timestamps_col_nm = NULL, path, data_dir, out_dir, out_file_nm = "scored_detectionClusters.csv", tz, POSIXct_format = "%Y-%m-%d %H:%M:%OS"){
+score_clusters <- function(file_nm, rfid_label = NULL, camera_label = NULL, outer_irbb_label = NULL, inner_irbb_label = NULL, video_metadata_col_nms, integrate_perching, perching_dataset = NULL, perching_prefix = NULL, perching_threshold = NULL, sensor_id_col_nm = NULL, PIT_tag_col_nm = NULL, pixel_col_nm = NULL, video_width = NULL, video_height = NULL, integrate_preproc_video, video_file_nm = NULL, timestamps_col_nm = NULL, path, data_dir, out_dir, out_file_nm = "scored_detectionClusters.csv", tz, POSIXct_format = "%Y-%m-%d %H:%M:%OS"){
   
   # Get the current global options
   orig_opts <- options()
@@ -125,6 +127,10 @@ score_clusters <- function(file_nm, rfid_label = NULL, camera_label = NULL, oute
     # Check that arguments that should be numeric are numeric
     expect_numeric <- c("video_width", "video_height")
     
+    if(integrate_perching){
+      expect_numeric <- c(expect_numeric, "perching_threshold")
+    }
+    
     invisible(sapply(1:length(expect_numeric), function(i){
       check_numeric(expect_numeric[i], f_args[[grep(paste(paste("^", expect_numeric[i], "$", sep = ""), collapse = "|"), names(f_args))]])
     }))
@@ -147,7 +153,7 @@ score_clusters <- function(file_nm, rfid_label = NULL, camera_label = NULL, oute
   # Check that the formal arguments that should be NULL are NULL, and vice versa
   if(integrate_perching){
     
-    expect_nonNull2 <- c("sensor_id_col_nm", "perching_dataset", "perching_prefix")
+    expect_nonNull2 <- c("sensor_id_col_nm", "perching_dataset", "perching_prefix", "perching_threshold")
     
     if(!is.null(perching_dataset)){
       if(grepl("RFID", perching_dataset)){
@@ -163,7 +169,7 @@ score_clusters <- function(file_nm, rfid_label = NULL, camera_label = NULL, oute
     
   } else if(!integrate_perching){
     
-    expect_nulls <- c("sensor_id_col_nm", "PIT_tag_col_nm", "perching_dataset", "perching_prefix")
+    expect_nulls <- c("sensor_id_col_nm", "PIT_tag_col_nm", "perching_dataset", "perching_prefix", "perching_threshold")
     
     invisible(sapply(1:length(expect_nulls), function(i){
       check_null(expect_nulls[i], f_args[[grep(paste(paste("^", expect_nulls[i], "$", sep = ""), collapse = "|"), names(f_args))]])
@@ -180,7 +186,11 @@ score_clusters <- function(file_nm, rfid_label = NULL, camera_label = NULL, oute
     
     if(!exists("expect_numeric")){
       
-      expect_strings <- f_args[-grep(paste(paste("^", c(expect_bool, names(f_args)[wh_null]), "$", sep = ""), collapse = "|"), names(f_args))]
+      if(integrate_perching){
+        expect_num <- "perching_threshold"
+      }
+      
+      expect_strings <- f_args[-grep(paste(paste("^", c(expect_bool, expect_num, names(f_args)[wh_null]), "$", sep = ""), collapse = "|"), names(f_args))]
       
     } else if(exists("expect_numeric")){
       
@@ -212,7 +222,7 @@ score_clusters <- function(file_nm, rfid_label = NULL, camera_label = NULL, oute
       if(perching_dataset %in% c("RFID", "IRBB")){
         
         check_file(file.path(path, data_dir), paste(perching_prefix, perching_dataset, ".csv", sep = ""))
-      
+        
       } else if(perching_dataset %in% c("RFID-IRBB")){
         
         ps <- strsplit(perching_dataset, split = "-")[[1]]
@@ -669,16 +679,14 @@ score_clusters <- function(file_nm, rfid_label = NULL, camera_label = NULL, oute
           dplyr::select(rowid, start, end) %>% 
           pmap_dfr(., function(rowid, start, end){
             
-            tmp_perching <- perch_df %>%
-              # Perching events should occur within the start and end of the given behavioral event in the data frame that is being scored
+            tmp_perching_full <- perch_df %>%
               dplyr::filter(
-                # This logic searches for perching events that happened within the start and end timestamps of the given detection
-                (perching_start >= start & perching_end <= end) |
-                  # Also search for perching events that started before the start of a detection but ended before the end timestamp. TKTK
-                  (perching_start >= start & perching_end <= end) |
-                  # Also search for perching events that started after the start of a detection and also ended before the end timestamp
-                  (perching_start >= start & perching_end <= end)
-                # TKTK how to handle integration of perching events that might have started before a detection event, or ended after the timestamps of a detection event?. TKTK the easiest thing to do will be to implement a temporal threshold for searching for perching events before and after the start of a detection...and then will also need to implement logic to select the closest perching event when multiple are found
+                # This logic searches for perching events that happened within the start and end timestamps of the given detection to catch perching events that occurred inside of the timestamps of the given detection
+                perching_start >= start & perching_end <= end
+              ) %>%
+              dplyr::mutate(
+                diff_start = perching_start - start,
+                diff_end = perching_end - end
               ) %>% 
               dplyr::rename(
                 perching_PIT_tag = !!sym(PIT_tag_col_nm)
@@ -686,9 +694,77 @@ score_clusters <- function(file_nm, rfid_label = NULL, camera_label = NULL, oute
               dplyr::mutate(
                 de_rowid = rowid
               ) %>% 
-              dplyr::select(de_rowid, all_of(sensor_id_col_nm), perching_PIT_tag, perching_start, perching_end, perching_duration_s)
+              dplyr::select(de_rowid, all_of(sensor_id_col_nm), perching_PIT_tag, perching_start, perching_end, perching_duration_s, diff_start, diff_end)
             
-            return(tmp_perching)
+            tmp_perching_partial <- perch_df %>%
+              dplyr::filter(
+                # This logic searches for perching events that happened within the start and end timestamps of the given detection, plus a buffer around those timestamps to catch perching events that partially overlap with the given detection
+                perching_start >= (start - perching_threshold) & perching_end <= (end + perching_threshold)
+              ) %>%
+              dplyr::mutate(
+                diff_start = perching_start - start,
+                diff_end = perching_end - end
+              ) %>% 
+              dplyr::rename(
+                perching_PIT_tag = !!sym(PIT_tag_col_nm)
+              ) %>% 
+              dplyr::mutate(
+                de_rowid = rowid
+              ) %>% 
+              dplyr::select(de_rowid, all_of(sensor_id_col_nm), perching_PIT_tag, perching_start, perching_end, perching_duration_s, diff_start, diff_end)
+            
+            # First check if there are any fully overlapping perching events
+            if(nrow(tmp_perching_full) > 0){
+              
+              # Then check if there were multiple matches, and if so, select the perching event that occurred closest to the start timestamp of the detection
+              if(nrow(tmp_perching_full) > 1){
+                
+                wh_min <- which(tmp_perching_full$diff_start == min(abs(tmp_perching_full$diff_start)))
+                
+                tmp_perching_fin <- tmp_perching_full %>% 
+                  slice(wh_min)
+                
+                # Otherwise select the single perching event that was identified as a full overlap
+              } else {
+                
+                tmp_perching_fin <- tmp_perching_full
+                
+              }
+              
+              # If no full perching events were identitfied, then assign the partial perching events as above 
+            } else if(nrow(tmp_perching_partial) > 0) {
+              
+              # Check if there were multiple matches, and if so, select the perching event that occurred closest to the start timestamp of the detection
+              if(nrow(tmp_perching_partial) > 1){
+                
+                wh_min <- which(tmp_perching_partial$diff_start == min(abs(tmp_perching_partial$diff_start)))
+                
+                tmp_perching_fin <- tmp_perching_partial %>% 
+                  slice(wh_min)
+                
+                # Otherwise select the single perching event that was identified as a partial overlap
+              } else {
+                
+                tmp_perching_fin <- tmp_perching_partial
+                
+              }
+              
+            } else if(nrow(tmp_perching_full) == 0 & nrow(tmp_perching_partial) == 0){
+              
+              tmp_perching_fin <- data.frame(de_rowid = NA) %>% 
+                dplyr::mutate(
+                  !!sensor_id_col_nm := NA, 
+                  perching_PIT_tag = NA, 
+                  perching_start = NA, 
+                  perching_end = NA, 
+                  perching_duration_s = NA, 
+                  diff_start = NA, 
+                  diff_end = NA
+                )
+              
+            }
+            
+            return(tmp_perching_fin)
             
           })
         
@@ -698,17 +774,85 @@ score_clusters <- function(file_nm, rfid_label = NULL, camera_label = NULL, oute
           dplyr::select(rowid, start, end) %>% 
           pmap_dfr(., function(rowid, start, end){
             
-            tmp_perching <- perch_df %>% 
+            tmp_perching_full <- perch_df %>%
               dplyr::filter(
-                # TKTK made the same changes here
-                perching_start >= start, perching_end <= end 
+                # This logic searches for perching events that happened within the start and end timestamps of the given detection to catch perching events that occurred inside of the timestamps of the given detection
+                perching_start >= start & perching_end <= end
+              ) %>%
+              dplyr::mutate(
+                diff_start = perching_start - start,
+                diff_end = perching_end - end
               ) %>% 
               dplyr::mutate(
                 de_rowid = rowid
               ) %>% 
-              dplyr::select(de_rowid, all_of(sensor_id_col_nm), perching_start, perching_end, perching_duration_s)
+              dplyr::select(de_rowid, all_of(sensor_id_col_nm), perching_start, perching_end, perching_duration_s, diff_start, diff_end)
             
-            return(tmp_perching)
+            tmp_perching_partial <- perch_df %>%
+              dplyr::filter(
+                # This logic searches for perching events that happened within the start and end timestamps of the given detection, plus a buffer around those timestamps to catch perching events that partially overlap with the given detection
+                perching_start >= (start - perching_threshold) & perching_end <= (end + perching_threshold)
+              ) %>% 
+              dplyr::mutate(
+                diff_start = perching_start - start,
+                diff_end = perching_end - end
+              ) %>% 
+              dplyr::mutate(
+                de_rowid = rowid
+              ) %>% 
+              dplyr::select(de_rowid, all_of(sensor_id_col_nm), perching_start, perching_end, perching_duration_s, diff_start, diff_end)
+            
+            # First check if there are any fully overlapping perching events
+            if(nrow(tmp_perching_full) > 0){
+              
+              # Then check if there were multiple matches, and if so, select the perching event that occurred closest to the start timestamp of the detection
+              if(nrow(tmp_perching_full) > 1){
+                
+                wh_min <- which(tmp_perching_full$diff_start == min(abs(tmp_perching_full$diff_start)))
+                
+                tmp_perching_fin <- tmp_perching_full %>% 
+                  slice(wh_min)
+                
+                # Otherwise select the single perching event that was identified as a full overlap
+              } else {
+                
+                tmp_perching_fin <- tmp_perching_full
+                
+              }
+              
+              # If no full perching events were identitfied, then assign the partial perching events as above 
+            } else if(nrow(tmp_perching_partial) > 0) {
+              
+              # Check if there were multiple matches, and if so, select the perching event that occurred closest to the start timestamp of the detection
+              if(nrow(tmp_perching_partial) > 1){
+                
+                wh_min <- which(tmp_perching_partial$diff_start == min(abs(tmp_perching_partial$diff_start)))
+                
+                tmp_perching_fin <- tmp_perching_partial %>% 
+                  slice(wh_min)
+                
+                # Otherwise select the single perching event that was identified as a partial overlap
+              } else {
+                
+                tmp_perching_fin <- tmp_perching_partial
+                
+              }
+              
+            } else if(nrow(tmp_perching_full) == 0 & nrow(tmp_perching_partial) == 0){
+              
+              tmp_perching_fin <- data.frame(de_rowid = NA) %>% 
+                dplyr::mutate(
+                  !!sensor_id_col_nm := NA,
+                  perching_start = NA, 
+                  perching_end = NA, 
+                  perching_duration_s = NA, 
+                  diff_start = NA, 
+                  diff_end = NA
+                )
+              
+            }
+            
+            return(tmp_perching_fin)
             
           })
         
@@ -719,7 +863,8 @@ score_clusters <- function(file_nm, rfid_label = NULL, camera_label = NULL, oute
         
         detectns_edges_p <- detectns_edges3 %>% 
           dplyr::left_join(
-            tmp_df %>% 
+            tmp_df %>%
+              dplyr::select(-c("diff_start", "diff_end")) %>% 
               dplyr::rename(
                 perching_sensor = !!sym(sensor_id_col_nm)
               ),
@@ -732,6 +877,7 @@ score_clusters <- function(file_nm, rfid_label = NULL, camera_label = NULL, oute
         detectns_edges_p <- detectns_edges3 %>% 
           dplyr::left_join(
             tmp_df %>% 
+              dplyr::select(-c("diff_start", "diff_end")) %>% 
               dplyr::filter(!!sym(sensor_id_col_nm) == "RFID") %>% 
               dplyr::rename(
                 `perching_rfid_start` = "perching_start",
@@ -743,6 +889,7 @@ score_clusters <- function(file_nm, rfid_label = NULL, camera_label = NULL, oute
           ) %>% 
           dplyr::left_join(
             tmp_df %>% 
+              dplyr::select(-c("diff_start", "diff_end")) %>% 
               dplyr::filter(!!sym(sensor_id_col_nm) == "Outer Beam Breaker") %>% 
               dplyr::rename(
                 `perching_outer_irbb_start` = "perching_start",
@@ -754,6 +901,7 @@ score_clusters <- function(file_nm, rfid_label = NULL, camera_label = NULL, oute
           ) %>% 
           dplyr::left_join(
             tmp_df %>% 
+              dplyr::select(-c("diff_start", "diff_end")) %>% 
               dplyr::filter(!!sym(sensor_id_col_nm) == "Inner Beam Breaker") %>% 
               dplyr::rename(
                 `perching_inner_irbb_start` = "perching_start",
