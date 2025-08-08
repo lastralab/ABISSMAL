@@ -21,24 +21,7 @@
 #' @details This function parses raw radio frequency identification (RFID) or infrared beam breaker data to identify perching events (e.g. periods of time when an individual was perched in the entrance of the nest container around which the movement sensors are mounted). When RFID data is used as input, this function identifies perching events for each unique passive integrated transponder (PIT) tag and date in the dataset. When beam breaker data is used as input, the function identifies perching events for each pair of beam breakers and date in the dataset. `detect_perching_events` identifies runs of sensor detections separated by the given temporal threshold or less. The function then takes the first and last detection of each run and returns these timestamps as the start and end of each perching event.
 #' 
 #' @return `detect_perching_events` returns a .csv file with all metadata columns in the original data frame, as well as the start and end timestamps of each perching period identified in the raw data per sensor type. When beam breaker data is used as input, the resulting spreadsheet contains perching events detected across both pairs of beam breakers. Each row in the resulting spreadsheet is a perching event. The function also returns information about parameters used for this data processing.
-#' 
-
-# file_nm = "combined_raw_data_RFID.csv"
-# threshold = 2
-# run_length = 1
-# sensor_id_col_nm = "sensor_id"
-# timestamps_col_nm = "timestamp_ms"
-# PIT_tag_col_nm = "PIT_tag_ID"
-# rfid_label = "RFID"
-# outer_irbb_label = NULL
-# inner_irbb_label = NULL
-# general_metadata_cols = c("chamber_id", "sensor_id")
-# path = path
-# data_dir = "raw_combined"
-# out_dir = "processed"
-# out_file_prefix = "perching_events_th-2"
-# tz = ""
-# POSIXct_format = "%Y-%m-%d %H:%M:%OS"
+#'
 
 detect_perching_events <- function(file_nm, threshold, run_length = 2, sensor_id_col_nm, timestamps_col_nm, PIT_tag_col_nm = NULL, rfid_label = NULL, outer_irbb_label = NULL, inner_irbb_label = NULL, general_metadata_cols, path, data_dir, out_dir, out_file_prefix = "perching_events", tz, POSIXct_format = "%Y-%m-%d %H:%M:%OS"){
   
@@ -266,58 +249,10 @@ detect_perching_events <- function(file_nm, threshold, run_length = 2, sensor_id
       gaps = purrr::map(
         .x = lags_runs,
         .y = lags,
-        # For each recording, retain the first and last indices of timestamps flagged as calling bouts
+        # For each nested element (date and PIT tag), retain the first and last indices of timestamps flagged as perching events
         # Use pmap_dfr to iterate over rows in each nested data frame, in which each row represents a unique perching event per group in the original nested data (date and PIT tag ID)
         .f = ~ dplyr::select(.x, first_indices, last_indices) %>% 
           pmap_dfr(., function(first_indices, last_indices){
-            
-            # # TKTK troubleshooting
-            # glimpse(perching_df)
-            # 
-            # # The 2 RFID timestamps that should be grouped as a perching event on 2023-8-9 should be index 71 for group row IDs 671 and 672 for PIT_tag_ID "01-10-3F-8F-F0" in lags_runs
-            # # Also see the 5 RFID timestamps that should be grouped as a perching event on 2023-8-9 should be index 73 for group row IDs 677 and 681 for PIT_tag_ID "01-10-3F-8F-F0" in lags_runs
-            # testing <- perching_df %>%
-            #   dplyr::filter(dates == "2023-8-9", PIT_tag_ID == "01-10-3F-8F-F0")
-            # 
-            # glimpse(testing)
-            # # View(testing$lags_runs[[1]])
-            # # View(testing$data[[1]])
-            # 
-            # 
-            # # [[1]] pulls out the data frame from the list structure
-            # first_indices <- testing$lags_runs[[1]]$first_indices[73]
-            # first_indices
-            # 
-            # last_indices <- testing$lags_runs[[1]]$last_indices[73]
-            # last_indices
-            # 
-            # if(first_indices == 0 & last_indices == 1){
-            #   first_indices <- first_indices + 1
-            #   last_indices <- last_indices + 1
-            # } else if(first_indices == 0 & last_indices != 1){
-            #   first_indices <- first_indices + 1
-            # }
-            # 
-            # first_indices
-            # last_indices
-            # 
-            # if(last_indices - first_indices == 1){
-            # 
-            #   gaps <- testing$lags[[1]] %>%
-            #     slice(last_indices) %>% 
-            #     pull(diff)
-            #   
-            # } else {
-            # 
-            #   gaps <- testing$lags[[1]] %>%
-            #     slice((first_indices + 1):(last_indices)) %>% 
-            #     pull(diff)  
-            #   
-            # }
-            
-            
-            ################################################
-            
             
             if(first_indices == 0 & last_indices == 1){
               first_indices <- first_indices + 1
@@ -344,7 +279,7 @@ detect_perching_events <- function(file_nm, threshold, run_length = 2, sensor_id
 
             }
             
-            # Get the right indices for summarizing the gaps in time among detections within the bout
+            # Get the right indices for summarizing the gaps in time among detections within the perching event
             tmp_gaps <- data.frame(
               number_detections = .y[[1]] %>%
                 slice((first_indices):(last_indices)) %>% nrow(.),
@@ -363,21 +298,7 @@ detect_perching_events <- function(file_nm, threshold, run_length = 2, sensor_id
     unnest(`cols` = c(perching, gaps)) %>%
     ungroup() %>% 
     dplyr::select(-c(dates))
-  
-  # TKTK I need to add code to get the gaps between detections as internal validation. All of these gaps amongst consecutive detections should be less than the temporal threshold used to find the perching events. Also consider adding the total numner of detections, which can help with troubleshooting
 
-  # Check gap summary statistics before moving on
-  perching_df %>%
-    pivot_longer(
-      cols = c("min_gap_s", "mean_gap_s", "max_gap_s"),
-      names_to = "type",
-      values_to = "values"
-    ) %>% 
-    group_by(PIT_tag_ID) %>% 
-    dplyr::reframe(
-      range_vals = range(values)
-    )
-  
   if(nrow(perching_df) > 0){
     
     # Add metadata and arrange columns and rows before writing this out
