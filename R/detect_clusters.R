@@ -59,7 +59,7 @@ detect_clusters <- function(file_nms, threshold, run_length = 2, sensor_id_col_n
     expect_nulls <- c("PIT_tag_col_nm", "rfid_label")
     
   }
-
+  
   if(exists("expect_nulls")){
     
     expect_nulls <- f_args[grep(paste(paste("^", expect_nulls, "$", sep = ""), collapse = "|"), names(f_args))]
@@ -75,7 +75,7 @@ detect_clusters <- function(file_nms, threshold, run_length = 2, sensor_id_col_n
     }))
     
   }
-
+  
   # Check that all formal arguments that cannot be NULL are not NULL:
   if(all(grepl("RFID", file_nms))){
     
@@ -267,20 +267,17 @@ detect_clusters <- function(file_nms, threshold, run_length = 2, sensor_id_col_n
       lags_runs = map(
         .x = lags,
         .f = ~ dplyr::reframe(.x,
-                              first_indices = cumsum(rle(binary_diff)[["lengths"]]) - (rle(binary_diff)[["lengths"]]),
-                              last_indices = cumsum(rle(binary_diff)[["lengths"]]),
-                              run_values = rle(binary_diff)[["values"]],
-                              run_lengths = rle(binary_diff)[["lengths"]],
+                              first_indices = find_indices(lengths = rle(binary_diff)[["lengths"]], values = rle(binary_diff)[["values"]], run_length = run_length)[["starts"]],
+                              last_indices = find_indices(lengths = rle(binary_diff)[["lengths"]], values = rle(binary_diff)[["values"]], run_length = run_length)[["ends"]],
                               .groups = "keep"
         ) %>% 
-          dplyr::filter(run_values & run_lengths >= run_length) %>% 
           dplyr::ungroup()
       )
     ) %>% 
     
     # Get the unique clusters of detections
     dplyr::mutate(
-      bouts = map(
+      clusters = map(
         .x = lags_runs,
         .y = data,
         # For each unique date, retain the first and last indices of sensor detections flagged as clusters
@@ -288,95 +285,149 @@ detect_clusters <- function(file_nms, threshold, run_length = 2, sensor_id_col_n
         .f = ~ dplyr::select(.x, first_indices, last_indices) %>%
           pmap_dfr(., function(first_indices, last_indices){
             
-            tmp <- data.frame(
-              start = .y[[1]] %>%
-                dplyr::filter(group_row_id == first_indices) %>%
-                dplyr::pull(all_of(timestamps_col_nm)),
-              end = .y[[1]] %>%
-                dplyr::filter(group_row_id == last_indices) %>%
-                dplyr::pull(all_of(timestamps_col_nm))
-            ) %>% 
-              dplyr::mutate(
-                event_seq = .y[[1]] %>%
-                  dplyr::filter(group_row_id >= first_indices & group_row_id <= last_indices) %>%
-                  dplyr::pull(sensor_id) %>% 
-                  paste(., collapse = "; ")
-              )
-            
-            # If RFID data is present, then add back PIT tag information
-            if(!is.null(rfid_label)){
+            if(length(first_indices) > 0 & length(last_indices) > 0){
               
-              if(any(grepl(rfid_label, tmp$event_seq))){
-                
-                PIT_tag_seq <- .y[[1]] %>%
-                  dplyr::filter(group_row_id >= first_indices & group_row_id <= last_indices) %>%
-                  dplyr::pull(all_of(PIT_tag_col_nm))
-                
-                # Drop NA values in the sequence
-                PIT_tag_seq <- PIT_tag_seq[!is.na(PIT_tag_seq)]
-                
-                total_indiv1_detections <- length(which(PIT_tag_seq == tag_ids[1]))
-                total_indiv2_detections <- length(which(PIT_tag_seq == tag_ids[2]))
-                individual_initiated <- PIT_tag_seq[1]
-                individual_ended <- PIT_tag_seq[length(PIT_tag_seq)]
-                
-              } else {
-                
-                total_indiv1_detections <- total_indiv2_detections <- individual_initiated <- individual_ended <- NA
-                
-              }
-              
-              tmp <- tmp %>%
+              tmp <- data.frame(
+                start = .y[[1]] %>%
+                  dplyr::filter(group_row_id == first_indices) %>%
+                  dplyr::pull(all_of(timestamps_col_nm)),
+                end = .y[[1]] %>%
+                  dplyr::filter(group_row_id == last_indices) %>%
+                  dplyr::pull(all_of(timestamps_col_nm))
+              ) %>% 
                 dplyr::mutate(
-                  indiv1_id = tag_ids[1],
-                  indiv2_id = tag_ids[2],
-                  total_indiv1_detections = total_indiv1_detections,
-                  total_indiv2_detections = total_indiv2_detections,
-                  individual_initiated = individual_initiated,
-                  individual_ended = individual_ended
+                  event_seq = .y[[1]] %>%
+                    dplyr::filter(group_row_id >= first_indices & group_row_id <= last_indices) %>%
+                    dplyr::pull(sensor_id) %>% 
+                    paste(., collapse = "; ")
                 )
               
-            }
-            
-            # If video data is present, then add back video-related information
-            if(!is.null(camera_label) & !is.null(video_metadata_col_nms)){
-
-              if(any(grepl(camera_label, tmp$event_seq))){
-
-                vid_cols_tmp <- .y[[1]] %>%
-                  dplyr::filter(group_row_id >= first_indices & group_row_id <= last_indices) %>%
-                  dplyr::select(all_of(video_metadata_col_nms)) %>%
-                  # Drop rows that have NAs in these columns
-                  dplyr::filter(complete.cases(.))
+              # If RFID data is present, then add back PIT tag information
+              if(!is.null(rfid_label)){
                 
-                # If multiple videos occurred within a detection cluster, then concatenate these file names together
-                if(nrow(vid_cols_tmp) > 1){
-
-                  tmp_col_nm <- video_metadata_col_nms[grep("file", video_metadata_col_nms)]
+                if(any(grepl(rfid_label, tmp$event_seq))){
                   
-                  vid_file_nms <- vid_cols_tmp %>%
-                    dplyr::reframe(
-                      tmp_col_nm = str_c(tmp_col_nm, collapse = "; ")
-                    ) %>%
-                    dplyr::pull(tmp_col_nm)
-
-                  vid_cols_tmp[[tmp_col_nm]] <- vid_file_nms
-
-                  vid_cols_tmp <- vid_cols_tmp %>%
-                    distinct()
-
+                  PIT_tag_seq <- .y[[1]] %>%
+                    dplyr::filter(group_row_id >= first_indices & group_row_id <= last_indices) %>%
+                    dplyr::pull(all_of(PIT_tag_col_nm))
+                  
+                  # Drop NA values in the sequence
+                  PIT_tag_seq <- PIT_tag_seq[!is.na(PIT_tag_seq)]
+                  
+                  total_indiv1_detections <- length(which(PIT_tag_seq == tag_ids[1]))
+                  total_indiv2_detections <- length(which(PIT_tag_seq == tag_ids[2]))
+                  individual_initiated <- PIT_tag_seq[1]
+                  individual_ended <- PIT_tag_seq[length(PIT_tag_seq)]
+                  
+                } else {
+                  
+                  total_indiv1_detections <- total_indiv2_detections <- individual_initiated <- individual_ended <- NA
+                  
                 }
-
+                
                 tmp <- tmp %>%
-                  dplyr::bind_cols(
-                    vid_cols_tmp
+                  dplyr::mutate(
+                    indiv1_id = tag_ids[1],
+                    indiv2_id = tag_ids[2],
+                    total_indiv1_detections = total_indiv1_detections,
+                    total_indiv2_detections = total_indiv2_detections,
+                    individual_initiated = individual_initiated,
+                    individual_ended = individual_ended
                   )
-
+                
               }
-
+              
+              # If video data is present, then add back video-related information
+              if(!is.null(camera_label) & !is.null(video_metadata_col_nms)){
+                
+                if(any(grepl(camera_label, tmp$event_seq))){
+                  
+                  vid_cols_tmp <- .y[[1]] %>%
+                    dplyr::filter(group_row_id >= first_indices & group_row_id <= last_indices) %>%
+                    dplyr::select(all_of(video_metadata_col_nms)) %>%
+                    # Drop rows that have NAs in these columns
+                    dplyr::filter(complete.cases(.))
+                  
+                  # If multiple videos occurred within a detection cluster, then concatenate these file names together
+                  if(nrow(vid_cols_tmp) > 1){
+                    
+                    tmp_col_nm <- video_metadata_col_nms[grep("file", video_metadata_col_nms)]
+                    
+                    vid_file_nms <- vid_cols_tmp %>%
+                      dplyr::reframe(
+                        tmp_col_nm = str_c(tmp_col_nm, collapse = "; ")
+                      ) %>%
+                      dplyr::pull(tmp_col_nm)
+                    
+                    vid_cols_tmp[[tmp_col_nm]] <- vid_file_nms
+                    
+                    vid_cols_tmp <- vid_cols_tmp %>%
+                      distinct()
+                    
+                  }
+                  
+                  tmp <- tmp %>%
+                    dplyr::bind_cols(
+                      vid_cols_tmp
+                    )
+                  
+                }
+                
+              }
+              
+              return(tmp)
+              
             }
             
-            return(tmp)
+          })
+      ) 
+    ) %>% 
+    
+    # Get the gaps between consecutive detections within each perching event by looping over the lags object
+    dplyr::mutate(
+      gaps = purrr::map(
+        .x = lags_runs,
+        .y = lags,
+        # For each nested element, retain the first and last indices of timestamps flagged as perching events
+        # Use pmap_dfr to iterate over rows in each nested data frame, in which each row represents a unique perching event per group in the original nested data (date and PIT tag ID)
+        .f = ~ dplyr::select(.x, first_indices, last_indices) %>% 
+          pmap_dfr(., function(first_indices, last_indices){
+            
+            if(first_indices == 0 & last_indices == 1){
+              first_indices <- first_indices + 1
+              last_indices <- last_indices + 1
+            } else if(first_indices == 0 & last_indices != 1){
+              first_indices <- first_indices + 1
+            }
+            
+            # Calculate summary statistics about gaps between detections from the lag differences
+            # For events with only two detections, all summary statistics will be the same
+            # The code below will drop the row for the last detection in a perching event, since we're interested in the difference calculation. In other words, the rows that remain will hold the temporal differences between detections in a perching event (if a perching event had 3 detections, there should be 2 temporal difference measurements between the end of detection 1 and the start of detection 2, then between the end of detection 2 and the start of detection 3)
+            # These temporal difference or gap calculations can be negative if detections overlapped another
+            if(last_indices - first_indices == 1){
+              
+              gaps <- .y[[1]] %>%
+                slice(last_indices) %>%
+                pull(diff)
+              
+            } else {
+              
+              gaps <- .y[[1]] %>%
+                slice((first_indices + 1):(last_indices)) %>%
+                pull(diff)
+              
+            }
+            
+            # Get the right indices for summarizing the gaps in time among detections within the perching event
+            tmp_gaps <- data.frame(
+              number_detections = .y[[1]] %>%
+                slice((first_indices):(last_indices)) %>% nrow(.),
+              min_gap_s = round(min(gaps), 6),
+              mean_gap_s = round(mean(gaps), 6),
+              max_gap_s = round(max(gaps), 6)
+            )
+            
+            return(tmp_gaps)
             
           })
       ) 
@@ -384,7 +435,7 @@ detect_clusters <- function(file_nms, threshold, run_length = 2, sensor_id_col_n
   
   detectns2 <- detectns %>%
     dplyr::select(-c(data, lags, lags_runs)) %>% 
-    unnest(`cols` = c(bouts)) %>%
+    unnest(`cols` = c(clusters, gaps)) %>%
     dplyr::ungroup() %>% 
     dplyr::select(-c(dates))
   
@@ -423,6 +474,10 @@ detect_clusters <- function(file_nms, threshold, run_length = 2, sensor_id_col_n
           distinct()
       ) %>% 
       dplyr::mutate(
+        number_detections = NA, 
+        min_gap_s = NA, 
+        mean_gap_s = NA, 
+        max_gap_s = NA,
         threshold_seconds = threshold,
         run_length = run_length,
         data_stage = "integration",
@@ -435,12 +490,12 @@ detect_clusters <- function(file_nms, threshold, run_length = 2, sensor_id_col_n
   if(!is.null(video_metadata_col_nms) & any(grepl(paste(video_metadata_col_nms, collapse = "|"), names(detectns3)))){
     
     detectns4 <- detectns3 %>% 
-      dplyr::select(all_of(general_metadata_col_nms), names(.)[-grep(paste(c(general_metadata_col_nms, video_metadata_col_nms, "threshold_seconds", "run_length", "data_stage", "date_processed"), collapse = "|"), names(.))], all_of(video_metadata_col_nms), threshold_seconds, run_length, data_stage, date_processed)
+      dplyr::select(all_of(general_metadata_col_nms), names(.)[-grep(paste(c(general_metadata_col_nms, video_metadata_col_nms, "threshold_seconds", "run_length", "data_stage", "date_processed"), collapse = "|"), names(.))], all_of(video_metadata_col_nms), number_detections, min_gap_s, mean_gap_s, max_gap_s, threshold_seconds, run_length, data_stage, date_processed)
     
   } else {
     
     detectns4 <- detectns3 %>% 
-      dplyr::select(all_of(general_metadata_col_nms), names(.)[-grep(paste(c(general_metadata_col_nms, "threshold_seconds", "run_length", "data_stage", "date_processed"), collapse = "|"), names(.))], threshold_seconds, run_length, data_stage, date_processed)
+      dplyr::select(all_of(general_metadata_col_nms), names(.)[-grep(paste(c(general_metadata_col_nms, "threshold_seconds", "run_length", "data_stage", "date_processed"), collapse = "|"), names(.))], number_detections, min_gap_s, mean_gap_s, max_gap_s, threshold_seconds, run_length, data_stage, date_processed)
     
   }
   

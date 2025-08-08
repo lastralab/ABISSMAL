@@ -216,6 +216,7 @@ preprocess_detections <- function(sensor, timestamps_col_nm, group_col_nm = NULL
       # Convert differences to Boolean based on the thinning threshold to be able to remove stretches of detection events very close together
       dplyr::mutate(
         diff = as.numeric(!!sym(timestamps_col_nm) - shift),
+        # Taking anything less than or equal to the threshold,. The diff > 0 condition removes the first timestamp compared to itself
         binary_diff = (diff <= thin_threshold & diff > 0)
       ) 
     

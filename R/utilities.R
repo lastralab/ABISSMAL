@@ -1,4 +1,30 @@
-# General purpose functions to run checks within customized data processing functions
+# General purpose functions to assist in data processing or to run checks within customized data processing functions
+
+
+################## Helper functions for data processing ##################
+
+# Get the first and last indices of a run
+find_indices <- function(lengths, values, run_length){
+  
+  # Get the runs that did meet the threshold rule as well as the run_length argument. This will also drop the NA at the end of each values vector
+  wh <- which(values & lengths >= run_length)
+  
+  # Calulate the start indices from the cumulative lengths of the previous runs. Adding one to the cumulative sum to account for a start index of 1 caused problems, especially when the true start index was 1
+  start_inds <- cumsum(lengths)
+  
+  # Take the index after each of the runs that met the threshold rule
+  start_inds <- start_inds[wh]
+  
+  # Then subtract the lengths from the cumulative sum of the lengths to get the true starts
+  start_inds <- start_inds - lengths[wh]
+  
+  # Next, add the lengths of each run to the start indices to find the true end indices
+  end_inds <- start_inds + lengths[wh]
+  
+  return(list(`starts` = start_inds, `ends` = end_inds))
+  
+}
+
 
 ################## Get user-specified values for formal arguments ##################
 

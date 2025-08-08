@@ -33,29 +33,6 @@
 #' Each row in the resulting .csv file is a unique detection cluster. Information about the date of processing is also contained in the resulting spreadsheet.
 #' 
 
-# file_nm = "detection_clusters.csv"
-# sensor_id_col_nm = "sensor_id"
-# PIT_tag_col_nm = "PIT_tag_ID"
-# rfid_label = NULL
-# camera_label = NULL
-# outer_irbb_label = "Outer Beam Breaker"
-# inner_irbb_label = "Inner Beam Breaker"
-# video_metadata_col_nms = NULL
-# integrate_perching = TRUE
-# perching_dataset = "RFID"
-# perching_prefix = "perching_events_"
-# perching_threshold = 30
-# pixel_col_nm = NULL
-# video_width = NULL
-# video_height = NULL
-# integrate_preproc_video = FALSE
-# path = path
-# data_dir = file.path(data_dir, "processed")
-# out_dir = file.path(data_dir, "processed")
-# out_file_nm = "scored_detectionClusters.csv"
-# tz = ""
-# POSIXct_format = "%Y-%m-%d %H:%M:%OS"
-
 score_clusters <- function(file_nm, rfid_label = NULL, camera_label = NULL, outer_irbb_label = NULL, inner_irbb_label = NULL, video_metadata_col_nms, integrate_perching, perching_dataset = NULL, perching_prefix = NULL, perching_threshold = NULL, sensor_id_col_nm = NULL, PIT_tag_col_nm = NULL, pixel_col_nm = NULL, video_width = NULL, video_height = NULL, integrate_preproc_video, video_file_nm = NULL, timestamps_col_nm = NULL, path, data_dir, out_dir, out_file_nm = "scored_detectionClusters.csv", tz, POSIXct_format = "%Y-%m-%d %H:%M:%OS"){
   
   # Get the current global options

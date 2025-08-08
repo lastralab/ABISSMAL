@@ -190,7 +190,7 @@ detect_perching_events <- function(file_nm, threshold, run_length = 2, sensor_id
         .f = ~ dplyr::mutate(.x,
                              shift = dplyr::lag(!!sym(timestamps_col_nm), default = first(!!sym(timestamps_col_nm)))
         ) %>% 
-          # Convert differences to Boolean based on the thinning threshold to remove stretches of detection events very close together
+          # Convert differences to Boolean based on the threshold to remove stretches of detection events very close together
           dplyr::mutate(
             diff = as.numeric(!!sym(timestamps_col_nm) - shift),
             # Taking anything less than or equal to the threshold,. The diff > 0 condition removes the first timestamp compared to itself
@@ -210,7 +210,7 @@ detect_perching_events <- function(file_nm, threshold, run_length = 2, sensor_id
                             last_indices = find_indices(lengths = rle(binary_diff)[["lengths"]], values = rle(binary_diff)[["values"]], run_length = run_length)[["ends"]],
                             .groups = "keep"
       ) %>% 
-        ungroup()
+        dplyr::ungroup()
     )
   ) %>% 
     
@@ -382,30 +382,5 @@ detect_perching_events <- function(file_nm, threshold, run_length = 2, sensor_id
   
   # Reset the current global options
   options(orig_opts)
-  
-}
-
-
-#### Helper functions
-
-# Get the first and last indices of a run
-find_indices <- function(lengths, values, run_length){
-  
-  # Get the runs that did meet the threshold rule as well as the run_length argument. This will also drop the NA at the end of each values vector
-  wh <- which(values & lengths >= run_length)
-  
-  # Calulate the start indices from the cumulative lengths of the previous runs. Adding one to the cumulative sum to account for a start index of 1 caused problems, especially when the true start index was 1
-  start_inds <- cumsum(lengths)
-  
-  # Take the index after each of the runs that met the threshold rule
-  start_inds <- start_inds[wh]
-  
-  # Then subtract the lengths from the cumulative sum of the lengths to get the true starts
-  start_inds <- start_inds - lengths[wh]
-  
-  # Next, add the lengths of each run to the start indices to find the true end indices
-  end_inds <- start_inds + lengths[wh]
-  
-  return(list(`starts` = start_inds, `ends` = end_inds))
   
 }
