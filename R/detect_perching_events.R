@@ -23,23 +23,6 @@
 #' @return `detect_perching_events` returns a .csv file with all metadata columns in the original data frame, as well as the start and end timestamps of each perching period identified in the raw data per sensor type. When beam breaker data is used as input, the resulting spreadsheet contains perching events detected across both pairs of beam breakers. Each row in the resulting spreadsheet is a perching event. The function also returns information about parameters used for this data processing.
 #' 
 
-file_nm = "combined_raw_data_RFID.csv"
-threshold = 1
-run_length = 1
-sensor_id_col_nm = "sensor_id"
-timestamps_col_nm = "timestamp_ms"
-PIT_tag_col_nm = "PIT_tag_ID"
-rfid_label = "RFID"
-outer_irbb_label = NULL
-inner_irbb_label = NULL
-general_metadata_cols = c("chamber_id", "sensor_id")
-path = path
-data_dir = "raw_combined"
-out_dir = "processed"
-out_file_prefix = "perching_events_th-1"
-tz = ""
-POSIXct_format = "%Y-%m-%d %H:%M:%OS"
-
 detect_perching_events <- function(file_nm, threshold, run_length = 2, sensor_id_col_nm, timestamps_col_nm, PIT_tag_col_nm = NULL, rfid_label = NULL, outer_irbb_label = NULL, inner_irbb_label = NULL, general_metadata_cols, path, data_dir, out_dir, out_file_prefix = "perching_events", tz, POSIXct_format = "%Y-%m-%d %H:%M:%OS"){
   
   # Get the current global options
@@ -216,49 +199,17 @@ detect_perching_events <- function(file_nm, threshold, run_length = 2, sensor_id
           dplyr::select(all_of(timestamps_col_nm), shift, diff, binary_diff) 
       )
     ) %>% 
-    
-    # TKTK troubleshooting, I see the two RFID timestamps at 8:47 that I want to catch as a perching event
-    # perching_df %>%
-    # ungroup() %>%
-    # dplyr::filter(dates == "2023-8-9", PIT_tag_ID == "01-10-3F-8F-F0") %>%
-    # # glimpse()
-    # pull(data) %>%
-    # # glimpse()
-    # as.data.frame() %>%
-    # dplyr::filter(group_row_id %in% c(671, 672)) %>%
-    # View()
-  
-  # ALL of the lags are FALSE, which is actually right for a threshold of 1 second
-  # When threshold = 2 seconds, the lag between the two timestamps at 8:47 is correctly identified as less than this threshold, although the run length is 1
-  # perching_df %>%
-  #   ungroup() %>%
-  #   dplyr::filter(dates == "2023-8-9", PIT_tag_ID == "01-10-3F-8F-F0") %>%
-  #   pull(lags) %>%
-  #   as.data.frame() %>%
-  #   # dplyr::filter(group_row_id %in% c(671, 672)) %>%
-  #   # View()
-  #   pull(binary_diff) %>%
-  #   unique()
-  
-  
+ 
   # Make a data frame of the first and last indices of each run longer than the given run_length that contain temporal difference values below or equal to the given threshold
   dplyr::mutate(
     # Map over the nested data frames in lags
     lags_runs = map(
       .x = lags,
       .f = ~ dplyr::reframe(.x,
-                            # first_indices = cumsum(rle(binary_diff)[["lengths"]]) - (rle(binary_diff)[["lengths"]]),
-                            # last_indices = cumsum(rle(binary_diff)[["lengths"]]),
                             first_indices = find_indices(lengths = rle(binary_diff)[["lengths"]], values = rle(binary_diff)[["values"]], run_length = run_length)[["starts"]],
                             last_indices = find_indices(lengths = rle(binary_diff)[["lengths"]], values = rle(binary_diff)[["values"]], run_length = run_length)[["ends"]],
-                            # run_values = rle(binary_diff)[["values"]],
-                            # run_lengths = rle(binary_diff)[["lengths"]],
                             .groups = "keep"
       ) %>% 
-        # TKTK the run_length filter is done inside of find_indices()
-        # dplyr::filter(run_values & run_lengths >= run_length) %>%
-        # TKTK troubleshooting removal of the run length
-        # dplyr::filter(run_values) %>%
         ungroup()
     )
   ) %>% 
@@ -272,38 +223,6 @@ detect_perching_events <- function(file_nm, threshold, run_length = 2, sensor_id
         # Use pmap_dfr to iterate over rows in each nested data frame, in which each row represents a unique perching event
         .f = ~ dplyr::select(.x, first_indices, last_indices) %>% 
           pmap_dfr(., function(first_indices, last_indices){
-            
-            # # TKTK troubleshooting
-            # glimpse(perching_df)
-            # 
-            # # The RFID timestamps that should be grouped as a perching event on 2023-8-9 should be index 71 for group row IDs 671 and 672 for PIT_tag_ID "01-10-3F-8F-F0"
-            # testing <- perching_df %>%
-            #   dplyr::filter(dates == "2023-8-9", PIT_tag_ID == "01-10-3F-8F-F0")
-            # 
-            # glimpse(testing)
-            # View(testing$lags_runs[[1]])
-            # 
-            # 
-            # # [[1]] pulls out the data frame from the list structure
-            # first_indices <- testing$lags_runs[[1]]$first_indices[71]
-            # first_indices
-            # 
-            # last_indices <- testing$lags_runs[[1]]$last_indices[71]
-            # last_indices
-            # 
-            # # In perching_df$data, each list element represents RFID timestamps by day. So the first and last indices listed above are straight up wrong, because on the first day there were only 2 RFID timestamps (row indices 1 and 2), but the first and last indices are 2 and 3. I fixed this issue, and I'm now getting a perching event detected for the timestamps I was troubleshooting above:
-            # 
-            # # perching_start        perching_end
-            # # 1 2023-08-09 08:47:30 2023-08-09 08:47:31
-            # 
-            # tmp_perching <- data.frame(
-            #   perching_start = testing$data[[1]] %>%
-            #     dplyr::filter(group_row_id == first_indices) %>%
-            #     pull(all_of(timestamps_col_nm)),
-            #   perching_end = testing$data[[1]] %>%
-            #     dplyr::filter(group_row_id == last_indices) %>%
-            #     pull(all_of(timestamps_col_nm))
-            # ) 
             
             if(length(first_indices) > 0 & length(last_indices) > 0){
               
@@ -414,23 +333,12 @@ detect_perching_events <- function(file_nm, threshold, run_length = 2, sensor_id
 #### Helper functions
 
 # Get the first and last indices of a run
-
-# TKTK troubleshooting
-# lengths = rle(perching_df$lags[[1]]$binary_diff)[["lengths"]]
-# values = rle(perching_df$lags[[1]]$binary_diff)[["values"]]
-# run_length = run_length
-# 
-# lengths
-# values
-# run_length
-
 find_indices <- function(lengths, values, run_length){
   
   # Get the runs that did meet the threshold rule as well as the run_length argument. This will also drop the NA at the end of each values vector
   wh <- which(values & lengths >= run_length)
   
-  # Calulate the start indices from the cumulative lengths of the previous runs. Add one to the cumulative sum to account for a start index of 1
-  # start_inds <- cumsum(lengths) + 1 # TKTK this was causing problems when the true start index was 1
+  # Calulate the start indices from the cumulative lengths of the previous runs. Adding one to the cumulative sum to account for a start index of 1 caused problems, especially when the true start index was 1
   start_inds <- cumsum(lengths)
   
   # Take the index after each of the runs that met the threshold rule
