@@ -3,9 +3,6 @@
 
 rm(list = ls())
 
-if (!require(testthat)) install.packages('testthat')
-library(testthat)
-
 source(file.path(code_path, "combine_raw_data.R"))
 
 source(file.path(code_path, "utilities.R"))

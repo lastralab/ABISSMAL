@@ -11,7 +11,20 @@ See more info on the testthat package: https://r-pkgs.org/testing-basics.html. S
 
 rm(list = ls())
 
-if (!require(testthat)) install.packages('testthat')
+# Install packages unless they already exist on the local machine
+is_installed <- function(p) is.element(p, installed.packages()[,1])
+
+# This vector of packages includes those used in the files called below
+X <- c("testthat", "tidyverse", "plyr", "dplyr", "lubridate", "pbapply")
+
+# Check that each of these packages is installed, and if not, then install them
+invisible(lapply(1:length(X), function(x){
+  if(!is_installed(X[x])){
+    install.packages(X[x], repos = "http://lib.stat.cmu.edu/R/CRAN")
+  }
+}))
+
+# Load testthat
 library(testthat)
 
 # These paths will need to be changed for different computers and/or users

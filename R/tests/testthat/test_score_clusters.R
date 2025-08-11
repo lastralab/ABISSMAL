@@ -3,9 +3,6 @@
 
 rm(list = ls())
 
-if (!require(testthat)) install.packages('testthat')
-library(testthat)
-
 source(file.path(code_path, "score_clusters.R"))
 
 source(file.path(code_path, "utilities.R"))
@@ -457,9 +454,9 @@ test_that("The function labels entrances and exits as expected using data from 2
   withr::local_package("lubridate")
   
   # Just for code development
-  library(tidyverse)
-  library(lubridate)
-  library(testthat)
+  # library(tidyverse)
+  # library(lubridate)
+  # library(testthat)
   
   # Create a temporary directory for testing. Files will be written and read here
   path <- testthat_tmp_path
@@ -538,9 +535,14 @@ test_that("The function labels entrances and exits as expected using data from 2
   score_clusters(file_nm = "detection_clusters.csv", sensor_id_col_nm = "sensor_id", PIT_tag_col_nm = "PIT_tag_ID", rfid_label = NULL, camera_label = NULL, outer_irbb_label = "Outer Beam Breaker", inner_irbb_label = "Inner Beam Breaker", video_metadata_col_nms = NULL, integrate_perching = TRUE, perching_dataset = "RFID", perching_prefix = "perching_events_", perching_threshold = 50, pixel_col_nm = NULL, video_width = NULL, video_height = NULL, integrate_preproc_video = FALSE, path = path, data_dir = file.path(data_dir, "processed"), out_dir = file.path(data_dir, "processed"), out_file_nm = "scored_detectionClusters.csv", tz = "", POSIXct_format = "%Y-%m-%d %H:%M:%OS")
   
   # Read in the output, check the output, then delete all files
-  test_res <- read.csv(file.path(tmp_path, "processed", "scored_detectionClusters.csv"))
+  test_res <- read.csv(file.path(tmp_path, "processed", "scored_detectionClusters.csv")) %>% 
+    # Make sure timestamps are in the right format for comparing to timestamps generated above
+    dplyr::mutate(
+      start = as.POSIXct(format(as.POSIXct(start, tz = ""), "%Y-%m-%d %H:%M:%OS")),
+      end = as.POSIXct(format(as.POSIXct(end, tz = ""), "%Y-%m-%d %H:%M:%OS"))
+    )
   # glimpse(test_res)
-  View(test_res)
+  # View(test_res)
   
   # Test that the results are 3 entrance events and 3 exit events, in that order
   expect_equal(test_res$direction_scored, rep(c("entrance", "exit"), each = 3))
@@ -562,7 +564,7 @@ test_that("The function labels entrances and exits as expected using data from 2
   # Test that the correct entrance and/or exit movements were assigned to perching events
   # TKTK keep troubleshooting, why are perching events not integrated correctly here?
   # View(test_res)
-  # i <- 1
+  i <- 1 # TKTK some perching events are being assigned to exit/entrance events that do not overlap...I see, this is because on line 681 of score_clusters, the function is using the perching threshold to search before and after the timestamps of each movement event for partially overlapping perching events. I made updates that broke what was working. The first event below should map onto the first perching event...
   invisible(lapply(1:nrow(test_res), function(i){
 
     if(test_res$start[i] %in% starts_p){
