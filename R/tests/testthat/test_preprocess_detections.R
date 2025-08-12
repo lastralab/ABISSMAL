@@ -16,7 +16,7 @@ test_that("The correct number and timing of discrete movement events are retaine
   # Avoid library calls and other changes to the virtual environment
   # See https://r-pkgs.org/testing-design.html
   withr::local_package("tidyverse")
-  withr::local_package("plyr")
+  # withr::local_package("plyr")
   withr::local_package("dplyr")
   withr::local_package("lubridate")
   withr::local_package("pbapply")
@@ -146,7 +146,7 @@ test_that("The correct number and timing of discrete movement events are retaine
   # Avoid library calls and other changes to the virtual environment
   # See https://r-pkgs.org/testing-design.html
   withr::local_package("tidyverse")
-  withr::local_package("plyr")
+  # withr::local_package("plyr")
   withr::local_package("dplyr")
   withr::local_package("lubridate")
   withr::local_package("pbapply")
@@ -279,7 +279,7 @@ test_that("The correct number and timing of discrete movement events are retaine
   # Avoid library calls and other changes to the virtual environment
   # See https://r-pkgs.org/testing-design.html
   withr::local_package("tidyverse")
-  withr::local_package("plyr")
+  # withr::local_package("plyr")
   withr::local_package("dplyr")
   withr::local_package("lubridate")
   withr::local_package("pbapply")
@@ -409,7 +409,7 @@ test_that("The correct number and timing of discrete movement events are retaine
   # Avoid library calls and other changes to the virtual environment
   # See https://r-pkgs.org/testing-design.html
   withr::local_package("tidyverse")
-  withr::local_package("plyr")
+  # withr::local_package("plyr")
   withr::local_package("dplyr")
   withr::local_package("lubridate")
   withr::local_package("pbapply")
@@ -562,7 +562,7 @@ test_that("The correct number and timing of discrete movement events are retaine
   # Avoid library calls and other changes to the virtual environment
   # See https://r-pkgs.org/testing-design.html
   withr::local_package("tidyverse")
-  withr::local_package("plyr")
+  # withr::local_package("plyr")
   withr::local_package("dplyr")
   withr::local_package("lubridate")
   withr::local_package("pbapply")
@@ -717,7 +717,7 @@ test_that("The correct number and timing of discrete movement events are retaine
   # Avoid library calls and other changes to the virtual environment
   # See https://r-pkgs.org/testing-design.html
   withr::local_package("tidyverse")
-  withr::local_package("plyr")
+  # withr::local_package("plyr")
   withr::local_package("dplyr")
   withr::local_package("lubridate")
   withr::local_package("pbapply")
@@ -880,7 +880,7 @@ test_that("The correct number and timing of discrete movement events are retaine
   # Avoid library calls and other changes to the virtual environment
   # See https://r-pkgs.org/testing-design.html
   withr::local_package("tidyverse")
-  withr::local_package("plyr")
+  # withr::local_package("plyr")
   withr::local_package("dplyr")
   withr::local_package("lubridate")
   withr::local_package("pbapply")

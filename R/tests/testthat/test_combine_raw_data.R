@@ -17,7 +17,7 @@ test_that("The function combines RFID data collected across dates", {
   # Avoid library calls and other changes to the virtual environment
   # See https://r-pkgs.org/testing-design.html
   withr::local_package("tidyverse")
-  withr::local_package("plyr")
+  # withr::local_package("plyr")
   withr::local_package("dplyr")
   withr::local_package("lubridate")
   withr::local_package("data.table")
@@ -94,7 +94,7 @@ test_that("The function combines IRBB data collected across dates", {
   # Avoid library calls and other changes to the virtual environment
   # See https://r-pkgs.org/testing-design.html
   withr::local_package("tidyverse")
-  withr::local_package("plyr")
+  # withr::local_package("plyr")
   withr::local_package("dplyr")
   withr::local_package("lubridate")
   withr::local_package("data.table")
@@ -177,7 +177,7 @@ test_that("The function combines Video data collected across dates", {
   # Avoid library calls and other changes to the virtual environment
   # See https://r-pkgs.org/testing-design.html
   withr::local_package("tidyverse")
-  withr::local_package("plyr")
+  # withr::local_package("plyr")
   withr::local_package("dplyr")
   withr::local_package("lubridate")
   withr::local_package("data.table")
@@ -257,7 +257,7 @@ test_that("The function combines temperature data collected across dates", {
   # Avoid library calls and other changes to the virtual environment
   # See https://r-pkgs.org/testing-design.html
   withr::local_package("tidyverse")
-  withr::local_package("plyr")
+  # withr::local_package("plyr")
   withr::local_package("dplyr")
   withr::local_package("lubridate")
   withr::local_package("data.table")
@@ -335,7 +335,7 @@ test_that("The function combines data from all 4 sensor types collected across d
   # Avoid library calls and other changes to the virtual environment
   # See https://r-pkgs.org/testing-design.html
   withr::local_package("tidyverse")
-  withr::local_package("plyr")
+  # withr::local_package("plyr")
   withr::local_package("dplyr")
   withr::local_package("lubridate")
   withr::local_package("data.table")
@@ -532,7 +532,7 @@ test_that("the function catches when non-NULL arguments are NULL", {
   # Avoid library calls and other changes to the virtual environment
   # See https://r-pkgs.org/testing-design.html
   withr::local_package("tidyverse")
-  withr::local_package("plyr")
+  # withr::local_package("plyr")
   withr::local_package("dplyr")
   withr::local_package("lubridate")
   withr::local_package("data.table")
@@ -620,7 +620,7 @@ test_that("the function catches when the sensor argument vector is not RFID, IRB
   # Avoid library calls and other changes to the virtual environment
   # See https://r-pkgs.org/testing-design.html
   withr::local_package("tidyverse")
-  withr::local_package("plyr")
+  # withr::local_package("plyr")
   withr::local_package("dplyr")
   withr::local_package("lubridate")
   withr::local_package("data.table")
@@ -710,7 +710,7 @@ test_that("the function catches when character string arguments are not strings"
   # Avoid library calls and other changes to the virtual environment
   # See https://r-pkgs.org/testing-design.html
   withr::local_package("tidyverse")
-  withr::local_package("plyr")
+  # withr::local_package("plyr")
   withr::local_package("dplyr")
   withr::local_package("lubridate")
   withr::local_package("data.table")
@@ -797,7 +797,7 @@ test_that("the function catches when paths don't exist", {
   # Avoid library calls and other changes to the virtual environment
   # See https://r-pkgs.org/testing-design.html
   withr::local_package("tidyverse")
-  withr::local_package("plyr")
+  # withr::local_package("plyr")
   withr::local_package("dplyr")
   withr::local_package("lubridate")
   withr::local_package("data.table")

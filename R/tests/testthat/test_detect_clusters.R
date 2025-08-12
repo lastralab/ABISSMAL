@@ -16,7 +16,7 @@ test_that("The function detects the expected number of clusters using RFID data"
   # Avoid library calls and other changes to the virtual environment
   # See https://r-pkgs.org/testing-design.html
   withr::local_package("tidyverse")
-  withr::local_package("plyr")
+  # withr::local_package("plyr")
   withr::local_package("dplyr")
   withr::local_package("lubridate")
   
@@ -104,7 +104,7 @@ test_that("The function detects the expected number of clusters using data from 
   # Avoid library calls and other changes to the virtual environment
   # See https://r-pkgs.org/testing-design.html
   withr::local_package("tidyverse")
-  withr::local_package("plyr")
+  # withr::local_package("plyr")
   withr::local_package("dplyr")
   withr::local_package("lubridate")
   withr::local_package("pbapply")
@@ -215,7 +215,7 @@ test_that("The function detects the expected number of clusters using data from 
   # Avoid library calls and other changes to the virtual environment
   # See https://r-pkgs.org/testing-design.html
   withr::local_package("tidyverse")
-  withr::local_package("plyr")
+  # withr::local_package("plyr")
   withr::local_package("dplyr")
   withr::local_package("lubridate")
   withr::local_package("pbapply")
@@ -347,7 +347,7 @@ test_that("The function detects the expected number of clusters using RFID data 
   # Avoid library calls and other changes to the virtual environment
   # See https://r-pkgs.org/testing-design.html
   withr::local_package("tidyverse")
-  withr::local_package("plyr")
+  # withr::local_package("plyr")
   withr::local_package("dplyr")
   withr::local_package("lubridate")
   withr::local_package("pbapply")
@@ -454,7 +454,7 @@ test_that("The function detects the expected number of clusters using data from 
   # Avoid library calls and other changes to the virtual environment
   # See https://r-pkgs.org/testing-design.html
   withr::local_package("tidyverse")
-  withr::local_package("plyr")
+  # withr::local_package("plyr")
   withr::local_package("dplyr")
   withr::local_package("lubridate")
   withr::local_package("pbapply")
@@ -599,7 +599,7 @@ test_that("The function detects the expected number of clusters using data from 
   # Avoid library calls and other changes to the virtual environment
   # See https://r-pkgs.org/testing-design.html
   withr::local_package("tidyverse")
-  withr::local_package("plyr")
+  # withr::local_package("plyr")
   withr::local_package("dplyr")
   withr::local_package("lubridate")
   withr::local_package("pbapply")
@@ -778,7 +778,7 @@ test_that("the function catches when the input file names do not contain the pat
   # Avoid library calls and other changes to the virtual environment
   # See https://r-pkgs.org/testing-design.html
   withr::local_package("tidyverse")
-  withr::local_package("plyr")
+  # withr::local_package("plyr")
   withr::local_package("dplyr")
   withr::local_package("lubridate")
   

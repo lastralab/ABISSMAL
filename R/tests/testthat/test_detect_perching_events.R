@@ -16,7 +16,7 @@ test_that("The correct number and timing of perching events are identified for R
   # Avoid library calls and other changes to the virtual environment
   # See https://r-pkgs.org/testing-design.html
   withr::local_package("tidyverse")
-  withr::local_package("plyr")
+  # withr::local_package("plyr")
   withr::local_package("dplyr")
   withr::local_package("lubridate")
   withr::local_package("pbapply")
@@ -124,7 +124,7 @@ test_that("The correct number and timing of discrete perching events are identif
   # Avoid library calls and other changes to the virtual environment
   # See https://r-pkgs.org/testing-design.html
   withr::local_package("tidyverse")
-  withr::local_package("plyr")
+  # withr::local_package("plyr")
   withr::local_package("dplyr")
   withr::local_package("lubridate")
   withr::local_package("pbapply")
@@ -240,7 +240,7 @@ test_that("The correct number and timing of perching events are identified for t
   # Avoid library calls and other changes to the virtual environment
   # See https://r-pkgs.org/testing-design.html
   withr::local_package("tidyverse")
-  withr::local_package("plyr")
+  # withr::local_package("plyr")
   withr::local_package("dplyr")
   withr::local_package("lubridate")
   withr::local_package("pbapply")
@@ -347,7 +347,7 @@ test_that("The correct number and timing of discrete perching events are identif
   # Avoid library calls and other changes to the virtual environment
   # See https://r-pkgs.org/testing-design.html
   withr::local_package("tidyverse")
-  withr::local_package("plyr")
+  # withr::local_package("plyr")
   withr::local_package("dplyr")
   withr::local_package("lubridate")
   withr::local_package("pbapply")
@@ -465,7 +465,7 @@ test_that("The correct number and timing of perching events are identified for t
   # Avoid library calls and other changes to the virtual environment
   # See https://r-pkgs.org/testing-design.html
   withr::local_package("tidyverse")
-  withr::local_package("plyr")
+  # withr::local_package("plyr")
   withr::local_package("dplyr")
   withr::local_package("lubridate")
   withr::local_package("pbapply")
@@ -572,7 +572,7 @@ test_that("The correct number and timing of discrete perching events are identif
   # Avoid library calls and other changes to the virtual environment
   # See https://r-pkgs.org/testing-design.html
   withr::local_package("tidyverse")
-  withr::local_package("plyr")
+  # withr::local_package("plyr")
   withr::local_package("dplyr")
   withr::local_package("lubridate")
   withr::local_package("pbapply")
@@ -690,7 +690,7 @@ test_that("The correct number and timing of perching events are identified for 2
   # Avoid library calls and other changes to the virtual environment
   # See https://r-pkgs.org/testing-design.html
   withr::local_package("tidyverse")
-  withr::local_package("plyr")
+  # withr::local_package("plyr")
   withr::local_package("dplyr")
   withr::local_package("lubridate")
   withr::local_package("pbapply")
@@ -797,7 +797,7 @@ test_that("The correct number and timing of discrete perching events are identif
   # Avoid library calls and other changes to the virtual environment
   # See https://r-pkgs.org/testing-design.html
   withr::local_package("tidyverse")
-  withr::local_package("plyr")
+  # withr::local_package("plyr")
   withr::local_package("dplyr")
   withr::local_package("lubridate")
   withr::local_package("pbapply")
