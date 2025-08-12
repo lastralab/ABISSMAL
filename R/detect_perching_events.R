@@ -185,7 +185,7 @@ detect_perching_events <- function(file_nm, threshold, run_length = 2, sensor_id
   perching_df <- raw_data_grpd %>% 
     dplyr::mutate(
       # Map over the nested data frames
-      lags = map(
+      lags = purrr::map(
         .x = data,
         .f = ~ dplyr::mutate(.x,
                              shift = dplyr::lag(!!sym(timestamps_col_nm), default = first(!!sym(timestamps_col_nm)))
@@ -203,7 +203,7 @@ detect_perching_events <- function(file_nm, threshold, run_length = 2, sensor_id
   # Make a data frame of the first and last indices of each run longer than the given run_length that contain temporal difference values below or equal to the given threshold
   dplyr::mutate(
     # Map over the nested data frames in lags
-    lags_runs = map(
+    lags_runs = purrr::map(
       .x = lags,
       .f = ~ dplyr::reframe(.x,
                             first_indices = find_indices(lengths = rle(binary_diff)[["lengths"]], values = rle(binary_diff)[["values"]], run_length = run_length)[["starts"]],
@@ -217,7 +217,7 @@ detect_perching_events <- function(file_nm, threshold, run_length = 2, sensor_id
     # Get the unique perching events
     dplyr::mutate(
       # Map over the nested data frames in lags_runs
-      perching = map(
+      perching = purrr::map(
         .x = lags_runs,
         .y = data,
         # For each unique PIT tag and date (RFID data), or each beam breaker pair and date (beam breaker data), retain the first and last indices of detections flagged as perching events

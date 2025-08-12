@@ -247,7 +247,7 @@ detect_clusters <- function(file_nms, threshold, run_length = 2, sensor_id_col_n
     nest() %>% 
     dplyr::mutate(
       # Map over the nested data frames
-      lags = map(
+      lags = purrr::map(
         .x = data,
         .f = ~ dplyr::mutate(.x,
                              shift = dplyr::lag(!!sym(timestamps_col_nm), default = first(!!sym(timestamps_col_nm)))
@@ -264,7 +264,7 @@ detect_clusters <- function(file_nms, threshold, run_length = 2, sensor_id_col_n
     
     # Make a data frame of the first and last indices of each run longer than the given run_length that contain temporal difference values below or equal to the given threshold
     dplyr::mutate(
-      lags_runs = map(
+      lags_runs = purrr::map(
         .x = lags,
         .f = ~ dplyr::reframe(.x,
                               first_indices = find_indices(lengths = rle(binary_diff)[["lengths"]], values = rle(binary_diff)[["values"]], run_length = run_length)[["starts"]],
@@ -277,7 +277,7 @@ detect_clusters <- function(file_nms, threshold, run_length = 2, sensor_id_col_n
     
     # Get the unique clusters of detections
     dplyr::mutate(
-      clusters = map(
+      clusters = purrr::map(
         .x = lags_runs,
         .y = data,
         # For each unique date, retain the first and last indices of sensor detections flagged as clusters

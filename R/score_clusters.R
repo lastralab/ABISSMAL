@@ -35,6 +35,12 @@
 
 # TKTK troubleshooting perching integration
 
+testing_path <- "/Users/gsvidaurre/Desktop/GitHub_repos/ABISSMAL/R/tests/testthat/"
+code_path <- "/Users/gsvidaurre/Desktop/GitHub_repos/ABISSMAL/R/"
+testthat_tmp_path <- "/Users/gsvidaurre/Desktop"
+path <- testthat_tmp_path
+data_dir <- "tmp_tests"
+tmp_path <- file.path(path, data_dir)
 file_nm = "detection_clusters.csv"
 sensor_id_col_nm = "sensor_id"
 PIT_tag_col_nm = "PIT_tag_ID"
@@ -57,6 +63,9 @@ out_dir = file.path(data_dir, "processed")
 out_file_nm = "scored_detectionClusters.csv"
 tz = ""
 POSIXct_format = "%Y-%m-%d %H:%M:%OS"
+
+path
+data_dir
 
 
 
@@ -333,7 +342,7 @@ score_clusters <- function(file_nm, rfid_label = NULL, camera_label = NULL, oute
     # Make a data frame of the indices of edges in the sensor type sequences
     dplyr::mutate(
       # Each nested data frame represents a different cluster of detections
-      edges = map(
+      edges = purrr::map(
         .x = data,
         # Get the edges for each burst of detections
         .f = ~ dplyr::select(.x, start, end, event_seq) %>% 
@@ -690,6 +699,20 @@ score_clusters <- function(file_nm, rfid_label = NULL, camera_label = NULL, oute
             start <- detectns_edges3$start[1]
             end <- detectns_edges3$end[1]
             
+            rowid
+            start
+            end
+            
+            perching_start <- perch_df$perching_start
+            perching_end <- perch_df$perching_end
+            
+            perching_start >= start
+            perching_end <= end
+            perching_start >= start & perching_end <= end
+            
+            
+            ####################################
+            
             tmp_perching_full <- perch_df %>%
               dplyr::filter(
                 # This logic searches for perching events that happened within the start and end timestamps of the given detection to catch perching events that occurred inside of the timestamps of the given detection
@@ -707,6 +730,36 @@ score_clusters <- function(file_nm, rfid_label = NULL, camera_label = NULL, oute
                 partial_perching_overlap_threshold = NA
               ) %>% 
               dplyr::select(de_rowid, all_of(sensor_id_col_nm), perching_PIT_tag, perching_start, perching_end, perching_duration_s, partial_perching_overlap_threshold, diff_start, diff_end)
+            
+            
+            # TKTK troubleshooting
+            rowid <- detectns_edges3$rowid[2]
+            start <- detectns_edges3$start[2]
+            end <- detectns_edges3$end[2]
+            
+            perching_start <- perch_df$perching_start
+            perching_end <- perch_df$perching_end
+            
+            # start
+            # end
+            # perching_start
+            # perching_end
+            
+            perching_start >= (start - perching_threshold)
+            # perching_start >= start
+            
+            perching_end <= (end + perching_threshold)
+            
+            # end <= perching_end
+            
+            perching_start >= (start - perching_threshold) & perching_end <= (end + perching_threshold)
+            
+            # Is the detection partially contained within the perching event? But this maps onto all perching events....
+            # perching_start >= start & end <= perching_end
+            
+              # Next, is the perching event partially contained within the detection?
+            
+            ####################################
             
             tmp_perching_partial <- perch_df %>%
               dplyr::filter(

@@ -330,7 +330,7 @@ preprocess_detections <- function(sensor, timestamps_col_nm, group_col_nm = NULL
         nest() %>%
         # Filter each nested data frame by the correct row indices per group
         dplyr::mutate(
-          filtered = map(.x = data, .f = ~ dplyr::filter(.x, !group_row_id %in% lags_runs2$rem_indices[group_col == lags_runs2$group_col]))
+          filtered = purrr::map(.x = data, .f = ~ dplyr::filter(.x, !group_row_id %in% lags_runs2$rem_indices[group_col == lags_runs2$group_col]))
         ) %>% 
         # Return the filtered data frames as a single data frame
         unnest(`cols` = c(filtered)) %>% 
